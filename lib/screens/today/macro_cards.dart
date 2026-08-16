@@ -1,0 +1,209 @@
+import 'package:flutter/material.dart';
+
+import '../../data/day.dart';
+import '../../data/meds.dart';
+import '../../design/icons.dart';
+import '../../design/ring.dart';
+import '../../design/theme.dart';
+import '../../design/tokens.dart';
+
+/// Three macro cards, and a fourth for medications only when the person
+/// actually has any.
+///
+/// Most people never open that feature, so it does not get a permanent slot; it
+/// earns one by existing, and the three macros give up a little width for it
+/// rather than the layout keeping an empty seat warm all year.
+class MacroCards extends StatelessWidget {
+  const MacroCards({
+    super.key,
+    required this.totals,
+    required this.goal,
+    required this.meds,
+    required this.onMeds,
+  });
+
+  final DayTotals totals;
+  final DayGoal goal;
+  final List<Med> meds;
+  final VoidCallback onMeds;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+    final four = meds.isNotEmpty;
+    final taken = medProgress(meds);
+    final ink = taken.ratio >= 1 ? c.success : c.accent;
+
+    /* 16.16: the three macros give up width to the fourth over 420 ms, so the
+       row is seen to make room instead of jumping to a new division.
+
+       The widths are worked out here rather than handed to Expanded: a flex is a
+       whole number and cannot sit halfway between thirds and quarters. An
+       AnimatedSize around the row would be wrong for a different reason: it
+       animates the row, and the row's own width never changes. */
+    return LayoutBuilder(
+      builder: (context, box) => TweenAnimationBuilder<double>(
+        tween: Tween(end: four ? 1.0 : 0.0),
+        duration: const Duration(milliseconds: 420),
+        curve: CalviMotion.easeRise,
+        builder: (context, t, _) {
+          const gap = CalviSize.gapCard;
+          final third = (box.maxWidth - gap * 2) / 3;
+          final quarter = (box.maxWidth - gap * 3) / 4;
+          final macro = third + (quarter - third) * t;
+
+          return Row(
+            children: [
+              _Card(
+                width: macro,
+                label: 'БІЛОК',
+                icon: 'protein',
+                value: '${totals.protein}',
+                of: ' / ${goal.protein}г',
+                progress: goal.protein == 0 ? 0 : totals.protein / goal.protein,
+                colour: c.protein,
+                tight: four,
+              ),
+              const SizedBox(width: gap),
+              _Card(
+                width: macro,
+                label: 'ЖИРИ',
+                icon: 'fat',
+                value: '${totals.fat}',
+                of: ' / ${goal.fat}г',
+                progress: goal.fat == 0 ? 0 : totals.fat / goal.fat,
+                colour: c.fats,
+                tight: four,
+              ),
+              const SizedBox(width: gap),
+              _Card(
+                width: macro,
+                label: 'ВУГЛЕВОДИ',
+                icon: 'carbs',
+                value: '${totals.carbs}',
+                of: ' / ${goal.carbs}г',
+                progress: goal.carbs == 0 ? 0 : totals.carbs / goal.carbs,
+                colour: c.carbs,
+                tight: four,
+              ),
+              if (t > 0) ...[
+                const SizedBox(width: gap),
+                /* No entrance of its own: it is the fourth member of the row,
+                   not a guest in it, so it appears exactly as the other three
+                   do while the row makes room. */
+                _Card(
+                  // Whatever the three left behind, to the pixel.
+                  width: box.maxWidth - macro * 3 - gap * 3,
+                  label: 'ПРЕПАРАТИ',
+                  // Green on a full set: finished, not merely on track.
+                  icon: taken.ratio >= 1 ? 'check' : 'pill',
+                  value: '${taken.done}',
+                  of: ' / ${taken.total}',
+                  progress: taken.ratio,
+                  colour: ink,
+                  tight: true,
+                  onTap: onMeds,
+                ),
+              ],
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _Card extends StatelessWidget {
+  const _Card({
+    required this.width,
+    required this.label,
+    required this.icon,
+    required this.value,
+    required this.of,
+    required this.progress,
+    required this.colour,
+    required this.tight,
+    this.onTap,
+  });
+
+  /// Worked out by the row, so the four widths add up exactly to its own.
+  final double width;
+
+  final String label;
+  final String icon;
+  final String value;
+  final String of;
+  final double progress;
+  final Color colour;
+
+  /* Four cards in the width of three need narrower type, otherwise «30 / 135г»
+     wraps and the row grows a line taller the moment the fourth appears. */
+  final bool tight;
+
+  /// Only the fourth card leads anywhere; the three macros are figures.
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+
+    final card = GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: tight ? 5 : 14, vertical: tight ? 15 : 16),
+        decoration: BoxDecoration(
+          color: c.card,
+          border: Border.all(color: c.cardBorder),
+          borderRadius: BorderRadius.circular(CalviSize.rCard),
+        ),
+        child: Column(
+          children: [
+            Text.rich(
+              TextSpan(
+                text: value,
+                children: [
+                  TextSpan(
+                    text: of,
+                    style: context.t.labelSmall?.copyWith(
+                      fontSize: tight ? 10 : CalviSize.fsMicro,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+              maxLines: 1,
+              style: context.t.headlineMedium?.copyWith(
+                fontSize: tight ? 16 : 19,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 10),
+            CalviRing(
+              progress: progress,
+              size: 46,
+              stroke: 5,
+              color: colour,
+              child: CalviIcon(icon, size: 15, color: colour),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              label,
+              maxLines: 1,
+              // Clipped rather than wrapped: a second line under one card
+              // makes the whole row taller than the other three.
+              overflow: TextOverflow.clip,
+              softWrap: false,
+              style: context.t.labelSmall?.copyWith(
+                fontSize: tight ? 9 : 11,
+                letterSpacing: tight ? 0 : 11 * 0.03,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    return SizedBox(width: width, child: card);
+  }
+}
