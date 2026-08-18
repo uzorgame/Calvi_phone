@@ -194,13 +194,13 @@ void main() {
 
     /* Мікрофон міг забрати дзвінок. Двигун падатиме одразу після кожного
        запуску, і крутити це без кінця означало б гріти телефон у кишені. */
-    for (var i = 0; i < 12; i++) {
+    for (var i = 0; i < 16; i++) {
       engine.hearsNothing();
       await _settle();
     }
 
     expect(voice.running, isFalse);
-    expect(engine.listens, lessThan(8), reason: 'перезапуск пішов у гарячу петлю');
+    expect(engine.listens, lessThan(10), reason: 'перезапуск пішов у гарячу петлю');
     expect(voice.failure, isNotNull);
   });
 

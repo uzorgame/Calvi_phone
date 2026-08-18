@@ -152,6 +152,13 @@ class _CameraScreenState extends State<CameraScreen> {
   /// Де саме на екрані код, за який зараз тримається рамка.
   Rect? _lock;
 
+  /* Рамка вже відпустила код і стоїть посеред екрана.
+   *
+   * Сама вона до нього не повернеться: відповідь уже є, і рамка, яка знову
+   * стрибає на код, поки на екрані картка з числами, каже, що застосунок читає
+   * далі, хоча він чекає рішення людини. Знімається це «Ще раз». */
+  bool _parked = false;
+
   /// Розмір видошукача, як його останній раз намалювали.
   Size _view = Size.zero;
 
@@ -188,7 +195,12 @@ class _CameraScreenState extends State<CameraScreen> {
 
   /// Кадр із кодом. Не відповідь, а один голос за неї.
   void _onCode(BarcodeCapture capture) {
-    if (_busy || _done || !mounted) return;
+    if (!mounted || _parked) return;
+
+    /* Відповідь уже є, але код ще в кадрі: рамка й далі за ним іде, а голоси
+       більше не збираються. Так видно, що застосунок дивиться саме на той код,
+       про який щойно розповів, і телефон можна повернути, не втративши нитки. */
+    final tracking = _busy || _done;
 
     /* Найбільший із побачених. Вікно читання вже відсікло все, що поза рамкою,
        а якщо в неї потрапило двоє, людина цілилась у того, що ближче. */
@@ -208,8 +220,8 @@ class _CameraScreenState extends State<CameraScreen> {
     final value = best?.rawValue?.trim();
     if (value == null) return;
 
-    final first = _votes.isEmpty;
-    _votes[value] = (_votes[value] ?? 0) + 1;
+    if (!tracking) _votes[value] = (_votes[value] ?? 0) + 1;
+    final first = !tracking && _votes[value] == 1;
 
     /* Рамка переїжджає, тільки коли код справді зрушив.
      *
@@ -230,6 +242,8 @@ class _CameraScreenState extends State<CameraScreen> {
     _lost?.cancel();
     _lost = Timer(lostAfter, _release);
 
+    if (tracking) return;
+
     // Досить однакових читань, щоб не тримати людину всю півтори секунди.
     if ((_votes[value] ?? 0) >= sureHits) _settle();
   }
@@ -245,7 +259,14 @@ class _CameraScreenState extends State<CameraScreen> {
   void _release() {
     _verdict?.cancel();
     _verdict = null;
+    _lost?.cancel();
+    _lost = null;
     _votes.clear();
+
+    // Код відвели від камери вже після відповіді. Рамка вертається на середину і
+    // там лишається: далі слово за людиною, а не за наступним кодом у кадрі.
+    if (_busy || _done) _parked = true;
+
     if (mounted) setState(() => _lock = null);
   }
 
@@ -253,8 +274,6 @@ class _CameraScreenState extends State<CameraScreen> {
   Future<void> _settle() async {
     _verdict?.cancel();
     _verdict = null;
-    _lost?.cancel();
-    _lost = null;
 
     final code = verdictOf(_votes);
     _votes.clear();
@@ -304,6 +323,8 @@ class _CameraScreenState extends State<CameraScreen> {
       _food = null;
       _unknown = false;
       _lensFree = false;
+      _parked = false;
+      _lock = null;
     });
 
     _handoff?.cancel();
@@ -314,11 +335,17 @@ class _CameraScreenState extends State<CameraScreen> {
 
   /// Назад до читання, коли людина хоче спробувати ще раз.
   void _again() {
+    _votes.clear();
     setState(() {
       _done = false;
       _code = null;
       _food = null;
       _unknown = false;
+      _dish = null;
+      _trouble = null;
+      // Аж тепер рамка знову вільна шукати.
+      _parked = false;
+      _lock = null;
     });
   }
 
@@ -524,7 +551,7 @@ class _CameraScreenState extends State<CameraScreen> {
                 top: frame.top,
                 width: frame.width,
                 height: frame.height,
-                child: _Frame(slim: slim, holding: _lock != null),
+                child: _Frame(slim: slim, holding: _lock != null && !_done && !_busy),
               ),
             ],
           ),

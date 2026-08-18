@@ -43,15 +43,26 @@ class Dictation implements LevelSource {
   /// Чи людина ще хоче, щоб її слухали. Двигун зупиняється сам, вона ні.
   bool _wanted = false;
 
-  /// Скільки перезапусків поспіль не принесли жодного слова.
-  ///
-  /// Захист від гарячої петлі: якщо мікрофон відібрала інша програма, двигун
-  /// падатиме одразу після кожного запуску, і крутити це вічно означало б
-  /// гріти телефон у кишені.
+  /* Скільки разів поспіль двигун падав одразу після запуску.
+   *
+   * Рахуються саме падіння, а не тиша. Різниця тут коштувала всього: спершу тут
+   * рахувався кожен мовчазний відрізок, і чотирьох вистачало, щоб диктування
+   * здалось. На Android відрізок закривається за секунду-три тиші, тобто запис
+   * помирав приблизно за пʼять секунд роздумів, а людина ще й слова не сказала.
+   *
+   * Захист усе одно потрібен: якщо мікрофон відібрав дзвінок, двигун падатиме
+   * миттєво після кожного запуску, і крутити це вічно означало б гріти телефон
+   * у кишені. Тому відрізок, який хоч трохи пожив, обнуляє лічильник. */
   int _barren = 0;
 
-  /// Скільки разів поспіль дозволено спробувати наосліп.
-  static const _maxBarren = 4;
+  /// Скільки миттєвих падінь поспіль означає, що мікрофон таки не наш.
+  static const _maxBarren = 6;
+
+  /// Відрізок, коротший за це, вважається падінням, а не тишею.
+  static const _tooShort = Duration(milliseconds: 900);
+
+  /// Коли почався поточний відрізок.
+  DateTime _segmentAt = DateTime.fromMillisecondsSinceEpoch(0);
 
   void Function(String words)? _onWords;
   String? _localeId;
@@ -101,6 +112,7 @@ class Dictation implements LevelSource {
 
   Future<bool> _listen() async {
     try {
+      _segmentAt = DateTime.now();
       await _speech.listen(
         onResult: (r) {
           _now = r.recognizedWords;
@@ -121,6 +133,9 @@ class Dictation implements LevelSource {
              дихати разом із голосом, а не мигтіти. */
           final want = (raw / 10).clamp(0.0, 1.0);
           _level = want > _level ? want : _level * 0.82 + want * 0.18;
+
+          // Рівень іде, отже мікрофон живий. Те, що людина мовчить, це не збій.
+          _barren = 0;
         },
         listenOptions: SpeechListenOptions(
           partialResults: true,
@@ -152,11 +167,14 @@ class Dictation implements LevelSource {
     if (!_wanted) return;
     if (_again?.isActive ?? false) return;
 
-    _barren++;
-    if (_barren > _maxBarren) {
-      // Кілька спроб поспіль без жодного слова. Далі це вже не пауза в мові.
+    /* Відрізок, який хоч трохи пожив, це нормальна тиша, а не поломка: людина
+       згадує, що ще їла. Лічильник росте тільки на тих, які обірвались одразу. */
+    if (DateTime.now().difference(_segmentAt) >= _tooShort) {
+      _barren = 0;
+    } else if (++_barren > _maxBarren) {
+      // Стільки миттєвих падінь поспіль означає, що мікрофона в нас немає.
       _wanted = false;
-      failure ??= 'Не почула нічого. Спробуй ще раз ближче до мікрофона';
+      failure ??= 'Мікрофон зайнятий. Спробуй ще раз';
       _onWords?.call(heard);
       return;
     }

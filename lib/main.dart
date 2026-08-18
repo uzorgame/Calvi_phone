@@ -143,7 +143,10 @@ class _CalviAppState extends State<CalviApp> {
       _s = next;
       _onboarding = false;
     });
-    unawaited(_profiles?.save(next));
+    /* І одразу на сервер. Раніше профіль лежав на телефоні до наступного
+       запису в щоденник: людина проходила «Старт», закривала застосунок, і на
+       сервері про неї не було нічого. */
+    unawaited(_profiles?.save(next).then((_) => _sync?.now()));
   }
 
   /// Слухає підсумки днів зі сховища. Порожні, поки перша відповідь не прийшла.
@@ -175,7 +178,7 @@ class _CalviAppState extends State<CalviApp> {
     _saveLater?.cancel();
     _saveLater = Timer(
       const Duration(milliseconds: 500),
-      () => unawaited(_profiles?.save(snapshot)),
+      () => unawaited(_profiles?.save(snapshot).then((_) => _sync?.now())),
     );
   }
 

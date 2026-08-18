@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../data/day.dart';
 import '../../data/fixtures.dart';
 import '../../data/measure.dart';
 import '../../data/settings.dart';
@@ -27,9 +28,44 @@ const _periods = [
   Period(days: 365, label: 'Рік'),
 ];
 
-/// Six months of weight, for the goal card.
-const _weightSeries = [81.0, 80.6, 80.9, 79.8, 79.4, 78.9, 78.6];
-const _weightLabels = ['Чер', 'Лип', 'Сер', 'Вер', 'Жов', 'Лис', 'Гру'];
+/// Показова крива ваги. Тільки для демо, і більше ніде.
+const _demoWeights = [81.0, 80.6, 80.9, 79.8, 79.4, 78.9, 78.6];
+const _demoLabels = ['Чер', 'Лип', 'Сер', 'Вер', 'Жов', 'Лис', 'Гру'];
+
+/// Крива ваги за записами, розкладена на сім точок.
+///
+/// Півроку в семи стовпчиках: не кожен день, а середнє по відрізку, бо графік
+/// заввишки сто тридцять пікселів не покаже двісті точок нічим, крім шуму.
+/// Порожні відрізки просто пропускаються, і лінія йде від запису до запису.
+///
+/// Раніше тут стояв сталий ряд із семи чисел, той самий у будь-якому режимі: на
+/// екрані аналітики вага людини не мінялась ніколи, хай би скільки вона
+/// зважувалась.
+({List<double> values, List<String> labels}) weightCurve(Map<int, double> byDay) {
+  if (byDay.isEmpty) return (values: const [], labels: const []);
+
+  const buckets = 7;
+  const span = 26 * 7 ~/ buckets;
+
+  final values = <double>[];
+  final labels = <String>[];
+
+  for (var i = buckets - 1; i >= 0; i--) {
+    final to = -i * span;
+    final from = to - span + 1;
+
+    final inside = [
+      for (final e in byDay.entries)
+        if (e.key >= from && e.key <= to) e.value,
+    ];
+    if (inside.isEmpty) continue;
+
+    values.add(inside.reduce((a, b) => a + b) / inside.length);
+    labels.add(dayInfo(to).full.split(' ').last.substring(0, 3));
+  }
+
+  return (values: values, labels: labels);
+}
 
 class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({super.key, required this.measures, required this.onSettings});
@@ -136,13 +172,30 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 ],
               ),
               const SizedBox(height: 22),
-              LineChart(
-                values: _weightSeries,
-                labels: _weightLabels,
-                goal: s.targetKg,
-                highlight: 4,
-                highlightNote: '12 жовтня',
-                height: 132,
+              Builder(
+                builder: (context) {
+                  /* Демо малює показову криву, «мої» малюють свої зважування.
+                     Той самий перемикач, що й на головній: він відповідає за
+                     всю сторінку, а не за половину. */
+                  final curve = stats.demo
+                      ? (values: _demoWeights, labels: _demoLabels)
+                      : weightCurve(stats.weights);
+
+                  if (curve.values.length < 2) {
+                    return _Note(
+                      'Крива зʼявиться після другого зважування. Скажи Норі вагу, '
+                      'і вона сама її запише.',
+                    );
+                  }
+
+                  return LineChart(
+                    values: curve.values,
+                    labels: curve.labels,
+                    goal: s.targetKg,
+                    highlight: curve.values.length - 1,
+                    height: 132,
+                  );
+                },
               ),
               const SizedBox(height: 12),
               // The most valuable number on the page: it turns an abstract goal

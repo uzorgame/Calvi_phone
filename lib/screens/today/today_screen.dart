@@ -10,6 +10,7 @@ import '../../data/app_scope.dart';
 // Only the handle: the generated row classes carry names the screens already
 // use for their own models, and `Workout` is one of them.
 import '../../data/local/database.dart' show CalviDb;
+import '../../data/local/chat_store.dart';
 import '../../data/local/day_reader.dart';
 import '../../data/remote/api.dart';
 import '../../data/remote/sync_service.dart';
@@ -120,6 +121,11 @@ class _TodayScreenState extends State<TodayScreen> {
   }
   var _tracked = <String>[...defaultTracked];
 
+  /* Розмова піднімається з диска один раз, коли екран народжується. Порожній
+     чат після кожного перезапуску виглядав так, ніби помічник забуває все, що
+     йому сказали, і в застосунку, який памʼятає звички, це особливо дивно. */
+  ChatStore? _chat;
+
   late bool _chatOpen = widget.chatOpen;
   late String? _openCard = widget.openCard;
   bool _dictating = false;
@@ -170,12 +176,17 @@ class _TodayScreenState extends State<TodayScreen> {
    * раз. Тому очікування це не значок збоку, а те саме повідомлення Нори, ще без
    * слів: коли слова приходять, бульбашка доростає з кільця, а не виникає з
    * нічого поруч. */
+  void _keep(Msg m, {bool store = true}) {
+    _messages.add(m);
+    if (store) unawaited(_chat?.save(m) ?? Future.value());
+  }
+
   Msg _wait(Msg mine) {
     final waiting = msg(from: MsgFrom.nora, text: '', pending: true);
     setState(() {
-      _messages
-        ..add(mine)
-        ..add(waiting);
+      _keep(mine);
+      // Кільце на диск не йде: це стан екрана, а не рядок розмови.
+      _keep(waiting, store: false);
       _chatOpen = true;
     });
     return waiting;
@@ -186,7 +197,10 @@ class _TodayScreenState extends State<TodayScreen> {
     if (!mounted) return;
     final at = _messages.indexWhere((m) => m.id == waiting.id);
     if (at < 0) return;
-    setState(() => _messages[at] = waiting.answered(text: text, plate: plate));
+
+    final said = waiting.answered(text: text, plate: plate);
+    setState(() => _messages[at] = said);
+    unawaited(_chat?.save(said) ?? Future.value());
   }
 
   /// Те саме, що [_say], але з кадром: знімок їде до моделі разом із
@@ -223,8 +237,8 @@ class _TodayScreenState extends State<TodayScreen> {
     final db = scope.db;
 
     setState(() {
-      _messages.add(msg(from: MsgFrom.me, kind: MsgKind.photo, text: 'Фото страви'));
-      _messages.add(
+      _keep(msg(from: MsgFrom.me, kind: MsgKind.photo, text: 'Фото страви'));
+      _keep(
         msg(
           from: MsgFrom.nora,
           text: 'Записала в ${slot.toLowerCase()}: ${dish.name.toLowerCase()}.',
@@ -265,8 +279,8 @@ class _TodayScreenState extends State<TodayScreen> {
     final plate = food.forGrams();
 
     setState(() {
-      _messages.add(msg(from: MsgFrom.me, kind: MsgKind.barcode, text: 'Штрихкод', code: code));
-      _messages.add(
+      _keep(msg(from: MsgFrom.me, kind: MsgKind.barcode, text: 'Штрихкод', code: code));
+      _keep(
         msg(
           from: MsgFrom.nora,
           text: 'Записала в ${slot.toLowerCase()}: ${food.name}, '
@@ -424,6 +438,21 @@ class _TodayScreenState extends State<TodayScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _follow();
+    unawaited(_openChat());
+  }
+
+  /// Піднімає збережену розмову. Один раз за життя екрана.
+  Future<void> _openChat() async {
+    final scope = AppScope.of(context);
+    final db = scope.db;
+    if (_chat != null || !scope.real || db == null) return;
+
+    final store = ChatStore(db);
+    _chat = store;
+
+    final was = await store.load();
+    if (!mounted || was.isEmpty || _messages.isNotEmpty) return;
+    setState(() => _messages.addAll(was));
   }
 
   @override

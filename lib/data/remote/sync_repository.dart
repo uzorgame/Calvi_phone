@@ -94,17 +94,24 @@ class SyncRepository {
       if (!answer.hasMore && answer.accepted.length == outgoing.length) break;
     }
 
-    /* Профіль після щоденника і навмисно не разом із ним.
+    /* Профіль після щоденника і навмисно не разом із ним. Невдача тут не має
+     * скасовувати вдалий обмін записами: людина побачить свої сніданки, навіть
+     * якщо ціль цього разу не доїхала.
      *
-     * Невдача тут не має скасовувати вдалий обмін записами: людина побачить
-     * свої сніданки, навіть якщо ціль цього разу не доїхала. */
+     * Ловиться все, а не тільки [ApiFailure].
+     *
+     * Раніше тут стояв `on ApiFailure`, і будь-яка інша біда вилітала з `run` у
+     * порожнечу: викликають його через `unawaited`, тому виняток нікуди не
+     * потрапляв і ніде не з'являвся. Профіль міг не доїжджати місяцями, а
+     * застосунок про це навіть не здогадувався. */
+    Object? trouble;
     try {
       await _profile();
-    } on ApiFailure {
-      /* Лишається брудним і поїде наступного разу. Це вся черга, іншої немає. */
+    } catch (e) {
+      trouble = e;
     }
 
-    return SyncOutcome(pushed: pushed, pulled: pulled);
+    return SyncOutcome(pushed: pushed, pulled: pulled, profileTrouble: trouble);
   }
 
   /// Ціль, темп, норма, вода і тема: один запис, і питання про нього одне.
@@ -205,12 +212,26 @@ class SyncRepository {
 
 /// What one run did.
 class SyncOutcome {
-  const SyncOutcome({required this.pushed, required this.pulled, this.failure});
-  const SyncOutcome.offline() : pushed = 0, pulled = 0, failure = const ApiFailure.offline();
+  const SyncOutcome({
+    required this.pushed,
+    required this.pulled,
+    this.failure,
+    this.profileTrouble,
+  });
+
+  const SyncOutcome.offline()
+    : pushed = 0,
+      pulled = 0,
+      failure = const ApiFailure.offline(),
+      profileTrouble = null;
 
   final int pushed;
   final int pulled;
   final ApiFailure? failure;
+
+  /// Що сталось із профілем, якщо сталось. Окремо від [failure], бо щоденник міг
+  /// доїхати цілим: це різні невдачі й різні наслідки.
+  final Object? profileTrouble;
 
   bool get ok => failure == null;
 
