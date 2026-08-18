@@ -120,6 +120,34 @@ void main() {
     expect(tester.takeException(), isNull, reason: 'смужка переповнила рядок');
   });
 
+  testWidgets('записане Норою показується числами, а не самим словом', (tester) async {
+    /* «Записала яєчню» без жодної цифри це половина відповіді, і саме та
+       половина, заради якої все це робиться: людина хоче бачити, скільки саме
+       їй зарахували. */
+    await tester.pumpWidget(
+      bar([
+        msg(from: MsgFrom.me, text: 'яєчня'),
+        msg(
+          from: MsgFrom.nora,
+          text: 'Записала яєчню на сніданок.',
+          plate: const MealPlate(
+            name: 'яєчня',
+            grams: 110,
+            kcal: 216,
+            protein: 14,
+            fat: 17,
+            carbs: 1,
+          ),
+        ),
+      ]),
+    );
+    await tester.pump(const Duration(milliseconds: 600));
+
+    expect(find.byType(PlateStrip), findsOneWidget);
+    expect(find.text('216'), findsOneWidget);
+    expect(find.text('за 110 г'), findsOneWidget);
+  });
+
   testWidgets('порожнє повідомлення без кільця не малює порожньої бульбашки', (tester) async {
     await tester.pumpWidget(bar([msg(from: MsgFrom.nora, text: 'Готово.')]));
     await tester.pump(const Duration(milliseconds: 600));

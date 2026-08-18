@@ -371,7 +371,7 @@ class _TodayScreenState extends State<TodayScreen> {
         if (answer.text.isNotEmpty) answer.text,
       ].join(' ');
 
-      _answer(waiting, line.isEmpty ? 'Готово.' : line);
+      _answer(waiting, line.isEmpty ? 'Готово.' : line, plate: _plateOf(answer.logged));
       // Whatever was written on the server arrives as an ordinary row.
       unawaited(sync.now());
     } on ApiFailure catch (e) {
@@ -384,6 +384,33 @@ class _TodayScreenState extends State<TodayScreen> {
     } finally {
       if (mounted) setState(() => _asking = false);
     }
+  }
+
+  /* Числа записаного, зведені в одну смужку.
+   *
+   * Одна страва показується сама собою, кілька складаються разом: людина
+   * написала одну фразу і чекає на один підсумок, а не на три картки під одним
+   * реченням. Порожньо, коли Нора нічого не записала: смужка з нулями під
+   * «привіт» це не дані, а шум.
+   *
+   * Грами додаються тільки якщо їх знають про кожну страву. Інакше «за 210 г»
+   * під сумою двох страв, з яких одну зважили, а другу ні, це число, яке ні про
+   * що не говорить. */
+  MealPlate? _plateOf(List<LoggedMeal> logged) {
+    if (logged.isEmpty) return null;
+
+    final grams = logged.every((m) => m.grams != null)
+        ? logged.fold<double>(0, (a, m) => a + m.grams!)
+        : null;
+
+    return MealPlate(
+      name: logged.length == 1 ? logged.first.name : 'Записано ${logged.length}',
+      grams: grams,
+      kcal: logged.fold<int>(0, (a, m) => a + m.kcal),
+      protein: logged.fold<double>(0, (a, m) => a + m.protein).round(),
+      fat: logged.fold<double>(0, (a, m) => a + m.fat).round(),
+      carbs: logged.fold<double>(0, (a, m) => a + m.carbs).round(),
+    );
   }
 
   /// Writes what was typed into the slot, then tries to make it a real entry.

@@ -120,7 +120,16 @@ class CalviApi {
       balance: body['balance'] as int? ?? 0,
       logged: [
         for (final m in (body['logged'] as List<dynamic>? ?? []).cast<Map<String, dynamic>>())
-          LoggedMeal(name: m['name'] as String? ?? '', kcal: m['kcal'] as int? ?? 0),
+          LoggedMeal(
+            name: m['name'] as String? ?? '',
+            kcal: (m['kcal'] as num?)?.round() ?? 0,
+            grams: (m['grams'] as num?)?.toDouble(),
+            protein: (m['protein_g'] as num?)?.toDouble() ?? 0,
+            fat: (m['fat_g'] as num?)?.toDouble() ?? 0,
+            carbs: (m['carbs_g'] as num?)?.toDouble() ?? 0,
+            icon: m['icon'] as String? ?? 'plate',
+            fromReference: m['from'] == 'reference',
+          ),
       ],
       warning: body['warning'] as String?,
     );
@@ -339,11 +348,32 @@ class NoraReply {
   final String? warning;
 }
 
+/// Страва, яку Нора щойно записала, з усіма її числами.
+///
+/// Числа тут не для звірки, а для показу: у чаті вони малюються смужкою під
+/// відповіддю. «Записала яєчню» без жодної цифри це половина відповіді.
 class LoggedMeal {
-  const LoggedMeal({required this.name, required this.kcal});
+  const LoggedMeal({
+    required this.name,
+    required this.kcal,
+    this.grams,
+    this.protein = 0,
+    this.fat = 0,
+    this.carbs = 0,
+    this.icon = 'plate',
+    this.fromReference = false,
+  });
 
   final String name;
   final int kcal;
+  final double? grams;
+  final double protein;
+  final double fat;
+  final double carbs;
+  final String icon;
+
+  /// Числа з довідника, а не оцінка на око. Різниця варта того, щоб її сказати.
+  final bool fromReference;
 }
 
 /// Знімок дорогою до моделі. Живе рівно стільки, скільки триває запит.
