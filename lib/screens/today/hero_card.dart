@@ -55,8 +55,18 @@ const _throw = 0.18;
 const _reach = 0.46;
 
 class _HeroCardState extends State<HeroCard> with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(vsync: this)
-    ..addListener(() => setState(() {}));
+  /* Built here rather than lazily: the deck no longer reads the controller while
+     it paints, so a card that was never turned would have created it for the
+     first time inside dispose, where there is no ticker to hang it on. */
+  late final AnimationController _c;
+
+  /// Where the deck stands, continuously, for the two faces to read.
+  final _turn = ValueNotifier<double>(0);
+
+  void _paint() {
+    if (!_c.isAnimating) return;
+    _turn.value = _origin + (_target - _origin) * Curves.easeOutQuart.transform(_c.value);
+  }
 
   /// Continuous position. Whole numbers are the resting states.
   double _pos = 0;
@@ -68,6 +78,7 @@ class _HeroCardState extends State<HeroCard> with SingleTickerProviderStateMixin
   @override
   void initState() {
     super.initState();
+    _c = AnimationController(vsync: this)..addListener(_paint);
     _wait();
   }
 
@@ -109,6 +120,7 @@ class _HeroCardState extends State<HeroCard> with SingleTickerProviderStateMixin
     if (s != AnimationStatus.completed) return;
     // Folded back so the counter cannot grow without bound.
     setState(() => _pos = _target % 2 == 0 ? 0 : 1);
+    _turn.value = _pos;
     _wait();
   }
 
@@ -116,6 +128,7 @@ class _HeroCardState extends State<HeroCard> with SingleTickerProviderStateMixin
   void dispose() {
     _clock?.cancel();
     _c.dispose();
+    _turn.dispose();
     super.dispose();
   }
 
@@ -133,62 +146,82 @@ class _HeroCardState extends State<HeroCard> with SingleTickerProviderStateMixin
     );
   }
 
+  /// Puts the deck back on a whole side, whether the finger let go or the page
+  /// pulled the gesture out from under it.
+  void _settle() {
+    if (_from == null) return;
+    final over = _held;
+    _pos += over;
+    _from = null;
+    _held = 0;
+    _turn.value = _pos;
+    _glide(
+      over.abs() > _throw
+          ? (_pos - over).roundToDouble() + (over > 0 ? 1 : -1)
+          : (_pos - over).roundToDouble(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final pos = _from != null
-        ? _pos + _held
-        : _c.isAnimating
-        ? _origin + (_target - _origin) * Curves.easeOutQuart.transform(_c.value)
-        : _pos;
+    /* Built once per real change and handed to the builder below as a child, so
+       the faces are the same widgets from frame to frame and the framework skips
+       their subtrees entirely while the deck turns. */
+    final kcal = _Kcal(day: widget.day, burned: widget.burned, goal: widget.goal);
+    const weight = _Weight();
 
-    final front = _face(true, pos);
-    final back = _face(false, pos);
-
-    return GestureDetector(
-      // The card takes the vertical drag itself. It is a small target on a long
-      // page, so the scroll it costs is cheap.
-      onVerticalDragStart: (d) {
-        _c.stop();
-        _clock?.cancel();
-        _from = d.localPosition.dy;
-        _held = 0;
-      },
-      onVerticalDragUpdate: (d) {
-        if (_from == null) return;
-        // Up carries the far side away, the way a deck shuffles under a thumb.
-        final raw = (_from! - d.localPosition.dy) * 1.1 / 180;
-        setState(() => _held = raw.clamp(-_reach, _reach));
-      },
-      onVerticalDragEnd: (_) {
-        final over = _held;
-        setState(() {
-          _pos += over;
-          _from = null;
+    /* The two faces share one box, and a system font scale the phone sets can
+       push the taller of them past it: what spills is clipped, and a clipped
+       card reads as a card that vanished. The figures here are already large,
+       so the scale is allowed a little room and no more. */
+    return MediaQuery.withClampedTextScaling(
+      maxScaleFactor: 1.15,
+      child: GestureDetector(
+        // The card takes the vertical drag itself. It is a small target on a long
+        // page, so the scroll it costs is cheap.
+        onVerticalDragStart: (d) {
+          _c.stop();
+          _clock?.cancel();
+          _from = d.localPosition.dy;
           _held = 0;
-        });
-        _glide(
-          over.abs() > _throw
-              ? (_pos - over).roundToDouble() + (over > 0 ? 1 : -1)
-              : (_pos - over).roundToDouble(),
-        );
-      },
-      child: Stack(
-        children: [
-          _Side(
-            shift: front.shift,
-            scale: front.scale,
-            opacity: front.opacity,
-            child: _Kcal(day: widget.day, burned: widget.burned, goal: widget.goal),
-          ),
-          Positioned.fill(
-            child: _Side(
-              shift: back.shift,
-              scale: back.scale,
-              opacity: back.opacity,
-              child: const _Weight(),
-            ),
-          ),
-        ],
+        },
+        onVerticalDragUpdate: (d) {
+          if (_from == null) return;
+          // Up carries the far side away, the way a deck shuffles under a thumb.
+          final raw = (_from! - d.localPosition.dy) * 1.1 / 180;
+          _held = raw.clamp(-_reach, _reach);
+          _turn.value = _pos + _held;
+        },
+        onVerticalDragEnd: (_) => _settle(),
+        /* The page can take the gesture away mid-drag, and when it does there is
+         no end event. Without this the deck stayed wherever the finger left it,
+         which on a half turn is a card standing edge on: invisible. */
+        onVerticalDragCancel: _settle,
+        child: ValueListenableBuilder<double>(
+          valueListenable: _turn,
+          builder: (context, pos, _) {
+            final front = _face(true, pos);
+            final back = _face(false, pos);
+            return Stack(
+              children: [
+                _Side(
+                  shift: front.shift,
+                  scale: front.scale,
+                  opacity: front.opacity,
+                  child: kcal,
+                ),
+                Positioned.fill(
+                  child: _Side(
+                    shift: back.shift,
+                    scale: back.scale,
+                    opacity: back.opacity,
+                    child: weight,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -209,12 +242,20 @@ class _Side extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (opacity <= 0.01) return const SizedBox.shrink();
-    return Transform.translate(
-      offset: shift,
-      child: Transform.scale(
-        scale: scale,
-        child: Opacity(opacity: opacity, child: child),
+    /* An invisible side still holds the card open. The front one is what the
+       stack measures itself by, so returning nothing for it once it faded out
+       collapsed the card to no height at all, and the weight side, stretched to
+       fill that, went with it: the card vanished the moment it finished turning
+       to kilograms. Opacity zero already skips the painting; the layout is the
+       part that has to stay. */
+    return IgnorePointer(
+      ignoring: opacity <= 0.01,
+      child: Transform.translate(
+        offset: shift,
+        child: Transform.scale(
+          scale: scale,
+          child: Opacity(opacity: opacity, child: child),
+        ),
       ),
     );
   }
@@ -236,12 +277,18 @@ class _Shell extends StatelessWidget {
     final c = context.c;
     return Container(
       padding: const EdgeInsets.all(22),
+      constraints: const BoxConstraints(minHeight: 132),
       decoration: BoxDecoration(
         color: c.card,
         border: Border.all(color: c.cardBorder),
         borderRadius: BorderRadius.circular(CalviSize.rLarge),
       ),
       child: Stack(
+        /* The dots sit in the card's own padding, which is outside this stack:
+           the stack clips by default, and clipping is what has been eating them.
+           A card that turns by itself and never said it had another side reads
+           as a glitch the first time it happens. */
+        clipBehavior: Clip.none,
         children: [
           Row(
             children: [
@@ -399,7 +446,9 @@ class _Weight extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             'зараз, від ${s.goalStartKg.toStringAsFixed(1)} кг на старті цілі',
-            style: context.t.bodyMedium,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: context.t.bodyMedium?.copyWith(height: 1.25),
           ),
         ],
       ),

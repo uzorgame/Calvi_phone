@@ -218,6 +218,23 @@ class SettingsState {
   );
 }
 
+/// З чого починається справжній перший запуск.
+///
+/// Не те саме, що [initialSettings], і різниця тут принципова. Демо показує
+/// готову людину: її зріст, її вагу, її алергію на фундук і чотири спогади
+/// помічника про неї. Це правильно для вітрини і неправильно для того, хто
+/// щойно встановив застосунок: спогади про чужі звички і чужа алергія у своєму
+/// профілі це не «заповнено наперед», а неправда.
+///
+/// Тілесні числа тут теж стоять, але вони живуть рівно до кінця «Старту», який
+/// перепише їх усі. Порожні насправді тільки ті списки, які має наповнити сама
+/// людина.
+SettingsState emptySettings() => initialSettings().copyWith(
+  allergies: const [],
+  memory: const [],
+);
+
+/// Демонстраційна людина: те, що видно у вітрині і в демо-режимі застосунку.
 SettingsState initialSettings() => SettingsState(
   sex: Sex.m,
   age: 26,
@@ -260,6 +277,10 @@ class ActivityLevel {
   final String label;
   final String hint;
 }
+
+/// What the age and height drums offer, at the start and in the profile.
+final ages = List.generate(87, (i) => i + 14);
+final heights = List.generate(91, (i) => i + 130);
 
 const activityLevels = <ActivityLevel>[
   ActivityLevel(v: 1.2, label: 'Сидячий', hint: 'майже без руху'),
@@ -321,18 +342,19 @@ const _months = [
   'грудня',
 ];
 
-/// Anchored to the demo date so the forecast does not drift under screenshots.
+/// Коли ціль буде досягнута, за нинішнім темпом.
+///
+/// Рахується від сьогодні, а не від дати, зашитої в код. Обіцянка «будеш на
+/// 74 кілограмах пʼятнадцятого вересня», яка не міняється місяцями, це не
+/// прогноз, а напис.
 String targetDate(int weeks) {
-  /* Days are added through the constructor, not as a Duration: a Duration is
-     absolute hours, so any clock change between here and the target lands the
-     answer a day early. */
-  final d = DateTime(2026, 8, 15 + weeks * 7);
+  final d = calendarDay(weeks * 7);
   return '${d.day} ${_months[d.month - 1]} ${d.year}';
 }
 
 /// The same day without the year, for a sentence that is already about this one.
 String targetDay(int weeks) {
-  final d = DateTime(2026, 8, 15 + weeks * 7);
+  final d = calendarDay(weeks * 7);
   return '${d.day} ${_months[d.month - 1]}';
 }
 

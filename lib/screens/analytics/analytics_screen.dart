@@ -58,12 +58,17 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     final tapeDays = days < 90 ? 90 : days;
     final tapeLabel = tapeDays >= 365 ? 'за рік' : 'за 3 місяці';
 
+    /* Числа беруться з підсумків застосунку, а не з фікстур. У режимі «мої» це
+       те, що людина справді записала; у демо це демонстраційний тиждень. Екран
+       про різницю не знає і знати не має. */
+    final stats = AppScope.of(context).stats;
+
     /* Columns and figures come from the same window: a headline counted over a
        month above a chart drawn over a week is two answers to one question. */
     final buckets = bucketDays(days);
     final dates = [for (final b in buckets) ...b.dates];
-    final logged = dates.where((d) => totalsFor(d).kcal > 0).length;
-    final total = dates.fold<int>(0, (a, d) => a + totalsFor(d).kcal);
+    final logged = dates.where((d) => stats.totalsOn(d).kcal > 0).length;
+    final total = dates.fold<int>(0, (a, d) => a + stats.totalsOn(d).kcal);
     // Averaged over the days actually logged, not over the calendar: a week
     // opened on Friday is not a week of two hundred calories a day.
     final avg = (total / (logged == 0 ? 1 : logged)).round();
@@ -182,18 +187,18 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               /* Water is asked of every day in the window, then drawn per
                  column: the question is how often the target was cleared, and
                  that is a count of days, not of columns. */
-              final wetDays = dates.where((d) => dayFor(d).waterMl > 0).length;
-              final hit = dates.where((d) => dayFor(d).waterMl >= goal.waterMl).length;
+              final wetDays = dates.where((d) => stats.waterOn(d) > 0).length;
+              final hit = dates.where((d) => stats.waterOn(d) >= goal.waterMl).length;
               final avgMl = wetDays == 0
                   ? 0
-                  : (dates.fold<int>(0, (a, d) => a + dayFor(d).waterMl) / wetDays).round();
+                  : (dates.fold<int>(0, (a, d) => a + stats.waterOn(d)) / wetDays).round();
               final water = [
                 for (final b in buckets)
                   (
                     label: b.label,
                     // A column of several days shows the best of them: a sum
                     // would tower over the daily target line and mean nothing.
-                    ml: b.dates.fold<int>(0, (a, d) => math.max(a, dayFor(d).waterMl)),
+                    ml: b.dates.fold<int>(0, (a, d) => math.max(a, stats.waterOn(d))),
                   ),
               ];
 
@@ -203,8 +208,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     children: [
                       _Figure(value: '$hit', suffix: '/${dates.length}', cap: 'днів у нормі'),
                       const SizedBox(width: 18),
-                  Container(width: 1, height: 34, color: c.cardBorder),
-                  const SizedBox(width: 18),
+                      Container(width: 1, height: 34, color: c.cardBorder),
+                      const SizedBox(width: 18),
                       _Figure(value: thousands(avgMl), cap: 'у середньому, мл'),
                     ],
                   ),
@@ -227,34 +232,17 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    /* One chart, switched by chips. Eight sparklines side by
-                       side made eight tiny pictures and no reading: each was two
-                       centimetres wide and none could show a scale. */
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        for (final f in tracked)
-                          GestureDetector(
-                            onTap: () => setState(() => _tape = f.key),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                              decoration: BoxDecoration(
-                                color: f.key == field.key ? c.button : c.fillSecondary,
-                                borderRadius: BorderRadius.circular(CalviSize.rPill),
-                              ),
-                              child: Text(
-                                f.label,
-                                style: context.t.titleMedium?.copyWith(
-                                  fontSize: 13,
-                                  color: f.key == field.key ? c.buttonText : c.text,
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
+                    /* One chart, switched on the same segment the period picker
+                       uses. Eight sparklines side by side made eight tiny
+                       pictures and no reading, and a row of chips said "filter"
+                       when exactly one of these is ever on screen. */
+                    CalviSegments(
+                      labels: [for (final f in tracked) f.label],
+                      index: tracked.indexWhere((f) => f.key == field.key),
+                      cell: 84,
+                      onPick: (i) => setState(() => _tape = tracked[i].key),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 18),
                     _TapeHead(list: widget.measures, field: field, days: tapeDays),
                     const SizedBox(height: 10),
                     Builder(
@@ -331,7 +319,7 @@ class _Block extends StatelessWidget {
           ),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
               color: c.card,
               border: Border.all(color: c.cardBorder),
@@ -430,7 +418,15 @@ class _Figure extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 5),
-        Text(cap, style: context.t.labelSmall?.copyWith(fontWeight: FontWeight.w400)),
+        // One line, the way the demo sets it: a caption that wraps turns a pair
+        // of figures into two columns of different heights.
+        Text(
+          cap,
+          maxLines: 1,
+          softWrap: false,
+          overflow: TextOverflow.visible,
+          style: context.t.labelSmall?.copyWith(fontWeight: FontWeight.w400),
+        ),
       ],
     );
     return tight ? body : Expanded(child: body);

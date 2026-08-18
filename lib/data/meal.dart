@@ -1,30 +1,22 @@
 /// One record in the day, and the card it belongs to.
 library;
 
-/// Which mark a row shows.
+/// Which mark a row shows: a key from our own set, as a string.
 ///
-/// Not an emoji field. Emoji are drawn by the OS, so the same meal would look
+/// Not an emoji, because emoji are drawn by the OS and the same meal would look
 /// one way on iOS and a noticeably worse way on most Android builds, and neither
-/// would match the rest of the interface. These name marks in our own set.
-enum FoodCategory {
-  soup,
-  bread,
-  egg,
-  drink,
-  meat,
-  vegetable,
-  fruit,
-  dairy,
-  sweet,
-  fish,
-  grain,
-  plate,
-}
+/// would match the rest of the interface.
+///
+/// Not an enum either, and this was once one. The set is shared with the server,
+/// where it is the closed list the model is handed, and an enum here meant every
+/// new mark had to be added in three places and mapped between them. Now a key
+/// that does not exist simply draws the plate, and that is the only rule.
+typedef FoodIcon = String;
 
 class Meal {
   const Meal({
     required this.id,
-    required this.category,
+    required this.icon,
     required this.title,
     required this.time,
     required this.slotId,
@@ -38,7 +30,7 @@ class Meal {
   });
 
   final String id;
-  final FoodCategory category;
+  final FoodIcon icon;
   final String title;
 
   /// "08:20". A string because it is only ever displayed and compared.

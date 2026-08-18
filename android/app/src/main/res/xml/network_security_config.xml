@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Звичайний http дозволений лише для машини розробника в домашній мережі і
+     більше ні для кого. Бойовий сервер це calvi.uk по https, тому в цьому файлі
+     його немає взагалі: саме так «тимчасово дозволимо незашифроване» не стає
+     постійною звичкою застосунку. -->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">192.168.50.51</domain>
+        <domain includeSubdomains="false">10.0.2.2</domain>
+    </domain-config>
+    <base-config cleartextTrafficPermitted="false" />
+</network-security-config>

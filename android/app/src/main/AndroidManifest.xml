@@ -1,8 +1,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- The scanner is the point of the app: a plate is logged by looking at it. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Диктування: голос розпізнається на самому телефоні і нікуди не їде. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
     <application
-        android:label="calvi"
+        android:label="Calvi"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -40,6 +48,12 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <!-- Диктування шукає системну службу розпізнавання. Без цього запису
+             Android 11 і новіші її просто не показують застосунку, і мікрофон
+             мовчить без жодної помилки. -->
+        <intent>
+            <action android:name="android.speech.RecognitionService"/>
         </intent>
     </queries>
 </manifest>

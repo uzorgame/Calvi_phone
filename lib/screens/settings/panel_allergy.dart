@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../data/allergens.dart';
@@ -15,10 +17,14 @@ import 'panels_account.dart';
 /// cosmetic problem: «фундук» and «лісовий горіх» are the same nut, and a typo
 /// is silently no allergy at all.
 class AllergyPanel extends StatefulWidget {
-  const AllergyPanel({super.key, required this.s, required this.set});
+  const AllergyPanel({super.key, required this.s, required this.set, this.onBack});
 
   final SettingsState s;
   final SetSettings set;
+
+  /// How the panel closes. It lives inside settings, not on top of it, so the
+  /// way out is settings putting its list back rather than a route popping.
+  final VoidCallback? onBack;
 
   @override
   State<AllergyPanel> createState() => _AllergyPanelState();
@@ -27,72 +33,90 @@ class AllergyPanel extends StatefulWidget {
 class _AllergyPanelState extends State<AllergyPanel> {
   final _q = TextEditingController();
 
+  /// Which row has its banner open, and what that banner is set to.
+  ///
+  /// The draft lives here rather than in settings: opening a row to look at it
+  /// must change nothing, and nothing is written until it is confirmed.
+  String? _open;
+  bool _severe = false;
+
+  /// The row whose banner is folding away, kept only until it has folded.
+  String? _closing;
+  Timer? _shut;
+
   @override
   void dispose() {
+    _shut?.cancel();
     _q.dispose();
     super.dispose();
   }
 
-  void _toggle(String id) {
-    final picked = widget.s.allergies.any((a) => a.id == id);
-    widget.set(
-      (v) => v.copyWith(
-        allergies: picked
-            ? v.allergies.where((a) => a.id != id).toList()
-            : [...v.allergies, Allergy(id: id, severe: false)],
-      ),
-    );
+  void _shutting(String id) {
+    _closing = id;
+    _shut?.cancel();
+    _shut = Timer(const Duration(milliseconds: 340), () {
+      if (mounted) setState(() => _closing = null);
+    });
   }
 
-  void _setSevere(String id, bool severe) {
+  void _openRow(String id) {
+    setState(() {
+      if (_open == id) {
+        _open = null;
+        return _shutting(id);
+      }
+      _severe = widget.s.allergies.where((a) => a.id == id).firstOrNull?.severe ?? false;
+      _open = id;
+      _closing = null;
+    });
+  }
+
+  void _confirm(String id) {
+    final had = widget.s.allergies.any((a) => a.id == id);
     widget.set(
       (v) => v.copyWith(
-        allergies: [
-          for (final a in v.allergies)
-            if (a.id == id) Allergy(id: a.id, severe: severe) else a,
-        ],
+        allergies: had
+            ? [
+                for (final a in v.allergies)
+                  if (a.id == id) Allergy(id: a.id, severe: _severe) else a,
+              ]
+            : [...v.allergies, Allergy(id: id, severe: _severe)],
       ),
     );
+    setState(() {
+      _open = null;
+      _shutting(id);
+    });
+  }
+
+  void _drop(String id) {
+    widget.set((v) => v.copyWith(allergies: v.allergies.where((a) => a.id != id).toList()));
+    setState(() {
+      _open = null;
+      _shutting(id);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final s = widget.s;
     final found = searchAllergens(_q.text);
-    final picked = s.allergies.map((a) => a.id).toSet();
     final groups = <String>[];
     for (final a in found) {
       if (!groups.contains(a.group)) groups.add(a.group);
     }
 
     return CalviScreen(
+      onBack: widget.onBack,
       title: 'Алергії',
       hint:
           'Обирай зі списку, а не пиши текстом: попередження спрацьовує за кодом алергену в '
           'складі, і саме тому воно не залежить від того, як страву назвали.',
-      foot: CalviButton(label: 'Готово', onTap: () => Navigator.of(context).pop()),
+      foot: CalviButton(
+        label: 'Готово',
+        onTap: () => (widget.onBack ?? Navigator.of(context).pop)(),
+      ),
       children: [
-        if (s.allergies.isNotEmpty)
-          CalviSection(
-            title: 'Мої алергії',
-            children: [
-              for (final (i, a) in s.allergies.indexed)
-                if (allergenById(a.id) case final info?)
-                  _Mine(
-                    name: info.name,
-                    severe: a.severe,
-                    first: i == 0,
-                    onDrop: () => _toggle(a.id),
-                    onSevere: (v) => _setSevere(a.id, v),
-                  ),
-            ],
-          )
-        else
-          const CalviNora(
-            text: 'Поки нічого не вказано.',
-            hint: 'Обери зі списку нижче, і я перевірятиму склад',
-          ),
-
         _Search(
           controller: _q,
           onChanged: (_) => setState(() {}),
@@ -109,12 +133,17 @@ class _AllergyPanelState extends State<AllergyPanel> {
           CalviSection(
             title: g,
             children: [
-              for (final (i, a) in found.where((x) => x.group == g).indexed)
+              for (final a in found.where((x) => x.group == g))
                 _AllergenRow(
                   allergen: a,
-                  on: picked.contains(a.id),
-                  first: i == 0,
-                  onTap: () => _toggle(a.id),
+                  mine: s.allergies.where((x) => x.id == a.id).firstOrNull,
+                  open: _open == a.id,
+                  alive: _open == a.id || _closing == a.id,
+                  severe: _severe,
+                  onTap: () => _openRow(a.id),
+                  onSeverity: (v) => setState(() => _severe = v),
+                  onConfirm: () => _confirm(a.id),
+                  onDrop: () => _drop(a.id),
                 ),
             ],
           ),
@@ -128,66 +157,6 @@ class _AllergyPanelState extends State<AllergyPanel> {
   }
 }
 
-/// One allergy already on the list, with how hard it hits.
-class _Mine extends StatelessWidget {
-  const _Mine({
-    required this.name,
-    required this.severe,
-    required this.first,
-    required this.onDrop,
-    required this.onSevere,
-  });
-
-  final String name;
-  final bool severe;
-  final bool first;
-  final VoidCallback onDrop;
-  final ValueChanged<bool> onSevere;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.c;
-    return Container(
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
-      decoration: BoxDecoration(
-        border: first ? null : Border(top: BorderSide(color: c.hairline)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(child: Text(name, style: context.t.titleMedium)),
-              GestureDetector(
-                onTap: onDrop,
-                behavior: HitTestBehavior.opaque,
-                child: Container(
-                  width: 26,
-                  height: 26,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(shape: BoxShape.circle, color: c.fillSecondary),
-                  child: CalviIcon('minus', size: 13, color: c.textSecondary),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          CalviSegments(
-            labels: const ['Легка', 'Важка'],
-            index: severe ? 1 : 0,
-            height: 38,
-            onPick: (i) => onSevere(i == 1),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            severe ? 'Зупиню до запису і скажу прямо.' : 'Попереджу в тексті, запис не блокую.',
-            style: context.t.labelSmall,
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _Search extends StatelessWidget {
   const _Search({required this.controller, required this.onChanged, required this.hint});
@@ -240,59 +209,214 @@ class _Search extends StatelessWidget {
   }
 }
 
+/// One allergen in the reference, with the banner that sets it.
+///
+/// The banner belongs under the row it is about: a choice made at the top of the
+/// screen is a choice about nothing in particular. Once set, the row itself
+/// carries the answer as its colour, so the list can be read by scanning: the
+/// pink of protein for an allergy that stops a record, the amber of
+/// carbohydrates for one that only warns.
 class _AllergenRow extends StatelessWidget {
   const _AllergenRow({
     required this.allergen,
-    required this.on,
-    required this.first,
+    required this.mine,
+    required this.open,
+    required this.alive,
+    required this.severe,
     required this.onTap,
+    required this.onSeverity,
+    required this.onConfirm,
+    required this.onDrop,
   });
 
   final Allergen allergen;
-  final bool on;
-  final bool first;
+
+  /// The allergy as it is already set, or null while it is not.
+  final Allergy? mine;
+
+  /// Whether this row's banner is the open one, and what it is set to.
+  final bool open;
+
+  /// Whether the banner is built at all: the open row, and the one folding away.
+  final bool alive;
+  final bool severe;
+
   final VoidCallback onTap;
+  final ValueChanged<bool> onSeverity;
+  final VoidCallback onConfirm;
+  final VoidCallback onDrop;
 
   @override
   Widget build(BuildContext context) {
     final c = context.c;
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-        decoration: BoxDecoration(
-          border: first ? null : Border(top: BorderSide(color: c.hairline)),
-        ),
-        child: Row(
-          children: [
-            AnimatedContainer(
-              duration: CalviMotion.fast,
-              width: 22,
-              height: 22,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(7),
-                color: on ? c.button : const Color(0x00000000),
-                border: Border.all(color: on ? c.button : c.hairline, width: 2),
-              ),
-              child: on ? CalviIcon('check', size: 12, color: c.buttonText) : null,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    final set = mine != null;
+    final tone = mine == null
+        ? const Color(0x00000000)
+        : mine!.severe
+        ? c.protein.withValues(alpha: 0.10)
+        : c.carbs.withValues(alpha: 0.14);
+    final mark = mine == null
+        ? c.button
+        : mine!.severe
+        ? c.protein
+        : c.carbs;
+
+    return AnimatedContainer(
+      duration: CalviMotion.normal,
+      curve: CalviMotion.ease,
+      color: tone,
+      child: Column(
+        children: [
+          GestureDetector(
+            onTap: onTap,
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
                 children: [
-                  Text(allergen.name, style: context.t.bodyLarge?.copyWith(fontSize: 15)),
-                  if (allergen.aka.isNotEmpty) ...[
-                    const SizedBox(height: 2),
-                    Text(allergen.aka.take(3).join(', '), style: context.t.labelSmall),
+                  AnimatedContainer(
+                    duration: CalviMotion.normal,
+                    curve: CalviMotion.ease,
+                    width: 24,
+                    height: 24,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(7),
+                      color: set ? mark : const Color(0x00000000),
+                      border: Border.all(color: set ? mark : c.hairline, width: 1.5),
+                    ),
+                    child: CalviIcon(
+                      'check',
+                      size: 13,
+                      color: set ? c.buttonText : const Color(0x00000000),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          allergen.name,
+                          style: context.t.bodyMedium?.copyWith(
+                            color: c.text,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        if (allergen.aka.isNotEmpty) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            allergen.aka.take(3).join(', '),
+                            style: context.t.labelSmall?.copyWith(
+                              fontWeight: FontWeight.w400,
+                              color: c.faint,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  if (mine case final a?) ...[
+                    const SizedBox(width: 10),
+                    Text(
+                      a.severe ? 'важка' : 'легка',
+                      style: context.t.labelSmall?.copyWith(fontWeight: FontWeight.w400),
+                    ),
                   ],
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+
+          /* The banner opens by giving the row height rather than by sliding
+             over it, so nothing underneath jumps. Its contents follow a beat
+             later, the way every other room in the app opens: first the space,
+             then what is in it. */
+          ClipRect(
+            child: AnimatedAlign(
+              duration: const Duration(milliseconds: 320),
+              curve: open ? CalviMotion.easeRise : CalviMotion.easeOut,
+              alignment: Alignment.topCenter,
+              heightFactor: open ? 1 : 0,
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(end: open ? 1.0 : 0.0),
+                duration: Duration(milliseconds: open ? 380 : 140),
+                curve: open
+                    ? const Interval(0.32, 1, curve: CalviMotion.easeRise)
+                    : CalviMotion.easeOut,
+                builder: (context, t, child) => Opacity(
+                  opacity: t,
+                  child: Transform.translate(offset: Offset(0, -6 * (1 - t)), child: child),
+                ),
+                child: !alive
+                    ? const SizedBox(width: double.infinity)
+                    : Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      CalviSegments(
+                        labels: const ['Легка', 'Важка'],
+                        index: severe ? 1 : 0,
+                        height: 38,
+                        onPick: (i) => onSeverity(i == 1),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(2, 10, 2, 12),
+                        child: Text(
+                          severe
+                              ? 'Зупиню до запису і скажу прямо.'
+                              : 'Попереджу в тексті, запис не блокую.',
+                          style: context.t.labelSmall?.copyWith(fontWeight: FontWeight.w400),
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: CalviPress(
+                              onTap: onConfirm,
+                              builder: (context, down) => AnimatedScale(
+                                scale: down ? 0.98 : 1,
+                                duration: CalviMotion.fast,
+                                curve: CalviMotion.ease,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: c.button,
+                                    borderRadius: BorderRadius.circular(CalviSize.rPill),
+                                  ),
+                                  child: Text(
+                                    'Підтвердити',
+                                    style: context.t.titleMedium?.copyWith(
+                                      fontSize: CalviSize.fsCaption,
+                                      fontWeight: FontWeight.w600,
+                                      color: c.buttonText,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          // Only where there is something to take away.
+                          if (set)
+                            GestureDetector(
+                              onTap: onDrop,
+                              behavior: HitTestBehavior.opaque,
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(14, 12, 4, 12),
+                                child: Text('Прибрати', style: context.t.bodyMedium),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

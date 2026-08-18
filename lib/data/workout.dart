@@ -62,7 +62,12 @@ class Workout {
 ///
 /// The input is a guess about effort, so a figure like 337 would claim a
 /// precision the estimate does not have.
-int burnEstimate(double met, int minutes) {
-  final raw = met * 3.5 * profileWeightKg / 200 * minutes;
+///
+/// Вага тут не стала. У формулі MET вона множник, тому людина на 55 кілограмів
+/// і людина на сто спалюють за ту саму годину бігу помітно різне. Раніше сюди
+/// підставлялась вага демонстраційної людини, і всі спалені калорії в
+/// застосунку були про неї.
+int burnEstimate(double met, int minutes, {double weightKg = profileWeightKg}) {
+  final raw = met * 3.5 * weightKg / 200 * minutes;
   return (raw / 5).round() * 5;
 }

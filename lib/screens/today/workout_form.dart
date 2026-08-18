@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../data/app_scope.dart';
 import '../../data/workout.dart';
 import '../../design/icons.dart';
 import '../../design/shell.dart';
@@ -51,7 +52,9 @@ class _WorkoutFormState extends State<WorkoutForm> {
     super.dispose();
   }
 
-  int get _estimate => burnEstimate(widget.activity.met, _minutes);
+  /// Оцінка за вагою саме цієї людини, а не за вагою з демонстрації.
+  int get _estimate =>
+      burnEstimate(widget.activity.met, _minutes, weightKg: AppScope.of(context).s.weightKg);
   int get _typedKcal => int.tryParse(_kcal.text) ?? 0;
 
   bool get _valid => _manual ? _typedKcal > 0 && _typedKcal < 5000 : _minutes > 0;
@@ -238,6 +241,8 @@ class _Input extends StatelessWidget {
     final c = context.c;
     return Container(
       height: 48,
+      // Centred, or the line sits at the top of a box that is taller than it.
+      alignment: Alignment.centerLeft,
       padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
         color: c.fillSecondary,

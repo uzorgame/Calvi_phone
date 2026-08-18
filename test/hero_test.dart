@@ -54,6 +54,16 @@ void main() {
 
     final texts = tester.widgetList<Text>(find.byType(Text)).map((t) => t.data).toList();
     expect(texts, contains('ціль, кг'), reason: 'бік ваги не вийшов уперед');
-    expect(texts, isNot(contains('днів')));
+
+    /* The calorie side is faded out, not taken out. It is the side the stack
+       measures itself by, and a card whose front side leaves the tree collapses
+       to nothing: that was the card disappearing the moment it turned. */
+    expect(texts, contains('днів'), reason: 'бік калорій має лишитись у дереві');
+    final faded = tester
+        .widgetList<Opacity>(
+          find.ancestor(of: find.text('днів'), matching: find.byType(Opacity)),
+        )
+        .map((o) => o.opacity);
+    expect(faded, contains(closeTo(0, 0.01)), reason: 'бік калорій не згас');
   });
 }

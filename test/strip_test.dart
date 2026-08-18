@@ -7,7 +7,14 @@ import 'package:calvi/screens/today/week_strip.dart';
 
 void main() {
   test('стрічка закінчується неділею поточного тижня, не пізніше', () {
-    expect(dayInfo(0).label, 'СБ', reason: 'фікстури стоять на суботі');
+    /* Годинник спинений навмисно. Раніше тут перевірялось, що сьогодні субота,
+       бо фікстури стояли на суботі назавжди; тепер сьогодні це справжнє
+       сьогодні, і тест про будову стрічки не має залежати від дня тижня, у
+       який його запустили. */
+    dayClock = () => DateTime(2026, 8, 18, 7, 19);
+    addTearDown(() => dayClock = DateTime.now);
+
+    expect(dayInfo(todayDate).label, 'ВТ');
 
     final last = stripRun.last;
     expect(dayInfo(last).label, 'НД', reason: 'останній день це неділя');
@@ -90,7 +97,9 @@ void main() {
     expect(visible.contains(todayDate), true, reason: 'після зміни ширини видно $visible');
   });
 
-  testWidgets('стрічка приземляється, навіть якщо перший кадр був іншої ширини', (tester) async {
+  testWidgets('стрічка приземляється, навіть якщо перший кадр був іншої ширини', (
+    tester,
+  ) async {
     /* What the web does on start: one frame at whatever size the canvas was
        created with, then the real one. The strip used to take its single jump
        on that throwaway layout and spend the rest of the session parked months

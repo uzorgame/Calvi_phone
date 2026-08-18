@@ -82,6 +82,11 @@ class CalviSize {
   static const double rLarge = 24;
   static const double rPill = 999;
   static const double buttonH = 56;
+
+  /* How much of the day the assistant bar covers: the chip, the field and the
+     padding around them. The day ends above it, and anything scrolling itself
+     into view has to stop above it too. */
+  static const double barRoom = 148;
   static const double iconCircleSize = 44;
   static const double inputBarH = 64;
   static const double navH = 52;

@@ -88,7 +88,7 @@ class MealRow extends StatelessWidget {
             height: CalviSize.iconCircleSize,
             alignment: Alignment.center,
             decoration: BoxDecoration(shape: BoxShape.circle, color: c.iconCircle),
-            child: CalviIcon(meal.category.name, size: 21),
+            child: CalviIcon(meal.icon, size: 21),
           ),
           const SizedBox(width: 13),
           Expanded(

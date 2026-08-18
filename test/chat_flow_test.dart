@@ -48,13 +48,13 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(const CalviApp());
+    await tester.pumpWidget(const CalviApp(storage: false));
     await tester.pump(const Duration(seconds: 1));
 
     // Straight through the first run to the day.
     await tester.tap(find.text('Почати'));
     await tester.pumpAndSettle();
-    for (var i = 0; i < 6; i++) {
+    for (var i = 0; i < 7; i++) {
       await tester.tap(find.text('Далі'));
       await tester.pumpAndSettle();
     }

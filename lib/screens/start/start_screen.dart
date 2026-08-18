@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform;
 import 'package:flutter/material.dart';
 
 import '../../data/allergens.dart';
@@ -13,11 +14,12 @@ import '../../design/tokens.dart';
 import '../../design/wheel.dart';
 import '../../format.dart';
 
-/// Names of the eight screens, in order. The demo panel jumps by index.
+/// Names of the nine screens, in order. The demo panel jumps by index.
 const startSteps = [
   'Вітання',
   'Стать',
-  'Тіло',
+  'Вік і зріст',
+  'Вага',
   'Ціль',
   'Темп',
   'Спосіб життя',
@@ -51,7 +53,7 @@ const _goals = [
   (id: Direction.gain, label: 'Набрати', hint: 'профіцит під обраний темп'),
 ];
 
-/// First run, eight screens.
+/// First run, nine screens.
 ///
 /// A competitor spends twenty eight of them, most on selling. We ask only what
 /// the daily norm cannot be calculated without, one question to a screen, and
@@ -216,80 +218,75 @@ class _StartScreenState extends State<StartScreen> {
   Widget _body() => switch (_step) {
     0 => _Hello(onNext: () => _go(1)),
     1 => _sexStep(),
-    2 => _bodyStep(),
-    3 => _goalStep(),
-    4 => _paceStep(),
-    5 => _lifeStep(),
-    6 => _normStep(),
+    2 => _sizeStep(),
+    3 => _weightStep(),
+    4 => _goalStep(),
+    5 => _paceStep(),
+    6 => _lifeStep(),
+    7 => _normStep(),
     _ => _SignIn(onDone: _done),
   };
 
   Widget _sexStep() => _Step(
     title: 'Стать',
-    hint:
-        'Формула норми рахує чоловіків і жінок по-різному, тому питання тут про арифметику, '
-        'а не про щось інше.',
     cta: 'Далі',
     onNext: () => _go(2),
     children: [
-      for (final (i, x) in _sexes.indexed)
-        _Card(
+      for (final x in _sexes)
+        CalviPick(
           label: x.label,
           icon: 'user',
-          first: i == 0,
           on: _sex == x.id,
           onTap: () => setState(() => _sex = x.id),
         ),
     ],
   );
 
-  /* Three drums on their own screen. Sharing one with the option cards made a
-     page you had to scroll to see the question you were answering. */
-  Widget _bodyStep() => _Step(
-    title: 'Вік, зріст і вага',
+  /* Age and height on drums, the way the profile in settings asks the same two:
+     a value picked once and rarely revisited reads better under a band than
+     along a tape. */
+  Widget _sizeStep() => _Step(
+    title: 'Вік і зріст',
     cta: 'Далі',
     onNext: () => _go(3),
     children: [
-      _Field(
-        label: 'Вік',
-        value: '$_age',
-        unit: 'років',
-        child: CalviRuler(
-          showValue: false,
-          value: _age.toDouble(),
-          min: 14,
-          max: 90,
-          step: 1,
+      _Block(
+        title: 'Вік',
+        aside: '$_age років',
+        child: CalviWheel(
+          values: ages,
+          value: _age,
           suffix: 'років',
-          onChange: (v) => setState(() => _age = v.round()),
+          onPick: (v) => setState(() => _age = v),
         ),
       ),
-      _Field(
-        label: 'Зріст',
-        value: '$_heightCm',
-        unit: 'см',
-        child: CalviRuler(
-          showValue: false,
-          value: _heightCm.toDouble(),
-          min: 120,
-          max: 220,
-          step: 1,
+      _Block(
+        title: 'Зріст',
+        aside: '$_heightCm см',
+        child: CalviWheel(
+          values: heights,
+          value: _heightCm,
           suffix: 'см',
-          onChange: (v) => setState(() => _heightCm = v.round()),
+          onPick: (v) => setState(() => _heightCm = v),
         ),
       ),
-      _Field(
-        label: 'Вага зараз',
-        value: _weightKg.toStringAsFixed(1),
-        unit: 'кг',
-        child: CalviRuler(
-          showValue: false,
-          value: _weightKg,
-          min: 40,
-          max: 180,
-          suffix: 'кг',
-          onChange: (v) => setState(() => _weightKg = v),
-        ),
+    ],
+  );
+
+  /* The weight has a screen to itself and stands in the middle of it: it is the
+     one number here that will be asked again every week. */
+  Widget _weightStep() => _Step(
+    title: 'Вага зараз',
+    cta: 'Далі',
+    onNext: () => _go(4),
+    middle: true,
+    children: [
+      CalviRuler(
+        value: _weightKg,
+        min: 40,
+        max: 180,
+        suffix: 'кг',
+        onChange: (v) => setState(() => _weightKg = v),
       ),
     ],
   );
@@ -298,22 +295,16 @@ class _StartScreenState extends State<StartScreen> {
     title: 'Куди рухаємось',
     cta: 'Далі',
     // Holding weight needs no target and no pace, so the next step is skipped.
-    onNext: () => _go(_direction == Direction.keep ? 5 : 4),
+    onNext: () => _go(_direction == Direction.keep ? 6 : 5),
     children: [
-      for (final (i, g) in _goals.indexed)
-        _Card(
+      for (final g in _goals)
+        CalviPick(
           label: g.label,
           hint: g.hint,
-          first: i == 0,
           on: _direction == g.id,
           onTap: () => setState(() => _direction = g.id),
         ),
-      if (_direction == Direction.keep)
-        const _Note(
-          'Тримати вагу означає їсти рівно стільки, скільки витрачаєш. Ціль і темп тут не '
-          'потрібні, тому наступний крок пропускаємо.',
-        )
-      else
+      if (_direction != Direction.keep)
         _Field(
           label: 'Цільова вага',
           value: _targetKg.toStringAsFixed(1),
@@ -337,7 +328,7 @@ class _StartScreenState extends State<StartScreen> {
     return _Step(
       title: 'Як швидко',
       cta: 'Далі',
-      onNext: () => _go(5),
+      onNext: () => _go(6),
       children: [
         Text.rich(
           TextSpan(
@@ -411,17 +402,13 @@ class _StartScreenState extends State<StartScreen> {
 
   Widget _lifeStep() => _Step(
     title: 'Спосіб життя',
-    hint:
-        'Активність змінює норму сильніше, ніж здається: різниця між сидячим і помірним це '
-        'майже чотириста калорій.',
     cta: 'Далі',
-    onNext: () => _go(6),
+    onNext: () => _go(7),
     children: [
-      for (final (i, a) in activityLevels.indexed)
-        _Card(
+      for (final a in activityLevels)
+        CalviPick(
           label: a.label,
           hint: a.hint,
-          first: i == 0,
           on: _activity == a.v,
           onTap: () => setState(() => _activity = a.v),
         ),
@@ -460,7 +447,7 @@ class _StartScreenState extends State<StartScreen> {
     return _Step(
       title: 'Твоя норма',
       cta: 'Далі',
-      onNext: () => _go(7),
+      onNext: () => _go(8),
       children: [
         Container(
           padding: const EdgeInsets.all(22),
@@ -566,51 +553,101 @@ class _Progress extends StatelessWidget {
 }
 
 /// The shell every step after the first shares.
+/// The question at the top of a step.
+class _Title extends StatelessWidget {
+  const _Title(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 24),
+    child: Text(
+      text,
+      style: context.t.displayLarge?.copyWith(
+        fontSize: 34,
+        letterSpacing: 34 * -0.03,
+        height: 1.12,
+      ),
+    ),
+  );
+}
+
+class _Block extends StatelessWidget {
+  const _Block({required this.title, required this.aside, required this.child});
+
+  final String title;
+  final String aside;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: CalviSize.gapSection),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Expanded(child: Text(title, style: context.t.titleMedium)),
+              Text(aside, style: context.t.bodyMedium),
+            ],
+          ),
+        ),
+        child,
+      ],
+    ),
+  );
+}
+
 class _Step extends StatelessWidget {
   const _Step({
     required this.title,
-    this.hint,
     required this.cta,
     required this.onNext,
     required this.children,
+    this.middle = false,
   });
 
   final String title;
-  final String? hint;
   final String cta;
   final VoidCallback onNext;
   final List<Widget> children;
+
+  /// Stands the content in the middle of the room it has, for a screen that
+  /// holds one control: a lone tape at the top of an empty screen reads as
+  /// something that failed to load below it.
+  final bool middle;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Expanded(
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 0, CalviSize.gutter, 16),
-            children: [
-              Text(
-                title,
-                style: context.t.displayLarge?.copyWith(
-                  fontSize: 34,
-                  letterSpacing: 34 * -0.03,
-                  height: 1.12,
-                ),
-              ),
-              if (hint != null) ...[
-                const SizedBox(height: 12),
-                Text(
-                  hint!,
-                  style: context.t.bodyMedium?.copyWith(
-                    fontSize: CalviSize.fsBody,
-                    height: 1.5,
+          // A screen with one control has nothing to scroll, so it is a column
+          // that hands the leftover room to the control rather than a list.
+          child: middle
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: CalviSize.gutter),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _Title(title),
+                      Expanded(
+                        child: Center(
+                          child: Column(mainAxisSize: MainAxisSize.min, children: children),
+                        ),
+                      ),
+                    ],
                   ),
+                )
+              : ListView(
+                  padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 0, CalviSize.gutter, 16),
+                  children: [_Title(title), ...children],
                 ),
-              ],
-              const SizedBox(height: 24),
-              ...children,
-            ],
-          ),
         ),
         /* A band under the action, so content scrolls behind it instead of
            through it: a button floating over a tape reads as a fault. The fade
@@ -684,119 +721,6 @@ class _BackState extends State<_Back> {
 
 /// One option, as a card rather than a row: a first run has room for it, and a
 /// choice that fills the thumb is easier than a list item.
-class _Card extends StatelessWidget {
-  const _Card({
-    required this.label,
-    this.hint,
-    this.icon,
-    required this.on,
-    required this.onTap,
-    this.first = false,
-  });
-
-  final String label;
-  final String? hint;
-  final String? icon;
-  final bool on;
-  final VoidCallback onTap;
-  final bool first;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.c;
-    return Padding(
-      padding: EdgeInsets.only(top: first ? 0 : 10),
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: AnimatedContainer(
-          duration: CalviMotion.normal,
-          curve: CalviMotion.ease,
-          /* Chosen is white and outlined rather than filled: the row is a choice
-             among equals, and filling it black would make it read as the
-             screen's action. The padding gives back what the border takes. */
-          padding: EdgeInsets.symmetric(horizontal: on ? 15 : 16, vertical: on ? 13 : 14),
-          decoration: BoxDecoration(
-            color: on ? c.bg : c.hover,
-            border: Border.all(color: on ? c.button : c.cardBorder, width: on ? 2 : 1),
-            borderRadius: BorderRadius.circular(CalviSize.rLarge),
-          ),
-          child: Row(
-            children: [
-              if (icon != null) ...[
-                Container(
-                  width: 40,
-                  height: 40,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(shape: BoxShape.circle, color: c.iconCircle),
-                  child: CalviIcon(icon!, size: 19),
-                ),
-                const SizedBox(width: 13),
-              ],
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      label,
-                      style: context.t.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: CalviSize.fsBody * -0.02,
-                      ),
-                    ),
-                    if (hint != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        hint!,
-                        style: context.t.labelSmall?.copyWith(fontWeight: FontWeight.w400),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              const SizedBox(width: 13),
-              _Dot(on: on),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// The radio of a [_Card]: a ring that fills, with a dot that grows inside it.
-class _Dot extends StatelessWidget {
-  const _Dot({required this.on});
-
-  final bool on;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.c;
-    return AnimatedContainer(
-      duration: CalviMotion.normal,
-      curve: CalviMotion.ease,
-      width: 24,
-      height: 24,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: on ? c.button : const Color(0x00000000),
-        border: Border.all(color: on ? c.button : c.hairline, width: 1.5),
-      ),
-      child: AnimatedScale(
-        scale: on ? 1 : 0,
-        duration: CalviMotion.normal,
-        curve: CalviMotion.ease,
-        child: Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(shape: BoxShape.circle, color: c.bg),
-        ),
-      ),
-    );
-  }
-}
 
 /* A ruler with its own heading, so a screen carrying three of them does not read
    as three identical drums. */
@@ -1025,8 +949,13 @@ class _SignInState extends State<_SignIn> {
               children: [
                 CalviButton(label: 'Продовжити з Google', onTap: widget.onDone),
                 const SizedBox(height: 10),
-                _Ghost(label: 'Продовжити з Apple', onTap: widget.onDone),
-                const SizedBox(height: 10),
+                /* Apple where Apple is. On Android the button leads nowhere, and
+                   a way in that cannot be walked is worse than one less way in. */
+                if (defaultTargetPlatform == TargetPlatform.iOS ||
+                    defaultTargetPlatform == TargetPlatform.macOS) ...[
+                  _Ghost(label: 'Продовжити з Apple', onTap: widget.onDone),
+                  const SizedBox(height: 10),
+                ],
                 _Ghost(label: 'Продовжити з поштою', onTap: widget.onDone),
               ],
             ),

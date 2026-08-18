@@ -37,6 +37,36 @@ dependencies:
   google_fonts: ^8.2.1
   flutter_svg: ^2.3.0
   url_launcher: ^6.3.2
+  camera: ^0.12.0+2
+  image_picker: ^1.2.3
+
+  # The local database. Drift rather than raw sqflite: the schema, the queries
+  # and the migrations are checked at build time, and this is the code where a
+  # silent mistake costs somebody their history.
+  drift: ^2.31.0
+  drift_flutter: ^0.2.8
+  path_provider: ^2.1.5
+  # Ids are made on the phone, so an entry written offline keeps its identity
+  # when it finally reaches the server.
+  uuid: ^4.5.1
+  # The one call the app makes to its own server. Nothing else talks to the
+  # network, so a client rather than a framework.
+  http: ^1.2.2
+  mobile_scanner: ^7.4.0
+  speech_to_text: ^7.4.0
+
+# The iOS camera plugin drags in objective_c, and objective_c 9.3 upwards ships
+# build hooks, which the Dart 3.10 toolchain refuses to compile a build script
+# against: code generation stops working for the whole project. iOS is outside
+# the MVP anyway (no Mac to build it on), so the older one is pinned here and
+# nothing on Android notices.
+# path_provider's Apple implementation pulls objective_c, which ships build
+# hooks; the Dart 3.10 toolchain then refuses to compile any build script for
+# this project, and code generation stops for everyone. Pinned to the last
+# version that does without them. Nothing on Android is affected, and iOS is
+# outside the MVP because there is no Mac to build it on.
+dependency_overrides:
+  path_provider_foundation: 2.4.0
 
 dev_dependencies:
   flutter_test:
@@ -48,6 +78,15 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  drift_dev: ^2.31.0
+  build_runner: ^2.15.1
+
+  # Двигун розпізнавання підмінюється в тестах через свій платформний інтерфейс.
+  # Інакше диктування не перевірити взагалі: паузу в голосі в тесті не
+  # помовчиш, а вся його поведінка тримається саме на тому, що робиться на цій
+  # паузі.
+  speech_to_text_platform_interface: ^2.4.0
+  plugin_platform_interface: ^2.1.8
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

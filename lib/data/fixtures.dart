@@ -5,6 +5,7 @@
 library;
 
 import 'day.dart';
+import 'settings.dart';
 import 'meal.dart';
 import 'workout.dart';
 
@@ -24,7 +25,7 @@ final allDays = <int, DayModel>{
     meals: const [
       Meal(
         id: 'a1',
-        category: FoodCategory.egg,
+        icon: 'egg',
         title: 'Омлет із двох яєць',
         time: '08:40',
         slotId: 'breakfast',
@@ -36,7 +37,7 @@ final allDays = <int, DayModel>{
       ),
       Meal(
         id: 'a2',
-        category: FoodCategory.soup,
+        icon: 'soup',
         title: 'Курячий суп',
         time: '13:10',
         slotId: 'lunch',
@@ -48,7 +49,7 @@ final allDays = <int, DayModel>{
       ),
       Meal(
         id: 'a3',
-        category: FoodCategory.meat,
+        icon: 'meat',
         title: 'Індичка з рисом',
         time: '19:20',
         slotId: 'dinner',
@@ -57,6 +58,42 @@ final allDays = <int, DayModel>{
         protein: 44,
         fat: 12,
         carbs: 62,
+      ),
+      Meal(
+        id: 'a4',
+        icon: 'pancake',
+        title: 'Сирники',
+        time: '16:20',
+        slotId: 'snack',
+        grams: 180,
+        kcal: 396,
+        protein: 21,
+        fat: 18,
+        carbs: 36,
+      ),
+      Meal(
+        id: 'a5',
+        icon: 'nuts',
+        title: 'Горіхи волоські',
+        time: '11:10',
+        slotId: 'snack',
+        grams: 45,
+        kcal: 294,
+        protein: 7,
+        fat: 29,
+        carbs: 4,
+      ),
+      Meal(
+        id: 'a6',
+        icon: 'pasta',
+        title: 'Паста з куркою',
+        time: '20:10',
+        slotId: 'dinner',
+        grams: 320,
+        kcal: 596,
+        protein: 34,
+        fat: 18,
+        carbs: 72,
       ),
     ],
     workouts: const [
@@ -69,7 +106,7 @@ final allDays = <int, DayModel>{
     meals: const [
       Meal(
         id: 'b1',
-        category: FoodCategory.grain,
+        icon: 'grain',
         title: 'Вівсянка з бананом',
         time: '08:15',
         slotId: 'breakfast',
@@ -81,7 +118,7 @@ final allDays = <int, DayModel>{
       ),
       Meal(
         id: 'b2',
-        category: FoodCategory.fish,
+        icon: 'fish',
         title: 'Лосось і салат',
         time: '13:40',
         slotId: 'lunch',
@@ -93,7 +130,7 @@ final allDays = <int, DayModel>{
       ),
       Meal(
         id: 'b3',
-        category: FoodCategory.dairy,
+        icon: 'dairy',
         title: 'Сир із медом',
         time: '20:05',
         slotId: 'dinner',
@@ -102,6 +139,42 @@ final allDays = <int, DayModel>{
         protein: 32,
         fat: 9,
         carbs: 20,
+      ),
+      Meal(
+        id: 'b4',
+        icon: 'chicken',
+        title: 'Куряча грудка',
+        time: '19:00',
+        slotId: 'dinner',
+        grams: 220,
+        kcal: 302,
+        protein: 56,
+        fat: 7,
+        carbs: 0,
+      ),
+      Meal(
+        id: 'b5',
+        icon: 'dumpling',
+        title: 'Вареники з сиром',
+        time: '13:20',
+        slotId: 'lunch',
+        grams: 260,
+        kcal: 533,
+        protein: 22,
+        fat: 17,
+        carbs: 70,
+      ),
+      Meal(
+        id: 'b6',
+        icon: 'fruit',
+        title: 'Банан',
+        time: '16:30',
+        slotId: 'snack',
+        grams: 130,
+        kcal: 125,
+        protein: 1,
+        fat: 0,
+        carbs: 32,
       ),
     ],
     waterMl: 2400,
@@ -112,7 +185,7 @@ final allDays = <int, DayModel>{
     meals: const [
       Meal(
         id: 'c1',
-        category: FoodCategory.bread,
+        icon: 'bread',
         title: 'Тост з авокадо',
         time: '09:00',
         slotId: 'breakfast',
@@ -124,7 +197,7 @@ final allDays = <int, DayModel>{
       ),
       Meal(
         id: 'c2',
-        category: FoodCategory.meat,
+        icon: 'meat',
         title: 'Бургер і картопля',
         time: '14:20',
         slotId: 'lunch',
@@ -136,7 +209,7 @@ final allDays = <int, DayModel>{
       ),
       Meal(
         id: 'c3',
-        category: FoodCategory.sweet,
+        icon: 'sweet',
         title: 'Тістечко',
         time: '17:10',
         slotId: 'snack',
@@ -148,7 +221,7 @@ final allDays = <int, DayModel>{
       ),
       Meal(
         id: 'c4',
-        category: FoodCategory.plate,
+        icon: 'plate',
         title: 'Паста карбонара',
         time: '20:40',
         slotId: 'dinner',
@@ -166,7 +239,7 @@ final allDays = <int, DayModel>{
     meals: const [
       Meal(
         id: 'd1',
-        category: FoodCategory.egg,
+        icon: 'egg',
         title: 'Яєчня і кава',
         time: '08:05',
         slotId: 'breakfast',
@@ -178,7 +251,7 @@ final allDays = <int, DayModel>{
       ),
       Meal(
         id: 'd2',
-        category: FoodCategory.grain,
+        icon: 'grain',
         title: 'Гречка з куркою',
         time: '13:25',
         slotId: 'lunch',
@@ -199,7 +272,7 @@ final allDays = <int, DayModel>{
     meals: const [
       Meal(
         id: 'e1',
-        category: FoodCategory.dairy,
+        icon: 'dairy',
         title: 'Йогурт з ягодами',
         time: '08:30',
         slotId: 'breakfast',
@@ -211,7 +284,7 @@ final allDays = <int, DayModel>{
       ),
       Meal(
         id: 'e2',
-        category: FoodCategory.vegetable,
+        icon: 'vegetable',
         title: 'Салат з тунцем',
         time: '13:50',
         slotId: 'lunch',
@@ -223,7 +296,7 @@ final allDays = <int, DayModel>{
       ),
       Meal(
         id: 'e3',
-        category: FoodCategory.meat,
+        icon: 'meat',
         title: 'Стейк і овочі',
         time: '19:35',
         slotId: 'dinner',
@@ -232,6 +305,42 @@ final allDays = <int, DayModel>{
         protein: 48,
         fat: 34,
         carbs: 18,
+      ),
+      Meal(
+        id: 'e4',
+        icon: 'fish',
+        title: 'Лосось запечений',
+        time: '19:30',
+        slotId: 'dinner',
+        grams: 200,
+        kcal: 412,
+        protein: 40,
+        fat: 26,
+        carbs: 0,
+      ),
+      Meal(
+        id: 'e5',
+        icon: 'yogurt',
+        title: 'Йогурт грецький',
+        time: '10:40',
+        slotId: 'snack',
+        grams: 200,
+        kcal: 148,
+        protein: 17,
+        fat: 4,
+        carbs: 11,
+      ),
+      Meal(
+        id: 'e6',
+        icon: 'bread',
+        title: 'Тост із авокадо',
+        time: '08:50',
+        slotId: 'breakfast',
+        grams: 140,
+        kcal: 268,
+        protein: 6,
+        fat: 16,
+        carbs: 24,
       ),
     ],
     waterMl: 2200,
@@ -242,7 +351,7 @@ final allDays = <int, DayModel>{
     meals: const [
       Meal(
         id: 'f1',
-        category: FoodCategory.egg,
+        icon: 'egg',
         title: 'Яєчня з двох яєць',
         time: '08:20',
         slotId: 'breakfast',
@@ -254,7 +363,7 @@ final allDays = <int, DayModel>{
       ),
       Meal(
         id: 'f2',
-        category: FoodCategory.drink,
+        icon: 'drink',
         title: 'Кава з молоком',
         time: '08:35',
         slotId: 'breakfast',
@@ -266,7 +375,7 @@ final allDays = <int, DayModel>{
       ),
       Meal(
         id: 'f3',
-        category: FoodCategory.soup,
+        icon: 'soup',
         title: 'Борщ з куркою',
         time: '13:05',
         slotId: 'lunch',
@@ -278,7 +387,7 @@ final allDays = <int, DayModel>{
       ),
       Meal(
         id: 'f4',
-        category: FoodCategory.bread,
+        icon: 'bread',
         title: 'Хліб житній',
         time: '13:12',
         slotId: 'lunch',
@@ -310,11 +419,16 @@ DayModel dayFor(int date) =>
 /// Whether the fixtures know anything about this day at all.
 bool hasDay(int date) => allDays.containsKey(date);
 
-DayState stateFor(int date) {
-  if (!hasDay(date)) return DayState.empty;
+/// Демонстраційний день за тим самим правилом, що й справжній.
+DayState stateFor(int date, {Direction direction = Direction.lose}) {
   final d = dayFor(date);
-  final left = fixtureGoal.kcal + d.burned - d.totals.kcal;
-  return left < 0 ? DayState.over : DayState.ok;
+  return verdictFor(
+    eaten: d.totals.kcal,
+    norm: fixtureGoal.kcal + d.burned,
+    direction: direction,
+    logged: hasDay(date),
+    finished: date < 0,
+  );
 }
 
 /// Weight, until the tape and the profile are wired up.

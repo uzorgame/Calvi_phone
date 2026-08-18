@@ -4,6 +4,7 @@ import '../../data/settings.dart';
 import '../../design/icons.dart';
 import '../../design/shell.dart';
 import '../../design/theme.dart';
+import '../../design/tokens.dart';
 import '../../design/wheel.dart';
 import 'panels_account.dart';
 
@@ -23,7 +24,12 @@ class RemindersPanel extends StatelessWidget {
     required this.onMedsRemind,
     required this.onMeds,
     required this.now,
+    this.onBack,
   });
+
+  /// How the panel closes: settings puts its list back rather than a route
+  /// popping, because the panel lives inside settings.
+  final VoidCallback? onBack;
 
   final SettingsState s;
   final SetSettings set;
@@ -88,31 +94,11 @@ class RemindersPanel extends StatelessWidget {
           ],
         ),
       ),
-      builder: (sheet) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40),
-        child: Row(
-          children: [
-            Expanded(
-              child: CalviWheel(
-                values: List.generate(24, (i) => i),
-                value: h,
-                suffix: '',
-                onPick: (v) => h = v,
-              ),
-            ),
-            Text(':', style: sheet.t.headlineMedium),
-            Expanded(
-              child: CalviWheel(
-                // Five-minute steps: a reminder at 13:47 is a reminder nobody
-                // meant to set.
-                values: List.generate(12, (i) => i * 5),
-                value: (m / 5).round() * 5,
-                suffix: '',
-                onPick: (v) => m = v,
-              ),
-            ),
-          ],
-        ),
+      builder: (sheet) => CalviTimeWheel(
+        hour: h,
+        minute: m,
+        onHour: (v) => h = v,
+        onMinute: (v) => m = v,
       ),
     );
   }
@@ -120,6 +106,7 @@ class RemindersPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CalviScreen(
+      onBack: onBack,
       title: 'Нагадування',
       hint:
           'Час береться з твоїх записів, а не вигаданий: годину прийому я знаю з того, коли ти '
@@ -184,9 +171,15 @@ class _Group extends StatelessWidget {
 
     return CalviSection(
       title: kind.title,
+      aside: on == 0 ? 'вимкнено' : '$on з ${items.length}',
+      /* The switch and the way in stand on the page; only the reminders
+         themselves are a card. Boxing all three made the group's own switch look
+         like one more reminder. */
+      bare: true,
+      trail: 0,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(2, 0, 2, 12),
           child: Row(
             children: [
               Container(
@@ -194,11 +187,16 @@ class _Group extends StatelessWidget {
                 height: 34,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(shape: BoxShape.circle, color: c.iconCircle),
-                child: CalviIcon(kind.icon, size: 17),
+                child: CalviIcon(kind.icon, size: 19),
               ),
-              const SizedBox(width: 12),
-              Expanded(child: Text(kind.hint, style: context.t.bodyMedium)),
-              const SizedBox(width: 8),
+              const SizedBox(width: 11),
+              Expanded(
+                child: Text(
+                  kind.hint,
+                  style: context.t.labelSmall?.copyWith(fontWeight: FontWeight.w400),
+                ),
+              ),
+              const SizedBox(width: 11),
               /* One state, two sides. The medications hold it, so this switch
                  keeps no count of its own and flips theirs instead: two switches
                  for one thing that drift apart are worse than one. */
@@ -210,71 +208,93 @@ class _Group extends StatelessWidget {
         /* Every group can add a reminder of its own. Medications are the
            exception: those need a name as well as an hour, so the plus leads to
            where both are entered instead of inventing an empty row. */
-        GestureDetector(
+        CalviPress(
           onTap: onAdd,
-          behavior: HitTestBehavior.opaque,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-            decoration: BoxDecoration(
-              border: Border(top: BorderSide(color: c.hairline)),
-            ),
+          builder: (context, down) => Padding(
+            padding: const EdgeInsets.fromLTRB(4, 10, 4, 12),
             child: Row(
               children: [
-                Container(
-                  width: 26,
-                  height: 26,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(shape: BoxShape.circle, color: c.fillSecondary),
-                  child: CalviIcon('plus', size: 13, color: c.textSecondary),
+                AnimatedScale(
+                  scale: down ? 0.9 : 1,
+                  duration: CalviMotion.fast,
+                  curve: CalviMotion.ease,
+                  child: Container(
+                    width: 28,
+                    height: 28,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(shape: BoxShape.circle, color: c.fillSecondary),
+                    child: CalviIcon('plus', size: 15),
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Text(
                   kind.id == ReminderKind.meds
                       ? 'Додати препарат і години'
                       : 'Своє нагадування',
-                  style: context.t.bodyMedium,
+                  style: context.t.labelSmall?.copyWith(fontWeight: FontWeight.w400),
                 ),
               ],
             ),
           ),
         ),
 
-        for (final r in items)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              border: Border(top: BorderSide(color: c.hairline)),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => onTime(r),
-                    behavior: HitTestBehavior.opaque,
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 58,
-                          child: Text(
-                            r.at,
-                            style: context.t.titleMedium?.copyWith(
-                              fontSize: 15,
-                              // A dash is not a time, and it should not read as
-                              // one: the hour is simply not known yet.
-                              color: r.at == '--:--' ? c.textSecondary : c.text,
-                            ),
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: c.cardBorder),
+            borderRadius: BorderRadius.circular(CalviSize.rLarge),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            children: [
+              // A rule between reminders, none under the last: the card's own
+              // border closes the list.
+              for (final (i, r) in items.indexed)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+                  decoration: BoxDecoration(
+                    border: i == 0 ? null : Border(top: BorderSide(color: c.cardBorder)),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => onTime(r),
+                          behavior: HitTestBehavior.opaque,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                r.at,
+                                style: context.t.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: r.at == '--:--'
+                                      ? CalviSize.fsBody * 0.08
+                                      : CalviSize.fsBody * -0.02,
+                                  fontFeatures: const [FontFeature.tabularFigures()],
+                                  // A dash is not a time, and it should not read
+                                  // as one: the hour is simply not known yet.
+                                  color: r.at == '--:--' ? c.faint : c.text,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                r.label,
+                                style: context.t.labelSmall?.copyWith(
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        Expanded(child: Text(r.label, style: context.t.bodyMedium)),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(width: 12),
+                      CalviSwitch(on: r.on, onChanged: (v) => onOne(r, v)),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 8),
-                CalviSwitch(on: r.on, onChanged: (v) => onOne(r, v)),
-              ],
-            ),
+            ],
           ),
+        ),
       ],
     );
   }

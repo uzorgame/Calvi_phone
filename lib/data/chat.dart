@@ -11,6 +11,30 @@ enum MsgKind { text, voice, photo, barcode }
 
 enum MsgFrom { me, nora }
 
+/// Числа страви, які Нора розібрала.
+///
+/// Живуть окремим полем, а не всередині тексту, і це не дрібниця. Число, вплетене
+/// в речення, читається як частина розмови, і його доводиться вишукувати очима
+/// серед слів. Те саме число смужкою під повідомленням видно з одного погляду, і
+/// одразу зрозуміло, де закінчується мова помічника і починаються дані.
+class MealPlate {
+  const MealPlate({
+    required this.name,
+    required this.kcal,
+    required this.protein,
+    required this.fat,
+    required this.carbs,
+    this.grams,
+  });
+
+  final String name;
+  final double? grams;
+  final int kcal;
+  final int protein;
+  final int fat;
+  final int carbs;
+}
+
 class Msg {
   const Msg({
     required this.id,
@@ -18,6 +42,8 @@ class Msg {
     required this.kind,
     required this.text,
     this.code,
+    this.plate,
+    this.pending = false,
   });
 
   final String id;
@@ -29,6 +55,26 @@ class Msg {
 
   /// The code, for a barcode. Unused otherwise.
   final String? code;
+
+  /// Розібрана страва: малюється смужкою під текстом.
+  final MealPlate? plate;
+
+  /* Нора ще думає над цим повідомленням.
+   *
+   * Саме повідомлення, а не значок збоку. Різниця не косметична: очікування
+   * стоїть рівно там, де зʼявиться відповідь, і коли вона приходить, бульбашка
+   * не виникає з нічого, а доростає з кільця. Значок в іншому місці означав би
+   * стрибок, а стрибок читається як збій. */
+  final bool pending;
+
+  Msg answered({required String text, MealPlate? plate}) => Msg(
+    id: id,
+    from: from,
+    kind: kind,
+    text: text,
+    code: code,
+    plate: plate ?? this.plate,
+  );
 }
 
 var _seq = 0;
@@ -37,8 +83,18 @@ Msg msg({
   required MsgFrom from,
   MsgKind kind = MsgKind.text,
   required String text,
+  MealPlate? plate,
+  bool pending = false,
   String? code,
-}) => Msg(id: 'm${++_seq}', from: from, kind: kind, text: text, code: code);
+}) => Msg(
+  id: 'm${++_seq}',
+  from: from,
+  kind: kind,
+  text: text,
+  code: code,
+  plate: plate,
+  pending: pending,
+);
 
 /* Fixed answers for the demo. The same figures the camera sheet showed, because
    two different numbers for one shot would be the demo contradicting itself. */

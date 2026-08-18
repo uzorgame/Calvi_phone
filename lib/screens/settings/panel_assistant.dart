@@ -14,10 +14,14 @@ import 'panels_account.dart';
 /// been written down about them and to take it back out. An assistant's hidden
 /// memory is something nobody asked for and nobody can check.
 class AssistantPanel extends StatefulWidget {
-  const AssistantPanel({super.key, required this.s, required this.set});
+  const AssistantPanel({super.key, required this.s, required this.set, this.onBack});
 
   final SettingsState s;
   final SetSettings set;
+
+  /// How the panel closes. It lives inside settings, not on top of it, so the
+  /// way out is settings putting its list back rather than a route popping.
+  final VoidCallback? onBack;
 
   @override
   State<AssistantPanel> createState() => _AssistantPanelState();
@@ -55,21 +59,29 @@ class _AssistantPanelState extends State<AssistantPanel> {
     final pinned = s.memory.where((m) => m.pinned).length;
 
     return CalviScreen(
+      onBack: widget.onBack,
       title: 'Помічник',
       hint:
           '$assistantName веде щоденник разом із тобою і памʼятає те, що ти про себе розповів.',
-      foot: CalviButton(label: 'Готово', onTap: () => Navigator.of(context).pop()),
+      foot: CalviButton(
+        label: 'Готово',
+        onTap: () => (widget.onBack ?? Navigator.of(context).pop)(),
+      ),
       children: [
         CalviSection(
           title: 'Памʼять',
+          aside: '${s.memory.length}, закріплено $pinned',
+          // Nothing remembered yet is one sentence from Nora, and a card round a
+          // sentence from Nora is a frame round a frame.
+          bare: s.memory.isEmpty,
+          note:
+              'Тап по запису закріплює його. Закріплене йде в кожну розмову, решта може '
+              'витіснитись, коли контекст ущільнюється.',
           children: [
             if (s.memory.isEmpty)
-              const Padding(
-                padding: EdgeInsets.all(14),
-                child: CalviNora(
-                  text: 'Поки нічого не запамʼятала.',
-                  hint: 'Памʼять зʼявляється з розмов, або додай вручну',
-                ),
+              const CalviNora(
+                text: 'Поки нічого не запамʼятала.',
+                hint: 'Памʼять зʼявляється з розмов, або додай вручну',
               )
             else
               for (final (i, m) in s.memory.indexed)
@@ -133,19 +145,6 @@ class _AssistantPanelState extends State<AssistantPanel> {
           ],
         ),
         Padding(
-          padding: const EdgeInsets.only(top: 0),
-          child: Text(
-            '${s.memory.length} записів, закріплено $pinned',
-            textAlign: TextAlign.center,
-            style: context.t.labelSmall,
-          ),
-        ),
-        const CalviNote(
-          'Тап по запису закріплює його. Закріплене йде в кожну розмову, решта може витіснитись, '
-          'коли контекст ущільнюється.',
-        ),
-
-        Padding(
           padding: const EdgeInsets.symmetric(horizontal: CalviSize.gutter),
           child: AddRow(
             label: _adding ? 'Згорнути' : 'Додати в памʼять',
@@ -164,6 +163,8 @@ class _AssistantPanelState extends State<AssistantPanel> {
                 const SizedBox(height: 6),
                 Container(
                   height: 48,
+                  // Centred, or the line sits at the top of a box that is taller than it.
+                  alignment: Alignment.centerLeft,
                   padding: const EdgeInsets.symmetric(horizontal: 14),
                   decoration: BoxDecoration(
                     color: c.fillSecondary,
@@ -195,6 +196,7 @@ class _AssistantPanelState extends State<AssistantPanel> {
 
         const CalviNote(
           'Вибір іншого характеру помічника поки не робимо: спершу має бути добре зроблена одна.',
+          lead: 12,
         ),
       ],
     );

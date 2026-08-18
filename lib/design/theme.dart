@@ -138,3 +138,24 @@ ThemeData _theme(CalviColors c, Brightness b) {
 
 ThemeData get calviLightTheme => _theme(calviLight, Brightness.light);
 ThemeData get calviDarkTheme => _theme(calviDark, Brightness.dark);
+
+/// How every list in this app behaves at its ends.
+///
+/// Android stretches the whole screen when a list is pulled past its end, and
+/// iOS lets it rubber-band. Neither belongs here: the demo's lists stop at the
+/// end because `overscroll-behavior` says so, and a screen that visibly bends
+/// under a thumb reads as a rendering fault in an app this flat. The list simply
+/// stops, and nothing paints over the edge to explain it.
+class CalviScroll extends MaterialScrollBehavior {
+  const CalviScroll();
+
+  @override
+  Widget buildOverscrollIndicator(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) => child;
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) => const ClampingScrollPhysics();
+}

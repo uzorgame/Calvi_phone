@@ -28,8 +28,35 @@ const _freeLine =
 
 /// Settings, and the sub-screens behind each row. Every row opens something:
 /// a row that leads nowhere teaches people to stop tapping rows.
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  /* Which sub-screen is showing, or null for the list itself. A panel is not a
+     route: the demo swaps what is inside settings and slides the swap, so the
+     panel arrives exactly the way settings itself arrived. Pushing a route put
+     a second screen over the first, with the old list still under it sliding
+     its own way, and that is the entrance that read as unfinished. */
+  String? _panel;
+
+  /// Whether anything has been opened yet, so the list does not slide on
+  /// arrival: the screen is already being carried in by the route that opened
+  /// it, and a second slide underneath fights the first.
+  bool _moved = false;
+
+  void _open(String id) => setState(() {
+    _moved = true;
+    _panel = id;
+  });
+
+  void _close() => setState(() {
+    _moved = true;
+    _panel = null;
+  });
 
   /* Opens the app if it is installed and the web chat if it is not, which is
      what `externalApplication` means on every platform we ship to. Failure is
@@ -42,11 +69,43 @@ class SettingsScreen extends StatelessWidget {
     }
   }
 
-  /// Medications have a screen of their own, reached from the home card too.
-  void _openMeds(BuildContext context) => _open(context, const MedsRoute());
+  /* Medications keep a route of their own: they are reached from the day as
+     well, so they are a place in the app rather than a page of settings. */
+  void _openMeds(BuildContext context) =>
+      Navigator.of(context).push(slideRoute(const MedsRoute()));
 
-  void _open(BuildContext context, Widget panel) {
-    Navigator.of(context).push(slideRoute(panel));
+  /// The sub-screen behind a row, built when it is the one showing.
+  Widget _panelFor(
+    String id,
+    SettingsState s,
+    void Function(SettingsState Function(SettingsState)) set,
+  ) {
+    return switch (id) {
+      'profile' => ProfilePanel(s: s, set: set, onBack: _close),
+      'weight' => WeightPanel(s: s, set: set, onBack: _close),
+      'goal' => GoalPanel(s: s, set: set, onBack: _close),
+      'norm' => NormPanel(s: s, set: set, onBack: _close),
+      'allergy' => AllergyPanel(s: s, set: set, onBack: _close),
+      'assistant' => AssistantPanel(s: s, set: set, onBack: _close),
+      'reminders' => RemindersPanel(
+        s: s,
+        set: set,
+        onBack: _close,
+        // One state, two sides: the medication screen owns it.
+        medsRemind: AppScope.of(context).meds.any((m) => m.remind),
+        onMedsRemind: (on) => AppScope.of(
+          context,
+        ).setMeds((list) => [for (final m in list) m.copyWith(remind: on)]),
+        onMeds: () => _openMeds(context),
+        now: DateTime.now().millisecondsSinceEpoch,
+      ),
+      'plan' => PlanPanel(onBack: _close),
+      'theme' => ThemePanel(s: s, set: set, onBack: _close),
+      'lang' => LangPanel(s: s, set: set, onBack: _close),
+      'privacy' => PrivacyPanel(s: s, set: set, onBack: _close),
+      'delete' => DeletePanel(onBack: _close),
+      _ => const SizedBox.shrink(),
+    };
   }
 
   @override
@@ -69,148 +128,147 @@ class SettingsScreen extends StatelessWidget {
               .map((k) => k.title.toLowerCase())
               .join(', ');
 
-    return CalviScreen(
-      title: 'Налаштування',
-      children: [
-        CalviSection(
-          title: 'Про тебе',
-          children: [
-            CalviRow(
-              icon: 'user',
-              title: 'Профіль',
-              first: true,
-              value: '${sexLabel(s.sex)}, ${s.age}, ${s.heightCm} см',
-              onTap: () => _open(context, ProfilePanel(s: s, set: set)),
-            ),
-            /* Weight is what you are today; where it should go is the goal's
+    /* One screen, and what is inside it slides. Settings itself is already
+       being carried in by the route that opened it, so on arrival the swap does
+       not animate: dir is zero until something has actually been opened. */
+    return Slide(
+      value: _panel ?? 'root',
+      dir: !_moved
+          ? 0
+          : _panel != null
+          ? 1
+          : -1,
+      child: _panel != null
+          ? _panelFor(_panel!, s, set)
+          : CalviScreen(
+              title: 'Налаштування',
+              children: [
+                CalviSection(
+                  title: 'Про тебе',
+                  children: [
+                    CalviRow(
+                      icon: 'user',
+                      title: 'Профіль',
+                      first: true,
+                      value: '${sexLabel(s.sex)}, ${s.age}, ${s.heightCm} см',
+                      onTap: () => _open('profile'),
+                    ),
+                    /* Weight is what you are today; where it should go is the goal's
                business. Holding both on one row made the two look like one
                decision. */
-            CalviRow(
-              icon: 'scale',
-              title: 'Вага',
-              value: '${s.weightKg.toStringAsFixed(1)} кг',
-              onTap: () => _open(context, WeightPanel(s: s, set: set)),
-            ),
-            CalviRow(
-              icon: 'target',
-              title: 'Ціль',
-              value: s.direction == Direction.keep
-                  ? 'тримати вагу'
-                  : '${s.targetKg.toStringAsFixed(1)} кг, ${s.pace.toStringAsFixed(1)}/тиждень',
-              onTap: () => _open(context, GoalPanel(s: s, set: set)),
-            ),
-          ],
-        ),
+                    CalviRow(
+                      icon: 'scale',
+                      title: 'Вага',
+                      value: '${s.weightKg.toStringAsFixed(1)} кг',
+                      onTap: () => _open('weight'),
+                    ),
+                    CalviRow(
+                      icon: 'target',
+                      title: 'Ціль',
+                      value: s.direction == Direction.keep
+                          ? 'тримати вагу'
+                          : '${s.targetKg.toStringAsFixed(1)} кг, ${s.pace.toStringAsFixed(1)}/тиждень',
+                      onTap: () => _open('goal'),
+                    ),
+                  ],
+                ),
 
-        /* One row, not three. Macros are calculated from calories and water from
+                /* One row, not three. Macros are calculated from calories and water from
            weight; splitting numbers that move each other across separate screens
            hides from the person what they just changed. */
-        CalviSection(
-          title: 'Норма',
-          children: [
-            CalviRow(
-              icon: 'flame',
-              title: 'Норма',
-              first: true,
-              value: '${thousands(dailyKcal(s))} ккал',
-              onTap: () => _open(context, NormPanel(s: s, set: set)),
-            ),
-          ],
-        ),
-
-        CalviSection(
-          title: 'Здоровʼя',
-          children: [
-            CalviRow(
-              icon: 'allergy',
-              title: 'Алергії',
-              first: true,
-              value: allergyValue,
-              onTap: () => _open(context, AllergyPanel(s: s, set: set)),
-            ),
-            CalviRow(icon: 'pill', title: 'Препарати', onTap: () => _openMeds(context)),
-          ],
-        ),
-
-        CalviSection(
-          title: 'Помічник',
-          children: [
-            CalviRow(
-              icon: 'user',
-              title: 'Помічник',
-              first: true,
-              value: '$assistantName, памʼяті ${s.memory.length}',
-              onTap: () => _open(context, AssistantPanel(s: s, set: set)),
-            ),
-            CalviRow(
-              icon: 'bell',
-              title: 'Нагадування',
-              value: remindValue,
-              onTap: () => _open(
-                context,
-                RemindersPanel(
-                  s: s,
-                  set: set,
-                  // One state, two sides: the medication screen owns it.
-                  medsRemind: AppScope.of(context).meds.any((m) => m.remind),
-                  onMedsRemind: (on) => AppScope.of(
-                    context,
-                  ).setMeds((list) => [for (final m in list) m.copyWith(remind: on)]),
-                  onMeds: () => _openMeds(context),
-                  now: DateTime.now().millisecondsSinceEpoch,
+                CalviSection(
+                  title: 'Норма',
+                  children: [
+                    CalviRow(
+                      icon: 'flame',
+                      title: 'Норма',
+                      first: true,
+                      value: '${thousands(dailyKcal(s))} ккал',
+                      onTap: () => _open('norm'),
+                    ),
+                  ],
                 ),
-              ),
-            ),
-          ],
-        ),
 
-        CalviSection(
-          title: 'Акаунт',
-          children: [
-            CalviRow(
-              icon: 'card',
-              title: 'Підписка',
-              first: true,
-              value: 'Безкоштовно',
-              onTap: () => _open(context, const PlanPanel()),
-            ),
-            CalviRow(
-              icon: 'sun',
-              title: 'Тема',
-              value: themeLabel(s.theme),
-              onTap: () => _open(context, ThemePanel(s: s, set: set)),
-            ),
-            CalviRow(
-              icon: 'note',
-              title: 'Мова',
-              value: langLabel(s.lang),
-              onTap: () => _open(context, LangPanel(s: s, set: set)),
-            ),
-            CalviRow(
-              icon: 'shield',
-              title: 'Приватність',
-              onTap: () => _open(context, PrivacyPanel(s: s, set: set)),
-            ),
-            CalviRow(
-              icon: 'user',
-              title: 'Видалити акаунт і дані',
-              danger: true,
-              onTap: () => _open(context, const DeletePanel()),
-            ),
-          ],
-        ),
+                CalviSection(
+                  title: 'Здоровʼя',
+                  children: [
+                    CalviRow(
+                      icon: 'allergy',
+                      title: 'Алергії',
+                      first: true,
+                      value: allergyValue,
+                      onTap: () => _open('allergy'),
+                    ),
+                    CalviRow(icon: 'pill', title: 'Препарати', onTap: () => _openMeds(context)),
+                  ],
+                ),
 
-        // The line sits under the subscription row and is itself the way in: it
-        // names who pays nothing, and tapping it says how to arrange that.
-        _FreeLine(onTap: () => _promo(context)),
+                CalviSection(
+                  title: 'Помічник',
+                  children: [
+                    CalviRow(
+                      icon: 'user',
+                      title: 'Помічник',
+                      first: true,
+                      value: '$assistantName, памʼяті ${s.memory.length}',
+                      onTap: () => _open('assistant'),
+                    ),
+                    CalviRow(
+                      icon: 'bell',
+                      title: 'Нагадування',
+                      value: remindValue,
+                      onTap: () => _open('reminders'),
+                    ),
+                  ],
+                ),
 
-        Padding(
-          padding: const EdgeInsets.only(top: 18),
-          child: Center(
-            child: Text('Calvi 0.1 · демо інтерфейсу', style: context.t.labelSmall),
-          ),
-        ),
-      ],
+                CalviSection(
+                  title: 'Акаунт',
+                  children: [
+                    CalviRow(
+                      icon: 'card',
+                      title: 'Підписка',
+                      first: true,
+                      value: 'Безкоштовно',
+                      onTap: () => _open('plan'),
+                    ),
+                    // Under the row it belongs to, and itself the way in: it
+                    // names who pays nothing and says how to arrange that.
+                    _FreeLine(onTap: () => _promo(context)),
+                    CalviRow(
+                      icon: 'sun',
+                      title: 'Тема',
+                      value: themeLabel(s.theme),
+                      onTap: () => _open('theme'),
+                    ),
+                    CalviRow(
+                      icon: 'note',
+                      title: 'Мова',
+                      value: langLabel(s.lang),
+                      onTap: () => _open('lang'),
+                    ),
+                    CalviRow(
+                      icon: 'shield',
+                      title: 'Приватність',
+                      onTap: () => _open('privacy'),
+                    ),
+                    CalviRow(
+                      icon: 'user',
+                      title: 'Видалити акаунт і дані',
+                      danger: true,
+                      onTap: () => _open('delete'),
+                    ),
+                  ],
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.only(top: 18),
+                  child: Center(
+                    child: Text('Calvi 0.1 · демо інтерфейсу', style: context.t.labelSmall),
+                  ),
+                ),
+              ],
+            ),
     );
   }
 
@@ -305,12 +363,30 @@ class _FreeLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(CalviSize.gutter + 4, 0, CalviSize.gutter + 4, 4),
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: Text(_freeLine, style: context.t.bodyMedium),
+    final c = context.c;
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 13),
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: c.cardBorder)),
+        ),
+        child: Text.rich(
+          TextSpan(
+            text: _freeLine,
+            children: [
+              // The way in is the last words of the sentence, not a button
+              // beside it: the sentence is what makes anybody want to tap.
+              TextSpan(
+                text: ' Як отримати',
+                style: TextStyle(color: c.text, fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+          style: context.t.bodyMedium?.copyWith(fontSize: CalviSize.fsMicro, height: 1.45),
+        ),
       ),
     );
   }

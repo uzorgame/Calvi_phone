@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../data/day.dart';
-import '../../data/fixtures.dart';
+import '../../data/app_scope.dart';
+import '../../data/settings.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
 
@@ -107,7 +108,7 @@ class _WeekStripState extends State<WeekStrip> with SingleTickerProviderStateMix
       final at = (_controller.offset / _cell).round();
       if (at != _front) {
         _front = at;
-        HapticFeedback.selectionClick();
+        HapticFeedback.lightImpact();
       }
     }
 
@@ -160,29 +161,31 @@ class _WeekStripState extends State<WeekStrip> with SingleTickerProviderStateMix
               stops: [0, CalviSize.gutter / r.width],
             ).createShader(r),
             blendMode: BlendMode.dstIn,
-            child: ListView.builder(
-              controller: _controller,
-              scrollDirection: Axis.horizontal,
-              physics: _SnapPhysics(cell: _cell),
-              padding: const EdgeInsets.symmetric(horizontal: CalviSize.gutter),
-              itemExtent: _cell,
-              itemCount: _run.length,
-              itemBuilder: (context, i) {
-                final date = _run[i];
-                return _Day(
-                  date: date,
-                  selected: date == widget.date,
-                  settle: _settle,
-                  viewport: box.maxWidth,
-                  controller: _controller,
-                  index: i,
-                  cell: _cell,
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    widget.onPick(date);
-                  },
-                );
-              },
+            child: RepaintBoundary(
+              child: ListView.builder(
+                controller: _controller,
+                scrollDirection: Axis.horizontal,
+                physics: _SnapPhysics(cell: _cell),
+                padding: const EdgeInsets.symmetric(horizontal: CalviSize.gutter),
+                itemExtent: _cell,
+                itemCount: _run.length,
+                itemBuilder: (context, i) {
+                  final date = _run[i];
+                  return _Day(
+                    date: date,
+                    selected: date == widget.date,
+                    settle: _settle,
+                    viewport: box.maxWidth,
+                    controller: _controller,
+                    index: i,
+                    cell: _cell,
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      widget.onPick(date);
+                    },
+                  );
+                },
+              ),
             ),
           );
         },
@@ -225,7 +228,7 @@ class _SnapPhysics extends ScrollPhysics {
   }
 }
 
-class _Day extends StatelessWidget {
+class _Day extends StatefulWidget {
   const _Day({
     required this.date,
     required this.selected,
@@ -247,15 +250,43 @@ class _Day extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
+  State<_Day> createState() => _DayState();
+}
+
+class _DayState extends State<_Day> {
+  /* Pressed is a state of one day, not of the run. The mark under the finger is
+     the one that answers, which is what makes a tap feel aimed rather than
+     broadcast to the whole strip. */
+  bool _down = false;
+
+  @override
   Widget build(BuildContext context) {
     final c = context.c;
+    final date = widget.date;
+    final selected = widget.selected;
+    final settle = widget.settle;
+    final viewport = widget.viewport;
+    final controller = widget.controller;
+    final index = widget.index;
+    final cell = widget.cell;
     final info = dayInfo(date);
-    final state = stateFor(date);
+    /* Стан дня береться з підсумків, а не з фікстур: у режимі «мої» кружечок
+       має говорити про той день, який справді записаний. Порожній день і день,
+       про який ще не прочитали, виглядають однаково, і це чесно. */
+    final scope = AppScope.maybeOf(context);
+    final state = scope == null
+        ? DayState.empty
+        : scope.stats.stateOn(
+            date,
+            goalKcal: goalOf(scope.s).kcal,
+            direction: scope.s.direction,
+          );
 
     final ring = switch (state) {
       DayState.ok => c.success,
-      DayState.over => c.protein,
-      DayState.empty => c.hairline,
+      // Перебір і голод обидва червоні: різні причини, однакова відповідь.
+      DayState.over || DayState.under => c.protein,
+      DayState.pending || DayState.empty => c.hairline,
     };
 
     final cellChild = Column(
@@ -266,6 +297,7 @@ class _Day extends StatelessWidget {
         _Circle(
           day: info.day,
           selected: selected,
+          pressed: _down,
           ring: ring,
           // A day with nothing in it gets a dashed ring and no verdict: a solid
           // grey circle reads as a judgement on a day nobody logged.
@@ -286,46 +318,54 @@ class _Day extends StatelessWidget {
       ],
     );
 
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedBuilder(
-        animation: Listenable.merge([controller, settle]),
-        builder: (context, child) {
-          if (!controller.hasClients) return child!;
+    /* Raw pointer for the press, recogniser for the tap. A tap recogniser inside
+       a scrolling run waits to win the arena before it reports the press, and by
+       then a quick tap is already over: the circle never moved. */
+    return Listener(
+      onPointerDown: (_) => setState(() => _down = true),
+      onPointerUp: (_) => setState(() => _down = false),
+      onPointerCancel: (_) => setState(() => _down = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedBuilder(
+          animation: Listenable.merge([controller, settle]),
+          builder: (context, child) {
+            if (!controller.hasClients) return child!;
 
-          /* Distance from the right edge, in cells. The strip bends around the
+            /* Distance from the right edge, in cells. The strip bends around the
              day at the front, so the far side of the run is the one that leans
              away, and geometry is arithmetic on the scroll offset rather than a
              question asked of each cell. */
-          final x = index * cell - controller.offset;
-          final fromRight = (viewport - CalviSize.gutter - x - cell) / viewport;
-          final k = fromRight.clamp(0.0, 1.0);
+            final x = index * cell - controller.offset;
+            final fromRight = (viewport - CalviSize.gutter - x - cell) / viewport;
+            final k = fromRight.clamp(0.0, 1.0);
 
-          /* Each day unfolds a little after the one to its right. The delay is
+            /* Each day unfolds a little after the one to its right. The delay is
              its own share of one controller, so a single animation drives the
              whole run instead of a timer per cell. */
-          const total = (_settleMs + _staggerMax) * 1.0;
-          final wait = math.min(k * (viewport / cell) * _stagger, _staggerMax.toDouble());
-          final flat = Interval(
-            wait / total,
-            math.min(1, (wait + _settleMs) / total),
-            curve: CalviMotion.easeRise,
-          ).transform(settle.value);
+            const total = (_settleMs + _staggerMax) * 1.0;
+            final wait = math.min(k * (viewport / cell) * _stagger, _staggerMax.toDouble());
+            final flat = Interval(
+              wait / total,
+              math.min(1, (wait + _settleMs) / total),
+              curve: CalviMotion.easeRise,
+            ).transform(settle.value);
 
-          final depth = 1 - flat;
-          if (depth < 0.001) return child!;
+            final depth = 1 - flat;
+            if (depth < 0.001) return child!;
 
-          return Transform(
-            alignment: Alignment.centerRight,
-            transform: Matrix4.identity()
-              ..setEntry(3, 2, 0.0018)
-              ..rotateY(0.9 * k * depth)
-              ..scaleByDouble(1 - 0.22 * k * k * depth, 1 - 0.22 * k * k * depth, 1, 1),
-            child: Opacity(opacity: 1 - 0.55 * k * k * depth, child: child),
-          );
-        },
-        child: cellChild,
+            return Transform(
+              alignment: Alignment.centerRight,
+              transform: Matrix4.identity()
+                ..setEntry(3, 2, 0.0018)
+                ..rotateY(0.9 * k * depth)
+                ..scaleByDouble(1 - 0.22 * k * k * depth, 1 - 0.22 * k * k * depth, 1, 1),
+              child: Opacity(opacity: 1 - 0.55 * k * k * depth, child: child),
+            );
+          },
+          child: cellChild,
+        ),
       ),
     );
   }
@@ -339,6 +379,7 @@ class _Circle extends StatelessWidget {
   const _Circle({
     required this.day,
     required this.selected,
+    required this.pressed,
     required this.ring,
     required this.dashed,
     required this.dim,
@@ -346,6 +387,9 @@ class _Circle extends StatelessWidget {
 
   final int day;
   final bool selected;
+
+  /// Under the finger right now, which is a different thing from chosen.
+  final bool pressed;
   final Color ring;
   final bool dashed;
   final bool dim;
@@ -353,29 +397,42 @@ class _Circle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.c;
-    return AnimatedContainer(
+    return AnimatedScale(
+      /* The chosen day stands a little proud of the row and gives way under the
+         finger. Both are the same 140 ms the demo uses, so a tap reads as one
+         movement rather than as a colour change somewhere in a strip. */
+      scale: pressed
+          ? 0.9
+          : selected
+          ? 1.06
+          : 1,
       duration: CalviMotion.fast,
-      width: 34,
-      height: 34,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: selected ? c.button : null,
-        // A dashed ring is painted, not bordered: a box border has one style for
-        // the whole shape and none of them is dashes.
-        border: dashed ? null : Border.all(color: selected ? c.button : ring, width: 2),
-      ),
-      child: CustomPaint(
-        painter: dashed ? _DashedRing(colour: ring) : null,
-        child: Center(
-          child: Text(
-            '$day',
-            style: context.t.titleMedium?.copyWith(
-              color: selected
-                  ? c.buttonText
-                  : dim
-                  ? c.textSecondary
-                  : c.text,
+      curve: CalviMotion.ease,
+      child: AnimatedContainer(
+        duration: CalviMotion.fast,
+        curve: CalviMotion.ease,
+        width: 34,
+        height: 34,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: selected ? c.button : null,
+          // A dashed ring is painted, not bordered: a box border has one style
+          // for the whole shape and none of them is dashes.
+          border: dashed ? null : Border.all(color: selected ? c.button : ring, width: 2),
+        ),
+        child: CustomPaint(
+          painter: dashed ? _DashedRing(colour: ring) : null,
+          child: Center(
+            child: Text(
+              '$day',
+              style: context.t.titleMedium?.copyWith(
+                color: selected
+                    ? c.buttonText
+                    : dim
+                    ? c.textSecondary
+                    : c.text,
+              ),
             ),
           ),
         ),

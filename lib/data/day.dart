@@ -6,7 +6,10 @@
 /// fixture broke on the first of the month.
 library;
 
+import 'package:flutter/foundation.dart';
+
 import 'meal.dart';
+import 'settings.dart';
 import 'workout.dart';
 
 /// What a day is measured against. One norm, not one per screen.
@@ -107,13 +110,84 @@ enum DayState {
   /// Over it.
   over,
 
+  /// Нижче за норму настільки, що це вже голод, а не дефіцит.
+  under,
+
+  /// День ще триває. Вироку немає і бути не може: о першій дня будь-хто
+  /// «недоїв», і фарбувати це червоним означає лаяти людину за те, що вона ще
+  /// не повечеряла.
+  pending,
+
   /// Nothing logged. Dashed, and no verdict.
   empty,
 }
 
-/// Where the fixtures are anchored, so a forecast does not drift under a
-/// screenshot taken a week later.
-final _anchor = DateTime(2026, 8, 15);
+/* Наскільки нижче норми ще можна опуститись і лишитись у зеленому.
+ *
+ * Дефіцит уже закладений у саму норму, тому ці чотириста це запас на живу
+ * людину: пропущений перекус, менша порція, день без апетиту. Усе, що глибше,
+ * це вже не план, а голодування, і кружечок не має його схвалювати. */
+const kcalSlack = 400;
+
+/// Як день читається в стрічці.
+///
+/// Правило залежить від того, куди людина йде, і це головне в ньому:
+///
+///   * **набір ваги** — норма або більше це зелений: з'їсти більше за ціль тут
+///     не помилка, а власне ціль;
+///   * **схуднення** — зелений лише від «норма мінус [kcalSlack]» до самої
+///     норми. Вище означає, що дефіциту не вийшло, нижче означає голод, і обидва
+///     випадки червоні;
+///   * **утримання** — той самий запас, але в обидва боки.
+///
+/// День без записів не оцінюється взагалі: порожній кружечок це не вирок.
+DayState verdictFor({
+  required int eaten,
+  required int norm,
+  required Direction direction,
+  bool logged = true,
+  /// Минулий день оцінюють цілком; сьогоднішній ще ні.
+  bool finished = true,
+}) {
+  if (!logged || eaten <= 0) return DayState.empty;
+
+  final ceiling = direction == Direction.lose ? norm : norm + kcalSlack;
+  // Перебрати можна й до вечора, і це вже факт, а не прогноз.
+  if (direction != Direction.gain && eaten > ceiling) return DayState.over;
+  if (!finished) return DayState.pending;
+
+  return switch (direction) {
+    Direction.gain => eaten >= norm ? DayState.ok : DayState.under,
+    _ => eaten < norm - kcalSlack ? DayState.under : DayState.ok,
+  };
+}
+
+/* --- Сьогодні ---
+ *
+ * Тут стояло `DateTime(2026, 8, 15)`, щоб числа під знімками екрана не пливли,
+ * поки застосунок малювався. Ціна виявилась непомірною, і не тільки на вигляд.
+ *
+ * Стрічка днів завмерла на пʼятнадцятому серпні назавжди, а це ще півбіди.
+ * Гірше те, що записи лягають у базу за справжнім годинником: страва, з'їдена
+ * вісімнадцятого, отримувала день `2026-08-18`, а екран питав базу про
+ * `2026-08-15` і не знаходив нічого. Людина записувала сніданок і бачила
+ * порожній день. */
+
+/// Звідки береться «сьогодні».
+///
+/// Підміняється тільки в тестах, і саме для того, щоб дата в них стояла на
+/// місці: перевірка, яка падає опівночі, це перевірка, якій перестають вірити.
+@visibleForTesting
+DateTime Function() dayClock = DateTime.now;
+
+/// Сьогодні, обрізане до дати.
+///
+/// Обчислюється щоразу, а не один раз при запуску: телефон, залишений
+/// увімкненим через північ, має побачити новий день сам, без перезапуску.
+DateTime get _anchor {
+  final now = dayClock();
+  return DateTime(now.year, now.month, now.day);
+}
 
 const _weekdays = ['НД', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
 const _months = [
@@ -145,13 +219,25 @@ class DayInfo {
 }
 
 DayInfo dayInfo(int offset) {
-  final d = _anchor.add(Duration(days: offset));
+  final d = calendarDay(offset);
   return DayInfo(
     day: d.day,
     label: _weekdays[d.weekday % 7],
     full: '${d.day} ${_months[d.month - 1]}',
   );
 }
+
+/// The calendar day an offset points at.
+///
+/// The screens count days as offsets from today, and the database files rows by
+/// the local calendar. This is the one place the two meet, so a mistake here is
+/// a mistake in one place.
+///
+/// Дні додаються конструктором, а не як [Duration]. Тривалість це абсолютні
+/// години, а доба буває на годину довшою: в ніч переходу на зимовий час доба
+/// плюс двадцять чотири години це двадцять третя того самого дня, і число
+/// виходить на одиницю меншим. Раз на рік, зате в усій стрічці одразу.
+DateTime calendarDay(int offset) => DateTime(_anchor.year, _anchor.month, _anchor.day + offset);
 
 /// Today is the origin.
 const todayDate = 0;
@@ -164,10 +250,7 @@ const historyDays = 18 * 7;
 List<int> get weekDates => List.generate(7, (i) => i - 6);
 
 /// Offset of the Monday that opens the week [offset] falls in.
-int mondayOf(int offset) {
-  final d = _anchor.add(Duration(days: offset));
-  return offset - ((d.weekday + 6) % 7);
-}
+int mondayOf(int offset) => offset - ((calendarDay(offset).weekday + 6) % 7);
 
 /// The run of days the strip shows, oldest first.
 ///

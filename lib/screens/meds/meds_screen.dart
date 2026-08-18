@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -138,12 +139,25 @@ class _MedsScreenState extends State<MedsScreen> {
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              Text(
+                              Text.rich(
                                 due == null
-                                    ? 'На сьогодні все прийнято'
-                                    : 'Далі о ${due.at}, ${due.name}',
+                                    ? const TextSpan(text: 'На сьогодні все прийнято')
+                                    : TextSpan(
+                                        text: 'Далі о ',
+                                        children: [
+                                          TextSpan(
+                                            text: due.at,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                              color: c.buttonText,
+                                            ),
+                                          ),
+                                          TextSpan(text: ', ${due.name}'),
+                                        ],
+                                      ),
                                 style: context.t.bodyMedium?.copyWith(
-                                  color: c.buttonText.withValues(alpha: 0.7),
+                                  fontSize: CalviSize.fsMicro,
+                                  color: c.buttonText.withValues(alpha: 0.62),
                                 ),
                               ),
                             ],
@@ -172,7 +186,7 @@ class _MedsScreenState extends State<MedsScreen> {
           ),
 
           for (final (gi, g) in groups.indexed) ...[
-            if (gi == nowAt) const _NowLine(),
+            if (gi == nowAt) const RepaintBoundary(child: _NowLine()),
             _Arrive(
               rank: gi,
               child: _RailRow(
@@ -282,22 +296,67 @@ class _NowLineState extends State<_NowLine> with SingleTickerProviderStateMixin 
     final c = context.c;
     return AnimatedBuilder(
       animation: _pulse,
-      builder: (context, _) => Opacity(
-        opacity: 0.65 + 0.35 * Curves.easeInOut.transform(_pulse.value),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 4, CalviSize.gutter, 4),
-          child: Row(
-            children: [
-              Text(
-                'зараз',
-                style: context.t.labelSmall?.copyWith(fontSize: 11, color: c.accent),
+      builder: (context, _) => Padding(
+        padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 4, CalviSize.gutter, 12),
+        child: Row(
+          children: [
+            // The same 44 the hours above it stand in, so the mark lines up.
+            SizedBox(
+              width: 44,
+              child: Text(
+                'ЗАРАЗ',
+                textAlign: TextAlign.right,
+                style: context.t.labelSmall?.copyWith(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.6,
+                  color: c.accent,
+                ),
               ),
-              const SizedBox(width: 8),
-              Expanded(child: Container(height: 1, color: c.accent.withValues(alpha: 0.4))),
-              const SizedBox(width: 8),
-              Text(_now, style: context.t.titleMedium?.copyWith(fontSize: 13, color: c.accent)),
-            ],
-          ),
+            ),
+            const SizedBox(width: 10),
+            SizedBox(
+              width: 24,
+              child: Center(
+                /* One slow pulse, and only here. The current hour is the only
+                   thing on this screen that moves on its own, so it needs no
+                   more than that to be found. Fading the whole line instead made
+                   the row look like it was loading. */
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: c.accent,
+                    boxShadow: [
+                      BoxShadow(
+                        color: c.accent.withValues(
+                          alpha: 0.55 * (1 - Curves.easeOut.transform(_pulse.value)),
+                        ),
+                        spreadRadius: 7 * Curves.easeOut.transform(_pulse.value),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              _now,
+              style: context.t.labelSmall?.copyWith(
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+                color: c.accent,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: CustomPaint(
+                size: const Size(double.infinity, 1),
+                painter: _Dashes(colour: c.accent.withValues(alpha: 0.55)),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -420,8 +479,8 @@ class _Dose extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 6),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
         decoration: BoxDecoration(
-          color: taken ? c.fillSecondary : c.card,
-          border: Border.all(color: taken ? c.fillSecondary : c.cardBorder),
+          color: taken ? c.success.withValues(alpha: 0.05) : c.card,
+          border: Border.all(color: taken ? c.success.withValues(alpha: 0.32) : c.cardBorder),
           borderRadius: BorderRadius.circular(CalviSize.rCard),
         ),
         child: Row(
@@ -433,8 +492,8 @@ class _Dose extends StatelessWidget {
                   Text(
                     med.name,
                     style: context.t.titleMedium?.copyWith(
-                      fontSize: 15,
-                      color: taken ? c.textSecondary : c.text,
+                      fontSize: CalviSize.fsCaption,
+                      letterSpacing: CalviSize.fsCaption * -0.02,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -456,6 +515,27 @@ class _Dose extends StatelessWidget {
 }
 
 /// The rail between two hours.
+/// The dashed run to the right of the now mark.
+class _Dashes extends CustomPainter {
+  _Dashes({required this.colour});
+
+  final Color colour;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = colour
+      ..strokeWidth = 1;
+    final y = size.height / 2;
+    for (var x = 0.0; x < size.width; x += 6) {
+      canvas.drawLine(Offset(x, y), Offset(math.min(x + 3, size.width), y), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_Dashes old) => old.colour != colour;
+}
+
 class _RailLine extends CustomPainter {
   _RailLine({required this.colour, required this.dashed});
 

@@ -79,12 +79,18 @@ class WaterCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(CalviSize.rPill),
                     child: SizedBox(
                       height: 6,
+                      /* Full width, said out loud. A stack sizes itself by its
+                         unpositioned children, and the fill is one of those: at
+                         forty per cent the whole bar came out forty per cent
+                         wide and sat centred, with no track to either side. */
+                      width: double.infinity,
                       child: Stack(
                         children: [
-                          Positioned.fill(child: ColoredBox(color: c.track)),
+                          Positioned.fill(child: ColoredBox(color: c.fillSecondary)),
                           // Grows on its own track rather than jumping: a bar that
                           // snaps reads as a redraw, not as water going in.
                           FractionallySizedBox(
+                            alignment: Alignment.centerLeft,
                             widthFactor: (pct / 100).clamp(0.0, 1.0),
                             // Without this the fill has no height to take: a
                             // Stack hands out loose constraints and a coloured

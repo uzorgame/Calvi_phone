@@ -8,7 +8,7 @@ import 'package:calvi/main.dart';
 
 void main() {
   testWidgets('застосунок відкривається першим запуском, а не днем', (tester) async {
-    await tester.pumpWidget(const CalviApp());
+    await tester.pumpWidget(const CalviApp(storage: false));
     await tester.pump(const Duration(seconds: 1));
 
     expect(find.text('Почати'), findsOneWidget);
@@ -20,7 +20,7 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(const CalviApp());
+    await tester.pumpWidget(const CalviApp(storage: false));
     await tester.pump(const Duration(seconds: 1));
 
     await tester.tap(find.text('Почати'));
@@ -28,8 +28,8 @@ void main() {
     // the tree for the length of the slide, and two «Далі» is an ambiguous tap.
     await tester.pumpAndSettle();
 
-    // Стать, Тіло, Ціль, Темп, Спосіб життя, Норма.
-    for (var i = 0; i < 6; i++) {
+    // Стать, Вік і зріст, Вага, Ціль, Темп, Спосіб життя, Норма.
+    for (var i = 0; i < 7; i++) {
       await tester.tap(find.text('Далі'));
       await tester.pumpAndSettle();
     }

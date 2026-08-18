@@ -16,7 +16,7 @@ void main() {
     tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
     addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
 
-    await tester.pumpWidget(const CalviApp());
+    await tester.pumpWidget(const CalviApp(storage: false));
     await tester.pump();
 
     final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
@@ -24,7 +24,7 @@ void main() {
   });
 
   testWidgets('вибір у налаштуваннях далі веде застосунок', (tester) async {
-    await tester.pumpWidget(const CalviApp());
+    await tester.pumpWidget(const CalviApp(storage: false));
     await tester.pump();
 
     // The three-way choice is still there; only the starting point changed.

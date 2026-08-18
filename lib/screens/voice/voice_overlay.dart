@@ -7,15 +7,16 @@ import 'package:flutter/services.dart';
 
 import '../../design/icons.dart';
 import '../../design/theme.dart';
+import 'dictation.dart';
 import 'level_source.dart';
 
 /// How many bars the meter draws. Enough to read as sound, few enough to stay
 /// calm.
 const _bars = 32;
 
-/* What the demo transcribes. Real speech recognition is a server away, and a
-   canned line is honest about that: the meter really does answer to a level,
-   the words do not pretend to. */
+/* Що показує демо, коли справжнього розпізнавання немає: на комп'ютері, у тесті
+   і на телефоні без нього. Рядок навмисно один і той самий, щоб його ні з чим не
+   сплутати. */
 const _said = 'два яйця, тост і кава без цукру';
 const _wordTime = Duration(milliseconds: 520);
 
@@ -26,13 +27,14 @@ const _wordTime = Duration(milliseconds: 520);
 /// the room, and under it the words as they land, so the person can see they
 /// were heard before they stop talking.
 class VoiceOverlay extends StatefulWidget {
-  const VoiceOverlay({super.key, required this.onDone, this.source = const BreathingLevel()});
+  const VoiceOverlay({super.key, required this.onDone, this.source});
 
   /// Called with what was dictated, or with an empty string if nothing came.
   final ValueChanged<String> onDone;
 
-  /// Swap in a real analyser and the screen does not change.
-  final LevelSource source;
+  /* Джерело рівня. Порожньо означає «слухати телефон по-справжньому»; тест і
+     демонстрація підставляють сюди своє і отримують той самий екран. */
+  final LevelSource? source;
 
   @override
   State<VoiceOverlay> createState() => _VoiceOverlayState();
@@ -52,13 +54,51 @@ class _VoiceOverlayState extends State<VoiceOverlay> with SingleTickerProviderSt
   String _heard = '';
   Timer? _type;
 
+  /// Справжнє диктування, коли джерело не підставили ззовні.
+  Dictation? _live;
+
+  /// Чому мовчимо, якщо мовчимо. Показується замість почутого.
+  String? _trouble;
+
+  /* Створюється тут, а не лінивим полем.
+   *
+   * Лінива ініціалізація виглядала охайно і мовчки ламала все: поле обчислюється
+   * при першому зверненні, а перевірка нижче зверталась не до нього, а до
+   * `_live`, який на той момент ще був порожній. Диктування не вмикалось ніколи,
+   * і замість голосу програвалась показова фраза. */
+  late final LevelSource _source;
+
   @override
   void initState() {
     super.initState();
     _clock.addListener(_frame);
 
-    /* The words land one at a time. Everything at once would say the phrase was
-       already known, which is exactly what dictation is not. */
+    final live = widget.source == null ? Dictation() : null;
+    _live = live;
+    _source = widget.source ?? live!;
+
+    if (live == null) {
+      _fake();
+      return;
+    }
+
+    unawaited(
+      live
+          .start(onWords: (words) {
+            if (mounted) setState(() => _heard = words);
+          })
+          .then((ok) {
+            if (!mounted) return;
+            // Не вийшло слухати, і про це треба сказати, а не вдавати диктування.
+            if (!ok) setState(() => _trouble = live.failure);
+          }),
+    );
+  }
+
+  /* Показова розшифровка для екрана без мікрофона: комп'ютер, тест, телефон без
+     розпізнавання. Слова лягають по одному, бо все разом означало б, що фразу
+     знали наперед, а це саме те, чим диктування не є. */
+  void _fake() {
     final words = _said.split(' ');
     var n = 0;
     _type = Timer.periodic(_wordTime, (t) {
@@ -69,8 +109,15 @@ class _VoiceOverlayState extends State<VoiceOverlay> with SingleTickerProviderSt
 
   void _frame() {
     _elapsed = _clock.lastElapsedDuration ?? Duration.zero;
-    final level = widget.source.level(_elapsed);
+    final level = _source.level(_elapsed);
     final t = _elapsed.inMilliseconds.toDouble();
+
+    /* Біда може статись і посеред диктування, не лише на старті: мікрофон
+       забирає дзвінок, вимикається мережа, двигун здається після кількох
+       порожніх відрізків. Раніше причину читали один раз при вмиканні, і після
+       неї смуги продовжували дихати над мертвим мікрофоном. */
+    final live = _live;
+    if (live != null && live.failure != _trouble) _trouble = live.failure;
 
     for (var i = 0; i < _bars; i++) {
       /* Middle bars carry more of the level than the ends, the way a voice meter
@@ -89,28 +136,38 @@ class _VoiceOverlayState extends State<VoiceOverlay> with SingleTickerProviderSt
     _type?.cancel();
     _clock.removeListener(_frame);
     _clock.dispose();
-    widget.source.dispose();
+    _source.dispose();
     super.dispose();
   }
 
-  void _stop() {
+  Future<void> _stop() async {
     HapticFeedback.selectionClick();
-    widget.onDone(_heard);
+    final live = _live;
+    // Дочекатись двигуна, бо останнє слово часто приходить саме на зупинці.
+    final said = live == null ? _heard : await live.stop();
+    if (!mounted) return;
+    widget.onDone(said.trim());
   }
 
   @override
   Widget build(BuildContext context) {
     final c = context.c;
-    final level = widget.source.level(_elapsed);
+    final level = _source.level(_elapsed);
 
     return Stack(
       children: [
         /* A real blur, not a wash of white over the page. Lowering the opacity
            of a veil leaves every edge behind it perfectly sharp, which reads as
-           a dimmed screen rather than as attention moving off it. */
+           a dimmed screen rather than as attention moving off it.
+         *
+         * Дотик до нього не зупиняє запис, і це навмисне. Людина диктує з
+         * телефоном у руці, а не перед собою на столі: випадковий дотик долонею
+         * або великим пальцем обривав фразу посеред слова. Вимикає диктування
+         * тільки той самий мікрофон, яким його ввімкнули. Але дотики шар усе
+         * одно ловить: під ним живий екран, і натиснути кнопку крізь туман
+         * означало б зробити щось, чого не видно. */
         Positioned.fill(
           child: GestureDetector(
-            onTap: _stop,
             behavior: HitTestBehavior.opaque,
             child: BackdropFilter(
               filter: ui.ImageFilter.blur(sigmaX: 11, sigmaY: 11),
@@ -126,21 +183,33 @@ class _VoiceOverlayState extends State<VoiceOverlay> with SingleTickerProviderSt
               SizedBox(
                 height: 96,
                 width: 250,
-                child: CustomPaint(
-                  painter: _MeterPainter(peaks: _peak, ink: c.text),
+                child: RepaintBoundary(
+                  child: CustomPaint(
+                    painter: _MeterPainter(peaks: _peak, ink: c.text),
+                  ),
                 ),
               ),
               const SizedBox(height: 22),
               SizedBox(
                 width: 280,
                 child: Text(
-                  _heard,
+                  /* Причина замість почутого, коли слухати не вийшло: мовчазний
+                     екран із бігунцями виглядав би як робота, якої немає. */
+                  _trouble ?? _heard,
                   textAlign: TextAlign.center,
-                  style: context.t.headlineMedium?.copyWith(fontSize: 19),
+                  style: context.t.headlineMedium?.copyWith(
+                    fontSize: 19,
+                    color: _trouble == null ? null : c.textSecondary,
+                  ),
                 ),
               ),
               const SizedBox(height: 10),
-              Text('Говори, торкнись будь-де, щоб зупинити', style: context.t.labelSmall),
+              Text(
+                _trouble == null
+                    ? 'Говори. Торкнись мікрофона, щоб зупинити'
+                    : 'Торкнись мікрофона, щоб закрити',
+                style: context.t.labelSmall,
+              ),
             ],
           ),
         ),
@@ -157,18 +226,20 @@ class _VoiceOverlayState extends State<VoiceOverlay> with SingleTickerProviderSt
               button: true,
               label: 'Зупинити запис',
               child: GestureDetector(
-                onTap: _stop,
+                onTap: () => unawaited(_stop()),
                 behavior: HitTestBehavior.opaque,
                 child: SizedBox(
                   width: 116,
                   height: 116,
-                  child: CustomPaint(
-                    painter: _WobblePainter(
-                      level: level,
-                      phase: _elapsed.inMilliseconds / 1000,
-                      fill: c.button,
+                  child: RepaintBoundary(
+                    child: CustomPaint(
+                      painter: _WobblePainter(
+                        level: level,
+                        phase: _elapsed.inMilliseconds / 1000,
+                        fill: c.button,
+                      ),
+                      child: Center(child: CalviIcon('mic', size: 26, color: c.buttonText)),
                     ),
-                    child: Center(child: CalviIcon('mic', size: 26, color: c.buttonText)),
                   ),
                 ),
               ),

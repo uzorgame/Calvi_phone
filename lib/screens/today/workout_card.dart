@@ -177,10 +177,6 @@ class _Picker extends StatelessWidget {
                       : const Expanded(child: SizedBox()),
               ],
             ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Text('Оберіть активність або скажіть Норі', style: context.t.labelSmall),
-          ),
         ],
       ),
     );

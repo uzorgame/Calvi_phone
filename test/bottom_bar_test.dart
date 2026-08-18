@@ -56,6 +56,20 @@ void main() {
     expect(focused, true);
   });
 
+  testWidgets('каретка в полі підіймає кімнату, хай як вона там опинилась', (tester) async {
+    bool? focused;
+    await tester.pumpWidget(_wrap(open: false, onOpen: (f) => focused = f));
+
+    /* Not a tap: the platform can put the caret in the field on its own, and on
+       the phone the tap itself was being eaten before it reached the field. What
+       raises the room is the caret being there. */
+    final field = tester.widget<TextField>(find.byType(TextField));
+    field.focusNode!.requestFocus();
+    await tester.pump();
+
+    expect(focused, true, reason: 'фокус у полі не підняв чат');
+  });
+
   testWidgets('відкрита кімната несе привітання Нори', (tester) async {
     await tester.pumpWidget(_wrap(open: true, onOpen: (_) {}));
     await tester.pumpAndSettle();

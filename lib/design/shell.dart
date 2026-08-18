@@ -10,7 +10,7 @@ import 'tokens.dart';
 /// same gutter as the day. The arrow sits on the left and nothing balances it on
 /// the right except empty space, because a title that is not centred on a phone
 /// reads as a mistake.
-class CalviScreen extends StatelessWidget {
+class CalviScreen extends StatefulWidget {
   const CalviScreen({
     super.key,
     required this.title,
@@ -19,7 +19,7 @@ class CalviScreen extends StatelessWidget {
     this.trailing,
     this.hint,
     this.foot,
-    this.padding = const EdgeInsets.only(bottom: 32),
+    this.padding = const EdgeInsets.only(bottom: 16),
   });
 
   final String title;
@@ -32,63 +32,118 @@ class CalviScreen extends StatelessWidget {
   /// One sentence under the title saying what this screen is for.
   final String? hint;
 
-  /// The action, pinned to the bottom rather than scrolling away with the
-  /// content: it is the point of the screen and has to be reachable by thumb.
+  /// The action. It follows the content when the screen has room for it and
+  /// holds the bottom when it does not, which is the demo's sticky footer: an
+  /// action nailed to the bottom of a short screen floats away from the thing it
+  /// acts on, and one that only scrolls is out of reach on a long one.
   final Widget? foot;
 
   final EdgeInsets padding;
 
   @override
+  State<CalviScreen> createState() => _CalviScreenState();
+}
+
+class _CalviScreenState extends State<CalviScreen> {
+  final _scroll = ScrollController();
+
+  /// Whether there is more content than room. Read off the scroll metrics after
+  /// a layout that always keeps the action's space in the flow, so moving the
+  /// action out of the flow cannot change the answer and flip it back.
+  bool _over = false;
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  void _measure() {
+    if (!_scroll.hasClients) return;
+    final over = _scroll.position.maxScrollExtent > 0.5;
+    if (over != _over) setState(() => _over = over);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) => _measure());
+
+    final foot = widget.foot == null
+        ? null
+        : Container(
+            padding: EdgeInsets.fromLTRB(
+              CalviSize.gutter,
+              18,
+              CalviSize.gutter,
+              6 + MediaQuery.paddingOf(context).bottom,
+            ),
+            /* The content scrolls under it, so it needs ground of its own, and
+               the ground arrives as a fade rather than an edge. */
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [context.c.bg.withValues(alpha: 0), context.c.bg],
+                stops: const [0, 0.26],
+              ),
+            ),
+            child: widget.foot,
+          );
+
     return Scaffold(
       body: SafeArea(
         bottom: false,
-        child: Column(
+        child: Stack(
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 4, CalviSize.gutter, 14),
-              child: Row(
-                children: [
-                  CalviBack(onTap: onBack ?? () => Navigator.of(context).pop()),
-                  Expanded(
+            ListView(
+              controller: _scroll,
+              padding: widget.padding,
+              children: [
+                // The header scrolls with the page, the way the day's does.
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 4, CalviSize.gutter, 18),
+                  child: Row(
+                    children: [
+                      CalviBack(onTap: widget.onBack ?? () => Navigator.of(context).pop()),
+                      Expanded(
+                        child: Text(
+                          widget.title,
+                          textAlign: TextAlign.center,
+                          style: context.t.headlineLarge?.copyWith(fontSize: 23),
+                        ),
+                      ),
+                      SizedBox(width: 40, child: widget.trailing),
+                    ],
+                  ),
+                ),
+                if (widget.hint != null)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      CalviSize.gutter,
+                      0,
+                      CalviSize.gutter,
+                      CalviSize.gapSection,
+                    ),
                     child: Text(
-                      title,
-                      textAlign: TextAlign.center,
-                      style: context.t.headlineLarge?.copyWith(fontSize: 19),
+                      widget.hint!,
+                      // Looser than body text: this is a sentence to read, not
+                      // a label to glance at.
+                      style: context.t.bodyMedium?.copyWith(height: 1.5),
                     ),
                   ),
-                  SizedBox(width: 40, child: trailing),
-                ],
-              ),
+                ...widget.children,
+                if (foot != null)
+                  Visibility(
+                    visible: !_over,
+                    maintainSize: true,
+                    maintainAnimation: true,
+                    maintainState: true,
+                    child: foot,
+                  ),
+              ],
             ),
-            Expanded(
-              child: ListView(
-                padding: padding,
-                children: [
-                  if (hint != null)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        CalviSize.gutter + 4,
-                        0,
-                        CalviSize.gutter + 4,
-                        6,
-                      ),
-                      child: Text(hint!, style: context.t.bodyMedium),
-                    ),
-                  ...children,
-                ],
-              ),
-            ),
-            if (foot != null)
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                  CalviSize.gutter,
-                  10,
-                  CalviSize.gutter,
-                  12 + MediaQuery.paddingOf(context).bottom,
-                ),
-                child: foot,
-              ),
+            if (foot != null && _over)
+              Positioned(left: 0, right: 0, bottom: 0, child: foot),
           ],
         ),
       ),
@@ -98,31 +153,78 @@ class CalviScreen extends StatelessWidget {
 
 /// The sentence under a control that explains what the number means.
 class CalviNote extends StatelessWidget {
-  const CalviNote(this.text, {super.key});
+  const CalviNote(this.text, {super.key, this.lead = 0}) : bold = null, rest = null;
+
+  /// A note with one run standing out of the sentence, for the figure it is
+  /// about: the demo's `<b>` inside a note.
+  const CalviNote.rich(this.text, {super.key, required this.bold, required this.rest, this.lead = 0});
 
   final String text;
+  final String? bold;
+  final String? rest;
+
+  /// The gap above. Nothing after a block, which already leaves a section gap
+  /// below it, and twelve when the note follows a card or a control inside one.
+  final double lead;
+
+  /// The note's own type, for the places that lay a note out themselves.
+  static TextStyle? styleOf(BuildContext context) =>
+      context.t.labelSmall?.copyWith(fontWeight: FontWeight.w400, height: 1.5);
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(CalviSize.gutter + 4, 2, CalviSize.gutter + 4, 16),
-    child: Text(text, style: context.t.bodyMedium),
-  );
+  Widget build(BuildContext context) {
+    final style = styleOf(context);
+    return Padding(
+      padding: EdgeInsets.fromLTRB(CalviSize.gutter, lead, CalviSize.gutter, 0),
+      child: bold == null
+          ? Text(text, style: style)
+          : Text.rich(
+              TextSpan(
+                text: text,
+                children: [
+                  TextSpan(
+                    text: bold,
+                    style: TextStyle(color: context.c.text, fontWeight: FontWeight.w600),
+                  ),
+                  TextSpan(text: rest),
+                ],
+              ),
+              style: style,
+            ),
+    );
+  }
 }
 
 /// A card of plain «label — value» lines.
 class CalviFacts extends StatelessWidget {
-  const CalviFacts({super.key, required this.rows, this.note});
+  const CalviFacts({
+    super.key,
+    required this.rows,
+    this.note,
+    this.noteBold,
+    this.noteRest,
+    this.inset = true,
+  });
 
   final List<(String, String)> rows;
   final String? note;
+
+  /// A run of the note standing out of the sentence, and what follows it.
+  final String? noteBold;
+  final String? noteRest;
+
+  /// Off inside a block, which already stands the card at the gutter.
+  final bool inset;
 
   @override
   Widget build(BuildContext context) {
     final c = context.c;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 0, CalviSize.gutter, 14),
+      // No gap of its own below: what follows carries its own, the way the
+      // demo's card does.
+      padding: EdgeInsets.symmetric(horizontal: inset ? CalviSize.gutter : 0),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           color: c.card,
           border: Border.all(color: c.cardBorder),
@@ -133,21 +235,39 @@ class CalviFacts extends StatelessWidget {
           children: [
             for (final (label, value) in rows)
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5),
+                padding: const EdgeInsets.symmetric(vertical: 7),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
                   children: [
                     Expanded(child: Text(label, style: context.t.bodyMedium)),
-                    Text(value, style: context.t.titleMedium?.copyWith(fontSize: 15)),
+                    Text(value, style: context.t.titleMedium),
                   ],
                 ),
               ),
-            if (note != null) ...[
-              Padding(
-                padding: const EdgeInsets.only(top: 12, bottom: 10),
-                child: Divider(height: 1, color: c.hairline),
+            if (note != null)
+              Container(
+                // Nothing to be ruled off when the card is the sentence itself.
+                margin: EdgeInsets.only(top: rows.isEmpty ? 0 : 14),
+                padding: EdgeInsets.only(top: rows.isEmpty ? 0 : 13),
+                decoration: rows.isEmpty
+                    ? null
+                    : BoxDecoration(border: Border(top: BorderSide(color: c.cardBorder))),
+                child: Text.rich(
+                  TextSpan(
+                    text: note,
+                    children: [
+                      if (noteBold != null)
+                        TextSpan(
+                          text: noteBold,
+                          style: TextStyle(color: c.text, fontWeight: FontWeight.w600),
+                        ),
+                      if (noteRest != null) TextSpan(text: noteRest),
+                    ],
+                  ),
+                  style: context.t.bodyMedium?.copyWith(height: 1.5),
+                ),
               ),
-              Text(note!, style: context.t.bodyMedium),
-            ],
           ],
         ),
       ),
@@ -167,7 +287,7 @@ class CalviCheck extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.c;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 0, CalviSize.gutter, 14),
+      padding: const EdgeInsets.symmetric(horizontal: CalviSize.gutter, vertical: 8),
       child: GestureDetector(
         onTap: onToggle,
         behavior: HitTestBehavior.opaque,
@@ -335,12 +455,34 @@ class _Ring extends CustomPainter {
 
 /// A titled group of rows.
 class CalviSection extends StatelessWidget {
-  const CalviSection({super.key, required this.title, this.aside, required this.children});
+  const CalviSection({
+    super.key,
+    this.title,
+    this.aside,
+    this.bare = false,
+    this.note,
+    this.trail = 10,
+    required this.children,
+  });
 
-  final String title;
+  /// A group can go without a title: some hold one card and need no label.
+  final String? title;
 
   /// The figure that answers the title, on the right of the same line.
   final String? aside;
+
+  /// The children draw their own grounds, so the group must not draw one round
+  /// them: options are separate cards, and a card of cards is a slab.
+  final bool bare;
+
+  /// A sentence under the card but inside the group, so the section gap stands
+  /// under the note rather than between a card and its own explanation.
+  final String? note;
+
+  /// What the last bare child already leaves under itself. Options carry ten,
+  /// a card carries nothing, and the demo's section gap swallows whichever it
+  /// is rather than standing on top of it.
+  final double trail;
   final List<Widget> children;
 
   @override
@@ -352,20 +494,23 @@ class CalviSection extends StatelessWidget {
         children: [
           /* Body-sized and sentence case, the way the demo writes them: «Про
              тебе», not a shouted caps label. */
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Expanded(child: Text(title, style: context.t.titleMedium)),
-                if (aside != null) Text(aside!, style: context.t.bodyMedium),
-              ],
+          if (title != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Expanded(child: Text(title!, style: context.t.titleMedium)),
+                  if (aside != null) Text(aside!, style: context.t.bodyMedium),
+                ],
+              ),
             ),
-          ),
           // A title on its own is allowed: some groups are headings over a card
           // that draws itself, and an empty bordered box would be a hole.
-          if (children.isNotEmpty)
+          if (bare)
+            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: children)
+          else if (children.isNotEmpty)
             Container(
               decoration: BoxDecoration(
                 color: context.c.card,
@@ -375,7 +520,19 @@ class CalviSection extends StatelessWidget {
               clipBehavior: Clip.antiAlias,
               child: Column(children: children),
             ),
-          SizedBox(height: children.isEmpty ? 0 : CalviSize.gapSection),
+          // Inside the group, so it takes the gutter the group already stands at.
+          if (note != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Text(note!, style: CalviNote.styleOf(context)),
+            ),
+          SizedBox(
+            height: bare && note == null
+                ? CalviSize.gapSection - trail
+                : children.isEmpty && !bare
+                ? 0
+                : CalviSize.gapSection,
+          ),
         ],
       ),
     );
@@ -394,11 +551,15 @@ class CalviRow extends StatelessWidget {
     this.danger = false,
     this.trailing,
     this.first = false,
+    this.hint,
   });
 
   final String icon;
   final String title;
   final String? value;
+
+  /// A line under the title, for a row whose switch needs saying what it does.
+  final String? hint;
   final VoidCallback? onTap;
   final bool danger;
 
@@ -424,13 +585,26 @@ class CalviRow extends StatelessWidget {
         ),
         child: LayoutBuilder(
           builder: (context, box) {
-            /* The value is sized by its own text and sits against the chevron,
-               taking whatever the title does not need. Splitting the line
-               equally left it stranded mid-row with the right third empty;
-               letting it size itself with no ceiling pushed the title out of
-               the row entirely on the one setting with a long answer. */
+            /* The value takes what the title does not need, and the title gives
+               way when there is not enough for both. Splitting the line equally
+               left the value stranded mid-row with the right third empty; giving
+               the value no ceiling pushed the title out of the row entirely on
+               the one setting with a long answer. Measuring the title is what
+               the browser does for `flex: 1 1 auto` beside `flex: 0 0 auto`. */
             final room = box.maxWidth - 34 - 12 - 12 - 16;
-            const forTitle = 96.0;
+            final titleStyle = context.t.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w500,
+              color: ink,
+            );
+            final measure = TextPainter(
+              text: TextSpan(text: title, style: titleStyle),
+              textDirection: TextDirection.ltr,
+              maxLines: 1,
+            )..layout();
+            /* Its own width, capped at three fifths of the row: past that the
+               value has nowhere left to go, and a title is easier to guess from
+               half a word than a figure is. */
+            final forTitle = math.min(measure.width, room * 0.6);
 
             return Row(
               children: [
@@ -443,19 +617,30 @@ class CalviRow extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.t.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: ink,
-                    ),
-                  ),
+                  child: hint == null
+                      ? Text(
+                          title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: titleStyle,
+                        )
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(title, style: titleStyle),
+                            const SizedBox(height: 2),
+                            Text(
+                              hint!,
+                              style: context.t.labelSmall?.copyWith(
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
+                        ),
                 ),
                 if (value != null)
                   ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: math.max(room - forTitle, room * 0.4)),
+                    constraints: BoxConstraints(maxWidth: room - forTitle),
                     child: Padding(
                       padding: const EdgeInsets.only(left: 8),
                       child: Text(
@@ -566,18 +751,144 @@ class CalviChoice extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             AnimatedContainer(
-              duration: CalviMotion.fast,
-              width: 22,
-              height: 22,
+              duration: CalviMotion.normal,
+              curve: CalviMotion.ease,
+              width: 24,
+              height: 24,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: chosen ? c.button : const Color(0x00000000),
-                border: Border.all(color: chosen ? c.button : c.hairline, width: 2),
+                border: Border.all(color: chosen ? c.button : c.hairline, width: 1.5),
               ),
-              child: chosen ? CalviIcon('check', size: 12, color: c.buttonText) : null,
+              child: AnimatedScale(
+                scale: chosen ? 1 : 0,
+                duration: CalviMotion.normal,
+                curve: CalviMotion.ease,
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(shape: BoxShape.circle, color: c.bg),
+                ),
+              ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// One option as a card of its own: the demo's .pick.
+///
+/// Chosen is white and outlined rather than filled: these are choices among
+/// equals, and filling one black would make it read as the screen's action.
+class CalviPick extends StatelessWidget {
+  const CalviPick({super.key,
+    required this.label,
+    this.hint,
+    this.icon,
+    required this.on,
+    required this.onTap,
+  });
+
+  final String label;
+  final String? hint;
+  final String? icon;
+  final bool on;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: CalviMotion.normal,
+          curve: CalviMotion.ease,
+          /* Chosen is white and outlined rather than filled: the row is a choice
+             among equals, and filling it black would make it read as the
+             screen's action. The padding gives back what the border takes. */
+          padding: EdgeInsets.symmetric(horizontal: on ? 15 : 16, vertical: on ? 13 : 14),
+          decoration: BoxDecoration(
+            color: on ? c.bg : c.hover,
+            border: Border.all(color: on ? c.button : c.cardBorder, width: on ? 2 : 1),
+            borderRadius: BorderRadius.circular(CalviSize.rLarge),
+          ),
+          child: Row(
+            children: [
+              if (icon != null) ...[
+                Container(
+                  width: 40,
+                  height: 40,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(shape: BoxShape.circle, color: c.iconCircle),
+                  child: CalviIcon(icon!, size: 19),
+                ),
+                const SizedBox(width: 13),
+              ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: context.t.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: CalviSize.fsBody * -0.02,
+                      ),
+                    ),
+                    if (hint != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        hint!,
+                        style: context.t.labelSmall?.copyWith(fontWeight: FontWeight.w400),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: 13),
+              _PickDot(on: on),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The radio of a [_Card]: a ring that fills, with a dot that grows inside it.
+class _PickDot extends StatelessWidget {
+  const _PickDot({required this.on});
+
+  final bool on;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+    return AnimatedContainer(
+      duration: CalviMotion.normal,
+      curve: CalviMotion.ease,
+      width: 24,
+      height: 24,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: on ? c.button : const Color(0x00000000),
+        border: Border.all(color: on ? c.button : c.hairline, width: 1.5),
+      ),
+      child: AnimatedScale(
+        scale: on ? 1 : 0,
+        duration: CalviMotion.normal,
+        curve: CalviMotion.ease,
+        child: Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(shape: BoxShape.circle, color: c.bg),
         ),
       ),
     );
@@ -594,12 +905,20 @@ class CalviButton extends StatefulWidget {
     required this.onTap,
     this.enabled = true,
     this.danger = false,
+    this.second,
+    this.onSecond,
   });
 
   final String label;
   final VoidCallback onTap;
   final bool enabled;
   final bool danger;
+
+  /* The way out, under the action rather than beside it. Beside it, two filled
+     buttons compete for the same glance; under it, plain text, the refusal is
+     available without being offered. */
+  final String? second;
+  final VoidCallback? onSecond;
 
   @override
   State<CalviButton> createState() => _CalviButtonState();
@@ -617,7 +936,7 @@ class _CalviButtonState extends State<CalviButton> {
         ? c.protein
         : c.button;
 
-    return GestureDetector(
+    final button = GestureDetector(
       onTap: widget.enabled ? widget.onTap : null,
       onTapDown: (_) => setState(() => _down = true),
       onTapUp: (_) => setState(() => _down = false),
@@ -643,6 +962,24 @@ class _CalviButtonState extends State<CalviButton> {
           ),
         ),
       ),
+    );
+
+    if (widget.second == null) return button;
+    return Column(
+      children: [
+        button,
+        const SizedBox(height: 4),
+        GestureDetector(
+          onTap: widget.onSecond,
+          behavior: HitTestBehavior.opaque,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            alignment: Alignment.center,
+            child: Text(widget.second!, style: context.t.bodyLarge?.copyWith(color: c.textSecondary)),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -758,7 +1095,10 @@ class CalviSegments extends StatelessWidget {
     required this.labels,
     required this.index,
     required this.onPick,
-    this.height = 40,
+    /* Four of the demo's pills: 4 of padding, a 9/9 button around a 13px line.
+       Anything shorter and the thumb reads as a chip sitting in a bar. */
+    this.height = 43,
+    this.cell,
   });
 
   final List<String> labels;
@@ -766,14 +1106,22 @@ class CalviSegments extends StatelessWidget {
   final ValueChanged<int> onPick;
   final double height;
 
+  /// Fixed width per segment, which makes the bar scroll instead of squeezing.
+  ///
+  /// Four periods share the width of the screen; eight measurements cannot, and
+  /// a segment whose cells resize as the labels change is a segment whose thumb
+  /// never lands where the eye expects it.
+  final double? cell;
+
   @override
   Widget build(BuildContext context) {
     final c = context.c;
     return LayoutBuilder(
       builder: (context, box) {
-        final w = (box.maxWidth - 8) / labels.length;
-        return SizedBox(
+        final w = cell ?? (box.maxWidth - 8) / labels.length;
+        final bar = SizedBox(
           height: height,
+          width: cell == null ? null : w * labels.length + 8,
           child: Stack(
             children: [
               Positioned.fill(
@@ -828,6 +1176,15 @@ class CalviSegments extends StatelessWidget {
             ],
           ),
         );
+
+        // A bar wider than the screen is dragged rather than crushed.
+        return cell == null
+            ? bar
+            : SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const ClampingScrollPhysics(),
+                child: bar,
+              );
       },
     );
   }
@@ -897,4 +1254,45 @@ class CalviNora extends StatelessWidget {
       ),
     );
   }
+}
+
+/// A press that answers the moment the finger lands.
+///
+/// Flutter's tap recognisers wait to win the gesture arena before they report a
+/// press, and inside a scrolling list that wait is long enough that a quick tap
+/// shows nothing at all. The demo's `:active` fires on pointer down with no
+/// arena to win, so the visual state is taken straight from the raw pointer and
+/// only the tap itself is left to the recogniser.
+class CalviPress extends StatefulWidget {
+  const CalviPress({super.key, required this.onTap, required this.builder, this.onLongPress});
+
+  final VoidCallback onTap;
+  final VoidCallback? onLongPress;
+
+  /// Called with true while a finger is on it.
+  final Widget Function(BuildContext context, bool down) builder;
+
+  @override
+  State<CalviPress> createState() => _CalviPressState();
+}
+
+class _CalviPressState extends State<CalviPress> {
+  bool _down = false;
+
+  void _set(bool v) {
+    if (_down != v) setState(() => _down = v);
+  }
+
+  @override
+  Widget build(BuildContext context) => Listener(
+    onPointerDown: (_) => _set(true),
+    onPointerUp: (_) => _set(false),
+    onPointerCancel: (_) => _set(false),
+    child: GestureDetector(
+      onTap: widget.onTap,
+      onLongPress: widget.onLongPress,
+      behavior: HitTestBehavior.opaque,
+      child: widget.builder(context, _down),
+    ),
+  );
 }

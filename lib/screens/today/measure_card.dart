@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../data/measure.dart';
 import '../../design/icons.dart';
+import '../../design/shell.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import 'slot_card.dart';
@@ -149,10 +150,28 @@ class _MeasureCardState extends State<MeasureCard> {
             ),
 
           if (rest.isNotEmpty)
-            AddRow(
-              label: _picking ? 'Згорнути' : 'Додати вимірювання',
-              open: _picking,
+            GestureDetector(
               onTap: () => setState(() => _picking = !_picking),
+              behavior: HitTestBehavior.opaque,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(4, 12, 4, 6),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 30,
+                      height: 30,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(shape: BoxShape.circle, color: c.fillSecondary),
+                      child: CalviIcon(_picking ? 'minus' : 'plus', size: 16, color: c.text),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      _picking ? 'Згорнути' : 'Додати вимірювання',
+                      style: context.t.bodyMedium,
+                    ),
+                  ],
+                ),
+              ),
             ),
 
           if (_picking)
@@ -188,29 +207,9 @@ class _MeasureCardState extends State<MeasureCard> {
               ),
             ),
 
-          if (fields.isNotEmpty) ...[
-            const SizedBox(height: 4),
-            GestureDetector(
-              onTap: _save,
-              behavior: HitTestBehavior.opaque,
-              child: Container(
-                height: 46,
-                width: double.infinity,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  // Nothing to save says so instead of going grey and silent.
-                  color: _draft.isEmpty ? c.fillSecondary : c.button,
-                  borderRadius: BorderRadius.circular(CalviSize.rCard),
-                ),
-                child: Text(
-                  _draft.isEmpty ? 'Нічого не змінилось' : 'Зберегти заміри',
-                  style: context.t.titleMedium?.copyWith(
-                    fontSize: 15,
-                    color: _draft.isEmpty ? c.textSecondary : c.buttonText,
-                  ),
-                ),
-              ),
-            ),
+          if (fields.isNotEmpty && _draft.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            CalviButton(label: 'Зберегти заміри', onTap: _save),
           ],
 
           const SizedBox(height: 4),
@@ -282,6 +281,7 @@ class _Field extends StatelessWidget {
           const SizedBox(height: 6),
           Container(
             height: 46,
+            alignment: Alignment.centerLeft,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
               color: c.fillSecondary,
@@ -291,6 +291,7 @@ class _Field extends StatelessWidget {
               children: [
                 Expanded(
                   child: TextField(
+                    textAlignVertical: TextAlignVertical.center,
                     controller: controller,
                     onChanged: onChanged,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -301,6 +302,7 @@ class _Field extends StatelessWidget {
                     style: context.t.headlineMedium?.copyWith(fontSize: 19),
                     decoration: InputDecoration(
                       isDense: true,
+                      contentPadding: EdgeInsets.zero,
                       border: InputBorder.none,
                       hintText: '—',
                       hintStyle: context.t.headlineMedium?.copyWith(

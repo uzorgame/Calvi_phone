@@ -37,14 +37,21 @@ class MedsForm extends StatefulWidget {
 
 class _MedsFormState extends State<MedsForm> {
   late final _name = TextEditingController(text: widget.med?.name ?? '');
+
+  /// One line in the person's own words: «разом зі сніданком», «через день».
+  late final _note = TextEditingController(text: widget.med?.note ?? '');
   late double _dose = widget.med?.dose ?? 1;
-  late MedForm _form = widget.med?.form ?? MedForm.tab;
+  /* Kept, but no longer asked about: the day card counts doses, and a count
+     needs a unit to step by. What the thing actually is goes in the note, in the
+     person's own words. */
+  late final MedForm _form = widget.med?.form ?? MedForm.tab;
   late bool _remind = widget.med?.remind ?? true;
   late List<String> _times = widget.med?.times.map((t) => t.at).toList() ?? [];
 
   @override
   void dispose() {
     _name.dispose();
+    _note.dispose();
     super.dispose();
   }
 
@@ -60,29 +67,11 @@ class _MedsFormState extends State<MedsForm> {
           if (!_times.contains(at)) _times = [..._times, at]..sort();
         });
       },
-      builder: (sheet) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40),
-        child: Row(
-          children: [
-            Expanded(
-              child: CalviWheel(
-                values: List.generate(24, (i) => i),
-                value: h,
-                suffix: '',
-                onPick: (v) => h = v,
-              ),
-            ),
-            Text(':', style: sheet.t.headlineMedium),
-            Expanded(
-              child: CalviWheel(
-                values: List.generate(12, (i) => i * 5),
-                value: m,
-                suffix: '',
-                onPick: (v) => m = v,
-              ),
-            ),
-          ],
-        ),
+      builder: (sheet) => CalviTimeWheel(
+        hour: h,
+        minute: m,
+        onHour: (v) => h = v,
+        onMinute: (v) => m = v,
       ),
     );
   }
@@ -101,6 +90,8 @@ class _MedsFormState extends State<MedsForm> {
           _Label('Назва'),
           Container(
             height: 48,
+            // Centred, or the line sits at the top of a box that is taller than it.
+            alignment: Alignment.centerLeft,
             padding: const EdgeInsets.symmetric(horizontal: 14),
             decoration: BoxDecoration(
               color: c.fillSecondary,
@@ -119,37 +110,6 @@ class _MedsFormState extends State<MedsForm> {
                 hintStyle: context.t.labelSmall?.copyWith(fontSize: 15),
               ),
             ),
-          ),
-
-          /* Picked, never typed. The home card counts doses taken today, and
-             free text cannot be counted: «трохи» does not add up to anything. */
-          _Label('Форма'),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final f in medForms)
-                GestureDetector(
-                  onTap: () => setState(() {
-                    _form = f.id;
-                    _dose = 1;
-                  }),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-                    decoration: BoxDecoration(
-                      color: f.id == _form ? c.button : c.fillSecondary,
-                      borderRadius: BorderRadius.circular(CalviSize.rPill),
-                    ),
-                    child: Text(
-                      f.many,
-                      style: context.t.titleMedium?.copyWith(
-                        fontSize: 14,
-                        color: f.id == _form ? c.buttonText : c.text,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
           ),
 
           _Label('Скільки за раз'),
@@ -270,14 +230,30 @@ class _MedsFormState extends State<MedsForm> {
             ),
           ),
 
-          const SizedBox(height: 12),
-          // Said once, plainly, on the screen where it matters.
-          Text(
-            'Calvi веде журнал прийомів і нагадує в обраний час. Дозування, схеми і зміни в них '
-            'лишаються між тобою і твоїм лікарем.',
-            style: context.t.bodyMedium,
+          _Label('Нотатка'),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: c.fillSecondary,
+              borderRadius: BorderRadius.circular(CalviSize.rCard),
+            ),
+            child: TextField(
+              controller: _note,
+              maxLength: 80,
+              maxLines: 2,
+              minLines: 1,
+              style: context.t.bodyLarge?.copyWith(fontSize: 15),
+              decoration: InputDecoration(
+                isDense: true,
+                counterText: '',
+                border: InputBorder.none,
+                hintText: 'Наприклад, разом зі сніданком',
+                hintStyle: context.t.labelSmall?.copyWith(fontSize: 15),
+              ),
+            ),
           ),
-          const SizedBox(height: 14),
+
+          const SizedBox(height: 20),
 
           CalviButton(
             label: widget.med != null ? 'Зберегти зміни' : 'Зберегти',
@@ -289,6 +265,7 @@ class _MedsFormState extends State<MedsForm> {
                   name: _name.text.trim(),
                   dose: _dose,
                   form: _form,
+                  note: _note.text.trim().isEmpty ? null : _note.text.trim(),
                   remind: _remind,
                   times: [
                     for (final at in _times)

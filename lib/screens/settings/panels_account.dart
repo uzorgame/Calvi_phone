@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../data/settings.dart';
 import '../../design/shell.dart';
-import '../../design/theme.dart';
-import '../../design/tokens.dart';
 
 typedef SetSettings = void Function(SettingsState Function(SettingsState));
 
@@ -14,27 +12,32 @@ typedef SetSettings = void Function(SettingsState Function(SettingsState));
 /// it has to stand in the row as its own decision instead of hiding in the
 /// position of a toggle.
 class ThemePanel extends StatelessWidget {
-  const ThemePanel({super.key, required this.s, required this.set});
+  const ThemePanel({super.key, required this.s, required this.set, this.onBack});
 
   final SettingsState s;
   final SetSettings set;
 
+  /// How the panel closes. It lives inside settings, not on top of it, so the
+  /// way out is settings putting its list back rather than a route popping.
+  final VoidCallback? onBack;
+
   @override
   Widget build(BuildContext context) {
     return CalviScreen(
+      onBack: onBack,
       title: 'Тема',
-      foot: CalviButton(label: 'Готово', onTap: () => Navigator.of(context).pop()),
+      foot: CalviButton(label: 'Готово', onTap: () => (onBack ?? Navigator.of(context).pop)()),
       children: [
         CalviSection(
           title: 'Вигляд',
+          bare: true,
           children: [
-            for (final (i, t) in themeOptions.indexed)
-              CalviChoice(
-                title: t.title,
+            for (final t in themeOptions)
+              CalviPick(
+                label: t.title,
                 hint: t.hint,
                 icon: t.icon,
-                first: i == 0,
-                chosen: s.theme == t.id,
+                on: s.theme == t.id,
                 onTap: () => set((v) => v.copyWith(theme: t.id)),
               ),
           ],
@@ -54,26 +57,31 @@ class ThemePanel extends StatelessWidget {
 /// instead of switching silently and leaving everything in Ukrainian. A promise
 /// the interface does not keep costs more than a missing button.
 class LangPanel extends StatelessWidget {
-  const LangPanel({super.key, required this.s, required this.set});
+  const LangPanel({super.key, required this.s, required this.set, this.onBack});
 
   final SettingsState s;
   final SetSettings set;
 
+  /// How the panel closes. It lives inside settings, not on top of it, so the
+  /// way out is settings putting its list back rather than a route popping.
+  final VoidCallback? onBack;
+
   @override
   Widget build(BuildContext context) {
     return CalviScreen(
+      onBack: onBack,
       title: 'Мова',
-      foot: CalviButton(label: 'Готово', onTap: () => Navigator.of(context).pop()),
+      foot: CalviButton(label: 'Готово', onTap: () => (onBack ?? Navigator.of(context).pop)()),
       children: [
         CalviSection(
           title: 'Мова інтерфейсу',
+          bare: true,
           children: [
-            for (final (i, l) in langOptions.indexed)
-              CalviChoice(
-                title: l.title,
+            for (final l in langOptions)
+              CalviPick(
+                label: l.title,
                 hint: l.hint,
-                first: i == 0,
-                chosen: s.lang == l.id,
+                on: s.lang == l.id,
                 onTap: () => set((v) => v.copyWith(lang: l.id)),
               ),
           ],
@@ -88,7 +96,11 @@ class LangPanel extends StatelessWidget {
 
 /// Subscription. Paid through the stores and nowhere else.
 class PlanPanel extends StatefulWidget {
-  const PlanPanel({super.key});
+  const PlanPanel({super.key, this.onBack});
+
+  /// How the panel closes: settings puts its list back rather than a route
+  /// popping, because the panel lives inside settings.
+  final VoidCallback? onBack;
 
   @override
   State<PlanPanel> createState() => _PlanPanelState();
@@ -100,51 +112,41 @@ class _PlanPanelState extends State<PlanPanel> {
   @override
   Widget build(BuildContext context) {
     return CalviScreen(
+      onBack: widget.onBack,
       title: 'Підписка',
-      foot: Row(
-        children: [
-          Expanded(
-            child: GestureDetector(
-              onTap: () => Navigator.of(context).pop(),
-              behavior: HitTestBehavior.opaque,
-              child: Container(
-                height: 52,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: context.c.fillSecondary,
-                  borderRadius: BorderRadius.circular(CalviSize.rCard),
-                ),
-                child: Text('Не зараз', style: context.t.titleMedium?.copyWith(fontSize: 15)),
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            flex: 2,
-            child: CalviButton(label: 'Оформити', onTap: () => Navigator.of(context).pop()),
-          ),
-        ],
+      foot: CalviButton(
+        label: 'Оформити',
+        onTap: () => (widget.onBack ?? Navigator.of(context).pop)(),
+        second: 'Не зараз',
+        onSecond: () => (widget.onBack ?? Navigator.of(context).pop)(),
       ),
       children: [
-        const CalviSection(title: 'Зараз', children: []),
-        const CalviFacts(
-          rows: [('План', 'Безкоштовний'), ('Токени', '2 на добу')],
-          note: 'Безлімітні токени, історія без обмежень і звіти за будь-який період.',
+        const CalviSection(
+          title: 'Зараз',
+          bare: true,
+          trail: 0,
+          children: [
+            CalviFacts(
+              inset: false,
+              rows: [('План', 'Безкоштовний'), ('Токени', '2 на добу')],
+              note: 'Безлімітні токени, історія без обмежень і звіти за будь-який період.',
+            ),
+          ],
         ),
         CalviSection(
           title: 'План',
+          bare: true,
           children: [
-            CalviChoice(
-              title: 'Рік',
+            CalviPick(
+              label: 'Рік',
               hint: '150 грн на місяць, списується раз на рік',
-              first: true,
-              chosen: _plan == 'year',
+              on: _plan == 'year',
               onTap: () => setState(() => _plan = 'year'),
             ),
-            CalviChoice(
-              title: 'Місяць',
+            CalviPick(
+              label: 'Місяць',
               hint: '180 грн',
-              chosen: _plan == 'month',
+              on: _plan == 'month',
               onTap: () => setState(() => _plan = 'month'),
             ),
           ],
@@ -160,34 +162,48 @@ class _PlanPanelState extends State<PlanPanel> {
 
 /// Privacy.
 class PrivacyPanel extends StatelessWidget {
-  const PrivacyPanel({super.key, required this.s, required this.set});
+  const PrivacyPanel({super.key, required this.s, required this.set, this.onBack});
 
   final SettingsState s;
   final SetSettings set;
 
+  /// How the panel closes. It lives inside settings, not on top of it, so the
+  /// way out is settings putting its list back rather than a route popping.
+  final VoidCallback? onBack;
+
   @override
   Widget build(BuildContext context) {
     return CalviScreen(
+      onBack: onBack,
       title: 'Приватність',
       hint: 'Що саме залишає твій телефон, і що не залишає його ніколи.',
-      foot: CalviButton(label: 'Готово', onTap: () => Navigator.of(context).pop()),
+      foot: CalviButton(label: 'Готово', onTap: () => (onBack ?? Navigator.of(context).pop)()),
       children: [
-        const CalviSection(title: 'Що ми не збираємо', children: []),
-        const CalviFacts(
-          rows: [],
-          note:
-              'Фото страв не зберігаються: знімок іде в обробку і зникає. В аналітику не '
-              'потрапляють ні страви, ні вага, ні алергії, ні препарати. Це особлива категорія '
-              'персональних даних, і віддавати її третій стороні не можна незалежно від '
-              'зручності.',
+        const CalviSection(
+          title: 'Що ми не збираємо',
+          bare: true,
+          trail: 0,
+          children: [
+            CalviFacts(
+              inset: false,
+              rows: [],
+              note: 'Фото страв ',
+              noteBold: 'не зберігаються',
+              noteRest:
+                  ': знімок іде в обробку і зникає. В аналітику не потрапляють ні страви, ні '
+                  'вага, ні алергії, ні препарати. Це особлива категорія персональних даних, і '
+                  'віддавати її третій стороні не можна незалежно від зручності.',
+            ),
+          ],
         ),
         CalviSection(
           title: 'Що можна вимкнути',
           children: [
             CalviRow(
               icon: 'chart',
-              title: 'Знеособлена статистика',
               first: true,
+              title: 'Знеособлена статистика',
+              hint: 'які екрани відкривають, без вмісту записів',
               trailing: CalviSwitch(
                 on: s.analytics,
                 onChanged: (v) => set((x) => x.copyWith(analytics: v)),
@@ -196,16 +212,13 @@ class PrivacyPanel extends StatelessWidget {
             CalviRow(
               icon: 'shield',
               title: 'Звіти про збої',
+              hint: 'стек помилки, без даних щоденника',
               trailing: CalviSwitch(
                 on: s.crash,
                 onChanged: (v) => set((x) => x.copyWith(crash: v)),
               ),
             ),
           ],
-        ),
-        const CalviNote(
-          'Статистика каже, які екрани відкривають, і нічого про вміст записів. '
-          'Звіт про збій це стек помилки, теж без щоденника.',
         ),
       ],
     );
@@ -214,7 +227,11 @@ class PrivacyPanel extends StatelessWidget {
 
 /// Deleting the account.
 class DeletePanel extends StatefulWidget {
-  const DeletePanel({super.key});
+  const DeletePanel({super.key, this.onBack});
+
+  /// How the panel closes: settings puts its list back rather than a route
+  /// popping, because the panel lives inside settings.
+  final VoidCallback? onBack;
 
   @override
   State<DeletePanel> createState() => _DeletePanelState();
@@ -226,45 +243,32 @@ class _DeletePanelState extends State<DeletePanel> {
   @override
   Widget build(BuildContext context) {
     return CalviScreen(
+      onBack: widget.onBack,
       title: 'Видалити акаунт',
       hint:
           'Видаляється все: щоденник, вага, вимірювання, алергії, препарати, історія розмов. '
           'Відновити після цього неможливо.',
-      foot: Row(
-        children: [
-          Expanded(
-            child: GestureDetector(
-              onTap: () => Navigator.of(context).pop(),
-              behavior: HitTestBehavior.opaque,
-              child: Container(
-                height: 52,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: context.c.fillSecondary,
-                  borderRadius: BorderRadius.circular(CalviSize.rCard),
-                ),
-                child: Text('Скасувати', style: context.t.titleMedium?.copyWith(fontSize: 15)),
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            flex: 2,
-            child: CalviButton(
-              label: 'Видалити назавжди',
-              danger: true,
-              enabled: _sure,
-              onTap: () => Navigator.of(context).pop(),
-            ),
-          ),
-        ],
+      foot: CalviButton(
+        label: 'Видалити назавжди',
+        enabled: _sure,
+        danger: true,
+        onTap: () => (widget.onBack ?? Navigator.of(context).pop)(),
+        second: 'Скасувати',
+        onSecond: () => (widget.onBack ?? Navigator.of(context).pop)(),
       ),
       children: [
-        const CalviFacts(
-          rows: [
-            ('Записів у щоденнику', '412'),
-            ('Замірів ваги', '37'),
-            ('Днів із Calvi', '94'),
+        const CalviSection(
+          bare: true,
+          trail: 0,
+          children: [
+            CalviFacts(
+              inset: false,
+              rows: [
+                ('Записів у щоденнику', '412'),
+                ('Замірів ваги', '37'),
+                ('Днів із Calvi', '94'),
+              ],
+            ),
           ],
         ),
         CalviCheck(
@@ -275,6 +279,7 @@ class _DeletePanelState extends State<DeletePanel> {
         const CalviNote(
           'Якщо річ у підписці, її можна скасувати окремо в App Store або Google Play, '
           'не видаляючи акаунт.',
+          lead: 12,
         ),
       ],
     );

@@ -4,7 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:calvi/data/meal.dart';
 import 'package:calvi/data/measure.dart';
 import 'package:calvi/data/workout.dart';
+import 'package:calvi/design/icons.dart';
 import 'package:calvi/design/theme.dart';
+import 'package:calvi/design/tokens.dart';
 import 'package:calvi/screens/today/measure_card.dart';
 import 'package:calvi/screens/today/meal_card.dart';
 import 'package:calvi/screens/today/water_card.dart';
@@ -16,6 +18,9 @@ Widget _wrap(Widget child) => MaterialApp(
 );
 
 void main() {
+  _sendMark();
+  _waterBar();
+
   testWidgets('вода рахує склянки і крокує по 100 мл', (tester) async {
     var ml = 900;
     await tester.pumpWidget(
@@ -111,7 +116,9 @@ void main() {
     expect(find.text('Біцепс'), findsNothing, reason: 'нестежене поле не має стояти в картці');
     // Prefilled from the last session, not empty.
     expect(find.text('78.6'), findsOneWidget);
-    expect(find.text('Нічого не змінилось'), findsOneWidget);
+    /* Nothing to save is nothing to press: the card offers the button only
+       once a figure has actually been changed. */
+    expect(find.text('Зберегти заміри'), findsNothing);
   });
   testWidgets('рядок страви несе грами, БЖВ і час', (tester) async {
     await tester.pumpWidget(
@@ -121,7 +128,7 @@ void main() {
           meals: const [
             Meal(
               id: 'x',
-              category: FoodCategory.egg,
+              icon: 'egg',
               title: 'Яєчня',
               time: '08:20',
               slotId: 'breakfast',
@@ -155,7 +162,7 @@ void main() {
           meals: const [
             Meal(
               id: 'y',
-              category: FoodCategory.soup,
+              icon: 'soup',
               title: 'Борщ',
               time: '13:05',
               slotId: 'lunch',
@@ -172,5 +179,82 @@ void main() {
 
     expect(find.text('Нора рахує…'), findsOneWidget);
     expect(find.text('—'), findsOneWidget, reason: 'нуль калорій був би вигадкою');
+  });
+}
+
+/// The send mark in an opened card.
+///
+/// It used to fade with the button: a grey plus on the grey disabled ground,
+/// which is a button you have to hunt for. The demo dims the ground and leaves
+/// the mark in the button's own ink.
+void _sendMark() {
+  testWidgets('плюс у картці читається і поки нічого не написано', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: calviLightTheme,
+        home: Scaffold(
+          body: ListView(
+            children: [
+              MealCard(
+                slot: baseSlots['breakfast']!,
+                meals: const [],
+                open: true,
+                onToggle: () {},
+                onAdd: (_) {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final mark = tester.widget<CalviIcon>(
+      find.descendant(of: find.bySemanticsLabel('Записати'), matching: find.byType(CalviIcon)),
+    );
+    expect(mark.color, calviLight.buttonText, reason: 'знак злився з тлом кнопки');
+  });
+}
+
+/// The water bar: a full-width track with the fill growing from its left edge.
+///
+/// The stack sized itself by the fill, so at forty per cent the whole bar came
+/// out forty per cent wide and sat centred in the card, with no track to either
+/// side of it.
+void _waterBar() {
+  testWidgets('смуга води на всю ширину, заповнення зліва', (tester) async {
+    tester.view.physicalSize = const Size(390, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: calviLightTheme,
+        home: Scaffold(
+          body: ListView(
+            children: [
+              WaterCard(ml: 900, goalMl: 2200, open: true, onToggle: () {}, onChange: (_) {}),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final track = tester.getRect(find.byType(ClipRRect).first);
+    final fill = tester.getRect(
+      find.descendant(
+        of: find.byType(ClipRRect).first,
+        matching: find.byType(AnimatedContainer),
+      ),
+    );
+
+    expect(track.width, greaterThan(200), reason: 'доріжка стиснулась до заповнення');
+    expect(fill.left, closeTo(track.left, 0.5), reason: 'заповнення не від лівого краю');
+    expect(
+      fill.width / track.width,
+      closeTo(900 / 2200, 0.02),
+      reason: 'заповнення не відповідає випитому',
+    );
   });
 }
