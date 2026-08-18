@@ -364,14 +364,41 @@ class _Kcal extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(thousands(left.abs()), style: context.t.displayLarge?.copyWith(height: 1)),
+          /* Великим числом стоїть зʼїдене, а не залишок.
+           *
+           * Людина відкриває застосунок, щоб побачити, скільки вона вже зʼїла, і
+           * саме це число шукає очима першим. Залишок це висновок із нього, і
+           * він доречний рядком нижче. До того ж залишок буває відʼємним, і
+           * найбільша цифра на екрані переставала означати те, що означала
+           * вранці. */
+          Text.rich(
+            TextSpan(
+              text: thousands(eaten),
+              children: [
+                TextSpan(text: ' ккал', style: context.t.bodyMedium?.copyWith(fontSize: 17)),
+              ],
+            ),
+            style: context.t.displayLarge?.copyWith(height: 1),
+          ),
           const SizedBox(height: 6),
           Text.rich(
             TextSpan(
               children: [
-                TextSpan(
-                  text: '${left >= 0 ? 'лишилось' : 'перебір'} з ${thousands(goal.kcal)} ккал',
-                ),
+                if (left >= 0) ...[
+                  const TextSpan(text: 'лишилось '),
+                  TextSpan(
+                    text: thousands(left),
+                    style: TextStyle(color: c.text, fontWeight: FontWeight.w600),
+                  ),
+                  TextSpan(text: ' з ${thousands(goal.kcal + burned)}'),
+                ] else ...[
+                  const TextSpan(text: 'перебір на '),
+                  TextSpan(
+                    text: thousands(left.abs()),
+                    style: TextStyle(color: c.protein, fontWeight: FontWeight.w600),
+                  ),
+                  TextSpan(text: ' від ${thousands(goal.kcal + burned)}'),
+                ],
                 if (burned > 0)
                   TextSpan(
                     text: ' +$burned спалено',
