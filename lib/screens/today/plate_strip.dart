@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../data/chat.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Кільце, поки Нора думає.
 ///
@@ -54,7 +55,10 @@ class _ThinkingState extends State<Thinking> with SingleTickerProviderStateMixin
           ),
         ),
         const SizedBox(width: 10),
-        Text('думаю', style: context.t.labelSmall?.copyWith(fontSize: CalviSize.fsMicro)),
+        Text(
+          L.of(context).plateThinking,
+          style: context.t.labelSmall?.copyWith(fontSize: CalviSize.fsMicro),
+        ),
       ],
     );
   }
@@ -73,6 +77,7 @@ class PlateStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.c;
+    final l = L.of(context);
 
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
@@ -100,11 +105,14 @@ class PlateStrip extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 6),
-              Text('ккал', style: context.t.labelSmall?.copyWith(fontSize: CalviSize.fsMicro)),
+              Text(
+                L.of(context).plateKcal,
+                style: context.t.labelSmall?.copyWith(fontSize: CalviSize.fsMicro),
+              ),
               const Spacer(),
               if (plate.grams != null)
                 Text(
-                  'за ${plate.grams!.round()} г',
+                  L.of(context).plateFor(plate.grams!.round()),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: context.t.labelSmall?.copyWith(fontSize: CalviSize.fsMicro),
@@ -118,7 +126,14 @@ class PlateStrip extends StatelessWidget {
              дає вміст, робить із них сходинки. */
           Row(
             children: [
-              for (final (i, cell) in const [('Б', 0), ('Ж', 1), ('В', 2)].indexed)
+              /* Кожній клітинці її колір, той самий, що в кілець дня: білок
+                 червонуватий, жири сині, вуглеводи жовті. Око вже вивчило цю
+                 мову на головному екрані, і чат говорить нею ж. */
+              for (final (i, cell) in [
+                (l.macroProteinLetter, 0, c.protein),
+                (l.macroFatLetter, 1, c.fats),
+                (l.macroCarbsLetter, 2, c.carbs),
+              ].indexed)
                 Expanded(
                   child: Padding(
                     padding: EdgeInsets.only(right: i == 2 ? 0 : 6),
@@ -126,7 +141,7 @@ class PlateStrip extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 6),
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: c.fillSecondary,
+                        color: cell.$3.withValues(alpha: 0.14),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       /* Число буває тризначним, а клітинка вужча за третину
@@ -138,15 +153,28 @@ class PlateStrip extends StatelessWidget {
                         child: Text.rich(
                           TextSpan(
                             text: '${cell.$1} ',
-                            style: context.t.labelSmall?.copyWith(fontSize: CalviSize.fsMicro),
+                            style: context.t.labelSmall?.copyWith(
+                              fontSize: CalviSize.fsMicro,
+                              color: cell.$3,
+                              fontWeight: FontWeight.w600,
+                            ),
                             children: [
+                              /* Число теж у колір клітинки, як на картці
+                                 сканера: два різні записи однієї речі поруч
+                                 виглядали б як два різні інтерфейси. */
                               TextSpan(
                                 text: '${_grams(cell.$2)}',
-                                style: context.t.titleMedium?.copyWith(fontSize: CalviSize.fsMicro),
+                                style: context.t.titleMedium?.copyWith(
+                                  fontSize: CalviSize.fsMicro,
+                                  color: cell.$3,
+                                ),
                               ),
                               TextSpan(
-                                text: ' г',
-                                style: context.t.labelSmall?.copyWith(fontSize: CalviSize.fsMicro),
+                                text: L.of(context).plateGrams,
+                                style: context.t.labelSmall?.copyWith(
+                                  fontSize: CalviSize.fsMicro,
+                                  color: cell.$3,
+                                ),
                               ),
                             ],
                           ),

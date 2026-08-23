@@ -131,9 +131,7 @@ class _CalviRulerState extends State<CalviRuler> {
               animation: _c,
               builder: (context, _) => Text.rich(
                 TextSpan(
-                  text: widget.step < 1
-                      ? _shown().toStringAsFixed(1)
-                      : _shown().toStringAsFixed(0),
+                  text: widget.step < 1 ? _shown().toStringAsFixed(1) : _shown().toStringAsFixed(0),
                   children: [
                     TextSpan(
                       text: ' ${widget.suffix}',
@@ -371,15 +369,14 @@ class _DetentPhysics extends ScrollPhysics {
        is chosen once, at the start of the journey, and held until it is reached. */
     final held = aim.at;
     final going = held != null && (held - position.pixels).sign == velocity.sign;
-    final target =
-        going && velocity.abs() > tolerance.velocity
+    final target = going && velocity.abs() > tolerance.velocity
         ? held
-        : (_landing(proposed, position.pixels).clamp(
-                    position.minScrollExtent,
-                    position.maxScrollExtent,
-                  ) /
-                  gap)
-              .round() *
+        : (_landing(
+                        proposed,
+                        position.pixels,
+                      ).clamp(position.minScrollExtent, position.maxScrollExtent) /
+                      gap)
+                  .round() *
               gap;
 
     if ((target - position.pixels).abs() < tolerance.distance) {
@@ -387,13 +384,7 @@ class _DetentPhysics extends ScrollPhysics {
       return proposed;
     }
     aim.at = target;
-    return ScrollSpringSimulation(
-      spring,
-      position.pixels,
-      target,
-      velocity,
-      tolerance: tolerance,
-    );
+    return ScrollSpringSimulation(spring, position.pixels, target, velocity, tolerance: tolerance);
   }
 }
 

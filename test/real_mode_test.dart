@@ -7,6 +7,7 @@ import 'package:calvi/data/local/database.dart';
 import 'package:calvi/data/settings.dart';
 import 'package:calvi/design/theme.dart';
 import 'package:calvi/screens/today/today_screen.dart';
+import 'package:calvi/l10n/app_localizations.dart';
 
 /// The switch on the day screen, and what it actually switches.
 ///
@@ -46,6 +47,9 @@ void main() {
           real: real,
           setReal: (v) => setState(() => real = v),
           child: MaterialApp(
+            localizationsDelegates: L.localizationsDelegates,
+            supportedLocales: L.supportedLocales,
+            locale: const Locale('uk'),
             theme: calviLightTheme,
             scrollBehavior: const CalviScroll(),
             home: TodayScreen(onSettings: () {}, onMeds: () {}),

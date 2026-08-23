@@ -90,7 +90,9 @@ void main() {
   });
 
   test('усе записане стає в чергу на сервер', () async {
-    await store.save(emptySettings().copyWith(allergies: const [Allergy(id: 'milk', severe: false)]));
+    await store.save(
+      emptySettings().copyWith(allergies: const [Allergy(id: 'milk', severe: false)]),
+    );
 
     final profile = await db.select(db.profile).getSingle();
     final weight = await db.select(db.weights).getSingle();
@@ -102,7 +104,9 @@ void main() {
   });
 
   test('знятий алерген видаляється мʼяко, а не зникає', () async {
-    await store.save(emptySettings().copyWith(allergies: const [Allergy(id: 'milk', severe: false)]));
+    await store.save(
+      emptySettings().copyWith(allergies: const [Allergy(id: 'milk', severe: false)]),
+    );
     await store.save(emptySettings().copyWith(allergies: const []));
 
     final rows = await db.select(db.allergies).get();

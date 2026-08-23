@@ -1,0 +1,62 @@
+{
+  "startGoalLose": "Схуднути",
+  "startGoalLoseHint": "дефіцит під обраний темп",
+  "startGoalKeep": "Тримати вагу",
+  "startGoalKeepHint": "скільки витрачаєш, стільки й повертаєш",
+  "startGoalGain": "Набрати",
+  "startGoalGainHint": "профіцит під обраний темп",
+
+  "startAbout": "Про тебе",
+  "startSex": "Стать",
+  "startSexMale": "Чоловіча",
+  "startSexFemale": "Жіноча",
+  "startSexOther": "Інше",
+  "startAge": "Вік",
+  "startAgeYears": "{count, plural, one{{count} рік} few{{count} роки} many{{count} років} other{{count} року}}",
+  "startYearsShort": "років",
+  "startHeight": "Зріст",
+
+  "startWeightNow": "Вага зараз",
+
+  "startGoal": "Куди рухаємось",
+  "startTargetWeight": "Цільова вага",
+
+  "startPace": "Як швидко",
+  "startPaceUnit": "кг на тиждень",
+  "startPaceSlow": "повільно",
+  "startPaceUsual": "звично",
+  "startPaceFast": "швидко",
+  "startPaceEtaHead": "Ціль приблизно ",
+  "startPaceEtaTail": ", це ",
+  "startPaceWeeks": "{count, plural, one{{count} тиждень} few{{count} тижні} many{{count} тижнів} other{{count} тижня}}",
+  "startPaceWarning": "Такий темп тримається важко і зазвичай зривається. Нижче за 0.8 кг на тиждень результат виходить повільніший, але лишається.",
+
+  "startLife": "Спосіб життя",
+  "startAllergies": "Алергії",
+
+  "startNorm": "Твоя норма",
+  "startNormPerDay": "ккал на день",
+  "startNormWeeks": "тижнів",
+  "startNormHold": "тримаємо",
+  "startNormNora": "Порахувала. Далі простіше.",
+  "startNormNoraHint": "Пиши або кажи як зручно: «два яйця і тост», «випив 300 води». Решту, що знадобиться, спитаю в розмові.",
+  "startNormNote": "Це розрахунок за формулою Міффліна-Сан Жеора, а не медична рекомендація. Якщо є захворювання, вагітність або призначена дієта, звіряйся з лікарем.",
+
+  "startHelloText": "Тут нічого не треба вести. Скажи Норі «два яйця і тост», і день порахований: ні пошуку в довідниках, ні грамів, ні таблиць. Далі вона сама.",
+  "startHelloAction": "Почати",
+
+  "startDeviceFirstRun": "перший запуск",
+  "startSignInFailed": "Не вдалось увійти. Спробуй ще раз або продовж без входу.",
+  "startSignInFailedWhy": "Не вдалось увійти. {why}",
+  "startSignInTitle": "Збережімо це",
+  "startSignInText": "Норма порахована. Увійди, щоб вона лишилась при собі: історія, заміри й записи будуть на всіх пристроях, а не тільки тут.",
+  "startSignInBusy": "Заходимо…",
+  "startSignInGoogle": "Продовжити з Google",
+  "startSignInApple": "Продовжити з Apple",
+  "startSignInSkip": "Поки без входу",
+
+  "startAgreeHead": "Погоджуюсь з ",
+  "startAgreeTerms": "умовами користування",
+  "startAgreeAnd": " і ",
+  "startAgreePrivacy": "політикою приватності"
+}

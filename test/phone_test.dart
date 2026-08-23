@@ -8,6 +8,7 @@ import 'package:calvi/design/shell.dart';
 import 'package:calvi/design/theme.dart';
 import 'package:calvi/screens/today/bottom_bar.dart';
 import 'package:calvi/screens/today/hero_card.dart';
+import 'package:calvi/l10n/app_localizations.dart';
 
 Widget _wrap(Widget child) => AppScope(
   s: initialSettings(),
@@ -15,6 +16,9 @@ Widget _wrap(Widget child) => AppScope(
   meds: const [],
   setMeds: (_) {},
   child: MaterialApp(
+    localizationsDelegates: L.localizationsDelegates,
+    supportedLocales: L.supportedLocales,
+    locale: const Locale('uk'),
     theme: calviLightTheme,
     scrollBehavior: const CalviScroll(),
     home: Scaffold(body: child),
@@ -74,7 +78,8 @@ void main() {
             onClose: () {},
             onSend: (_) {},
             onCamera: () {},
-            onVoice: () {},
+            onHold: (_, _) {},
+            onLetGo: () {},
           ),
         ),
       ),

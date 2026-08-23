@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:calvi/data/day.dart';
 import 'package:calvi/design/theme.dart';
 import 'package:calvi/screens/today/week_strip.dart';
+import 'package:calvi/l10n/app_localizations.dart';
 
 void main() {
   test('стрічка закінчується неділею поточного тижня, не пізніше', () {
@@ -30,6 +31,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: L.localizationsDelegates,
+        supportedLocales: L.supportedLocales,
+        locale: const Locale('uk'),
         theme: calviLightTheme,
         home: Scaffold(
           body: WeekStrip(date: todayDate, onPick: (_) {}),
@@ -70,6 +74,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: L.localizationsDelegates,
+        supportedLocales: L.supportedLocales,
+        locale: const Locale('uk'),
         theme: calviLightTheme,
         home: Scaffold(
           body: WeekStrip(date: todayDate, onPick: (_) {}),
@@ -97,9 +104,7 @@ void main() {
     expect(visible.contains(todayDate), true, reason: 'після зміни ширини видно $visible');
   });
 
-  testWidgets('стрічка приземляється, навіть якщо перший кадр був іншої ширини', (
-    tester,
-  ) async {
+  testWidgets('стрічка приземляється, навіть якщо перший кадр був іншої ширини', (tester) async {
     /* What the web does on start: one frame at whatever size the canvas was
        created with, then the real one. The strip used to take its single jump
        on that throwaway layout and spend the rest of the session parked months
@@ -110,6 +115,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: L.localizationsDelegates,
+        supportedLocales: L.supportedLocales,
+        locale: const Locale('uk'),
         theme: calviLightTheme,
         home: Scaffold(
           body: WeekStrip(date: todayDate, onPick: (_) {}),

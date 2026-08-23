@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 
 import '../local/database.dart';
@@ -75,7 +77,7 @@ MealsCompanion mealFromChange(Map<String, dynamic> c) {
     deletedAt: Value(_time(c['deleted_at'])),
     seq: Value(c['seq'] as int),
     dirty: const Value(false),
-    day: Value(d['day'] as String),
+    day: Value(_day(d['day'])),
     at: Value(_time(d['at'])!),
     tzOffsetMin: Value((d['tz_offset_min'] as num?)?.toInt() ?? 0),
     slot: Value(d['slot'] as String),
@@ -100,7 +102,7 @@ WaterLogsCompanion waterFromChange(Map<String, dynamic> c) {
     deletedAt: Value(_time(c['deleted_at'])),
     seq: Value(c['seq'] as int),
     dirty: const Value(false),
-    day: Value(d['day'] as String),
+    day: Value(_day(d['day'])),
     at: Value(_time(d['at'])!),
     ml: Value((d['ml'] as num).toInt()),
   );
@@ -114,7 +116,7 @@ WeightsCompanion weightFromChange(Map<String, dynamic> c) {
     deletedAt: Value(_time(c['deleted_at'])),
     seq: Value(c['seq'] as int),
     dirty: const Value(false),
-    day: Value(d['day'] as String),
+    day: Value(_day(d['day'])),
     at: Value(_time(d['at'])!),
     kg: Value((d['kg'] as num).toDouble()),
   );
@@ -122,8 +124,19 @@ WeightsCompanion weightFromChange(Map<String, dynamic> c) {
 
 /// Times come back as UTC text and are stored as local, because that is what
 /// every screen reads them as.
-DateTime? _time(Object? value) =>
-    value is String ? DateTime.parse(value).toLocal() : null;
+DateTime? _time(Object? value) => value is String ? DateTime.parse(value).toLocal() : null;
+
+/// Календарний день, як його зберігає телефон: рівно десять символів.
+///
+/// Сервер уже віддає його рядком, але цей рівень лишається назавжди. Одного дня
+/// звідти приїхало `2026-08-18T00:00:00.000Z`, і кожен запис Нори ліг у базу
+/// під ключем, якого жоден екран не питає: людина бачила порожній сніданок
+/// після того, як їй сказали «записала». Дешевше обрізати тут, ніж шукати це
+/// вдруге.
+String _day(Object? value) {
+  final s = value?.toString() ?? '';
+  return s.length >= 10 ? s.substring(0, 10) : s;
+}
 
 /* --- Решта щоденника ---
  *
@@ -137,12 +150,7 @@ Map<String, dynamic> measureToChange(Measurement r) => envelope(
   id: r.id,
   updatedAt: r.updatedAt,
   deletedAt: r.deletedAt,
-  data: {
-    'day': r.day,
-    'at': r.at.toUtc().toIso8601String(),
-    'part': r.part,
-    'cm': r.cm,
-  },
+  data: {'day': r.day, 'at': r.at.toUtc().toIso8601String(), 'part': r.part, 'cm': r.cm},
 );
 
 Map<String, dynamic> workoutToChange(WorkoutRow r) => envelope(
@@ -170,6 +178,17 @@ Map<String, dynamic> medToChange(Medication r) => envelope(
     'note': r.note,
     'times': splitTimes(r.times),
     'remind': r.remind,
+    /* Розклад рядком, як він і лежить у базі: сервер його не тлумачить, а
+       возить. Розбирати JSON у двох місцях означало б два місця, де він може
+       розійтись. */
+    'schedule': r.schedule,
+    /* Форма власним полем, а не всередині примітки: інакше текст людини
+       затирався маркером «form=tab». */
+    'form': r.form,
+    /* Межі курсу. Без них препарат, заведений сьогодні, зʼявлявся в кожному
+       минулому дні, а закінчений курс стирав власну історію. */
+    'start_day': r.startDay,
+    'end_day': r.endDay,
   },
 );
 
@@ -202,7 +221,7 @@ MeasurementsCompanion measureFromChange(Map<String, dynamic> c) {
     deletedAt: Value(_time(c['deleted_at'])),
     seq: Value(c['seq'] as int),
     dirty: const Value(false),
-    day: Value(d['day'] as String),
+    day: Value(_day(d['day'])),
     at: Value(_time(d['at'])!),
     part: Value(d['part'] as String),
     cm: Value((d['cm'] as num).toDouble()),
@@ -217,7 +236,7 @@ WorkoutsCompanion workoutFromChange(Map<String, dynamic> c) {
     deletedAt: Value(_time(c['deleted_at'])),
     seq: Value(c['seq'] as int),
     dirty: const Value(false),
-    day: Value(d['day'] as String),
+    day: Value(_day(d['day'])),
     at: Value(_time(d['at'])!),
     kind: Value(d['kind'] as String),
     minutes: Value((d['minutes'] as num).toInt()),
@@ -237,6 +256,10 @@ MedicationsCompanion medFromChange(Map<String, dynamic> c) {
     amount: Value(d['amount'] as String?),
     note: Value(d['note'] as String?),
     times: Value(joinTimes(d['times'])),
+    schedule: Value(d['schedule'] as String? ?? ''),
+    form: Value(d['form'] as String? ?? 'tab'),
+    startDay: Value(_day(d['start_day'])),
+    endDay: Value(d['end_day'] == null ? null : _day(d['end_day'])),
     remind: Value(d['remind'] as bool? ?? true),
   );
 }
@@ -250,7 +273,7 @@ MedicationTakesCompanion takeFromChange(Map<String, dynamic> c) {
     seq: Value(c['seq'] as int),
     dirty: const Value(false),
     medicationId: Value(d['medication_id'] as String),
-    day: Value(d['day'] as String),
+    day: Value(_day(d['day'])),
     at: Value(_time(d['at'])!),
     plannedTime: Value(d['planned_time'] as String?),
   );
@@ -302,6 +325,13 @@ Map<String, dynamic> profileToWire(ProfileData r) => {
   'carbs_g': r.carbsG,
   'water_ml': r.waterMl,
   'theme': r.theme,
+  'address_as': r.addressAs,
+  // Які поля вимірювань людина веде: інакше на другому телефоні картка показує
+  // не те, що на першому.
+  'tracked': r.tracked,
+  // Памʼять їде списком обʼєктів, а не рядком: на дроті вона така сама, як у
+  // базі сервера, і зайвого розбору по дорозі не потрібно.
+  'memory': jsonDecode(r.memory),
 };
 
 /// Профіль із сервера, готовий лягти на диск.
@@ -327,6 +357,9 @@ ProfileCompanion profileFromWire(Map<String, dynamic> p, {required String id}) =
   carbsG: Value(p['carbs_g'] as int?),
   waterMl: Value(p['water_ml'] as int),
   theme: Value(p['theme'] as String),
+  addressAs: Value(p['address_as'] as String?),
+  tracked: Value(p['tracked'] as String? ?? ''),
+  memory: Value(jsonEncode(p['memory'] ?? const [])),
 );
 
 /// Числа з JSON приходять то цілими, то дробовими: 74 і 74.0 це той самий вага.

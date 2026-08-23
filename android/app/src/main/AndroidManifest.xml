@@ -5,6 +5,23 @@
     <!-- Диктування: голос розпізнається на самому телефоні і нікуди не їде. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
+
+    <!-- Нагадування. Дозвіл на показ питається на першому нагадуванні, а не при
+         встановленні: питати наперед означає питати до того, як людина зрозуміла,
+         навіщо це їй. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Точний час. Нагадування о восьмій, яке приходить о девʼятій, гірше за
+         відсутнє: людина вирішить, що вже пила таблетку.
+
+         Тільки SCHEDULE_EXACT_ALARM, який питається в людини. Поруч стояв ще
+         USE_EXACT_ALARM, який дається сам, і саме тому магазин пускає його лише
+         будильникам, таймерам і календарям. Calvi це щоденник харчування, і на
+         таке пояснення довелось би або збрехати, або отримати відмову. Дозвіл,
+         який питається, коштує людині одного тапу і не коштує нам застосунку. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <!-- Після перезавантаження телефона розклад треба відновити: інакше він
+         мовчки зникає, і людина дізнається про це через пропущений прийом. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <application
         android:label="Calvi"
         android:name="${applicationName}"
@@ -38,6 +55,22 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+        <!-- Приймачі плагіна сповіщень: показ у призначений час і відновлення
+             розкладу після перезавантаження. -->
+        <receiver
+            android:exported="false"
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
+        <receiver
+            android:exported="false"
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

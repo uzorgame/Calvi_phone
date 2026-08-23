@@ -6,6 +6,7 @@ import 'package:calvi/data/settings.dart';
 import 'package:calvi/design/theme.dart';
 import 'package:calvi/design/wheel.dart';
 import 'package:calvi/screens/settings/panels_body.dart';
+import 'package:calvi/l10n/app_localizations.dart';
 
 /// Dragging a macro slider moves the macro, not the page.
 ///
@@ -27,6 +28,9 @@ void main() {
           meds: const [],
           setMeds: (_) {},
           child: MaterialApp(
+            localizationsDelegates: L.localizationsDelegates,
+            supportedLocales: L.supportedLocales,
+            locale: const Locale('uk'),
             theme: calviLightTheme,
             scrollBehavior: const CalviScroll(),
             home: NormPanel(s: s, set: (patch) => setState(() => s = patch(s))),

@@ -3,38 +3,131 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../design/icons.dart';
 import '../../design/theme.dart';
-import 'dictation.dart';
 import 'level_source.dart';
 
-/// How many bars the meter draws. Enough to read as sound, few enough to stay
-/// calm.
-const _bars = 32;
+/// Звідки збирається рідина і куди вона повертається.
+class VoiceOrigin {
+  const VoiceOrigin({required this.at, required this.size});
 
-/* Що показує демо, коли справжнього розпізнавання немає: на комп'ютері, у тесті
-   і на телефоні без нього. Рядок навмисно один і той самий, щоб його ні з чим не
-   сплутати. */
-const _said = 'два яйця, тост і кава без цукру';
-const _wordTime = Duration(milliseconds: 520);
+  /// Центр кнопки мікрофона, у координатах екрана.
+  final Offset at;
 
-/// Dictation, over the whole screen.
+  /// Її справжній діаметр: у нього збільшена кнопка повертається наприкінці.
+  final double size;
+}
+
+/* Скільки смуг малює метр, і скільки крапель летить: це одне число.
+ *
+ * Одинадцять товстих, а не тридцять дві тонких. Тонкі під фільтром просто
+ * зникають: розмиття розмазує їх нижче порога прозорості. Товщі смуги при
+ * ширшому полі лишають між собою проміжок, удвічі більший за розмиття, тому
+ * вони тягнуться одна до одної перетяжками, але не склеюються в суцільну масу. */
+const _bars = 11;
+
+/// Скільки крапель збирається довкола кнопки, перш ніж маса рушить.
+const _beads = 7;
+
+/// Ширина смуги і поле, у якому вона росте.
+const _barW = 16.0;
+const _barH = 140.0;
+
+/// Ширина метра і його місце по висоті екрана.
+const _meterW = 320.0;
+const _meterAt = 0.47;
+
+/// Діаметр збільшеної кнопки і крапель довкола неї.
+const _micD = 74.0;
+const _beadD = 18.0;
+
+/* Висота смуги в спокої, часткою від її поля. Робить із неї коло: рівно таку
+   краплю смуга і має, поки летить, і з неї ж вона росте. */
+const _seed = _barW / _barH;
+
+/// Коли рушає найперша крапля і наскільки пізніше за неї найкрайніша.
+const _flyAt = 70.0;
+const _flySpread = 130.0;
+const _flyMs = 620.0;
+
+/// Скільки збираються краплі довкола кнопки і скільки набрякає сама кнопка.
+const _gatherMs = 520.0;
+
+/// Наскільки раніше за посадку смуга починає рости, і скільки вона росте.
+const _riseLead = 90.0;
+const _riseMs = 280.0;
+
+/// За скільки метр складається назад, коли палець прибрали.
+const _foldMs = 200.0;
+
+/// Коли і за скільки збільшена кнопка сідає у свій звичайний розмір.
+const _homeAt = 400.0;
+const _homeMs = 240.0;
+
+/// Скільки триває зворотний шлях. Стільки, щоб кнопка встигла сісти.
+const backMs = 660;
+
+/// Розмиття і поріг, які роблять із крапель воду.
+const _goo = 5.5;
+const _sharpen = 17.0;
+const _cut = 6.5;
+
+/// Мʼякий початок і кінець: рідина не рушає і не спиняється ривком.
+double _ease(double v) => v * v * (3 - 2 * v);
+
+double _clamp(double v) => v < 0 ? 0 : (v > 1 ? 1 : v);
+
+/// Наскільки смуга далеко від середини, від нуля до одиниці.
+double _offMid(int i) => (i - (_bars - 1) / 2).abs() / ((_bars - 1) / 2);
+
+/// Коли рушає крапля цієї смуги. Середні летять першими, крайні наздоганяють.
 ///
-/// The screen behind blurs rather than disappears, because dictation is a layer
-/// over the day and not a different place. In the middle a meter that answers to
-/// the room, and under it the words as they land, so the person can see they
-/// were heard before they stop talking.
+/// Дрібний доважок за парністю розводить сусідів, симетричних відносно
+/// середини: без нього вони рушали б хвилина в хвилину і йшли б однією точкою,
+/// тобто цівка була б удвічі коротшою, ніж могла б.
+double _flyOf(int i) => _flyAt + _offMid(i) * _flySpread + (i.isOdd ? 18 : 0);
+
+/// Крива польоту, та сама, що в демці.
+const _flyCurve = Cubic(0.46, 0, 0.28, 1);
+const _homeCurve = Cubic(0.42, 0, 0.4, 1);
+
+/// Диктування, поки палець на кнопці.
+///
+/// Тримаєш і говориш, відпустив і сказане пішло. Тексту тут немає навмисне:
+/// показувати слова, поки їх ніхто не розбирає, означало б показувати вигадку,
+/// а розбір починається рівно тоді, коли палець прибрали.
+///
+/// **Рідина склеюється фільтром, а не намальована.** Кульки, що летять поруч,
+/// лишаються кульками, скільки їх не додавай. Тут вони проходять крізь розмиття
+/// і різкий поріг по прозорості, і те, що близько, зливається в одну масу з
+/// перетяжкою між краплями, а те, що відірвалось, знову стає краплею. Це та сама
+/// механіка, якою малюють ртуть.
+///
+/// **Метр і є ця рідина.** Не окрема анімація, яка починається після неї: кожна
+/// смуга сама вилітає з кнопки краплею, летить своєю дорогою, сідає на своє
+/// місце і звідти живе голосом. Передавати нема чого і нема кому, тому й мить
+/// передачі не видно.
 class VoiceOverlay extends StatefulWidget {
-  const VoiceOverlay({super.key, required this.onDone, this.source});
+  const VoiceOverlay({
+    super.key,
+    required this.origin,
+    required this.leaving,
+    required this.onClosed,
+    required this.source,
+  });
 
-  /// Called with what was dictated, or with an empty string if nothing came.
-  final ValueChanged<String> onDone;
+  /// Звідки збирається рідина і куди вона повертається.
+  final VoiceOrigin origin;
 
-  /* Джерело рівня. Порожньо означає «слухати телефон по-справжньому»; тест і
-     демонстрація підставляють сюди своє і отримують той самий екран. */
-  final LevelSource? source;
+  /// Палець уже відпущено: рідина пливе назад, і після неї накладка гасне.
+  final bool leaving;
+
+  /// Зворотний шлях доїхав. Тільки після цього накладку можна знімати.
+  final VoidCallback onClosed;
+
+  /// Звідки метр бере гучність.
+  final LevelSource source;
 
   @override
   State<VoiceOverlay> createState() => _VoiceOverlayState();
@@ -46,274 +139,334 @@ class _VoiceOverlayState extends State<VoiceOverlay> with SingleTickerProviderSt
     duration: const Duration(days: 1),
   )..forward();
 
-  /* Each bar keeps its own falling ceiling, so the meter settles instead of
-     flickering: sound rises instantly and decays over a few frames. */
-  final _peak = List<double>.filled(_bars, 0);
+  /* Кожна смуга тримає власну спадаючу стелю: звук підіймає її миттєво, а
+     осідає вона за кілька кадрів. Інакше метр мерехтить. */
+  final _peak = List<double>.filled(_bars, _seed);
 
-  Duration _elapsed = Duration.zero;
-  String _heard = '';
-  Timer? _type;
+  Duration _age = Duration.zero;
 
-  /// Справжнє диктування, коли джерело не підставили ззовні.
-  Dictation? _live;
+  /// Коли палець прибрали. Нуль означає «ще тримають».
+  double _away = 0;
 
-  /// Чому мовчимо, якщо мовчимо. Показується замість почутого.
-  String? _trouble;
-
-  /* Створюється тут, а не лінивим полем.
+  /* Таймер знімається разом із накладкою.
    *
-   * Лінива ініціалізація виглядала охайно і мовчки ламала все: поле обчислюється
-   * при першому зверненні, а перевірка нижче зверталась не до нього, а до
-   * `_live`, який на той момент ще був порожній. Диктування не вмикалось ніколи,
-   * і замість голосу програвалась показова фраза. */
-  late final LevelSource _source;
+   * Відкладений виклик без нього переживає віджет: після зникнення екрана він
+   * усе одно спрацьовує, і хай навіть його ловить перевірка на `mounted`, це
+   * лишається таймером, який ніхто не зупиняв. */
+  Timer? _closing;
 
   @override
   void initState() {
     super.initState();
-    _clock.addListener(_frame);
-
-    final live = widget.source == null ? Dictation() : null;
-    _live = live;
-    _source = widget.source ?? live!;
-
-    if (live == null) {
-      _fake();
-      return;
-    }
-
-    unawaited(
-      live
-          .start(onWords: (words) {
-            if (mounted) setState(() => _heard = words);
-          })
-          .then((ok) {
-            if (!mounted) return;
-            // Не вийшло слухати, і про це треба сказати, а не вдавати диктування.
-            if (!ok) setState(() => _trouble = live.failure);
-          }),
-    );
-  }
-
-  /* Показова розшифровка для екрана без мікрофона: комп'ютер, тест, телефон без
-     розпізнавання. Слова лягають по одному, бо все разом означало б, що фразу
-     знали наперед, а це саме те, чим диктування не є. */
-  void _fake() {
-    final words = _said.split(' ');
-    var n = 0;
-    _type = Timer.periodic(_wordTime, (t) {
-      if (n >= words.length) return t.cancel();
-      setState(() => _heard = words.take(++n).join(' '));
+    _clock.addListener(() {
+      final now = _clock.lastElapsedDuration ?? Duration.zero;
+      setState(() => _age = now);
     });
   }
 
-  void _frame() {
-    _elapsed = _clock.lastElapsedDuration ?? Duration.zero;
-    final level = _source.level(_elapsed);
-    final t = _elapsed.inMilliseconds.toDouble();
-
-    /* Біда може статись і посеред диктування, не лише на старті: мікрофон
-       забирає дзвінок, вимикається мережа, двигун здається після кількох
-       порожніх відрізків. Раніше причину читали один раз при вмиканні, і після
-       неї смуги продовжували дихати над мертвим мікрофоном. */
-    final live = _live;
-    if (live != null && live.failure != _trouble) _trouble = live.failure;
-
-    for (var i = 0; i < _bars; i++) {
-      /* Middle bars carry more of the level than the ends, the way a voice meter
-         is drawn, plus a little per-bar variation so it is not one hump. */
-      final mid = 1 - (i / (_bars - 1) - 0.5).abs() * 2;
-      final shape = 0.35 + 0.65 * mid;
-      final jitter = 0.72 + 0.28 * math.sin(t / 90 + i * 1.7);
-      final want = math.max(0.06, level * shape * jitter);
-      _peak[i] = want > _peak[i] ? want : _peak[i] * 0.86 + want * 0.14;
+  @override
+  void didUpdateWidget(VoiceOverlay old) {
+    super.didUpdateWidget(old);
+    if (widget.leaving && !old.leaving) {
+      _away = _age.inMilliseconds.toDouble();
+      _closing = Timer(const Duration(milliseconds: backMs), () {
+        if (mounted) widget.onClosed();
+      });
     }
-    setState(() {});
   }
 
   @override
   void dispose() {
-    _type?.cancel();
-    _clock.removeListener(_frame);
+    _closing?.cancel();
     _clock.dispose();
-    _source.dispose();
     super.dispose();
-  }
-
-  Future<void> _stop() async {
-    HapticFeedback.selectionClick();
-    final live = _live;
-    // Дочекатись двигуна, бо останнє слово часто приходить саме на зупинці.
-    final said = live == null ? _heard : await live.stop();
-    if (!mounted) return;
-    widget.onDone(said.trim());
   }
 
   @override
   Widget build(BuildContext context) {
     final c = context.c;
-    final level = _source.level(_elapsed);
+    final age = _age.inMilliseconds.toDouble();
+    final away = _away == 0 ? 0.0 : age - _away;
 
-    return Stack(
-      children: [
-        /* A real blur, not a wash of white over the page. Lowering the opacity
-           of a veil leaves every edge behind it perfectly sharp, which reads as
-           a dimmed screen rather than as attention moving off it.
-         *
-         * Дотик до нього не зупиняє запис, і це навмисне. Людина диктує з
-         * телефоном у руці, а не перед собою на столі: випадковий дотик долонею
-         * або великим пальцем обривав фразу посеред слова. Вимикає диктування
-         * тільки той самий мікрофон, яким його ввімкнули. Але дотики шар усе
-         * одно ловить: під ним живий екран, і натиснути кнопку крізь туман
-         * означало б зробити щось, чого не видно. */
-        Positioned.fill(
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            child: BackdropFilter(
-              filter: ui.ImageFilter.blur(sigmaX: 11, sigmaY: 11),
-              child: ColoredBox(color: c.bg.withValues(alpha: 0.4)),
+    _breathe(age, away);
+
+    /* Кнопка живе своїм життям: набрякає при появі, тримається весь час, поки
+       рідина в дорозі, і аж наприкінці сідає у свій звичайний розмір. Вона не
+       зникає ні на мить, бо на ній лежить палець. */
+    final micScale = away == 0
+        ? _swell(age)
+        : ui.lerpDouble(
+            _swell(_away),
+            widget.origin.size / _micD,
+            _ease(_clamp((away - _homeAt) / _homeMs)),
+          )!;
+
+    /* Дотики поглинаються, а не пропускаються наскрізь.
+     *
+     * Тут стояв `IgnorePointer`, і крізь відкритий екран запису натискалось геть
+     * усе, що під ним: розмита картка дня ловила дотик і відкривалась. Палець,
+     * яким запис почали, це не зачіпає: він уже належить своїй кнопці, і
+     * відпускання дійде до неї попри цей шар. */
+    return AbsorbPointer(
+      child: Stack(
+        children: [
+          /* День лишається позаду, поза фокусом: диктування це шар над ним, а не
+             інше місце. Туман сходить швидше, ніж рідина встигає доїхати. */
+          Positioned.fill(
+            child: Opacity(
+              opacity: away == 0 ? _clamp(age / 300) : 1 - _clamp((away - 40) / 280),
+              child: BackdropFilter(
+                filter: ui.ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                child: ColoredBox(color: c.bg.withValues(alpha: 0.45)),
+              ),
             ),
           ),
-        ),
 
-        Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                height: 96,
-                width: 250,
-                child: RepaintBoundary(
-                  child: CustomPaint(
-                    painter: _MeterPainter(peaks: _peak, ink: c.text),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 22),
-              SizedBox(
-                width: 280,
-                child: Text(
-                  /* Причина замість почутого, коли слухати не вийшло: мовчазний
-                     екран із бігунцями виглядав би як робота, якої немає. */
-                  _trouble ?? _heard,
-                  textAlign: TextAlign.center,
-                  style: context.t.headlineMedium?.copyWith(
-                    fontSize: 19,
-                    color: _trouble == null ? null : c.textSecondary,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                _trouble == null
-                    ? 'Говори. Торкнись мікрофона, щоб зупинити'
-                    : 'Торкнись мікрофона, щоб закрити',
-                style: context.t.labelSmall,
-              ),
-            ],
-          ),
-        ),
-
-        /* The button that started this, grown and breathing. It stays sharp
-           while everything else blurs, because it is the one thing still in
-           use. */
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 44,
-          child: Center(
-            child: Semantics(
-              button: true,
-              label: 'Зупинити запис',
-              child: GestureDetector(
-                onTap: () => unawaited(_stop()),
-                behavior: HitTestBehavior.opaque,
-                child: SizedBox(
-                  width: 116,
-                  height: 116,
-                  child: RepaintBoundary(
-                    child: CustomPaint(
-                      painter: _WobblePainter(
-                        level: level,
-                        phase: _elapsed.inMilliseconds / 1000,
-                        fill: c.button,
-                      ),
-                      child: Center(child: CalviIcon('mic', size: 26, color: c.buttonText)),
-                    ),
-                  ),
+          /* Уся маса разом, і саме в цьому вся справа. Розмиття з різким порогом
+             по прозорості склеює те, що поруч, в одну масу з перетяжкою між
+             краплями, і рве її назад на краплі, щойно вони розійшлись. */
+          Positioned.fill(
+            child: _goo_(
+              CustomPaint(
+                size: Size.infinite,
+                painter: _Liquid(
+                  age: age,
+                  away: away,
+                  origin: widget.origin,
+                  heights: _peak,
+                  ink: c.button,
                 ),
               ),
             ),
           ),
-        ),
-      ],
+
+          /* Знак мікрофона поза фільтром: під ним він розплився б у пляму. */
+          Positioned(
+            left: widget.origin.at.dx - _micD / 2,
+            top: widget.origin.at.dy - _micD / 2,
+            width: _micD,
+            height: _micD,
+            child: Transform.scale(
+              scale: micScale,
+              child: Center(child: CalviIcon('mic', size: 26, color: c.buttonText)),
+            ),
+          ),
+        ],
+      ),
     );
+  }
+
+  /* Розмиття плюс різкий поріг по прозорості: те саме, що робив фільтр у демці.
+     Те, що поруч, зливається в одну масу з перетяжкою між краплями, а те, що
+     відірвалось, знову стає краплею. */
+  Widget _goo_(Widget child) {
+    return ColorFiltered(
+      colorFilter: const ColorFilter.matrix([
+        1, 0, 0, 0, 0, //
+        0, 1, 0, 0, 0,
+        0, 0, 1, 0, 0,
+        0, 0, 0, _sharpen, -_cut * 255,
+      ]),
+      child: ImageFiltered(
+        imageFilter: ui.ImageFilter.blur(sigmaX: _goo, sigmaY: _goo),
+        child: child,
+      ),
+    );
+  }
+
+  /// Розмір кнопки при появі: набрякає вище, ніж осяде.
+  double _swell(double age) {
+    final t = _clamp(age / _gatherMs);
+    return t < 0.4
+        ? ui.lerpDouble(0.34, 1.06, _ease(t / 0.4))!
+        : ui.lerpDouble(1.06, 0.92, _ease((t - 0.4) / 0.6))!;
+  }
+
+  /* Висота кожної смуги на цей кадр.
+   *
+   * Росте з краплі, а не з нуля, і в неї ж повертається: смуга вилітає з кнопки
+   * вже краплею, і якби висота повзла від нуля, її просто не було б видно. */
+  void _breathe(double age, double away) {
+    final loud = widget.source.level(_age);
+
+    for (var i = 0; i < _bars; i++) {
+      final mid = 1 - _offMid(i);
+      final shape = 0.62 + 0.38 * mid;
+      final jitter = 0.7 + 0.3 * math.sin(age / 90 + i * 1.7);
+
+      /* Метр дихає і в тиші. Хвиля, що біжить уздовж ряду, а не спільний
+         рівень: спільний підіймав би всі смуги разом, і ряд лишався б рівним.
+         Голос лягає поверх неї. */
+      final calm =
+          0.17 + 0.06 * math.sin(age / 620 + i * 0.62) + 0.03 * math.sin(age / 210 - i * 0.9);
+
+      final rise = _clamp((age - (_flyOf(i) + _flyMs - _riseLead)) / _riseMs);
+      final fold = away == 0 ? 0.0 : _clamp((away - (1 - _offMid(i)) * 90) / _foldMs);
+
+      final voice = math.max(calm, loud * shape * jitter);
+      final want = _seed + (voice - _seed) * _ease(rise) * (1 - _ease(fold));
+      _peak[i] = want > _peak[i] ? want : _peak[i] * 0.82 + want * 0.18;
+    }
   }
 }
 
-class _MeterPainter extends CustomPainter {
-  _MeterPainter({required this.peaks, required this.ink});
+/// Малює всю масу: краплі довкола кнопки, саму кнопку і смуги в дорозі.
+class _Liquid extends CustomPainter {
+  const _Liquid({
+    required this.age,
+    required this.away,
+    required this.origin,
+    required this.heights,
+    required this.ink,
+  });
 
-  final List<double> peaks;
+  final double age;
+  final double away;
+  final VoiceOrigin origin;
+  final List<double> heights;
   final Color ink;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final gap = size.width / peaks.length;
-    final paint = Paint()
-      ..color = ink
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = math.min(4, gap * 0.55);
+    final paint = Paint()..color = ink;
 
-    for (var i = 0; i < peaks.length; i++) {
-      final x = gap * (i + 0.5);
-      final h = size.height * peaks[i] / 2;
-      canvas.drawLine(Offset(x, size.height / 2 - h), Offset(x, size.height / 2 + h), paint);
+    final meterW = math.min(_meterW, size.width - 40);
+    final gap = (meterW - _bars * _barW) / (_bars - 1);
+    final left = (size.width - meterW) / 2;
+    final hub = Offset(size.width / 2, size.height * _meterAt);
+
+    _beadsAround(canvas, paint);
+    _theSeed(canvas, paint);
+
+    for (var i = 0; i < _bars; i++) {
+      final seat = Offset(left + i * (_barW + gap) + _barW / 2, hub.dy);
+      _oneBar(canvas, paint, i, seat, hub);
     }
   }
 
-  @override
-  bool shouldRepaint(_MeterPainter old) => true;
-}
+  /* Вода збирається довкола кнопки, перш ніж рушити. Без цього маса зʼявлялась
+     нізвідки, а так вона звідкись береться. */
+  void _beadsAround(Canvas canvas, Paint paint) {
+    for (var i = 0; i < _beads; i++) {
+      final a = 2 * math.pi * i / _beads;
+      final span = _gatherMs + (i % 3) * 40;
 
-/// The microphone disc, with an edge that answers to the room.
-///
-/// Three sine terms at different frequencies rather than one: a single wave
-/// makes an egg that rotates, and what is wanted is a surface that ripples.
-class _WobblePainter extends CustomPainter {
-  _WobblePainter({required this.level, required this.phase, required this.fill});
-
-  final double level;
-  final double phase;
-  final Color fill;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final centre = Offset(size.width / 2, size.height / 2);
-    final base = size.shortestSide / 2 - 6;
-    final amp = base * 0.06 * (0.35 + level);
-
-    final path = Path();
-    for (var a = 0.0; a <= 360; a += 3) {
-      final rad = a * math.pi / 180;
-      final r =
-          base +
-          amp * math.sin(3 * rad + phase * 2.1) +
-          amp * 0.6 * math.sin(5 * rad - phase * 1.4) +
-          amp * 0.4 * math.sin(7 * rad + phase * 0.9);
-      final p = centre + Offset(math.cos(rad) * r, math.sin(rad) * r);
-      if (a == 0) {
-        path.moveTo(p.dx, p.dy);
+      double reach, scale;
+      if (away == 0) {
+        final t = _clamp(age / span);
+        if (t < 0.38) {
+          reach = ui.lerpDouble(6, 40, _ease(t / 0.38))!;
+          scale = ui.lerpDouble(0.3, 1, _ease(t / 0.38))!;
+        } else {
+          reach = ui.lerpDouble(40, 12, _ease((t - 0.38) / 0.62))!;
+          scale = ui.lerpDouble(1, 0.42, _ease((t - 0.38) / 0.62))!;
+        }
       } else {
-        path.lineTo(p.dx, p.dy);
+        // Осідають у кнопку разом з усім іншим.
+        final t = _ease(_clamp(away / 240));
+        reach = ui.lerpDouble(12, 0, t)!;
+        scale = ui.lerpDouble(0.42, 0, t)!;
       }
-    }
-    path.close();
 
-    canvas.drawPath(path, Paint()..color = fill.withValues(alpha: 0.18));
-    canvas.drawCircle(centre, base * 0.74, Paint()..color = fill);
+      if (scale <= 0.01) continue;
+      final at = origin.at + Offset(math.cos(a), math.sin(a)) * reach;
+      _blob(canvas, paint, at, _beadD * scale, _beadD * scale, i * 1.7);
+    }
+  }
+
+  /* Маса під кнопкою. Не зникає, поки рідина в дорозі: саме в неї вона й
+     повертається, і аж потім кнопка сідає у свій розмір. */
+  void _theSeed(Canvas canvas, Paint paint) {
+    final double scale;
+    if (away == 0) {
+      final t = _clamp(age / _gatherMs);
+      scale = t < 0.4
+          ? ui.lerpDouble(0.34, 1.06, _ease(t / 0.4))!
+          : ui.lerpDouble(1.06, 0.92, _ease((t - 0.4) / 0.6))!;
+    } else {
+      scale = ui.lerpDouble(0.92, origin.size / _micD, _ease(_clamp((away - _homeAt) / _homeMs)))!;
+    }
+    _blob(canvas, paint, origin.at, _micD * scale, _micD * scale, 0);
+  }
+
+  /* Смуга сама вилітає з кнопки краплею, летить своєю дорогою і сідає на своє
+     місце. Окремих крапель немає навмисне: доти між ними була мить передачі, і
+     на ній було видно, що це дві різні анімації. */
+  void _oneBar(Canvas canvas, Paint paint, int i, Offset seat, Offset hub) {
+    /* Перша опора виводить краплю з кнопки вгору, друга збирає всі дороги над
+       серединою метра, і вже звідти кожна розходиться у своє місце. Тому рідина
+       злітає одним тілом і розпливається вздовж метра, замість збиратись у
+       точку. */
+    final c1 = Offset(
+      origin.at.dx + (hub.dx - origin.at.dx) * 0.12,
+      origin.at.dy + (hub.dy - origin.at.dy) * 0.34,
+    );
+    final c2 = Offset(hub.dx + (seat.dx - hub.dx) * 0.1, hub.dy - 20);
+
+    final double t;
+    final double wide, tall;
+    if (away == 0) {
+      t = _flyCurve.transform(_clamp((age - _flyOf(i)) / _flyMs));
+      // У дорозі крапля більша за себе саму і витягнута вздовж підйому: саме це
+      // робить цівку товстою і суцільною.
+      (wide, tall) = _stretch(t);
+    } else {
+      final back = _homeCurve.transform(_clamp((away - (_bars - 1 - i) * 8) / 320));
+      t = 1 - back;
+      (wide, tall) = _stretch(1 - back * 0.86);
+    }
+
+    final at = _onRoad(origin.at, c1, c2, seat, t);
+    final h = _barH * heights[i] * tall;
+    _blob(canvas, paint, at, _barW * wide, math.max(_barW * wide, h), i * 0.9);
+  }
+
+  /// Кадри розтягу в дорозі, ті самі числа, що в демці.
+  (double, double) _stretch(double t) {
+    if (t < 0.22) return (ui.lerpDouble(0.7, 1.5, t / 0.22)!, ui.lerpDouble(0.7, 2.4, t / 0.22)!);
+    if (t < 0.6) {
+      final k = (t - 0.22) / 0.38;
+      return (ui.lerpDouble(1.5, 1.3, k)!, ui.lerpDouble(2.4, 1.9, k)!);
+    }
+    if (t < 0.84) {
+      final k = (t - 0.6) / 0.24;
+      return (ui.lerpDouble(1.3, 1.14, k)!, ui.lerpDouble(1.9, 1.3, k)!);
+    }
+    final k = (t - 0.84) / 0.16;
+    return (ui.lerpDouble(1.14, 1, k)!, ui.lerpDouble(1.3, 1, k)!);
+  }
+
+  /// Точка на кубічній кривій.
+  Offset _onRoad(Offset a, Offset b, Offset c, Offset d, double t) {
+    final u = 1 - t;
+    return a * (u * u * u) + b * (3 * u * u * t) + c * (3 * u * t * t) + d * (t * t * t);
+  }
+
+  /* Одне тіло з трохи неправильними краями.
+   *
+   * Радіуси кутів повільно перетікають, і кожне тіло має свою фазу: рівний овал
+   * читається як намальована фігура, а жива вода не буває симетричною. Рух
+   * рівномірний навмисне: мʼякий вхід і вихід спиняли б форму на кожному кадрі,
+   * і це читалось би як сіпання. */
+  void _blob(Canvas canvas, Paint paint, Offset at, double w, double h, double phase) {
+    if (w <= 0.5 || h <= 0.5) return;
+
+    final s = age / 1000;
+    double r(double k) => 0.5 + 0.045 * math.sin(s / 1.6 + phase + k);
+
+    final box = Rect.fromCenter(center: at, width: w, height: h);
+    canvas.drawRRect(
+      RRect.fromRectAndCorners(
+        box,
+        topLeft: Radius.elliptical(w * r(0), h * r(1.9)),
+        topRight: Radius.elliptical(w * r(3.1), h * r(0.7)),
+        bottomRight: Radius.elliptical(w * r(4.4), h * r(2.6)),
+        bottomLeft: Radius.elliptical(w * r(1.2), h * r(5.0)),
+      ),
+      paint,
+    );
   }
 
   @override
-  bool shouldRepaint(_WobblePainter old) => true;
+  bool shouldRepaint(_Liquid old) => true;
 }

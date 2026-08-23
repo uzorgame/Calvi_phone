@@ -29,8 +29,36 @@ class DayGoal {
   final int waterMl;
 }
 
-/// Consecutive days finished inside the norm.
-const streak = 12;
+/// Наскільки можна промахнутись повз норму, і день усе одно вдалий.
+///
+/// Набрати рівно норму неможливо, тому це вікно, а не число. Ширина в кожної
+/// цілі своя, і несиметрична навмисно: тому, хто набирає, перебір допомагає, а
+/// тому, хто худне, недобір не шкодить настільки ж.
+///
+/// Вихід за вікно з будь-якого боку це невдалий день. Недоїсти на тисячу це не
+/// успіх худнення, а голодування, і рахувати його як успіх означало б хвалити
+/// за нього.
+({int under, int over}) _window(Direction d) => switch (d) {
+  Direction.lose => (under: 300, over: 0),
+  Direction.keep => (under: 300, over: 300),
+  Direction.gain => (under: 0, over: 500),
+};
+
+/// Чи день закінчився всередині вікна своєї цілі.
+bool dayHit({required int kcal, required int norm, required Direction direction}) {
+  final w = _window(direction);
+  return kcal >= norm - w.under && kcal <= norm + w.over;
+}
+
+/// Чи день уже вийшов за верхню межу вікна.
+///
+/// Питання не те саме, що [dayHit], і різниця в часі. Перебір необоротний: те,
+/// що зʼїдено, не роззʼїдається, і день, який перебрав об одинадцятій ранку,
+/// уже не стане вдалим до вечора. Недобір оборотний: до півночі ще можна доїсти.
+///
+/// Саме тому сьогоднішній день уміє серію обірвати, але не вміє її подовжити.
+bool dayOver({required int kcal, required int norm, required Direction direction}) =>
+    kcal > norm + _window(direction).over;
 
 /// Everything logged on one day, plus which cards it carries.
 class DayModel {
@@ -39,6 +67,7 @@ class DayModel {
     required this.meals,
     this.workouts = const [],
     this.waterMl = 0,
+    this.medTakes = const {},
   });
 
   /// Cards, in the order they belong to the day. Not a fixed set of four: the
@@ -47,6 +76,14 @@ class DayModel {
   final List<Meal> meals;
   final List<Workout> workouts;
   final int waterMl;
+
+  /* Прийняті дози цього дня, парами «препарат|година».
+   *
+   * Галочка належить дню, а не препарату. Доти вона бралася з самого препарату,
+   * а той завантажувався один раз на сьогодні, тому будь-яка інша дата
+   * показувала сьогоднішні галочки: людина закривала ранковий прийом і бачила
+   * «прийнято» в кожному дні тижня, зокрема в майбутніх. */
+  final Set<String> medTakes;
 
   /// Calories spent on training. They come back into the norm, so this is a
   /// figure derived from the sessions rather than stored beside them: two places
@@ -71,18 +108,37 @@ class DayModel {
     return out;
   }
 
-  /// Cards in the order the day was actually lived, not in the order a
-  /// breakfast is supposed to happen: a snack logged at half nine belongs below
-  /// a dinner logged at eight, whatever the card is called.
+  /// Картки в порядку дня.
+  ///
+  /// Сніданок, обід і вечеря стоять на своїх місцях завжди, порожні вони чи ні.
+  /// Тут довго сортувалось за часом першого запису, і від цього день
+  /// перебудовувався під людиною: «додай в обід шашлик» на порожньому сніданку
+  /// піднімало обід угору, і картка, яку щойно шукали очима внизу, опинялась
+  /// зверху. Каркас дня має стояти нерухомо, інакше кожен запис доводиться
+  /// шукати заново.
+  ///
+  /// Рухаються тільки картки поза цим каркасом: перекус, доданий о пів на
+  /// десяту, лягає під вечерею, а зʼїдений об одинадцятій ранку між сніданком і
+  /// обідом. У них немає своєї години, тому її дає перший запис.
   List<SlotDef> get ordered {
+    double at(SlotDef s) {
+      if (alwaysSlots.contains(s.id)) return s.order.toDouble();
+
+      // Час запису це «21:30», рядком, як він і показується на картці.
+      final clock = inSlot(s.id).firstOrNull?.time.split(':');
+      if (clock == null) return s.order.toDouble();
+
+      final h = int.tryParse(clock.first);
+      if (h == null) return s.order.toDouble();
+
+      final m = clock.length > 1 ? int.tryParse(clock[1]) ?? 0 : 0;
+      return h + m / 60;
+    }
+
     final out = [...slots];
     out.sort((a, b) {
-      final ea = inSlot(a.id).firstOrNull?.time;
-      final eb = inSlot(b.id).firstOrNull?.time;
-      if (ea != null && eb != null) return ea.compareTo(eb);
-      if (ea != null) return -1;
-      if (eb != null) return 1;
-      return a.order.compareTo(b.order);
+      final byHour = at(a).compareTo(at(b));
+      return byHour != 0 ? byHour : a.order.compareTo(b.order);
     });
     return out;
   }
@@ -133,12 +189,12 @@ const kcalSlack = 400;
 ///
 /// Правило залежить від того, куди людина йде, і це головне в ньому:
 ///
-///   * **набір ваги** — норма або більше це зелений: з'їсти більше за ціль тут
+///   * **набір ваги**: норма або більше це зелений: з'їсти більше за ціль тут
 ///     не помилка, а власне ціль;
-///   * **схуднення** — зелений лише від «норма мінус [kcalSlack]» до самої
+///   * **схуднення**: зелений лише від «норма мінус [kcalSlack]» до самої
 ///     норми. Вище означає, що дефіциту не вийшло, нижче означає голод, і обидва
 ///     випадки червоні;
-///   * **утримання** — той самий запас, але в обидва боки.
+///   * **утримання**: той самий запас, але в обидва боки.
 ///
 /// День без записів не оцінюється взагалі: порожній кружечок це не вирок.
 DayState verdictFor({
@@ -146,6 +202,7 @@ DayState verdictFor({
   required int norm,
   required Direction direction,
   bool logged = true,
+
   /// Минулий день оцінюють цілком; сьогоднішній ще ні.
   bool finished = true,
 }) {
@@ -180,6 +237,14 @@ DayState verdictFor({
 @visibleForTesting
 DateTime Function() dayClock = DateTime.now;
 
+/// Котра зараз година, за тим самим годинником, що й дати.
+///
+/// Окремо від [dayClock], бо той підміняють лише тести, а година потрібна і
+/// застосунку: за нею він вирішує, який прийом їжі пропонувати наступним. Доти
+/// екран питав системний час напряму і лишався єдиним місцем, яке закріплений
+/// годинник не діставав.
+int get nowHour => dayClock().hour;
+
 /// Сьогодні, обрізане до дати.
 ///
 /// Обчислюється щоразу, а не один раз при запуску: телефон, залишений
@@ -189,8 +254,22 @@ DateTime get _anchor {
   return DateTime(now.year, now.month, now.day);
 }
 
-const _weekdays = ['НД', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
-const _months = [
+/* Мова, якою шар даних пише дати.
+ *
+ * Глобальна, як і [dayClock], і рівно з тієї ж причини: назви місяців потрібні
+ * там, куди `BuildContext` не дістає, і тягнути його в сховище, у сповіщення і
+ * в тести заради двох слів дорожче, ніж одне поле.
+ *
+ * Ставить її `main` при кожній зміні локалі. Стандартом лишається українська:
+ * якщо ніхто нічого не поставив, дати виглядають так само, як виглядали. */
+String dataLang = 'uk';
+
+const _weekdaysUk = ['НД', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
+const _weekdaysEn = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+
+/* Родовий відмінок: «15 серпня», а не «15 серпень». Місяць тут ніколи не
+   стоїть сам, він завжди після числа. */
+const _monthsUk = [
   'січня',
   'лютого',
   'березня',
@@ -204,6 +283,46 @@ const _months = [
   'листопада',
   'грудня',
 ];
+
+const _monthsEn = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+
+List<String> get _months => dataLang == 'uk' ? _monthsUk : _monthsEn;
+List<String> get _weekdays => dataLang == 'uk' ? _weekdaysUk : _weekdaysEn;
+
+/// Назва місяця так, як вона стоїть у даті: «серпня», «August».
+String monthName(int month) => _months[month - 1];
+
+const _shortUk = [
+  'січ',
+  'лют',
+  'бер',
+  'квіт',
+  'трав',
+  'черв',
+  'лип',
+  'серп',
+  'вер',
+  'жовт',
+  'лист',
+  'груд',
+];
+
+/// Скорочений місяць, для рядків, де на повний немає місця.
+String monthShort(int month) =>
+    dataLang == 'uk' ? _shortUk[month - 1] : _monthsEn[month - 1].substring(0, 3);
 
 class DayInfo {
   const DayInfo({required this.day, required this.label, required this.full});

@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'shell.dart';
 import 'theme.dart';
 import 'tokens.dart';
+import '../l10n/app_localizations.dart';
 
 /// Row height and how many rows the drum shows.
 const _row = 40.0;
@@ -14,6 +15,11 @@ const _visible = 5;
 /// How tall the drum stands. Five rows, so two values are readable either side
 /// of the one under the band.
 const _drum = 200.0;
+
+/// Три ряди, для екрана, де барабанів два і вони мають вміститись разом із
+/// рештою. Нахил рахується від `_visible` і лишається тим самим: міняється те,
+/// скільки барабана видно, а не те, як він крутиться.
+const _drumSmall = 120.0;
 
 /* The framework's wheel is flattened almost to a list and the tilt is written
    here instead. Its cylinder moves rows along the drum as well as turning them,
@@ -59,10 +65,7 @@ class CalviWheelColumn extends StatefulWidget {
 }
 
 class _CalviWheelColumnState extends State<CalviWheelColumn> {
-  late final int _start = widget.values.indexOf(widget.value).clamp(
-    0,
-    widget.values.length - 1,
-  );
+  late final int _start = widget.values.indexOf(widget.value).clamp(0, widget.values.length - 1);
   late final FixedExtentScrollController _c = FixedExtentScrollController(initialItem: _start);
 
   @override
@@ -152,10 +155,7 @@ class _CalviWheelColumnState extends State<CalviWheelColumn> {
           ),
           if (widget.suffix.isNotEmpty) ...[
             const SizedBox(width: 3),
-            Text(
-              widget.suffix,
-              style: context.t.labelSmall?.copyWith(fontWeight: FontWeight.w400),
-            ),
+            Text(widget.suffix, style: context.t.labelSmall?.copyWith(fontWeight: FontWeight.w400)),
           ],
         ],
       ),
@@ -165,15 +165,16 @@ class _CalviWheelColumnState extends State<CalviWheelColumn> {
 
 /// The band and the fading ends that every drum stands in.
 class _Drum extends StatelessWidget {
-  const _Drum({required this.children});
+  const _Drum({required this.children, this.height = _drum});
 
   final List<Widget> children;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
     final c = context.c;
     return SizedBox(
-      height: _drum,
+      height: height,
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -188,24 +189,26 @@ class _Drum extends StatelessWidget {
               ),
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: children,
-          ),
-          // Values dissolve at the ends of the drum rather than being cut off by
-          // it. Two veils of the page rather than a mask: a mask means a layer
-          // saved and blended on every frame of a scroll.
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: children),
+          /* Values dissolve at the ends of the drum rather than being cut off by
+             it. Two veils rather than a mask: a mask means a layer saved and
+             blended on every frame of a scroll.
+
+             Пелена бере колір того, на чому барабан лежить, а не сторінки.
+             Барабан майже завжди в аркуші, і в темряві аркуш світліший за
+             сторінку: пелена кольору сторінки лягала на його кінці видимою
+             темною смугою замість того, щоб зникнути. */
           for (final top in const [true, false])
             IgnorePointer(
               child: Align(
                 alignment: top ? Alignment.topCenter : Alignment.bottomCenter,
                 child: Container(
-                  height: _drum * 0.34,
+                  height: height * 0.34,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: top ? Alignment.topCenter : Alignment.bottomCenter,
                       end: top ? Alignment.bottomCenter : Alignment.topCenter,
-                      colors: [c.bg, c.bg.withValues(alpha: 0)],
+                      colors: [context.on, context.on.withValues(alpha: 0)],
                     ),
                   ),
                 ),
@@ -225,6 +228,7 @@ class CalviWheel extends StatelessWidget {
     required this.value,
     required this.onPick,
     required this.suffix,
+    this.compact = false,
   });
 
   final List<int> values;
@@ -232,11 +236,13 @@ class CalviWheel extends StatelessWidget {
   final ValueChanged<int> onPick;
   final String suffix;
 
+  /// Три ряди замість пʼяти, коли барабанів на екрані два.
+  final bool compact;
+
   @override
   Widget build(BuildContext context) => _Drum(
-    children: [
-      CalviWheelColumn(values: values, value: value, onPick: onPick, suffix: suffix),
-    ],
+    height: compact ? _drumSmall : _drum,
+    children: [CalviWheelColumn(values: values, value: value, onPick: onPick, suffix: suffix)],
   );
 }
 
@@ -325,7 +331,7 @@ class CalviStepper extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _Key(
-            label: 'Менше',
+            label: L.of(context).wheelLess,
             sign: '−',
             onTap: () => onChange((value - step).clamp(min, 1 << 30)),
           ),
@@ -345,7 +351,7 @@ class CalviStepper extends StatelessWidget {
               letterSpacing: 24 * -0.02,
             ),
           ),
-          _Key(label: 'Більше', sign: '+', onTap: () => onChange(value + step)),
+          _Key(label: L.of(context).wheelMore, sign: '+', onTap: () => onChange(value + step)),
         ],
       ),
     );
@@ -492,69 +498,69 @@ class _CalviSliderState extends State<CalviSlider> {
             onVerticalDragUpdate: (_) {},
             onVerticalDragEnd: (_) {},
             child: Listener(
-            behavior: HitTestBehavior.opaque,
-            onPointerDown: (e) {
-              setState(() => _settling = false);
-              _drag(e.localPosition.dx, box.maxWidth);
-            },
-            onPointerMove: (e) => _drag(e.localPosition.dx, box.maxWidth),
-            onPointerUp: (_) => setState(() {
-              _settling = true;
-              _raw = _snap(_raw);
-            }),
-            onPointerCancel: (_) => setState(() {
-              _settling = true;
-              _raw = _snap(_raw);
-            }),
-            child: SizedBox(
-              // Room for the handle to stand proud of the track, and for a thumb
-              // to land anywhere near it.
-              height: 30,
-              child: Stack(
-                alignment: Alignment.centerLeft,
-                clipBehavior: Clip.none,
-                children: [
-                  Container(
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: c.fillSecondary,
-                      borderRadius: BorderRadius.circular(CalviSize.rPill),
-                    ),
-                  ),
-                  AnimatedContainer(
-                    duration: _settling ? const Duration(milliseconds: 200) : Duration.zero,
-                    curve: CalviMotion.easeRise,
-                    height: 8,
-                    width: box.maxWidth * at,
-                    decoration: BoxDecoration(
-                      color: c.button,
-                      borderRadius: BorderRadius.circular(CalviSize.rPill),
-                    ),
-                  ),
-                  AnimatedPositioned(
-                    duration: _settling ? const Duration(milliseconds: 200) : Duration.zero,
-                    curve: CalviMotion.easeRise,
-                    left: box.maxWidth * at - 15,
-                    child: Container(
-                      width: 30,
-                      height: 30,
+              behavior: HitTestBehavior.opaque,
+              onPointerDown: (e) {
+                setState(() => _settling = false);
+                _drag(e.localPosition.dx, box.maxWidth);
+              },
+              onPointerMove: (e) => _drag(e.localPosition.dx, box.maxWidth),
+              onPointerUp: (_) => setState(() {
+                _settling = true;
+                _raw = _snap(_raw);
+              }),
+              onPointerCancel: (_) => setState(() {
+                _settling = true;
+                _raw = _snap(_raw);
+              }),
+              child: SizedBox(
+                // Room for the handle to stand proud of the track, and for a thumb
+                // to land anywhere near it.
+                height: 30,
+                child: Stack(
+                  alignment: Alignment.centerLeft,
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      height: 8,
                       decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        /* The handle sits on the filled part of the track, so it
-                           is made of the ink's opposite: white on dark in the
-                           light theme, dark on light in the dark one. */
-                        color: c.buttonText,
-                        border: Border.all(color: c.button, width: 2),
-                        boxShadow: [
-                          BoxShadow(color: c.shade, blurRadius: 8, offset: const Offset(0, 2)),
-                        ],
+                        color: c.fillSecondary,
+                        borderRadius: BorderRadius.circular(CalviSize.rPill),
                       ),
                     ),
-                  ),
-                ],
+                    AnimatedContainer(
+                      duration: _settling ? const Duration(milliseconds: 200) : Duration.zero,
+                      curve: CalviMotion.easeRise,
+                      height: 8,
+                      width: box.maxWidth * at,
+                      decoration: BoxDecoration(
+                        color: c.button,
+                        borderRadius: BorderRadius.circular(CalviSize.rPill),
+                      ),
+                    ),
+                    AnimatedPositioned(
+                      duration: _settling ? const Duration(milliseconds: 200) : Duration.zero,
+                      curve: CalviMotion.easeRise,
+                      left: box.maxWidth * at - 15,
+                      child: Container(
+                        width: 30,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          /* The handle sits on the filled part of the track, so it
+                           is made of the ink's opposite: white on dark in the
+                           light theme, dark on light in the dark one. */
+                          color: c.buttonText,
+                          border: Border.all(color: c.button, width: 2),
+                          boxShadow: [
+                            BoxShadow(color: c.shade, blurRadius: 8, offset: const Offset(0, 2)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
           ),
         ),
       ],

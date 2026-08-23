@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import '../../data/meds.dart';
+import '../../data/repeat.dart';
 import '../../design/icons.dart';
 import '../../design/ring.dart';
 import '../../design/shell.dart';
@@ -11,6 +12,8 @@ import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import '../today/slot_card.dart';
 import 'meds_form.dart';
+import '../../l10n/app_localizations.dart';
+import '../../data/day.dart';
 
 /// Demo clock, same value the status bar shows.
 const _now = '12:39';
@@ -32,25 +35,118 @@ class MedsScreen extends StatefulWidget {
     required this.meds,
     required this.onToggle,
     required this.onSave,
-    required this.onDelete,
+    required this.onFinish,
+    required this.onRevive,
   });
 
   final List<Med> meds;
   final void Function(String medId, int index) onToggle;
   final ValueChanged<Med> onSave;
-  final ValueChanged<String> onDelete;
+
+  /// Закінчити курс: препарат переїжджає в «Минулі», історія лишається.
+  final ValueChanged<String> onFinish;
+
+  /// Повернути закінчений курс в активні. Потрібне рівно для промаху.
+  final ValueChanged<String> onRevive;
 
   @override
   State<MedsScreen> createState() => _MedsScreenState();
 }
 
 class _MedsScreenState extends State<MedsScreen> {
-  /// null: closed. 'new': adding. Otherwise the id being edited.
-  String? _form;
+  /// Чи розгорнуті минулі курси. Згорнуто за замовчуванням: це довідка.
+  bool _showPast = false;
+
+  /* Стану форми тут більше немає: вона живе в аркуші, який сам знає, що
+     редагує. Раніше цей рядок вирішував, який блок розгорнути в списку. */
+
+  /* Тут два різні питання, і плутати їх не можна.
+   *
+   * [_live] це «які курси я взагалі веду», [_today] це «що з них пити сьогодні».
+   * Обидва списки колись були одним, порахованим через [medsOn], і через це курс
+   * «по понеділках», заведений у середу, зникав з екрана цілком: у середу він не
+   * приймається, тож у список не потрапляв, а закінченим не був, тож і в
+   * «Минулих» його не було. Людина заводила препарат і бачила «Тут порожньо». */
+  List<Med> get _live => medsAhead(widget.meds);
+
+  /// Дози, які припадають саме на сьогодні.
+  List<Med> get _today => medsOn(_live, DateTime.now());
+
+  /// Закінчені курси: рівно доповнення до [_live].
+  List<Med> get _past => [
+    for (final m in widget.meds)
+      if (!m.stillRunning()) m,
+  ];
+
+  /* Закінчений курс: що це було і коли.
+   *
+   * Читається, не редагується. Редагувати курс, який уже не приймається, нема
+   * навіщо, а от подивитись, що саме людина пила в березні, буває треба, і саме
+   * заради цього препарат не видаляється. Єдина дія тут це повернення, і воно
+   * потрібне рівно для промаху по кнопці. */
+  void _openPast(Med m) {
+    calviSheet<void>(
+      context,
+      title: m.name,
+      info: true,
+      doneLabel: L.of(context).actionClose,
+      builder: (sheetContext) {
+        final c = sheetContext.c;
+        final t = sheetContext.t;
+
+        Widget line(String label, String value) => Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: t.bodyLarge?.copyWith(color: c.textSecondary)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(value, textAlign: TextAlign.right, style: t.bodyLarge),
+              ),
+            ],
+          ),
+        );
+
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 4, CalviSize.gutter, 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              line(L.of(sheetContext).medsDose, doseLabel(m.dose, m.form)),
+              line(L.of(sheetContext).medsHours, m.times.map((x) => x.at).join(', ')),
+              line(L.of(sheetContext).medsSchedule, repeatLabel(m.repeat)),
+              line(L.of(sheetContext).medsCourse, _span(m)),
+              if (m.note?.trim().isNotEmpty ?? false)
+                line(L.of(sheetContext).medsNote, m.note!.trim()),
+              const SizedBox(height: 8),
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  widget.onRevive(m.id);
+                  Navigator.of(sheetContext).pop();
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: c.fillSecondary,
+                    borderRadius: BorderRadius.circular(CalviSize.rPill),
+                  ),
+                  child: Text(L.of(sheetContext).medsResume, style: t.labelSmall),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   List<({String at, List<({Med med, int index})> items})> get _groups {
     final map = <String, List<({Med med, int index})>>{};
-    for (final m in widget.meds) {
+    for (final m in _today) {
       for (final (i, t) in m.times.indexed) {
         map.putIfAbsent(t.at, () => []).add((med: m, index: i));
       }
@@ -61,23 +157,29 @@ class _MedsScreenState extends State<MedsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    /* Активні й закінчені окремо.
+     *
+     * Курс, який людина припинила, зникав із застосунку разом з історією: дні,
+     * коли вона його справді приймала, ставали такими, ніби вона його не пила
+     * ніколи. Тепер він переїжджає в «Минулі» і лишається там назавжди. */
     final c = context.c;
-    final meds = widget.meds;
-    final total = medProgress(meds);
-    final due = nextDue(meds);
+    final l = L.of(context);
+    final meds = _live;
+    final past = _past;
+    // Смуга годин і кільце говорять про сьогодні, список нижче про весь курс.
+    final today = _today;
+    final total = medProgress(today);
+    final due = nextDue(today);
     final groups = _groups;
     final nowAt = groups.indexWhere((g) => g.at.compareTo(_now) > 0);
 
     return CalviScreen(
-      title: 'Препарати',
+      title: l.medsTitle,
       children: [
         if (meds.isEmpty)
-          const Padding(
-            padding: EdgeInsets.fromLTRB(CalviSize.gutter, 4, CalviSize.gutter, 12),
-            child: CalviNora(
-              text: 'Тут порожньо. Додай препарат, і я нагадаю в потрібний час.',
-              hint: 'Веду журнал прийомів, дозування не рахую',
-            ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 4, CalviSize.gutter, 12),
+            child: CalviNora(text: l.medsEmpty, hint: l.medsEmptyHint),
           )
         else ...[
           Padding(
@@ -102,6 +204,9 @@ class _MedsScreenState extends State<MedsScreen> {
                      the regimen summary is the headline, not another tile. */
                   color: c.button,
                   borderRadius: BorderRadius.circular(CalviSize.rLarge),
+                  // Темна картка на світлому ґрунті плаває найвище: їй і тінь
+                  // найглибша з трьох.
+                  boxShadow: context.shadowPop,
                 ),
                 child: Stack(
                   children: [
@@ -140,10 +245,17 @@ class _MedsScreenState extends State<MedsScreen> {
                               ),
                               const SizedBox(height: 8),
                               Text.rich(
-                                due == null
-                                    ? const TextSpan(text: 'На сьогодні все прийнято')
+                                /* Порожній день і закритий день це різні речі.
+                                 *
+                                 * «Все прийнято» на курсі «по понеділках» у
+                                 * середу читалось би як похвала за те, чого
+                                 * людина не робила. */
+                                total.total == 0
+                                    ? TextSpan(text: l.medsNoneToday)
+                                    : due == null
+                                    ? TextSpan(text: l.medsAllTaken)
                                     : TextSpan(
-                                        text: 'Далі о ',
+                                        text: l.medsNextAt,
                                         children: [
                                           TextSpan(
                                             text: due.at,
@@ -202,69 +314,125 @@ class _MedsScreenState extends State<MedsScreen> {
           /* The rail answers what is next; this answers what is in the list at
              all, and it is the only place a name can be corrected or an entry
              dropped. */
-          CalviSection(
-            title: 'Мої препарати',
-            children: [
-              for (final (i, m) in meds.indexed)
-                CalviRow(
-                  icon: 'pill',
-                  title: m.name,
-                  first: i == 0,
-                  value:
-                      '${doseLabel(m.dose, m.form)} · ${m.times.map((t) => t.at).join(', ')}',
-                  onTap: () => setState(() => _form = _form == m.id ? null : m.id),
-                ),
-            ],
-          ),
-
-          if (_form != null && _form != 'new')
-            if (meds.where((m) => m.id == _form).firstOrNull case final med?) ...[
-              MedsForm(
-                key: ValueKey(med.id),
-                med: med,
-                now: DateTime.now().millisecondsSinceEpoch,
-                onSave: widget.onSave,
-                onDone: () => setState(() => _form = null),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 0, CalviSize.gutter, 8),
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() => _form = null);
-                    widget.onDelete(med.id);
-                  },
-                  behavior: HitTestBehavior.opaque,
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: Text(
-                        'Видалити препарат',
-                        style: context.t.titleMedium?.copyWith(fontSize: 14, color: c.protein),
-                      ),
+          if (meds.isNotEmpty)
+            CalviSection(
+              title: l.medsMine,
+              children: [
+                for (final (i, m) in meds.indexed)
+                  CalviRow(
+                    icon: 'pill',
+                    title: m.name,
+                    first: i == 0,
+                    value:
+                        /* Розклад поруч із годинами: «08:00» щодня і «08:00»
+                         через день це два різні курси. Щоденне не підписується:
+                         воно і так найчастіше, і підпис до кожного рядка
+                         перетворився б на шум. */
+                        '${doseLabel(m.dose, m.form)} · ${m.times.map((t) => t.at).join(', ')}'
+                        '${m.repeat is DailyRepeat ? '' : ' · ${repeatLabel(m.repeat)}'}',
+                    onTap: () => openMedSheet(
+                      context,
+                      med: m,
+                      now: DateTime.now().millisecondsSinceEpoch,
+                      onSave: widget.onSave,
+                      onFinish: widget.onFinish,
                     ),
                   ),
-                ),
-              ),
-            ],
+              ],
+            ),
         ],
 
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: CalviSize.gutter),
+          /* Аркуш, а не розгорнутий блок у списку: форма більше не штовхає
+             список униз і не змушує гортати те, що щойно відкрили. */
           child: AddRow(
-            label: _form == 'new' ? 'Згорнути' : 'Додати препарат',
-            open: _form == 'new',
-            onTap: () => setState(() => _form = _form == 'new' ? null : 'new'),
+            label: l.medsAdd,
+            open: false,
+            onTap: () => openMedSheet(
+              context,
+              now: DateTime.now().millisecondsSinceEpoch,
+              onSave: widget.onSave,
+            ),
           ),
         ),
 
-        if (_form == 'new')
-          MedsForm(
-            now: DateTime.now().millisecondsSinceEpoch,
-            onSave: widget.onSave,
-            onDone: () => setState(() => _form = null),
+        /* Минулі курси.
+         *
+         * Закінчений курс зникав із застосунку разом з історією, і дні, коли
+         * людина його справді приймала, ставали такими, ніби вона його не пила
+         * ніколи. Тепер він лишається тут: що приймали, скільки, з якого дня по
+         * який. Згорнуто за замовчуванням, бо це довідка, а не щоденна робота.
+         *
+         * Розділ стоїть навіть порожній. Ховати його, поки минулих курсів немає,
+         * здавалось охайним, а на ділі людина, яка шукає історію, не знаходила
+         * навіть натяку на те, що історія десь є. */
+        const SizedBox(height: CalviSize.gapCard),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: CalviSize.gutter),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => setState(() => _showPast = !_showPast),
+            child: Row(
+              children: [
+                Text(l.medsPast, style: context.t.titleMedium?.copyWith(fontSize: 15)),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: c.fillSecondary,
+                    borderRadius: BorderRadius.circular(CalviSize.rPill),
+                  ),
+                  child: Text('${past.length}', style: context.t.labelSmall),
+                ),
+                const Spacer(),
+                AnimatedRotation(
+                  turns: _showPast ? 0.5 : 0,
+                  duration: CalviMotion.fast,
+                  child: CalviIcon('chevron', size: 16, color: c.textSecondary),
+                ),
+              ],
+            ),
           ),
+        ),
+
+        if (_showPast)
+          if (past.isEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 10, CalviSize.gutter, 0),
+              child: Text(l.medsPastEmpty, style: context.t.bodyMedium),
+            )
+          else
+            CalviSection(
+              title: '',
+              children: [
+                for (final (i, m) in past.indexed)
+                  CalviRow(
+                    icon: 'pill',
+                    title: m.name,
+                    first: i == 0,
+                    value: '${doseLabel(m.dose, m.form)} · ${_span(m)}',
+                    onTap: () => _openPast(m),
+                  ),
+              ],
+            ),
       ],
     );
+  }
+
+  /// «12 серп – 19 серп» або «з 12 серп», якщо кінця ще немає.
+  String _span(Med m) {
+    String short(String key) {
+      final p = key.split('-');
+      if (p.length != 3) return key;
+      final mm = (int.tryParse(p[1]) ?? 1).clamp(1, 12);
+      return '${int.tryParse(p[2]) ?? p[2]} ${monthShort(mm)}';
+    }
+
+    final l = L.of(context);
+    if (m.startDay.isEmpty) return m.endDay == null ? '' : l.medsUntil(short(m.endDay!));
+    if (m.endDay == null) return l.medsSince(short(m.startDay));
+    return '${short(m.startDay)} – ${short(m.endDay!)}';
   }
 }
 
@@ -304,7 +472,7 @@ class _NowLineState extends State<_NowLine> with SingleTickerProviderStateMixin 
             SizedBox(
               width: 44,
               child: Text(
-                'ЗАРАЗ',
+                L.of(context).medsNow,
                 textAlign: TextAlign.right,
                 style: context.t.labelSmall?.copyWith(
                   fontSize: 10,
@@ -429,10 +597,7 @@ class _RailRow extends StatelessWidget {
                     Expanded(
                       child: CustomPaint(
                         size: const Size(2, double.infinity),
-                        painter: _RailLine(
-                          colour: done ? c.success : c.hairline,
-                          dashed: !done,
-                        ),
+                        painter: _RailLine(colour: done ? c.success : c.hairline, dashed: !done),
                       ),
                     ),
                 ],
@@ -481,6 +646,7 @@ class _Dose extends StatelessWidget {
         decoration: BoxDecoration(
           color: taken ? c.success.withValues(alpha: 0.05) : c.card,
           border: Border.all(color: taken ? c.success.withValues(alpha: 0.32) : c.cardBorder),
+          boxShadow: context.shadowCard,
           borderRadius: BorderRadius.circular(CalviSize.rCard),
         ),
         child: Row(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'theme.dart';
 import 'tokens.dart';
 
 /// How far a screen travels on the way in. Short on purpose: the eye reads a
@@ -18,7 +19,14 @@ const _travel = 26.0;
 /// it is the thing they asked to see again.
 Route<T> slideRoute<T>(Widget page) {
   return PageRouteBuilder<T>(
-    pageBuilder: (_, _, _) => page,
+    /* Кожна сторінка несе свій ґрунт, і саме тому вона непрозора.
+     *
+     * Попередня сторінка лишається змонтованою під новою на весь час переходу,
+     * і напівпрозора нова пропускає її текст крізь себе: два екрани читаються
+     * один поверх одного. Доти непрозорість давало тло Scaffold, але в темряві
+     * воно прозоре навмисно, щоб було видно вугільний ґрунт. Тому ґрунт
+     * переїхав сюди: він і темний фон, і та сама непрозорість. */
+    pageBuilder: (_, _, _) => CalviGround(child: page),
     transitionDuration: CalviMotion.screen,
     reverseTransitionDuration: CalviMotion.screen,
     transitionsBuilder: (context, animation, secondary, child) {
@@ -39,12 +47,24 @@ Route<T> slideRoute<T>(Widget page) {
          shows through the arriving screen; here the old one is still mounted
          underneath, and a half transparent new page let its text read straight
          through the old page's for the length of the run. The arriving screen is
-         opaque and simply travels. */
+         opaque and simply travels.
+
+         А от на вихід розчинення потрібне, і саме його бракувало. Сторінка, що
+         йде, доти зсувалась на двадцять шість пікселів і зникала останнім
+         кадром, обривом. Тепер вона гасне за весь час руху, а той, що під нею,
+         проступає крізь неї: це те саме, що робить демка, тільки з іншого
+         боку. Прозорість тут безпечна, бо ця сторінка вже не накриває нічого
+         важливого: під нею той екран, куди ми й повертаємось. */
+      final leaving = animation.status == AnimationStatus.reverse;
+
       return AnimatedBuilder(
         animation: Listenable.merge([animation, secondary]),
         child: child,
         builder: (context, child) => RepaintBoundary(
-          child: Transform.translate(offset: arriving.value + revealed.value, child: child),
+          child: Opacity(
+            opacity: leaving ? CalviMotion.ease.transform(animation.value) : 1.0,
+            child: Transform.translate(offset: arriving.value + revealed.value, child: child),
+          ),
         ),
       );
     },
@@ -57,7 +77,21 @@ Route<T> slideRoute<T>(Widget page) {
 /// keeps the header and the run of days, and slides everything under them in the
 /// direction the week was moved.
 class Slide extends StatefulWidget {
-  const Slide({super.key, required this.value, required this.dir, required this.child});
+  const Slide({
+    super.key,
+    required this.value,
+    required this.dir,
+    required this.child,
+    this.fade = false,
+  });
+
+  /* Чи розчиняти сторінки одна в одну.
+   *
+   * Для екрана, який заповнює вікно власним тлом, це не потрібно: він просто
+   * їде і закриває собою попередній. Для вмісту без тла потрібно, і дуже:
+   * сторінки лежать одна на одній повністю непрозорі, зсунуті на двадцять шість
+   * пікселів, і людина бачить два дні одночасно, з подвоєними картками. */
+  final bool fade;
 
   /// Changing this replays the animation.
   final Object value;
@@ -203,22 +237,53 @@ class _SlideState extends State<Slide> with SingleTickerProviderStateMixin {
                 ? _dir * _travel * (1 - t)
                 : -_dir * _travel * t;
 
-            return Transform.translate(
-              offset: Offset(dx, 0),
-              /* Обгортка постійна, а міняється лише її прапорець. Варіант «або
+            /* Проявляється тільки та сторінка, що приходить, і проявляється
+               весь час руху. Та, що йде, зникає одразу.
+
+               Це дослівно демка: там стару гілку React знімає з дерева тієї ж
+               миті, а нова програє свою появу з нуля до одиниці за всі 260 мс.
+               Читається це м'яко, бо на екрані в кожен момент рівно одна
+               сторінка, і вона наростає.
+
+               Тут довго стояло інше: множники 1.6 і 1.8, від яких обидві
+               прозорості добігали за перші сорок мілісекунд із двохсот
+               шістдесяти. Рух після цього тривав, але дивитись у ньому вже
+               було ні на що, і перехід читався як різкий обрив.
+
+               Обгортка прозорості стоїть завжди, навіть коли нічого не
+               розчиняється. Ставити її лише під час руху означало б міняти
+               форму дерева, а від цього дитина створюється наново і програє
+               свою появу вдруге: та сама помилка, що описана нижче про Stack. */
+            final opacity = !moving || !widget.fade
+                ? 1.0
+                : current
+                ? t
+                : 0.0;
+
+            return Opacity(
+              opacity: opacity,
+              child: Transform.translate(
+                offset: Offset(dx, 0),
+                /* Обгортка постійна, а міняється лише її прапорець. Варіант «або
                  з IgnorePointer, або без» додавав рівень у дерево тому, хто
                  їде, і екран народжувався заново вже вкотре: та сама помилка,
                  що й нагорі, тільки глибша. */
-              child: IgnorePointer(
-                ignoring: !current,
-                child: KeyedSubtree(key: ValueKey(value), child: child),
+                child: IgnorePointer(
+                  ignoring: !current,
+                  child: KeyedSubtree(key: ValueKey(value), child: child),
+                ),
               ),
             );
           }
 
           /* Порядок малювання, а не порядок комірок: той, що приходить, має
              бути зверху. Ключі лишаються ті самі, тому перестановка міняє лише
-             що поверх чого, і жоден елемент від цього не перебудовується. */
+             що поверх чого, і жоден елемент від цього не перебудовується.
+           *
+             Обгортати ту комірку, що йде, у Positioned, аби вона не задавала
+             висоту, не можна: обгортка переїжджала б з комірки на комірку, а
+             для Flutter це інше місце в дереві, і екран народжувався б наново
+             на кожному переході. */
           final a = KeyedSubtree(key: const ValueKey('#a'), child: cell(isA: true));
           final b = KeyedSubtree(key: const ValueKey('#b'), child: cell(isA: false));
 

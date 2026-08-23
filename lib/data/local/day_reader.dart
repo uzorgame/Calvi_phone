@@ -2,6 +2,7 @@ import 'dart:async';
 
 import '../day.dart';
 import '../day_stats.dart';
+import '../measure.dart';
 import '../meal.dart';
 import '../workout.dart';
 import 'database.dart';
@@ -60,6 +61,7 @@ class DayReader {
         db.diaryDao.watchMeals(date),
         db.diaryDao.watchWater(date),
         db.diaryDao.watchWorkouts(date),
+        db.diaryDao.watchTakes(date),
       ]) {
         subs.add(source.listen((_) => unawaited(rebuild())));
       }
@@ -76,14 +78,34 @@ class DayReader {
   }
 
   /// Один знімок дня, без потоку.
-  Future<DayModel> read(DateTime date) async => DayModel(
-    // A real day carries the same three cards a fixture day does. Renaming
-    // and adding them is the assistant's job and comes with it.
-    slots: [for (final id in alwaysSlots) baseSlots[id]!],
-    meals: [for (final row in await db.diaryDao.mealsOn(date)) _toMeal(row)],
-    workouts: [for (final row in await db.diaryDao.workoutsOn(date)) _toWorkout(row)],
-    waterMl: await db.diaryDao.waterOn(date),
-  );
+  Future<DayModel> read(DateTime date) async {
+    final meals = [for (final row in await db.diaryDao.mealsOn(date)) _toMeal(row)];
+
+    /* Сніданок, обід і вечеря стоять завжди. Решта карток зʼявляється разом із
+       першим записом у них.
+     *
+     * Перекус довго не зʼявлявся зовсім: Нора писала бутерброд у `snack`, рядок
+     * лягав у базу, а картки під нього не було, і запис ставав невидимим.
+     * Порожнього перекусу показувати не треба, бо він не щоденний, але щойно в
+     * ньому щось є, він має бути на екрані. */
+    final extra = {
+      for (final m in meals)
+        if (!alwaysSlots.contains(m.slotId)) m.slotId,
+    };
+
+    final takes = await db.diaryDao.takesOn(date);
+
+    return DayModel(
+      medTakes: takes,
+      slots: [
+        for (final id in alwaysSlots) baseSlots[id]!,
+        for (final id in extra) baseSlots[id] ?? baseSlots['snack']!,
+      ],
+      meals: meals,
+      workouts: [for (final row in await db.diaryDao.workoutsOn(date)) _toWorkout(row)],
+      waterMl: await db.diaryDao.waterOn(date),
+    );
+  }
 
   /// Підсумки багатьох днів одним запитом, для стрічки тижня і аналітики.
   ///
@@ -93,13 +115,13 @@ class DayReader {
   Stream<DayStats> watchStats({int days = 120}) {
     final from = DateTime.now().subtract(Duration(days: days));
 
-    return db.diaryDao.watchSince(from).map((rows) {
+    return db.diaryDao.changes().asyncMap((_) => db.diaryDao.readSince(from)).map((rows) {
       final totals = <int, DayTotals>{};
       final water = <int, int>{};
       final weights = <int, double>{};
 
       for (final m in rows.meals) {
-        final key = _offset(m.at);
+        final key = _dayOffset(m.day);
         final was = totals[key];
         totals[key] = DayTotals(
           kcal: (was?.kcal ?? 0) + m.kcal,
@@ -110,24 +132,58 @@ class DayReader {
       }
 
       for (final w in rows.water) {
-        water[_offset(w.at)] = (water[_offset(w.at)] ?? 0) + w.ml;
+        final key = _dayOffset(w.day);
+        water[key] = (water[key] ?? 0) + w.ml;
       }
 
       // Одна вага на день: пізніший запис витісняє ранішній, як і в застосунку.
       for (final w in rows.weights) {
-        weights[_offset(w.at)] = w.kg;
+        weights[_dayOffset(w.day)] = w.kg;
       }
 
-      return DayStats(totals: totals, water: water, weights: weights, demo: false);
+      /* Заміри складаються в один запис на день: людина міряє талію і груди за
+         один підхід, і в стрічці це один рядок, а не два. Вага входить туди ж,
+         бо в картці вимірювань вона стоїть першим полем. */
+      final byDay = <int, Map<String, double>>{};
+      for (final m in rows.measures) {
+        (byDay[_dayOffset(m.day)] ??= {})[m.part] = m.cm;
+      }
+      for (final e in weights.entries) {
+        (byDay[e.key] ??= {})['weightKg'] = e.value;
+      }
+
+      final measures = [for (final e in byDay.entries) Measure(date: e.key, values: e.value)]
+        ..sort((a, b) => a.date.compareTo(b.date));
+
+      return DayStats(
+        totals: totals,
+        water: water,
+        weights: weights,
+        measures: measures,
+        demo: false,
+      );
     });
   }
 
-  /// Зсув дня від сьогодні, тією ж міркою, якою його рахують екрани.
-  static int _offset(DateTime at) {
-    final today = DateTime.now();
-    final a = DateTime(today.year, today.month, today.day);
-    final b = DateTime(at.year, at.month, at.day);
-    return b.difference(a).inDays;
+  /* Зсув дня рахується з календарного ключа, а не з часової позначки.
+   *
+   * Це та сама розбіжність, що ховалась між екраном і базою. Позначка часу несе
+   * годину і пояс: запис, зроблений о пів на першу ночі, в іншому поясі легко
+   * стає вчорашнім, і аналітика розходиться з тим самим днем на головному
+   * екрані. Колонка `day` це вже вирішений календарний день, і саме за ним
+   * щоденник питають усі інші екрани. */
+  static int _dayOffset(String day) {
+    final parts = day.split('-');
+    if (parts.length < 3) return 0;
+
+    final at = DateTime(
+      int.tryParse(parts[0]) ?? 0,
+      int.tryParse(parts[1]) ?? 1,
+      int.tryParse(parts[2].substring(0, 2)) ?? 1,
+    );
+
+    final now = DateTime.now();
+    return at.difference(DateTime(now.year, now.month, now.day)).inDays;
   }
 
   Meal _toMeal(MealRow row) => Meal(
@@ -168,4 +224,3 @@ class DayReader {
   Future<String> addTyped({required String slotId, required String text}) =>
       db.diaryDao.addMeal(slot: slotId, name: text.trim(), kcal: 0);
 }
-

@@ -6,6 +6,7 @@ import '../../design/icons.dart';
 import '../../design/ring.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Three macro cards, and a fourth for medications only when the person
 /// actually has any.
@@ -20,6 +21,7 @@ class MacroCards extends StatelessWidget {
     required this.goal,
     required this.meds,
     required this.onMeds,
+    this.takes = const {},
   });
 
   final DayTotals totals;
@@ -27,11 +29,14 @@ class MacroCards extends StatelessWidget {
   final List<Med> meds;
   final VoidCallback onMeds;
 
+  /// Прийняті дози показаного дня, парами «препарат|година».
+  final Set<String> takes;
+
   @override
   Widget build(BuildContext context) {
     final c = context.c;
     final four = meds.isNotEmpty;
-    final taken = medProgress(meds);
+    final taken = medProgressOn(meds, takes);
     final ink = taken.ratio >= 1 ? c.success : c.accent;
 
     /* 16.16: the three macros give up width to the fourth over 420 ms, so the
@@ -56,10 +61,10 @@ class MacroCards extends StatelessWidget {
             children: [
               _Card(
                 width: macro,
-                label: 'БІЛОК',
+                label: L.of(context).macroProteinCaps,
                 icon: 'protein',
                 value: '${totals.protein}',
-                of: ' / ${goal.protein}г',
+                of: L.of(context).macroOfGrams(goal.protein),
                 progress: goal.protein == 0 ? 0 : totals.protein / goal.protein,
                 colour: c.protein,
                 tight: four,
@@ -67,10 +72,10 @@ class MacroCards extends StatelessWidget {
               const SizedBox(width: gap),
               _Card(
                 width: macro,
-                label: 'ЖИРИ',
+                label: L.of(context).macroFatCaps,
                 icon: 'fat',
                 value: '${totals.fat}',
-                of: ' / ${goal.fat}г',
+                of: L.of(context).macroOfGrams(goal.fat),
                 progress: goal.fat == 0 ? 0 : totals.fat / goal.fat,
                 colour: c.fats,
                 tight: four,
@@ -78,10 +83,10 @@ class MacroCards extends StatelessWidget {
               const SizedBox(width: gap),
               _Card(
                 width: macro,
-                label: 'ВУГЛЕВОДИ',
+                label: L.of(context).macroCarbsCaps,
                 icon: 'carbs',
                 value: '${totals.carbs}',
-                of: ' / ${goal.carbs}г',
+                of: L.of(context).macroOfGrams(goal.carbs),
                 progress: goal.carbs == 0 ? 0 : totals.carbs / goal.carbs,
                 colour: c.carbs,
                 tight: four,
@@ -94,7 +99,7 @@ class MacroCards extends StatelessWidget {
                 _Card(
                   // Whatever the three left behind, to the pixel.
                   width: box.maxWidth - macro * 3 - gap * 3,
-                  label: 'ПРЕПАРАТИ',
+                  label: L.of(context).macroMedsCaps,
                   // Green on a full set: finished, not merely on track.
                   icon: taken.ratio >= 1 ? 'check' : 'pill',
                   value: '${taken.done}',
@@ -156,6 +161,7 @@ class _Card extends StatelessWidget {
           color: c.card,
           border: Border.all(color: c.cardBorder),
           borderRadius: BorderRadius.circular(CalviSize.rCard),
+          boxShadow: context.shadowCard,
         ),
         child: Column(
           children: [
@@ -194,9 +200,12 @@ class _Card extends StatelessWidget {
               // makes the whole row taller than the other three.
               overflow: TextOverflow.clip,
               softWrap: false,
+              /* Підпис як у приладів: маленький і розріджений. Саме трекінг
+                 робить із нього підпис шкали, а не маленьке слово. */
               style: context.t.labelSmall?.copyWith(
-                fontSize: tight ? 9 : 11,
-                letterSpacing: tight ? 0 : 11 * 0.03,
+                fontSize: tight ? 9 : 10,
+                fontWeight: FontWeight.w500,
+                letterSpacing: tight ? 0 : 10 * 0.09,
               ),
             ),
           ],

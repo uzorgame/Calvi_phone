@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../data/allergens.dart';
+import '../../data/legal.dart';
 import '../../data/settings.dart';
 import '../../data/app_scope.dart';
 import '../meds/meds_route.dart';
@@ -12,8 +13,12 @@ import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import '../../format.dart';
 import 'panel_allergy.dart';
+import '../../l10n/app_localizations.dart';
+import '../../l10n/labels.dart';
 import 'panel_assistant.dart';
 import 'panel_reminders.dart';
+import 'panel_about.dart';
+import 'panel_legal.dart';
 import 'panels_account.dart';
 import 'panels_body.dart';
 
@@ -21,10 +26,6 @@ import 'panels_body.dart';
    only address in the app and it will change with the developer, not with the
    screen. */
 const devTelegram = 'calvi_dev';
-
-const _freeLine =
-    'Захисникам України, працівникам ЗСУ, ДСНС, ДТЕК, медикам, волонтерам, '
-    'вчителям прифронтових зон тарифний план БЕЗКОШТОВНИЙ';
 
 /// Settings, and the sub-screens behind each row. Every row opens something:
 /// a row that leads nowhere teaches people to stop tapping rows.
@@ -71,8 +72,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   /* Medications keep a route of their own: they are reached from the day as
      well, so they are a place in the app rather than a page of settings. */
-  void _openMeds(BuildContext context) =>
-      Navigator.of(context).push(slideRoute(const MedsRoute()));
+  void _openMeds(BuildContext context) => Navigator.of(context).push(slideRoute(const MedsRoute()));
 
   /// The sub-screen behind a row, built when it is the one showing.
   Widget _panelFor(
@@ -82,7 +82,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   ) {
     return switch (id) {
       'profile' => ProfilePanel(s: s, set: set, onBack: _close),
-      'weight' => WeightPanel(s: s, set: set, onBack: _close),
       'goal' => GoalPanel(s: s, set: set, onBack: _close),
       'norm' => NormPanel(s: s, set: set, onBack: _close),
       'allergy' => AllergyPanel(s: s, set: set, onBack: _close),
@@ -93,9 +92,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         onBack: _close,
         // One state, two sides: the medication screen owns it.
         medsRemind: AppScope.of(context).meds.any((m) => m.remind),
-        onMedsRemind: (on) => AppScope.of(
-          context,
-        ).setMeds((list) => [for (final m in list) m.copyWith(remind: on)]),
+        onMedsRemind: (on) =>
+            AppScope.of(context).setMeds((list) => [for (final m in list) m.copyWith(remind: on)]),
         onMeds: () => _openMeds(context),
         now: DateTime.now().millisecondsSinceEpoch,
       ),
@@ -103,6 +101,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       'theme' => ThemePanel(s: s, set: set, onBack: _close),
       'lang' => LangPanel(s: s, set: set, onBack: _close),
       'privacy' => PrivacyPanel(s: s, set: set, onBack: _close),
+      'terms' => LegalPanel(doc: terms, onBack: _close),
+      'policy' => LegalPanel(doc: privacy, onBack: _close),
+      'about' => AboutPanel(onBack: _close),
       'delete' => DeletePanel(onBack: _close),
       _ => const SizedBox.shrink(),
     };
@@ -113,8 +114,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final scope = AppScope.of(context);
     final s = scope.s;
     final set = scope.set;
+    final l = L.of(context);
     final allergyValue = s.allergies.isEmpty
-        ? 'не вказано'
+        ? l.setUnset
         : s.allergies
               .map((a) => allergenById(a.id)?.name ?? '')
               .where((n) => n.isNotEmpty)
@@ -122,10 +124,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     final onKinds = s.reminders.where((r) => r.on).map((r) => r.kind).toSet();
     final remindValue = onKinds.isEmpty
-        ? 'вимкнені'
+        ? l.setRemindersOff
         : reminderKinds
               .where((k) => onKinds.contains(k.id))
-              .map((k) => k.title.toLowerCase())
+              .map((k) => reminderTitle(context, k.id).toLowerCase())
               .join(', ');
 
     /* One screen, and what is inside it slides. Settings itself is already
@@ -133,6 +135,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
        not animate: dir is zero until something has actually been opened. */
     return Slide(
       value: _panel ?? 'root',
+      /* Сторінки налаштувань розчиняються одна в одну, як у демці. Доти вони
+         просто накривали одна одну непрозорими прямокутниками, і вихід назад
+         до списку читався як підміна, а не як рух: сторінка зникала на
+         останньому кадрі. Тепер та, що йде, зникає одразу, а список наростає
+         весь час руху, і повернення виходить м'яким. */
+      fade: true,
       dir: !_moved
           ? 0
           : _panel != null
@@ -141,33 +149,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: _panel != null
           ? _panelFor(_panel!, s, set)
           : CalviScreen(
-              title: 'Налаштування',
+              title: l.setTitle,
               children: [
                 CalviSection(
-                  title: 'Про тебе',
+                  title: l.setGroupAbout,
                   children: [
                     CalviRow(
                       icon: 'user',
-                      title: 'Профіль',
+                      title: l.setProfile,
                       first: true,
-                      value: '${sexLabel(s.sex)}, ${s.age}, ${s.heightCm} см',
+                      value: l.setProfileLine(sexShort(context, s.sex), s.age, s.heightCm),
                       onTap: () => _open('profile'),
                     ),
-                    /* Weight is what you are today; where it should go is the goal's
-               business. Holding both on one row made the two look like one
-               decision. */
-                    CalviRow(
-                      icon: 'scale',
-                      title: 'Вага',
-                      value: '${s.weightKg.toStringAsFixed(1)} кг',
-                      onTap: () => _open('weight'),
-                    ),
+                    /* Ваги тут немає навмисно.
+                       Її ставлять один раз на знайомстві, а далі вона живе
+                       вимірюваннями: замір це подія з датою, з якої будується
+                       крива. Поле в налаштуваннях дозволяло переписати поточну
+                       вагу без сліду в історії, і крива після цього показувала
+                       не те, що сталось. */
                     CalviRow(
                       icon: 'target',
-                      title: 'Ціль',
+                      title: l.setGoal,
                       value: s.direction == Direction.keep
-                          ? 'тримати вагу'
-                          : '${s.targetKg.toStringAsFixed(1)} кг, ${s.pace.toStringAsFixed(1)}/тиждень',
+                          ? l.setGoalKeep
+                          : l.setGoalLine(s.targetKg.toStringAsFixed(1), s.pace.toStringAsFixed(1)),
                       onTap: () => _open('goal'),
                     ),
                   ],
@@ -177,45 +182,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
            weight; splitting numbers that move each other across separate screens
            hides from the person what they just changed. */
                 CalviSection(
-                  title: 'Норма',
+                  title: l.setNorm,
                   children: [
                     CalviRow(
                       icon: 'flame',
-                      title: 'Норма',
+                      title: l.setNorm,
                       first: true,
-                      value: '${thousands(dailyKcal(s))} ккал',
+                      value: l.setNormLine(thousands(dailyKcal(s))),
                       onTap: () => _open('norm'),
                     ),
                   ],
                 ),
 
                 CalviSection(
-                  title: 'Здоровʼя',
+                  title: l.setGroupHealth,
                   children: [
                     CalviRow(
                       icon: 'allergy',
-                      title: 'Алергії',
+                      title: l.setAllergies,
                       first: true,
                       value: allergyValue,
                       onTap: () => _open('allergy'),
                     ),
-                    CalviRow(icon: 'pill', title: 'Препарати', onTap: () => _openMeds(context)),
+                    CalviRow(icon: 'pill', title: l.setMeds, onTap: () => _openMeds(context)),
                   ],
                 ),
 
                 CalviSection(
-                  title: 'Помічник',
+                  title: l.setGroupAssistant,
                   children: [
                     CalviRow(
                       icon: 'user',
-                      title: 'Помічник',
+                      title: l.setGroupAssistant,
                       first: true,
-                      value: '$assistantName, памʼяті ${s.memory.length}',
+                      value: l.setAssistantLine(assistantName, s.memory.length),
                       onTap: () => _open('assistant'),
                     ),
                     CalviRow(
                       icon: 'bell',
-                      title: 'Нагадування',
+                      title: l.setReminders,
                       value: remindValue,
                       onTap: () => _open('reminders'),
                     ),
@@ -223,13 +228,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
 
                 CalviSection(
-                  title: 'Акаунт',
+                  title: l.setGroupAccount,
                   children: [
                     CalviRow(
                       icon: 'card',
-                      title: 'Підписка',
+                      title: l.setPlan,
                       first: true,
-                      value: 'Безкоштовно',
+                      value: l.setPlanFree,
                       onTap: () => _open('plan'),
                     ),
                     // Under the row it belongs to, and itself the way in: it
@@ -237,35 +242,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     _FreeLine(onTap: () => _promo(context)),
                     CalviRow(
                       icon: 'sun',
-                      title: 'Тема',
-                      value: themeLabel(s.theme),
+                      title: l.setTheme,
+                      value: themeTitle(context, s.theme),
                       onTap: () => _open('theme'),
                     ),
                     CalviRow(
                       icon: 'note',
-                      title: 'Мова',
-                      value: langLabel(s.lang),
+                      title: l.setLang,
+                      value: langTitle(context, s.lang),
                       onTap: () => _open('lang'),
                     ),
-                    CalviRow(
-                      icon: 'shield',
-                      title: 'Приватність',
-                      onTap: () => _open('privacy'),
-                    ),
+                    /* «Дані і аналітика», а не «Приватність»: нижче стоїть
+                       політика приватності, і два однакові слова на одному
+                       екрані означали б, що людина відкриє не те. Тут
+                       перемикачі, там документ. */
+                    CalviRow(icon: 'chart', title: l.setPrivacy, onTap: () => _open('privacy')),
                     CalviRow(
                       icon: 'user',
-                      title: 'Видалити акаунт і дані',
+                      title: l.setDeleteAccount,
                       danger: true,
                       onTap: () => _open('delete'),
                     ),
                   ],
                 ),
 
-                Padding(
-                  padding: const EdgeInsets.only(top: 18),
-                  child: Center(
-                    child: Text('Calvi 0.1 · демо інтерфейсу', style: context.t.labelSmall),
-                  ),
+                /* Документи мусять бути в застосунку, а не тільки на сайті. Так
+                   вимагає магазин, і так чесніше: погодився в застосунку,
+                   читаєш у застосунку. */
+                CalviSection(
+                  title: l.setGroupDocs,
+                  children: [
+                    CalviRow(
+                      icon: 'note',
+                      first: true,
+                      title: l.setTerms,
+                      onTap: () => _open('terms'),
+                    ),
+                    CalviRow(icon: 'shield', title: l.setPolicy, onTap: () => _open('policy')),
+                    CalviRow(icon: 'settings', title: l.setAbout, onTap: () => _open('about')),
+                  ],
                 ),
               ],
             ),
@@ -275,11 +290,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _promo(BuildContext context) {
     calviSheet(
       context,
-      title: 'Безкоштовний тариф',
-      doneLabel: 'Закрити',
+      title: L.of(context).setFreeTierTitle,
+      doneLabel: L.of(context).actionClose,
       info: true,
       builder: (sheet) {
         final c = sheet.c;
+        final l = L.of(sheet);
         return Padding(
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
           child: Column(
@@ -288,12 +304,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: [
               Text.rich(
                 TextSpan(
-                  text:
-                      'Захисникам України, працівникам ЗСУ, ДСНС, ДТЕК, медикам, волонтерам, '
-                      'вчителям прифронтових зон тарифний план ',
+                  text: l.setFreeTierHead,
                   children: [
                     TextSpan(
-                      text: 'БЕЗКОШТОВНИЙ',
+                      text: l.setFreeTierWord,
                       style: TextStyle(color: c.text, fontWeight: FontWeight.w700),
                     ),
                     const TextSpan(text: '.'),
@@ -330,7 +344,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Написати в Telegram',
+                              l.setFreeTierTelegram,
                               style: sheet.t.titleMedium?.copyWith(fontSize: 15),
                             ),
                             const SizedBox(height: 2),
@@ -344,10 +358,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
               const SizedBox(height: 14),
-              Text(
-                'Напишіть розробнику, і сьогодні вам активують платний тариф.',
-                style: sheet.t.bodyMedium,
-              ),
+              Text(l.setFreeTierWrite, style: sheet.t.bodyMedium),
             ],
           ),
         );
@@ -364,6 +375,7 @@ class _FreeLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.c;
+    final l = L.of(context);
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -375,12 +387,12 @@ class _FreeLine extends StatelessWidget {
         ),
         child: Text.rich(
           TextSpan(
-            text: _freeLine,
+            text: l.setFreeTierShort,
             children: [
               // The way in is the last words of the sentence, not a button
               // beside it: the sentence is what makes anybody want to tap.
               TextSpan(
-                text: ' Як отримати',
+                text: l.setFreeTierHow,
                 style: TextStyle(color: c.text, fontWeight: FontWeight.w600),
               ),
             ],

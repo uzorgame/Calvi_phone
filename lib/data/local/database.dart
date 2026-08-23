@@ -54,7 +54,19 @@ class CalviDb extends _$CalviDb {
    * взагалі, поки не сказати, звідки взяти sqlite та його робітника: без цього
    * рядка `driftDatabase` кидає «When compiling to the web, the web parameter
    * needs to be set», і застосунок падає ще до першого кадру, показуючи білий
-   * екран. Обидва файли кладе в build/web сам drift під час збірки. */
+   * екран.
+   *
+   * **Обидва файли треба покласти в `web/` руками.** Тут стояло, що їх копіює
+   * drift під час збірки, і це неправда: `flutter build web` не знає про них
+   * нічого. У зібраному застосунку `GET /sqlite3.wasm` віддавав 404, drift
+   * пробував знову і знову, і сторінка крутила той самий необроблений виняток
+   * без кінця. Знайшлось це не з коду, а з мережевої панелі браузера.
+   *
+   * `sqlite3.wasm` береться з релізів пакета `sqlite3`, `drift_worker.js`
+   * збирається командою `dart run drift_dev make-worker`. Версії обох мають
+   * збігатись із версіями пакетів у `pubspec.lock`.
+   *
+   * Android це не зачіпає, і саме тому воно прожило так довго непоміченим. */
   static QueryExecutor _open() => driftDatabase(
     name: 'calvi',
     web: DriftWebOptions(
@@ -64,7 +76,7 @@ class CalviDb extends _$CalviDb {
   );
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -80,6 +92,90 @@ class CalviDb extends _$CalviDb {
       if (from < 2) {
         await m.addColumn(syncMeta, syncMeta.accessToken);
         await m.addColumn(syncMeta, syncMeta.refreshToken);
+      }
+
+      /* 3: полагодити дні, які приїхали з сервера повним часом.
+       *
+       * Сервер віддавав календарний день як `2026-08-18T00:00:00.000Z`, і кожен
+       * запис, зроблений Норою, лягав під ключем, якого жоден екран не питає.
+       * Сервер уже виправлено, але зіпсовані рядки лишились лежати в людей на
+       * телефонах: без цього кроку вони так і не побачать свій сніданок. */
+      if (from < 3) {
+        for (final table in [
+          'meals',
+          'water_logs',
+          'weights',
+          'measurements',
+          'workouts',
+          'medication_takes',
+        ]) {
+          await customStatement(
+            'update $table set day = substr(day, 1, 10) where length(day) > 10',
+          );
+        }
+      }
+
+      /* Памʼять Нори і звертання. Обидва в профілі, обидва новими колонками:
+         на телефонах, які вже живуть, профіль лишається на місці, а поля
+         додаються порожніми. */
+      if (from < 4) {
+        await m.addColumn(profile, profile.addressAs);
+        await m.addColumn(profile, profile.memory);
+      }
+
+      // Розклад препарату: до цього він умів тільки години.
+      if (from < 5) {
+        await m.addColumn(medications, medications.schedule);
+      }
+
+      // Нагадування: доти вони жили тільки в памʼяті екрана.
+      if (from < 6) {
+        await m.addColumn(profile, profile.reminders);
+      }
+
+      /* Форма препарату, межі курсу і перелік полів вимірювань.
+       *
+       * Форму дістаємо з примітки, куди вона колись була вписана рядком
+       * «form=tab», і примітку тут же чистимо: інакше людина побачила б цей
+       * маркер як власний текст. Початком курсу для вже заведених препаратів
+       * стає день оновлення: коли саме їх завели, ми не знаємо, а зробити
+       * вигляд, що знаємо, гірше. */
+      if (from < 7) {
+        await m.addColumn(medications, medications.form);
+        await m.addColumn(medications, medications.startDay);
+        await m.addColumn(medications, medications.endDay);
+        await m.addColumn(profile, profile.tracked);
+
+        for (final f in ['tab', 'cap', 'drop', 'ml', 'shot']) {
+          await customStatement("update medications set form = '$f' where note like '%form=$f%'");
+        }
+        await customStatement("update medications set note = null where note like 'form=%'");
+
+        final today = DateTime.now();
+        final key =
+            '${today.year.toString().padLeft(4, '0')}-'
+            '${today.month.toString().padLeft(2, '0')}-'
+            '${today.day.toString().padLeft(2, '0')}';
+        await customStatement("update medications set start_day = '$key'");
+      }
+
+      /* Пошта акаунта і дата його створення.
+       *
+       * Порожні для тих, хто вже увійшов до цього оновлення: сервер віддає їх
+       * при вході, а не при синхронізації, тому заповняться вони наступним
+       * входом. Профіль на це готовий і показує в такому разі саму пошту без
+       * дати, а не рядок «невідомо». */
+      if (from < 8) {
+        await m.addColumn(syncMeta, syncMeta.email);
+        await m.addColumn(syncMeta, syncMeta.joinedAt);
+      }
+
+      /* Мова інтерфейсу. Доти вона жила тільки в памʼяті екрана і злітала при
+         кожному перезапуску: вибір, який не переживає закриття застосунку, це не
+         вибір. Тим, хто вже користується, дістається `system`, і для української
+         аудиторії на українських телефонах нічого не змінюється. */
+      if (from < 9) {
+        await m.addColumn(profile, profile.lang);
       }
     },
     beforeOpen: (details) async {

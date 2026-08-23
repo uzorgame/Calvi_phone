@@ -1,0 +1,1217 @@
+{
+  "@@locale": "en",
+  "@accountSignInFailedWhy": {
+    "placeholders": {
+      "why": {
+        "type": "String"
+      }
+    }
+  },
+  "@agoDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agoWeeks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@allergySearch": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@anChartGoal": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@anDonePercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "@anEtaHead": {
+    "description": "The asterisks mark the part drawn in bold; the note widget reads them.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@anMacroGoal": {
+    "placeholders": {
+      "grams": {
+        "type": "int"
+      }
+    }
+  },
+  "@anMeasuresChange": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "@anShareOfNorm": {
+    "placeholders": {
+      "share": {
+        "type": "int"
+      }
+    }
+  },
+  "@anWaterGoal": {
+    "placeholders": {
+      "ml": {
+        "type": "String"
+      }
+    }
+  },
+  "@assistantHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@assistantPinned": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "pinned": {
+        "type": "int"
+      }
+    }
+  },
+  "@barGrams": {
+    "placeholders": {
+      "grams": {
+        "type": "int"
+      }
+    }
+  },
+  "@camAllergyContains": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "@camAllergyTraces": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "@camIngredients": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "@camIntoSlot": {
+    "description": "Under the shutter: which card the shot will be written into.",
+    "placeholders": {
+      "slot": {
+        "type": "String"
+      }
+    }
+  },
+  "@camKcalFor": {
+    "placeholders": {
+      "grams": {
+        "type": "int"
+      }
+    }
+  },
+  "@camKcalPer": {
+    "placeholders": {
+      "grams": {
+        "type": "int"
+      }
+    }
+  },
+  "@camLogInto": {
+    "description": "The whole phrase comes from the shared slot phrases, because Ukrainian declines the card name after the preposition.",
+    "placeholders": {
+      "slotInto": {
+        "type": "String"
+      }
+    }
+  },
+  "@camPortionPack": {
+    "placeholders": {
+      "g": {
+        "type": "int"
+      }
+    }
+  },
+  "@doseTabOne": {
+    "description": "Dose forms. Three each, because Ukrainian picks between them by the number in front; English uses the same word for the last two."
+  },
+  "@entries": {
+    "description": "How many records a meal card holds. Ukrainian needs three forms here, which is why this is a plural and not a joined string.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@eveningLogged": {
+    "description": "The evening question. The card name arrives already in the case the sentence needs, because Ukrainian declines it.",
+    "placeholders": {
+      "slot": {
+        "type": "String"
+      }
+    }
+  },
+  "@eveningMissing": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "@goalDiff": {
+    "placeholders": {
+      "kg": {
+        "type": "String"
+      }
+    }
+  },
+  "@goalFromStart": {
+    "placeholders": {
+      "kg": {
+        "type": "String"
+      }
+    }
+  },
+  "@goalRange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "@gramsUnit": {
+    "description": "Weight with the unit.",
+    "placeholders": {
+      "grams": {
+        "type": "int"
+      }
+    }
+  },
+  "@heroBurned": {
+    "placeholders": {
+      "kcal": {
+        "type": "int"
+      }
+    }
+  },
+  "@heroFrom": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      }
+    }
+  },
+  "@heroOf": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      }
+    }
+  },
+  "@heroWeightFrom": {
+    "placeholders": {
+      "kg": {
+        "type": "String"
+      }
+    }
+  },
+  "@kcalUnit": {
+    "description": "Calories with the unit, as it stands on badges and cards.",
+    "placeholders": {
+      "kcal": {
+        "type": "int"
+      }
+    }
+  },
+  "@legalUpdated": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@loginServer": {
+    "placeholders": {
+      "why": {
+        "type": "String"
+      }
+    }
+  },
+  "@macroCShort": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "@macroFShort": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "@macroOfGrams": {
+    "placeholders": {
+      "goal": {
+        "type": "int"
+      }
+    }
+  },
+  "@macroPShort": {
+    "description": "Macro chips under a dish: one letter and the grams.",
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "@macroProteinLetter": {
+    "description": "One letter over a macro column on the plate strip."
+  },
+  "@mealGrams": {
+    "placeholders": {
+      "grams": {
+        "type": "int"
+      }
+    }
+  },
+  "@measureCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@measureLast": {
+    "placeholders": {
+      "ago": {
+        "type": "String"
+      }
+    }
+  },
+  "@medsSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@medsUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@normAutoHint": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      }
+    }
+  },
+  "@normGrams": {
+    "placeholders": {
+      "grams": {
+        "type": "int"
+      }
+    }
+  },
+  "@normKcalOf": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      }
+    }
+  },
+  "@normMacroSplit": {
+    "placeholders": {
+      "protein": {
+        "type": "int"
+      },
+      "fat": {
+        "type": "int"
+      },
+      "carbs": {
+        "type": "int"
+      }
+    }
+  },
+  "@normOf": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      }
+    }
+  },
+  "@normOffBy": {
+    "placeholders": {
+      "sum": {
+        "type": "String"
+      },
+      "off": {
+        "type": "int"
+      }
+    }
+  },
+  "@normWaterPerKg": {
+    "placeholders": {
+      "ml": {
+        "type": "int"
+      }
+    }
+  },
+  "@plateFor": {
+    "placeholders": {
+      "grams": {
+        "type": "int"
+      }
+    }
+  },
+  "@reminderBodyMeal": {
+    "description": "The one line inside a notification. No exclamation marks, emoji or reproach: a reminder that nags gets switched off on the third day."
+  },
+  "@repEveryN": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@setAssistantLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@setGoalLine": {
+    "placeholders": {
+      "kg": {
+        "type": "String"
+      },
+      "pace": {
+        "type": "String"
+      }
+    }
+  },
+  "@setNormLine": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      }
+    }
+  },
+  "@setProfileLine": {
+    "description": "The one-line summary under Profile: sex, age, height.",
+    "placeholders": {
+      "sex": {
+        "type": "String"
+      },
+      "age": {
+        "type": "int"
+      },
+      "height": {
+        "type": "int"
+      }
+    }
+  },
+  "@sexShortMale": {
+    "description": "One letter, as the profile row prints it beside age and height."
+  },
+  "@slotBreakfast": {
+    "description": "The four meal cards. The assistant may rename a card by the time it happened, and then its own words are shown instead of these."
+  },
+  "@slotIntoBreakfast": {
+    "description": "«Logged into breakfast». A whole phrase, not a preposition glued to the name: Ukrainian declines the noun after it («у вечерю», not «в вечеря») and alternates the preposition itself for sound, so neither half survives being assembled in code."
+  },
+  "@slotIntoOther": {
+    "description": "A card the assistant renamed by the time it happened. Its name arrives in her own words and cannot be declined, so quotes hold it out of the sentence instead.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@startAgeYears": {
+    "description": "Age beside the drum. Ukrainian needs three forms, which is why this is a plural rather than a joined string.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@startAgreeHead": {
+    "description": "The consent line is assembled from spans, because the two document names are tappable."
+  },
+  "@startPaceEtaHead": {
+    "description": "Opening of the line that names the date. The date itself is bold, so the sentence arrives in three pieces."
+  },
+  "@startPaceWeeks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@startSignInFailedWhy": {
+    "placeholders": {
+      "why": {
+        "type": "String"
+      }
+    }
+  },
+  "@todayCodeTalk": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "@todayHowManyGrams": {
+    "description": "One question per dish whose weight was not stated. The app writes it, not the model: on two dishes the model wrote one question for both, and one number cannot answer for two dishes.",
+    "placeholders": {
+      "dish": {
+        "type": "String"
+      }
+    }
+  },
+  "@todayLoggedAskWeight": {
+    "placeholders": {
+      "slotInto": {
+        "type": "String"
+      }
+    }
+  },
+  "@todayLoggedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@todayLoggedInto": {
+    "placeholders": {
+      "slotInto": {
+        "type": "String"
+      },
+      "dish": {
+        "type": "String"
+      }
+    }
+  },
+  "@todayLoggedIntoWithNumbers": {
+    "placeholders": {
+      "slotInto": {
+        "type": "String"
+      },
+      "dish": {
+        "type": "String"
+      },
+      "kcal": {
+        "type": "int"
+      },
+      "grams": {
+        "type": "int"
+      }
+    }
+  },
+  "@unitKcal": {
+    "description": "Bare units, for places that set the figure and the unit in different type."
+  },
+  "@waterGlasses": {
+    "placeholders": {
+      "glasses": {
+        "type": "int"
+      }
+    }
+  },
+  "@waterLess": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      }
+    }
+  },
+  "@waterMore": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      }
+    }
+  },
+  "@waterOf": {
+    "placeholders": {
+      "ml": {
+        "type": "String"
+      }
+    }
+  },
+  "@waterShare": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "@wfMin": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "@workoutBurned": {
+    "placeholders": {
+      "kcal": {
+        "type": "int"
+      }
+    }
+  },
+  "@workoutSessions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "aboutContact": "Contact",
+  "aboutDeveloper": "Developer",
+  "aboutText": "A food diary that understands ordinary sentences. Nora does the arithmetic, the decisions stay yours.",
+  "aboutTitle": "About the app",
+  "aboutVersion": "Version",
+  "aboutWrite": "Write to us",
+  "accountBusy": "Signing in…",
+  "accountGoogle": "Continue with Google",
+  "accountKeepCloud": "The one in the account",
+  "accountNoAccountNote": "The diary lives only on this phone. Change the phone or remove the app and there is nothing to bring the entries back with: we do not know whose they are.",
+  "accountScopeNote": "We ask for the email only. Google does not pass us the name, the profile picture or the contacts.",
+  "accountSettingsDevice": "settings",
+  "accountSignInFailed": "Could not sign in.",
+  "accountSignInFailedWhy": "Could not sign in. {why}",
+  "accountSignOut": "Sign out",
+  "accountSignOutAction": "Sign out",
+  "accountSignOutAsk": "Sign out?",
+  "accountSignOutBack": "You can sign back in with the same account any time, right here.",
+  "accountSignOutNote": "The entries stay on this phone: signing out does not wipe the diary. What stops is the rest, syncing with other devices and the ability to get the data back if the phone is lost.",
+  "accountSince": "With Calvi since",
+  "accountTitle": "Account",
+  "accountVia": "Signed in with Google",
+  "accountWhichDiary": "Which diary do we keep?",
+  "accountWhichDiaryNote": "This account already has entries, and so does the phone. Only one can stay: the one in the account, or the one on the phone. The other one goes.",
+  "actBasketball": "Basketball",
+  "actBike": "Cycling",
+  "actDance": "Dancing",
+  "actFootball": "Football",
+  "actGym": "Gym",
+  "actHiit": "HIIT",
+  "actJumprope": "Skipping",
+  "actRun": "Running",
+  "actSki": "Skiing",
+  "actStretch": "Stretching",
+  "actSwim": "Swimming",
+  "actTennis": "Tennis",
+  "actWalk": "Walking",
+  "actYoga": "Yoga",
+  "actionAdd": "Add",
+  "actionBack": "Back",
+  "actionCancel": "Cancel",
+  "actionClose": "Close",
+  "actionDelete": "Delete",
+  "actionDone": "Done",
+  "actionNext": "Next",
+  "actionSave": "Save",
+  "activityHigh": "High",
+  "activityHighHint": "5-6 workouts",
+  "activityLight": "Lightly active",
+  "activityLightHint": "1-2 workouts a week",
+  "activityModerate": "Moderate",
+  "activityModerateHint": "3-4 workouts",
+  "activitySedentary": "Sedentary",
+  "activitySedentaryHint": "almost no movement",
+  "activityVeryHigh": "Very high",
+  "activityVeryHighHint": "physical work or sport every day",
+  "agoDays": "{count, plural, =1{1 day ago} other{{count} days ago}}",
+  "agoToday": "today",
+  "agoWeek": "a week ago",
+  "agoWeeks": "{count, plural, other{{count} weeks ago}}",
+  "agoYesterday": "yesterday",
+  "allergyConfirm": "Confirm",
+  "allergyMild": "Mild",
+  "allergyMildHint": "I will warn you in the text, without blocking the entry.",
+  "allergyMildShort": "mild",
+  "allergyNote": "If a product's composition is not in the base, I do not stay quiet and I do not treat that as safe: I will say separately that the composition is unknown.",
+  "allergyNothing": "Nothing found. If the allergen is not in the list, tell Nora: we will add it to the reference so it works for everyone, instead of staying as text for one person.",
+  "allergyRemove": "Remove",
+  "allergySearch": "Search {count} allergens",
+  "allergySevere": "Severe",
+  "allergySevereHint": "I will stop before logging and say so plainly.",
+  "allergySevereShort": "severe",
+  "allergyTitle": "Allergies",
+  "anChartGoal": "goal {value}",
+  "anDaysInNorm": "days on target",
+  "anDonePercent": "{percent}% done",
+  "anEtaHead": "At the current pace the goal is around *{date}*",
+  "anForMonth": "over the month",
+  "anForQuarter": "over 3 months",
+  "anForYear": "over the year",
+  "anGoalProgress": "Progress to the goal",
+  "anKcal": "Calories",
+  "anKcalAvg": "on average a day",
+  "anKcalEmpty": "Nothing logged for this period yet. Tell Nora what you ate and the chart will build itself.",
+  "anKcalTotal": "over the period, kcal",
+  "anMacroGoal": "norm {grams} g",
+  "anMacrosAvg": "Macros on average",
+  "anMacrosEmpty": "An average appears as soon as there is something to average: log at least one day.",
+  "anMeasures": "Measurements",
+  "anMeasuresChange": "change {period}",
+  "anMeasuresEmpty": "No measurements yet.",
+  "anMeasuresEmptyHint": "Measure once a month and I will show you what is moving",
+  "anMonth": "Month",
+  "anNow": "now",
+  "anNowKg": "now, kg",
+  "anOneReading": "one reading",
+  "anOneWeighing": "One reading so far. The second one shows the direction, and the line starts from it.",
+  "anPerDay": "a day",
+  "anQuarter": "3 months",
+  "anShareOfNorm": "{share}% of the norm",
+  "anTargetKg": "goal, kg",
+  "anTitle": "Analytics",
+  "anWater": "Hydration",
+  "anWaterAvg": "on average, ml",
+  "anWaterGoal": "norm {ml} ml",
+  "anWeek": "Week",
+  "anWeightEmpty": "The curve appears after the second weigh-in. Tell Nora your weight and she will log it herself.",
+  "anYear": "Year",
+  "assistantAddMemory": "Add to memory",
+  "assistantCollapse": "Collapse",
+  "assistantExample": "For example, I do not eat mushrooms",
+  "assistantForget": "Forget",
+  "assistantHint": "{name} keeps the diary with you and remembers what you told her about yourself.",
+  "assistantMemory": "Memory",
+  "assistantMemoryEmpty": "Nothing remembered yet.",
+  "assistantMemoryEmptyHint": "Memory comes out of conversations, or add one by hand",
+  "assistantPinned": "{count}, {pinned} pinned",
+  "assistantTitle": "Assistant",
+  "assistantWhatToRemember": "What to remember",
+  "barCamera": "Camera",
+  "barGrams": "{grams} g",
+  "barHint": "Write the way you speak.",
+  "barHintMore": "\"two eggs and toast\", \"drank 300 of water\", \"ran 40 minutes\": I will work it out and put it in the right card",
+  "barLogsInto": "Logging into ",
+  "barMic": "Microphone",
+  "barSend": "Send",
+  "camAgain": "Again",
+  "camAllergen": "Allergen!",
+  "camAllergyContains": "Contains your allergen: {list}",
+  "camAllergyTraces": "May contain traces of: {list}",
+  "camBarcode": "Barcode",
+  "camBusy": "The camera did not open. Usually another app is holding it.",
+  "camCouldNotRead": "Could not read the shot",
+  "camDish": "Meal",
+  "camEstimate": " kcal, an estimate",
+  "camFlash": "Flash",
+  "camFromPack": "Figures from the packaging. Logging this costs no tokens.",
+  "camGallery": "From the gallery",
+  "camHintBarcode": "the code inside the frame",
+  "camHintDish": "point it at the plate",
+  "camIngredients": "Ingredients: {text}",
+  "camIntoSlot": "into {slot}",
+  "camKcalFor": " kcal for {grams} g",
+  "camKcalPer": " kcal per {grams} g",
+  "camLogInto": "Log it {slotInto}",
+  "camNoPermission": "No camera permission. You can grant it in the phone's settings.",
+  "camNoScanner": "This phone cannot read codes with the camera.",
+  "camNoTokens": "Out of tokens for today",
+  "camNotRead": "Could not make it out",
+  "camOfflineShot": "No connection. You can send the shot to Nora later",
+  "camPer100": "No exact weight on the packaging: figures are per 100 g.",
+  "camPortionPack": "Portion from the packaging: {g} g. Figures are per portion.",
+  "camReading": "Reading…",
+  "camSendToNora": "Send to Nora",
+  "camShoot": "Take a photo",
+  "camShotFailed": "The shot did not work",
+  "camShotReady": "The shot is ready",
+  "camShotReadyNote": "Nora will read it and answer in the chat: she will name the dish, estimate the portion and show where the figure came from. It costs two tokens.",
+  "camStillWorks": "Meal photos and the gallery work as usual.",
+  "camTitle": "Scanner",
+  "camTookTooLong": "Reading it took too long. Try again",
+  "camUnknownCode": "I do not know this code",
+  "camUnknownCodeNote": "It is not in our base, and not in the open one either. Photograph the meal itself or write the name in words, and Nora will count it.",
+  "deleteConfirm": "I understand the data will be deleted forever and cannot be brought back.",
+  "deleteDays": "Days with Calvi",
+  "deleteEntries": "Entries in the diary",
+  "deleteForever": "Delete forever",
+  "deleteNote": "Everything goes: the diary, weight, measurements, allergies, medications, conversation history. There is no undoing it.",
+  "deleteSubNote": "If it is about the subscription, that can be cancelled separately in the App Store or Google Play without deleting the account.",
+  "deleteTitle": "Delete account",
+  "deleteWeighings": "Weight readings",
+  "dictationBusy": "The microphone is busy. Try again",
+  "dictationFailed": "Dictation did not work",
+  "dictationNoMatch": "I did not hear anything I could make out",
+  "dictationNoNetwork": "Recognition needs a network",
+  "dictationNoPermission": "No microphone permission",
+  "dictationSilence": "Silence. Try again, closer to the microphone",
+  "dictationUnavailable": "Dictation is not available on this phone",
+  "doseCapFew": "capsules",
+  "doseCapMany": "capsules",
+  "doseCapOne": "capsule",
+  "doseDropFew": "drops",
+  "doseDropMany": "drops",
+  "doseDropOne": "drop",
+  "doseMlFew": "ml",
+  "doseMlMany": "ml",
+  "doseMlOne": "ml",
+  "doseShotFew": "shots",
+  "doseShotMany": "shots",
+  "doseShotOne": "shot",
+  "doseTabFew": "tablets",
+  "doseTabMany": "tablets",
+  "doseTabOne": "tablet",
+  "entries": "{count, plural, =0{no entries} =1{1 entry} other{{count} entries}}",
+  "eveningAnd": " and ",
+  "eveningBreakfastAcc": "breakfast",
+  "eveningDinnerAcc": "dinner",
+  "eveningEmptyDay": "The day is empty. What did you eat today?",
+  "eveningLogged": "Logged {slot}?",
+  "eveningLunchAcc": "lunch",
+  "eveningMissing": "{list} are not logged yet. Which of them happened?",
+  "eveningWater": "How much water did the day come to?",
+  "fieldBiceps": "Biceps",
+  "fieldChest": "Chest",
+  "fieldHips": "Hips",
+  "fieldNeck": "Neck",
+  "fieldThigh": "Thigh",
+  "fieldWaist": "Waist",
+  "fieldWeight": "Weight",
+  "fieldWrist": "Wrist",
+  "goalBecomes": "Becomes",
+  "goalCurrent": "Current goal ",
+  "goalDailyNorm": "Daily norm",
+  "goalDiff": "{kg} kg apart",
+  "goalDirection": "Direction",
+  "goalEta": "Goal around",
+  "goalFromStart": " from {kg} kg at the start. ",
+  "goalFromToday": "The new goal will start from today's weight.",
+  "goalKeepNote": "The norm holds your current weight: you put back exactly what you spend.",
+  "goalKeepShort": "Keep",
+  "goalNew": "Set a new goal",
+  "goalNewTitle": "New goal",
+  "goalPace": "Pace",
+  "goalPaceFast": "Fast",
+  "goalPaceOk": "This is the pace most people hold without breaking.",
+  "goalPaceSlow": "Slow",
+  "goalPaceUnit": "kg a week",
+  "goalPaceUsual": "Recommended",
+  "goalRange": "{from} → {to} kg",
+  "goalReplaceNote": "A goal is not edited, it is replaced. Progress will count from today's weight, and the old goal stays in the history. Confirm the replacement?",
+  "goalSet": "Set",
+  "goalTarget": "Target weight",
+  "goalWas": "Was",
+  "gramsUnit": "{grams} g",
+  "heroBurned": "-{kcal} kcal from training",
+  "heroDays": "days",
+  "heroFrom": " of {kcal}",
+  "heroGoalKg": "goal, kg",
+  "heroKcal": " kcal",
+  "heroKg": " kg",
+  "heroLeft": "left ",
+  "heroOf": " of {kcal}",
+  "heroOver": "over by ",
+  "heroWeightFrom": "now, from {kg} kg at the start of the goal",
+  "kcalUnit": "{kcal} kcal",
+  "langSection": "Interface language",
+  "langSystem": "Device language",
+  "legalUpdated": "Updated {date}",
+  "loginNoToken": "Google did not return a token",
+  "loginNotConfigured": "sign-in is not configured in this build",
+  "loginServer": "server: {why}",
+  "macroCShort": "C {value}",
+  "macroCarbs": "Carbs",
+  "macroCarbsCaps": "CARBS",
+  "macroCarbsLetter": "C",
+  "macroFShort": "F {value}",
+  "macroFat": "Fat",
+  "macroFatCaps": "FAT",
+  "macroFatLetter": "F",
+  "macroMedsCaps": "MEDS",
+  "macroOfGrams": " / {goal}g",
+  "macroPShort": "P {value}",
+  "macroProtein": "Protein",
+  "macroProteinCaps": "PROTEIN",
+  "macroProteinLetter": "P",
+  "mealAuto": "auto ",
+  "mealEmpty": "Nothing here yet. Write what it was and I will log it.",
+  "mealGrams": "{grams} g",
+  "mealThinking": "Nora is counting…",
+  "measureAdd": "Add a measurement",
+  "measureCollapse": "Collapse",
+  "measureCount": "{count, plural, =1{1 reading} other{{count} readings}}",
+  "measureLast": "last one {ago}",
+  "measureNever": "not measured yet",
+  "measureNothing": "nothing yet",
+  "measurePick": "Choose what you will measure. One is enough if the rest does not interest you.",
+  "measureSave": "Save the readings",
+  "measureStats": "Measurement statistics",
+  "measureTitle": "Measurements",
+  "medsAdd": "Add a medication",
+  "medsAllTaken": "Everything for today is taken",
+  "medsAt": "At",
+  "medsCourse": "Course",
+  "medsDose": "Dose",
+  "medsEmpty": "Nothing here yet. Add a medication and I will remind you at the right time.",
+  "medsEmptyHint": "I keep the log of doses taken, I do not work out the dosage",
+  "medsFinish": "End the course",
+  "medsHours": "Hours",
+  "medsHowOften": "How often",
+  "medsMine": "My medications",
+  "medsName": "Name",
+  "medsNameExample": "For example, Magnesium B6",
+  "medsNew": "New medication",
+  "medsNextAt": "Next at ",
+  "medsNoneToday": "Nothing to take today",
+  "medsNote": "Note",
+  "medsNow": "NOW",
+  "medsOne": "Medication",
+  "medsPast": "Past",
+  "medsPastEmpty": "Courses you no longer take will be here. A medication removed from the list stays in the days you took it.",
+  "medsPerTake": "How much at a time",
+  "medsRemind": "Remind me",
+  "medsRemindHint": "at the chosen hours",
+  "medsResume": "Resume the course",
+  "medsSchedule": "Schedule",
+  "medsSince": "since {date}",
+  "medsTime": "Time",
+  "medsTitle": "Medications",
+  "medsUntil": "until {date}",
+  "noraName": "Nora",
+  "normAuto": "Count it automatically",
+  "normAutoFrom": "From weight, height, age, activity and goal: ",
+  "normAutoHint": "from weight, height, age, activity and the goal: {kcal} kcal",
+  "normAutoShort": "Automatic",
+  "normByHand": "Set it by hand",
+  "normByHandHint": "analytics will count against this figure",
+  "normByHandShort": "By hand",
+  "normCalculatedHead": "The calculated value is ",
+  "normCalculatedTail": ". You can go back to it by choosing \"Count it automatically\".",
+  "normFitCarbs": "Fit the carbs to the norm",
+  "normFits": "The split matches the norm",
+  "normGrams": "{grams} g",
+  "normKcalOf": "{kcal} kcal",
+  "normMacroSplit": "{protein} / {fat} / {carbs} g",
+  "normMacros": "Macros",
+  "normManual": "set by hand",
+  "normOf": "of {kcal} kcal",
+  "normOffBy": "The split gives {sum} kcal, {off} away",
+  "normPerDay": "kcal a day",
+  "normTitle": "Norm",
+  "normWater": "Water",
+  "normWaterHead": "That is ",
+  "normWaterPerKg": "{ml} ml",
+  "normWaterTail": " per kilogram of weight. The usual rough range is 30-40 ml, but it depends on heat and training, so the figure here is not rigid.",
+  "normWhere": "Where this figure comes from",
+  "notifyChannel": "Reminders",
+  "notifyChannelHint": "Reminders about food, water, medications and weigh-ins",
+  "notifyDenied": "The phone refused notifications. Switch them on in the system settings and the reminders will work.",
+  "photoDish": "Dish",
+  "photoNotRecognized": "I could not recognise the dish in this shot",
+  "planBuy": "Subscribe",
+  "planFree": "Free",
+  "planLater": "Not now",
+  "planMonth": "Month",
+  "planMonthBilled": "billed monthly",
+  "planMonthPrice": "180 UAH",
+  "planNow": "Now",
+  "planPerkChat": "Unlimited conversations with Nora",
+  "planPerkHistory": "History and analytics without limits",
+  "planPerkReports": "Reports for any period",
+  "planPerks": "What Premium gives",
+  "planPitch": "Unlimited tokens, history without limits, and reports for any period.",
+  "planPlan": "Plan",
+  "planSave": "-17%",
+  "planStoreNote": "Payment goes through the App Store or Google Play. You can cancel in the same place, in subscription settings, and Calvi has no say in it.",
+  "planTitle": "Subscription",
+  "planTokens": "Tokens",
+  "planTokensFree": "2 a day",
+  "planYear": "Year",
+  "planYearBilled": "1,800 UAH once a year",
+  "planYearHint": "150 UAH a month, charged once a year",
+  "planYearPrice": "150 UAH",
+  "plateFor": "for {grams} g",
+  "plateGrams": " g",
+  "plateKcal": "kcal",
+  "plateThinking": "thinking",
+  "privacyCrash": "Crash reports",
+  "privacyCrashHint": "the error stack, without diary data",
+  "privacyDiaryHead": "Your diary stays yours",
+  "privacyDiarySub": "neither meals nor weight go into analytics",
+  "privacyHealthHead": "Health data goes to nobody",
+  "privacyHealthSub": "allergies and medications never leave the app",
+  "privacyNoPhotosHead": "Meal photos are not stored",
+  "privacyNoPhotosSub": "the shot goes to be read and is gone",
+  "privacyNotCollected": "What we do not collect",
+  "privacyOptional": "What you can switch off",
+  "privacyPhotosBold": "are not kept",
+  "privacyPhotosHead": "Meal photos ",
+  "privacyPhotosTail": ": the shot goes for processing and is gone. Analytics never sees dishes, weight, allergies or medications. That is a special category of personal data, and handing it to a third party is not on, however convenient it would be.",
+  "privacyStats": "Anonymous statistics",
+  "privacyStatsHint": "which screens get opened, without the content of entries",
+  "privacyTitle": "Privacy",
+  "profileActivity": "Activity",
+  "profileAge": "Age",
+  "profileHeight": "Height",
+  "profileSex": "Sex",
+  "profileSexNote": "The norm is the average of two formulas.",
+  "remAbout": "About what",
+  "remAdd": "Add a reminder",
+  "remAt": "At",
+  "remDelete": "Delete reminder",
+  "remEdit": "Reminder",
+  "remEmpty": "No reminders yet.",
+  "remEmptyHint": "Add the one thing you really forget, not everything at once",
+  "remHowOften": "How often",
+  "remName": "Name",
+  "remNew": "New reminder",
+  "remOpenMeds": "Open medications",
+  "remTime": "Time",
+  "remTitle": "Reminders",
+  "reminderBodyMeal": "Log what it was",
+  "reminderBodyMeds": "On schedule",
+  "reminderBodySummary": "What did you not log today?",
+  "reminderBodyWater": "Time to drink",
+  "reminderBodyWeigh": "In the morning, before eating",
+  "reminderBodyWorkout": "Log it if it happened",
+  "reminderMeal": "Food",
+  "reminderMealHint": "I will remind you to log the meal",
+  "reminderMeds": "Medications",
+  "reminderMedsHint": "on the schedule from the journal",
+  "reminderSummary": "Day summary",
+  "reminderSummaryHint": "briefly about the day before bed",
+  "reminderWater": "Water",
+  "reminderWaterHint": "I will remind you to drink",
+  "reminderWeigh": "Weigh-in",
+  "reminderWeighHint": "so the weight chart does not break",
+  "reminderWorkout": "Workout",
+  "reminderWorkoutHint": "I will remind you about the planned one",
+  "repDaily": "every day",
+  "repEveryN": "{count, plural, other{every {count} days}}",
+  "repEveryOther": "every other day",
+  "repPickDaily": "Every day",
+  "repPickFromToday": "Counting from today.",
+  "repPickInterval": "Every other day",
+  "repPickNoDays": "No day is chosen, so the reminder will never fire.",
+  "repPickWeekdays": "Days of the week",
+  "repWeekdays": "on weekdays",
+  "repWeekends": "at weekends",
+  "repWeekly": "once a week",
+  "setAbout": "About the app",
+  "setAllergies": "Allergies",
+  "setAssistantLine": "{name}, {count} in memory",
+  "setDeleteAccount": "Delete account and data",
+  "setFreeTierHead": "For Ukraine's defenders, and for those serving in the Armed Forces, the State Emergency Service, DTEK, medics, volunteers and teachers in front-line areas, the paid plan is ",
+  "setFreeTierHow": " How to get it",
+  "setFreeTierShort": "For Ukraine's defenders, and for those serving in the Armed Forces, the State Emergency Service, DTEK, medics, volunteers and teachers in front-line areas, the paid plan is FREE",
+  "setFreeTierTelegram": "Write on Telegram",
+  "setFreeTierTitle": "Free plan",
+  "setFreeTierWord": "FREE",
+  "setFreeTierWrite": "Write to the developer and the paid plan will be switched on for you the same day.",
+  "setGoal": "Goal",
+  "setGoalKeep": "keep weight",
+  "setGoalLine": "{kg} kg, {pace}/week",
+  "setGroupAbout": "About you",
+  "setGroupAccount": "Account",
+  "setGroupAssistant": "Assistant",
+  "setGroupDocs": "Documents",
+  "setGroupHealth": "Health",
+  "setLang": "Language",
+  "setMeds": "Medications",
+  "setNorm": "Norm",
+  "setNormLine": "{kcal} kcal",
+  "setPlan": "Subscription",
+  "setPlanFree": "Free",
+  "setPolicy": "Privacy policy",
+  "setPrivacy": "Data and analytics",
+  "setProfile": "Profile",
+  "setProfileLine": "{sex}, {age}, {height} cm",
+  "setReminders": "Reminders",
+  "setRemindersOff": "off",
+  "setTerms": "Terms of use",
+  "setTheme": "Theme",
+  "setTitle": "Settings",
+  "setUnset": "not set",
+  "sexOther": "Other",
+  "sexShortFemale": "F",
+  "sexShortMale": "M",
+  "slotBreakfast": "Breakfast",
+  "slotDinner": "Dinner",
+  "slotIntoBreakfast": "into breakfast",
+  "slotIntoDinner": "into dinner",
+  "slotIntoLunch": "into lunch",
+  "slotIntoOther": "into “{name}”",
+  "slotIntoSnack": "into a snack",
+  "slotLog": "Log it",
+  "slotLunch": "Lunch",
+  "slotSnack": "Snack",
+  "slotWriteWhat": "Write what it was",
+  "startAbout": "About you",
+  "startAge": "Age",
+  "startAgeYears": "{count, plural, =1{1 year} other{{count} years}}",
+  "startAgreeAnd": " and the ",
+  "startAgreeHead": "I agree to the ",
+  "startAgreePrivacy": "privacy policy",
+  "startAgreeTerms": "terms of use",
+  "startAllergies": "Allergies",
+  "startDeviceFirstRun": "first run",
+  "startGoal": "Where we are heading",
+  "startGoalGain": "Gain weight",
+  "startGoalGainHint": "a surplus at the pace you pick",
+  "startGoalKeep": "Keep weight",
+  "startGoalKeepHint": "you put back exactly what you spend",
+  "startGoalLose": "Lose weight",
+  "startGoalLoseHint": "a deficit at the pace you pick",
+  "startHeight": "Height",
+  "startHelloAction": "Start",
+  "startHelloText": "Nothing to keep here. Tell Nora \"two eggs and toast\" and the day is counted: no searching through references, no grams, no tables. She takes it from there.",
+  "startLife": "Lifestyle",
+  "startNorm": "Your norm",
+  "startNormHold": "holding",
+  "startNormNora": "Counted. It gets easier from here.",
+  "startNormNoraHint": "Write or say it however suits you: \"two eggs and toast\", \"drank 300 of water\". Whatever else I need, I will ask in the conversation.",
+  "startNormNote": "This is the Mifflin-St Jeor formula, not medical advice. If you have a condition, are pregnant, or follow a prescribed diet, check with your doctor.",
+  "startNormPerDay": "kcal a day",
+  "startNormWeeks": "weeks",
+  "startPace": "How fast",
+  "startPaceEtaHead": "Goal around ",
+  "startPaceEtaTail": ", that is ",
+  "startPaceFast": "fast",
+  "startPaceSlow": "slow",
+  "startPaceUnit": "kg a week",
+  "startPaceUsual": "steady",
+  "startPaceWarning": "A pace like this is hard to hold and usually breaks. Under 0.8 kg a week the result comes slower but stays.",
+  "startPaceWeeks": "{count, plural, =1{1 week} other{{count} weeks}}",
+  "startSex": "Sex",
+  "startSexFemale": "Female",
+  "startSexMale": "Male",
+  "startSexOther": "Other",
+  "startSignInApple": "Continue with Apple",
+  "startSignInBusy": "Signing in…",
+  "startSignInFailed": "Could not sign in. Try again, or carry on without an account.",
+  "startSignInFailedWhy": "Could not sign in. {why}",
+  "startSignInGoogle": "Continue with Google",
+  "startSignInSkip": "Not now",
+  "startSignInText": "The norm is counted. Sign in to keep it: history, measurements and entries will be on every device, not only here.",
+  "startSignInTitle": "Let us keep this",
+  "startTargetWeight": "Target weight",
+  "startWeightNow": "Weight now",
+  "startYearsShort": "years",
+  "storageBroken": "Could not open the storage. Your entries are safe, but there is nothing to show them with right now.",
+  "themeDark": "Dark",
+  "themeDarkHint": "always the dark interface",
+  "themeLight": "Light",
+  "themeLightHint": "always the light interface",
+  "themeNote": "The dark theme here is neutral, with no blue cast: the app's ink turns light rather than changing colour.",
+  "themeSectionLook": "Appearance",
+  "themeSystem": "Device theme",
+  "themeSystemHint": "follows the system setting",
+  "todayBarcode": "Barcode",
+  "todayCodeTalk": "I scanned barcode {code} and no base knows it. Do not log anything: ask me about this product or tell me how to count it.",
+  "todayDemo": "Demo",
+  "todayDone": "Done.",
+  "todayFailedRetry": "Did not work. Try again in a minute.",
+  "todayHowManyGrams": "How many grams was the {dish}?",
+  "todayLogFailed": "Could not log it. Try again.",
+  "todayLogged": "Logged.",
+  "todayLoggedAskWeight": "Logged {slotInto}. Tell me the weight if you want it exact.",
+  "todayLoggedAskWeightShort": "Logged. Tell me the weight if you want it exact.",
+  "todayLoggedCount": "{count} logged",
+  "todayLoggedInto": "Logged {slotInto}: {dish}.",
+  "todayLoggedIntoWithNumbers": "Logged {slotInto}: {dish}, {kcal} kcal per {grams} g.",
+  "todayMine": "Mine",
+  "todayNoraSlow": "Nora is thinking longer than usual. Try again, the token was not spent.",
+  "todayOffline": "No connection. Try again once it is back.",
+  "todayOfflineSaved": "No connection. The entry stays on the phone and goes up when it returns.",
+  "todayOutOfTokens": "Out of tokens for today. Logging by hand always works.",
+  "todayPhotoMeal": "Meal photo",
+  "todayQuestionClosed": "That question is already closed. Say the weight in words if you need to.",
+  "todayShowingDemo": "Showing the sample day",
+  "todayShowingMine": "Showing my entries",
+  "unitCm": "cm",
+  "unitG": "g",
+  "unitKcal": "kcal",
+  "unitKg": "kg",
+  "unitMl": "ml",
+  "waterGlasses": "about {glasses} glasses",
+  "waterLess": "{step} ml less",
+  "waterMore": "{step} ml more",
+  "waterNone": "nothing drunk",
+  "waterOf": " / {ml} ml",
+  "waterShare": "{pct}% of the daily goal",
+  "waterTitle": "Water",
+  "wcNoTime": "no duration",
+  "wdFri": "Fri",
+  "wdMon": "Mon",
+  "wdSat": "Sat",
+  "wdSun": "Sun",
+  "wdThu": "Thu",
+  "wdTue": "Tue",
+  "wdWed": "Wed",
+  "weightHint": "What you weigh today. The goal and the pace towards it live separately.",
+  "weightNote": "Weigh yourself in the morning, before eating: that way the daily swings do not turn the chart into noise. One reading a week is already a trend.",
+  "weightTitle": "Weight",
+  "wfBurned": "Burned, kcal",
+  "wfDuration": "Duration",
+  "wfDurationCap": "Duration, min",
+  "wfEstimate": "An estimate from your weight and the kind of activity",
+  "wfFromWatch": "From a watch or a machine",
+  "wfKcal": " kcal",
+  "wfLog": "Log it",
+  "wfManualKcal": "kcal by hand",
+  "wfMin": "{min} min",
+  "wfMinutes": "Minutes",
+  "wfNote": "Note",
+  "wfNoteExample": "Legs, hard",
+  "wfOptional": "  optional",
+  "wheelLess": "Less",
+  "wheelMore": "More",
+  "workoutAdd": "Add a workout",
+  "workoutBurned": "−{kcal} kcal",
+  "workoutCollapse": "Collapse",
+  "workoutNone": "nothing logged",
+  "workoutSessions": "{count, plural, =1{1 session} other{{count} sessions}}",
+  "workoutTitle": "Workout"
+}

@@ -1,0 +1,39 @@
+{
+  "medsTitle": "Medications",
+  "medsMine": "My medications",
+  "medsEmpty": "Nothing here yet. Add a medication and I will remind you at the right time.",
+  "medsEmptyHint": "I keep the log of doses taken, I do not work out the dosage",
+  "medsNoneToday": "Nothing to take today",
+  "medsAllTaken": "Everything for today is taken",
+  "medsNextAt": "Next at ",
+  "medsAdd": "Add a medication",
+  "medsPast": "Past",
+  "medsPastEmpty": "Courses you no longer take will be here. A medication removed from the list stays in the days you took it.",
+  "medsSince": "since {date}",
+  "@medsSince": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "medsNow": "NOW",
+
+  "medsDose": "Dose",
+  "medsHours": "Hours",
+  "medsSchedule": "Schedule",
+  "medsCourse": "Course",
+  "medsNote": "Note",
+  "medsResume": "Resume the course",
+
+  "medsNew": "New medication",
+  "medsOne": "Medication",
+  "medsTime": "Time",
+  "medsName": "Name",
+  "medsNameExample": "For example, Magnesium B6",
+  "medsPerTake": "How much at a time",
+  "medsAt": "At",
+  "medsHowOften": "How often",
+  "medsRemind": "Remind me",
+  "medsRemindHint": "at the chosen hours",
+  "medsFinish": "End the course",
+
+  "medsUntil": "until {date}",
+  "@medsUntil": {"placeholders":{"date":{"type":"String"}}}
+}

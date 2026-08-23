@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
@@ -7,6 +8,7 @@ import '../../design/shell.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import 'plate_strip.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Bottom of the screen: the input field, nothing else.
 ///
@@ -30,9 +32,12 @@ class BottomBar extends StatefulWidget {
     required this.onOpen,
     required this.onClose,
     required this.onCamera,
-    required this.onVoice,
+    required this.onHold,
+    required this.onLetGo,
     required this.onSend,
     required this.messages,
+    /* Обрана вага у відповідь на питання Нори. Один дотик замість набирання. */
+    this.onWeigh,
     this.muteMic = false,
   });
 
@@ -44,11 +49,17 @@ class BottomBar extends StatefulWidget {
   final ValueChanged<bool> onOpen;
   final VoidCallback onClose;
   final VoidCallback onCamera;
-  final VoidCallback onVoice;
+
+  /// Палець ліг на мікрофон: запис починається цієї ж миті.
+  final void Function(Offset at, double size) onHold;
+
+  /// Палець прибрали: запис спиняється, і сказане йде на розбір.
+  final VoidCallback onLetGo;
 
   /// What was typed into the bar, in the person's own words.
   final ValueChanged<String> onSend;
   final List<Msg> messages;
+  final void Function(String id, int grams)? onWeigh;
 
   /// While dictation is on, the small microphone steps aside for the big one.
   final bool muteMic;
@@ -101,6 +112,7 @@ class _BottomBarState extends State<BottomBar> {
 
   @override
   void dispose() {
+    _later?.cancel();
     _focus.removeListener(_raise);
     _field.dispose();
     _focus.dispose();
@@ -133,19 +145,46 @@ class _BottomBarState extends State<BottomBar> {
        That comparison was always false and the room never followed a reply. */
     if (widget.open && widget.messages.length != _seen) {
       _seen = widget.messages.length;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!_room.hasClients) return;
-        _room.animateTo(
-          _room.position.maxScrollExtent,
-          duration: CalviMotion.normal,
-          curve: CalviMotion.ease,
-        );
-      });
+      _toBottom();
+    }
+
+    /* І ще раз, коли панель доїхала.
+     *
+     * Сказане голосом приходить разом із відкриттям панелі, і домотування
+     * рахувалось по кімнаті, яка ще не має повної висоти: кінець списку тоді
+     * ще не там, де він буде за пів секунди. Тому нове повідомлення лишалось
+     * унизу за краєм, і людина бачила середину розмови замість своєї останньої
+     * фрази. */
+    if (!old.open && widget.open) {
+      _toBottom(after: _opening + const Duration(milliseconds: 60));
+    }
+  }
+
+  /// Домотує кімнату до останнього рядка. З відступом, коли панель ще їде.
+  void _toBottom({Duration? after}) {
+    void go() {
+      if (!mounted || !_room.hasClients) return;
+      _room.animateTo(
+        _room.position.maxScrollExtent,
+        duration: CalviMotion.normal,
+        curve: CalviMotion.ease,
+      );
+    }
+
+    if (after == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => go());
+    } else {
+      _later?.cancel();
+      _later = Timer(after, go);
     }
   }
 
   /// How many messages the room has already scrolled for.
   int _seen = 0;
+
+  /* Відкладене домотування знімається разом із рядком: відкладений виклик без
+     цього переживає віджет і спрацьовує вже над мертвим екраном. */
+  Timer? _later;
 
   @override
   Widget build(BuildContext context) {
@@ -211,15 +250,16 @@ class _BottomBarState extends State<BottomBar> {
                   // Under the clip, so the shadow keeps the shape it is cast by.
                   decoration: BoxDecoration(
                     borderRadius: shape,
-                    boxShadow: lift > 0
-                        ? [
-                            BoxShadow(
-                              color: c.shade.withValues(alpha: c.shade.a * lift),
-                              blurRadius: 40,
-                              offset: const Offset(0, -18),
-                            ),
-                          ]
-                        : null,
+                    /* Тінь угору замість риски: панель це окремий шар над
+                       тонованим ґрунтом дня, а не місце, де закінчується
+                       екран. Опущена вона кидає тиху тінь, піднята глибшу. */
+                    boxShadow: [
+                      BoxShadow(
+                        color: c.shade.withValues(alpha: c.shade.a * (0.55 + 0.45 * lift)),
+                        blurRadius: 34 + 6 * lift,
+                        offset: Offset(0, -10 - 8 * lift),
+                      ),
+                    ],
                   ),
                   /* The hairline is painted over the panel rather than set as its
                      top border. A border is a straight run across the box, so the
@@ -234,7 +274,7 @@ class _BottomBarState extends State<BottomBar> {
                     child: ClipRRect(
                       borderRadius: shape,
                       child: DecoratedBox(
-                        decoration: BoxDecoration(color: c.bg),
+                        decoration: BoxDecoration(color: c.card),
                         child: child,
                       ),
                     ),
@@ -283,7 +323,11 @@ class _BottomBarState extends State<BottomBar> {
                                   child: child,
                                 ),
                               ),
-                              child: _Room(controller: _room, messages: widget.messages),
+                              child: _Room(
+                                controller: _room,
+                                messages: widget.messages,
+                                onWeigh: widget.onWeigh,
+                              ),
                             ),
                           ),
                         ),
@@ -296,7 +340,8 @@ class _BottomBarState extends State<BottomBar> {
                           if (!open) widget.onOpen(true);
                         },
                         onCamera: widget.onCamera,
-                        onVoice: widget.onVoice,
+                        onHold: widget.onHold,
+                        onLetGo: widget.onLetGo,
                         onSend: _send,
                         muteMic: widget.muteMic,
                       ),
@@ -314,10 +359,11 @@ class _BottomBarState extends State<BottomBar> {
 
 /// Where the messages live once the bar is raised.
 class _Room extends StatelessWidget {
-  const _Room({required this.controller, required this.messages});
+  const _Room({required this.controller, required this.messages, this.onWeigh});
 
   final ScrollController controller;
   final List<Msg> messages;
+  final void Function(String id, int grams)? onWeigh;
 
   @override
   Widget build(BuildContext context) {
@@ -343,7 +389,7 @@ class _Room extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 10),
-                Text('Нора', style: context.t.titleMedium),
+                Text(L.of(context).noraName, style: context.t.titleMedium),
                 const Spacer(),
                 /* The count is a fact, not a warning: it sits quiet in a pill
                    until the number starts to matter. */
@@ -368,15 +414,8 @@ class _Room extends StatelessWidget {
               shrinkWrap: true,
               children: messages.isEmpty
                   // What Nora says before anything has been said to her.
-                  ? const [
-                      CalviNora(
-                        text: 'Пиши як кажеш.',
-                        hint:
-                            '«два яйця і тост», «випив 300 води», «біг 40 хвилин» — розберу і '
-                            'запишу в потрібну картку',
-                      ),
-                    ]
-                  : [for (final m in messages) _Bubble(msg: m)],
+                  ? [CalviNora(text: L.of(context).barHint, hint: L.of(context).barHintMore)]
+                  : [for (final m in messages) _Bubble(msg: m, onWeigh: onWeigh)],
             ),
           ),
         ],
@@ -387,9 +426,10 @@ class _Room extends StatelessWidget {
 
 /// One message, arriving from a little below.
 class _Bubble extends StatelessWidget {
-  const _Bubble({required this.msg});
+  const _Bubble({required this.msg, this.onWeigh});
 
   final Msg msg;
+  final void Function(String id, int grams)? onWeigh;
 
   @override
   Widget build(BuildContext context) {
@@ -502,6 +542,17 @@ class _Bubble extends StatelessWidget {
                         const SizedBox(height: 10),
                         PlateStrip(plate: msg.plate!),
                       ],
+
+                      /* Питання про вагу має відповідь в один дотик.
+                       *
+                       * Посередині найімовірніша порція, з боків крок униз і
+                       * вгору. Набирати «400 г» руками тут не було за чим, а тап
+                       * ще й не коштує токена: страву вже розібрано, і лишилось
+                       * помножити її числа на вагу. */
+                      if (msg.weights.isNotEmpty && msg.weighed == null) ...[
+                        const SizedBox(height: 10),
+                        _WeightPicks(weights: msg.weights, onPick: (g) => onWeigh?.call(msg.id, g)),
+                      ],
                     ],
                   ),
                 ),
@@ -541,7 +592,7 @@ class _SlotChip extends StatelessWidget {
             const SizedBox(width: 7),
             Text.rich(
               TextSpan(
-                text: 'Записую в ',
+                text: L.of(context).barLogsInto,
                 children: [
                   TextSpan(
                     text: slot,
@@ -569,7 +620,8 @@ class _Input extends StatelessWidget {
     required this.focus,
     required this.onFocused,
     required this.onCamera,
-    required this.onVoice,
+    required this.onHold,
+    required this.onLetGo,
     required this.onSend,
     required this.muteMic,
   });
@@ -578,7 +630,12 @@ class _Input extends StatelessWidget {
   final FocusNode focus;
   final VoidCallback onFocused;
   final VoidCallback onCamera;
-  final VoidCallback onVoice;
+
+  /// Палець ліг на мікрофон: запис починається цієї ж миті.
+  final void Function(Offset at, double size) onHold;
+
+  /// Палець прибрали: запис спиняється, і сказане йде на розбір.
+  final VoidCallback onLetGo;
   final VoidCallback onSend;
   final bool muteMic;
 
@@ -606,7 +663,7 @@ class _Input extends StatelessWidget {
                 isDense: true,
                 contentPadding: EdgeInsets.zero,
                 border: InputBorder.none,
-                hintText: 'Нора',
+                hintText: L.of(context).noraName,
                 hintStyle: context.t.bodyLarge?.copyWith(
                   fontSize: CalviSize.fsBody,
                   color: c.textSecondary,
@@ -615,7 +672,7 @@ class _Input extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          _Round(icon: 'camera', label: 'Камера', onTap: onCamera),
+          _Round(icon: 'camera', label: L.of(context).barCamera, onTap: onCamera),
           const SizedBox(width: 8),
           /* Один круг на дві дії, а не дві кнопки поруч.
            *
@@ -631,7 +688,7 @@ class _Input extends StatelessWidget {
               valueListenable: field,
               builder: (context, value, _) {
                 final typed = value.text.trim().isNotEmpty;
-                return _MicSend(send: typed, onTap: typed ? onSend : onVoice);
+                return _MicSend(send: typed, onSend: onSend, onHold: onHold, onLetGo: onLetGo);
               },
             ),
           ),
@@ -699,11 +756,24 @@ class _RoundState extends State<_Round> {
 /// виглядало як смикана анімація, було випадковим перерахунком на тих кадрах,
 /// коли поле перебудовувало кнопку з іншої причини.
 class _MicSend extends StatefulWidget {
-  const _MicSend({required this.send, required this.onTap});
+  const _MicSend({
+    required this.send,
+    required this.onSend,
+    required this.onHold,
+    required this.onLetGo,
+  });
 
   /// True, коли в полі щось написано: тоді круг означає «надіслати».
   final bool send;
-  final VoidCallback onTap;
+  final VoidCallback onSend;
+
+  /* Мікрофон утримують, а не тицяють.
+   *
+   * Запис іде рівно стільки, скільки палець на кнопці. Початок віддає її місце
+   * і розмір: рідина має вилетіти саме звідти і туди ж повернутись, а кнопка
+   * стоїть у різних місцях, залежно від того, відкрита панель чи ні. */
+  final void Function(Offset at, double size) onHold;
+  final VoidCallback onLetGo;
 
   @override
   State<_MicSend> createState() => _MicSendState();
@@ -724,6 +794,23 @@ class _MicSendState extends State<_MicSend> with SingleTickerProviderStateMixin 
 
   bool _down = false;
 
+  /// Щоб дізнатись, де стоїть кнопка тієї миті, коли на неї натиснули.
+  final _spot = GlobalKey();
+
+  void _hold() {
+    setState(() => _down = true);
+    if (widget.send) return;
+
+    final box = _spot.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null) return;
+    widget.onHold(box.localToGlobal(box.size.center(Offset.zero)), box.size.width);
+  }
+
+  void _letGo() {
+    setState(() => _down = false);
+    if (!widget.send) widget.onLetGo();
+  }
+
   @override
   void didUpdateWidget(_MicSend old) {
     super.didUpdateWidget(old);
@@ -742,39 +829,52 @@ class _MicSendState extends State<_MicSend> with SingleTickerProviderStateMixin 
 
     return Semantics(
       button: true,
-      label: widget.send ? 'Надіслати' : 'Мікрофон',
-      child: GestureDetector(
-        onTap: widget.onTap,
-        onTapDown: (_) => setState(() => _down = true),
-        onTapUp: (_) => setState(() => _down = false),
-        onTapCancel: () => setState(() => _down = false),
-        behavior: HitTestBehavior.opaque,
-        child: AnimatedScale(
-          scale: _down ? 0.92 : 1,
-          duration: CalviMotion.fast,
-          curve: CalviMotion.ease,
-          child: Container(
-            width: 42,
-            height: 42,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(shape: BoxShape.circle, color: c.button),
-            child: AnimatedBuilder(
-              animation: _in,
-              /* Числа тут не з голови, а зняті з демки: `swap-in`, 240 мс,
+      label: widget.send ? L.of(context).barSend : L.of(context).barMic,
+      /* Запис тримається, поки палець на екрані, а не поки він на кнопці.
+       *
+       * Тут стояв `GestureDetector`, і його `onTapCancel` спрацьовував, щойно
+       * палець зсувався далі за кілька пікселів: рука ледь поїхала, і запис
+       * обірвався посеред фрази. `Listener` дає сирі події вказівника, а їх
+       * система віддає тому, хто прийняв натискання, куди б палець потім не
+       * поїхав. Так само це зроблено в месенджерах, і саме тому там зручно.
+       *
+       * Дотик лишається дотиком тільки для «надіслати»: там подія одна і
+       * приходить уже після всього. */
+      child: Listener(
+        onPointerDown: widget.send ? null : (_) => _hold(),
+        onPointerUp: widget.send ? null : (_) => _letGo(),
+        onPointerCancel: widget.send ? null : (_) => _letGo(),
+        child: GestureDetector(
+          onTap: widget.send ? widget.onSend : null,
+          behavior: HitTestBehavior.opaque,
+          child: AnimatedScale(
+            scale: _down ? 0.92 : 1,
+            duration: CalviMotion.fast,
+            curve: CalviMotion.ease,
+            child: Container(
+              key: _spot,
+              width: 42,
+              height: 42,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(shape: BoxShape.circle, color: c.button),
+              child: AnimatedBuilder(
+                animation: _in,
+                /* Числа тут не з голови, а зняті з демки: `swap-in`, 240 мс,
                  `--ease-rise`, від `rotate(-180deg) scale(0.55)` і прозорості
                  нуль до звичайного стану. Знак на кнопці завжди рівно один, бо
                  другого просто немає в дереві. */
-              builder: (context, child) {
-                final t = CalviMotion.easeRise.transform(_in.value);
-                return Opacity(
-                  opacity: t.clamp(0, 1),
-                  child: Transform.rotate(
-                    angle: -math.pi * (1 - t),
-                    child: Transform.scale(scale: 0.55 + 0.45 * t, child: child),
-                  ),
-                );
-              },
-              child: CalviIcon(widget.send ? 'send' : 'mic', size: 19, color: c.buttonText),
+                builder: (context, child) {
+                  final t = CalviMotion.easeRise.transform(_in.value);
+                  return Opacity(
+                    opacity: t.clamp(0, 1),
+                    child: Transform.rotate(
+                      angle: -math.pi * (1 - t),
+                      child: Transform.scale(scale: 0.55 + 0.45 * t, child: child),
+                    ),
+                  );
+                },
+                child: CalviIcon(widget.send ? 'send' : 'mic', size: 19, color: c.buttonText),
+              ),
             ),
           ),
         ),
@@ -817,4 +917,55 @@ class _TopEdge extends CustomPainter {
 
   @override
   bool shouldRepaint(_TopEdge old) => old.color != color;
+}
+
+/* Три ваги на вибір під питанням Нори.
+ *
+ * Посередині найімовірніша порція, і саме вона зафарбована: око йде до неї
+ * першою, а решта лишається поруч на випадок, коли порція вийшла більшою або
+ * меншою за звичну. Ширина в усіх однакова, а не за числом: «100 г» поруч із
+ * «1000 г» інакше стрибало б, і ряд читався б як випадковий. */
+class _WeightPicks extends StatelessWidget {
+  const _WeightPicks({required this.weights, required this.onPick});
+
+  final List<int> weights;
+  final ValueChanged<int> onPick;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+
+    return Row(
+      children: [
+        for (final (i, g) in weights.indexed) ...[
+          if (i > 0) const SizedBox(width: 8),
+          Expanded(
+            child: Material(
+              color: i == 1 ? c.button : c.card,
+              borderRadius: BorderRadius.circular(12),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () => onPick(g),
+                child: Container(
+                  height: 40,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: i == 1 ? null : Border.all(color: c.cardBorder),
+                  ),
+                  child: Text(
+                    L.of(context).barGrams(g),
+                    style: context.t.labelLarge?.copyWith(
+                      color: i == 1 ? c.buttonText : c.text,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
 }

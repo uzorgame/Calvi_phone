@@ -4,9 +4,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:calvi/data/chat.dart';
 import 'package:calvi/design/theme.dart';
 import 'package:calvi/screens/today/bottom_bar.dart';
+import 'package:calvi/l10n/app_localizations.dart';
 
 Widget _wrap({required bool open, required ValueChanged<bool> onOpen, VoidCallback? onClose}) =>
     MaterialApp(
+      localizationsDelegates: L.localizationsDelegates,
+      supportedLocales: L.supportedLocales,
+      locale: const Locale('uk'),
       theme: calviLightTheme,
       home: Scaffold(
         body: Stack(
@@ -20,7 +24,8 @@ Widget _wrap({required bool open, required ValueChanged<bool> onOpen, VoidCallba
                 onClose: onClose ?? () {},
                 onSend: (_) {},
                 onCamera: () {},
-                onVoice: () {},
+                onHold: (_, _) {},
+                onLetGo: () {},
                 messages: const [],
               ),
             ),
@@ -97,6 +102,9 @@ void main() {
     late StateSetter refresh;
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: L.localizationsDelegates,
+        supportedLocales: L.supportedLocales,
+        locale: const Locale('uk'),
         theme: calviLightTheme,
         home: Scaffold(
           body: StatefulBuilder(
@@ -112,7 +120,8 @@ void main() {
                       onClose: () {},
                       onSend: (_) {},
                       onCamera: () {},
-                      onVoice: () {},
+                      onHold: (_, _) {},
+                      onLetGo: () {},
                       messages: messages,
                     ),
                   ),

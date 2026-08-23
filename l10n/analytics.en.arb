@@ -1,0 +1,63 @@
+{
+  "anTitle": "Analytics",
+  "anWeek": "Week",
+  "anMonth": "Month",
+  "anQuarter": "3 months",
+  "anYear": "Year",
+
+  "anForYear": "over the year",
+  "anForQuarter": "over 3 months",
+  "anForMonth": "over the month",
+
+  "anGoalProgress": "Progress to the goal",
+  "anNowKg": "now, kg",
+  "anTargetKg": "goal, kg",
+  "anWeightEmpty": "The curve appears after the second weigh-in. Tell Nora your weight and she will log it herself.",
+  "anEtaHead": "At the current pace the goal is around *{date}*",
+  "@anEtaHead": {
+    "description": "The asterisks mark the part drawn in bold; the note widget reads them.",
+    "placeholders": { "date": { "type": "String" } }
+  },
+
+  "anKcal": "Calories",
+  "anShareOfNorm": "{share}% of the norm",
+  "@anShareOfNorm": {
+    "placeholders": { "share": { "type": "int" } }
+  },
+  "anKcalTotal": "over the period, kcal",
+  "anKcalAvg": "on average a day",
+  "anKcalEmpty": "Nothing logged for this period yet. Tell Nora what you ate and the chart will build itself.",
+
+  "anWater": "Hydration",
+  "anWaterAvg": "on average, ml",
+
+  "anMeasures": "Measurements",
+  "anMeasuresChange": "change {period}",
+  "@anMeasuresChange": {
+    "placeholders": { "period": { "type": "String" } }
+  },
+  "anMeasuresEmpty": "No measurements yet.",
+  "anMeasuresEmptyHint": "Measure once a month and I will show you what is moving",
+  "anNow": "now",
+  "anOneReading": "one reading",
+
+  "anMacrosAvg": "Macros on average",
+  "anMacrosEmpty": "An average appears as soon as there is something to average: log at least one day.",
+  "anPerDay": "a day",
+  "anMacroGoal": "norm {grams} g",
+  "@anMacroGoal": {
+    "placeholders": { "grams": { "type": "int" } }
+  },
+
+  "anOneWeighing": "One reading so far. The second one shows the direction, and the line starts from it.",
+  "anChartGoal": "goal {value}",
+  "@anChartGoal": {
+    "placeholders": { "value": { "type": "String" } }
+  },
+
+  "anWaterGoal": "norm {ml} ml",
+  "@anWaterGoal": {"placeholders":{"ml":{"type":"String"}}},
+  "anDaysInNorm": "days on target",
+  "anDonePercent": "{percent}% done",
+  "@anDonePercent": {"placeholders":{"percent":{"type":"int"}}}
+}

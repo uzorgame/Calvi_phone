@@ -13,6 +13,7 @@ import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import '../../format.dart';
 import 'charts.dart';
+import '../../l10n/app_localizations.dart';
 
 class Period {
   const Period({required this.days, required this.label});
@@ -21,31 +22,39 @@ class Period {
   final String label;
 }
 
-const _periods = [
-  Period(days: 7, label: 'Тиждень'),
-  Period(days: 30, label: 'Місяць'),
-  Period(days: 90, label: '3 місяці'),
-  Period(days: 365, label: 'Рік'),
+List<Period> _periods(L l) => [
+  Period(days: 7, label: l.anWeek),
+  Period(days: 30, label: l.anMonth),
+  Period(days: 90, label: l.anQuarter),
+  Period(days: 365, label: l.anYear),
 ];
 
 /// Показова крива ваги. Тільки для демо, і більше ніде.
 const _demoWeights = [81.0, 80.6, 80.9, 79.8, 79.4, 78.9, 78.6];
-const _demoLabels = ['Чер', 'Лип', 'Сер', 'Вер', 'Жов', 'Лис', 'Гру'];
 
-/// Крива ваги за записами, розкладена на сім точок.
+/// Підписи показової кривої: сім місяців підряд, скороченнями мови застосунку.
+List<String> get _demoLabels => [for (var m = 6; m <= 12; m++) monthShort(m)];
+
+/// Крива ваги за записами, розкладена на сім точок вибраного періоду.
 ///
-/// Півроку в семи стовпчиках: не кожен день, а середнє по відрізку, бо графік
-/// заввишки сто тридцять пікселів не покаже двісті точок нічим, крім шуму.
-/// Порожні відрізки просто пропускаються, і лінія йде від запису до запису.
+/// Не кожен день, а середнє по відрізку, бо графік заввишки сто тридцять
+/// пікселів не покаже двісті точок нічим, крім шуму. Порожні відрізки просто
+/// пропускаються, і лінія йде від запису до запису.
 ///
 /// Раніше тут стояв сталий ряд із семи чисел, той самий у будь-якому режимі: на
 /// екрані аналітики вага людини не мінялась ніколи, хай би скільки вона
 /// зважувалась.
-({List<double> values, List<String> labels}) weightCurve(Map<int, double> byDay) {
+({List<double> values, List<String> labels}) weightCurve(Map<int, double> byDay, int days) {
   if (byDay.isEmpty) return (values: const [], labels: const []);
 
   const buckets = 7;
-  const span = 26 * 7 ~/ buckets;
+
+  /* Відрізок рахується з вибраного періоду, а не з півроку назавжди.
+   *
+   * Тут стояло сталих двадцять шість тижнів, і крива ваги показувала одне й те
+   * саме, хоч тиждень вибери, хоч рік: перемикач угорі рухав усе на сторінці,
+   * крім найпершої картки. Людина натискала «Тиждень» і бачила місяці. */
+  final span = math.max(1, (days / buckets).ceil());
 
   final values = <double>[];
   final labels = <String>[];
@@ -84,15 +93,25 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   @override
   Widget build(BuildContext context) {
     final c = context.c;
+    final l = L.of(context);
     final s = AppScope.of(context).s;
     final goal = goalOf(s);
-    final days = _periods[_period].days;
+    final periods = _periods(l);
+    final days = periods[_period].days;
 
-    /* The tape moves once a month, so a week-long window shows a row of dots and
-       says nothing. It gets its own floor and names the window it actually
-       used. */
-    final tapeDays = days < 90 ? 90 : days;
-    final tapeLabel = tapeDays >= 365 ? 'за рік' : 'за 3 місяці';
+    /* Стрічка вимірювань іде за тим самим перемикачем, що й решта сторінки.
+     *
+     * Виняток один, і він названий уголос: тиждень. Сантиметром міряються раз на
+     * місяць, і тиждень дав би одну точку або жодної, тобто картку, яка нічого
+     * не каже. Для тижня береться три місяці, для всього іншого рівно те, що
+     * вибрали. Раніше підлога стояла на трьох місяцях завжди, і «Місяць» нічого
+     * не міняв. */
+    final tapeDays = days < 30 ? 90 : days;
+    final tapeLabel = switch (tapeDays) {
+      >= 365 => l.anForYear,
+      >= 90 => l.anForQuarter,
+      _ => l.anForMonth,
+    };
 
     /* Числа беруться з підсумків застосунку, а не з фікстур. У режимі «мої» це
        те, що людина справді записала; у демо це демонстраційний тиждень. Екран
@@ -103,6 +122,23 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
        month above a chart drawn over a week is two answers to one question. */
     final buckets = bucketDays(days);
     final dates = [for (final b in buckets) ...b.dates];
+    /* Підсумки за відрізок беруться з тих самих даних, що й числа над ними.
+     *
+     * Тут стояв `totalsOf` із фікстур, і графік макросів малював демонстраційний
+     * тиждень завжди: зверху чесні нулі, знизу різнокольорові стовпчики з чужого
+     * життя. Найгірший різновид помилки, бо виглядає як робочий екран. */
+    DayTotals totalsOver(Iterable<int> days) {
+      var kcal = 0, protein = 0, fat = 0, carbs = 0;
+      for (final d in days) {
+        final t = stats.totalsOn(d);
+        kcal += t.kcal;
+        protein += t.protein;
+        fat += t.fat;
+        carbs += t.carbs;
+      }
+      return DayTotals(kcal: kcal, protein: protein, fat: fat, carbs: carbs);
+    }
+
     final logged = dates.where((d) => stats.totalsOn(d).kcal > 0).length;
     final total = dates.fold<int>(0, (a, d) => a + stats.totalsOn(d).kcal);
     // Averaged over the days actually logged, not over the calendar: a week
@@ -111,10 +147,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     final share = (avg / goal.kcal * 100).round();
     final ok = share >= 90 && share <= 110;
 
-    final span = s.goalStartKg - s.targetKg;
-    final done = span > 0
-        ? ((s.goalStartKg - s.weightKg) / span * 100).round().clamp(0, 100)
-        : 0;
+    // Те саме число, що на головному екрані, і тією ж формулою: два підрахунки
+    // одного прогресу розійшлись би на першому ж кілограмі.
+    final done = (goalProgress(s) * 100).round();
 
     final tracked = measureFields
         .where((f) => latestMeasure(widget.measures, f.key) != null)
@@ -124,7 +159,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         : tracked.firstWhere((f) => f.key == _tape, orElse: () => tracked.first);
 
     return CalviScreen(
-      title: 'Аналітика',
+      title: l.anTitle,
       trailing: GestureDetector(
         onTap: widget.onSettings,
         behavior: HitTestBehavior.opaque,
@@ -143,31 +178,37 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         Padding(
           padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 0, CalviSize.gutter, 6),
           child: CalviSegments(
-            labels: [for (final p in _periods) p.label],
+            labels: [for (final p in periods) p.label],
             index: _period,
             onPick: (i) => setState(() => _period = i),
           ),
         ),
 
         _Block(
-          title: 'Прогрес до цілі',
-          badge: '$done% пройдено',
+          title: l.anGoalProgress,
+          badge: l.anDonePercent(done),
           child: Column(
             children: [
+              // Гнучкі обидва числа: підписи під ними це слова, а слова довші
+              // на вузькому телефоні й зі збільшеним шрифтом системи.
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _Figure(
-                    value: s.weightKg.toStringAsFixed(1),
-                    cap: 'поточна, кг',
-                    tight: true,
+                  Flexible(
+                    child: _Figure(
+                      value: s.weightKg.toStringAsFixed(1),
+                      cap: l.anNowKg,
+                      tight: true,
+                    ),
                   ),
                   CalviIcon('trend', size: 20, color: c.textSecondary),
-                  _Figure(
-                    value: s.targetKg.toStringAsFixed(1),
-                    cap: 'ціль, кг',
-                    dim: true,
-                    tight: true,
+                  Flexible(
+                    child: _Figure(
+                      value: s.targetKg.toStringAsFixed(1),
+                      cap: l.anTargetKg,
+                      dim: true,
+                      tight: true,
+                    ),
                   ),
                 ],
               ),
@@ -179,13 +220,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                      всю сторінку, а не за половину. */
                   final curve = stats.demo
                       ? (values: _demoWeights, labels: _demoLabels)
-                      : weightCurve(stats.weights);
+                      : weightCurve(stats.weights, days);
 
                   if (curve.values.length < 2) {
-                    return _Note(
-                      'Крива зʼявиться після другого зважування. Скажи Норі вагу, '
-                      'і вона сама її запише.',
-                    );
+                    return _Note(l.anWeightEmpty);
                   }
 
                   return LineChart(
@@ -200,41 +238,44 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               const SizedBox(height: 12),
               // The most valuable number on the page: it turns an abstract goal
               // into a date the person can picture.
-              _Note('За поточним темпом ціль близько *${targetDay(weeksToTarget(s))}*'),
+              _Note(l.anEtaHead(targetDay(weeksToTarget(s)))),
             ],
           ),
         ),
 
         _Block(
-          title: 'Калорії',
-          badge: '$share% від норми',
+          title: l.anKcal,
+          badge: l.anShareOfNorm(share),
           warn: !ok,
           child: Column(
             children: [
               Row(
                 children: [
-                  _Figure(value: thousands(total), cap: 'за період, ккал'),
+                  _Figure(value: thousands(total), cap: l.anKcalTotal),
                   const SizedBox(width: 18),
                   Container(width: 1, height: 34, color: c.cardBorder),
                   const SizedBox(width: 18),
-                  _Figure(value: thousands(avg), cap: 'у середньому за день'),
+                  _Figure(value: thousands(avg), cap: l.anKcalAvg),
                 ],
               ),
               const SizedBox(height: 16),
-              MacroBars(
-                rows: [
-                  for (final b in buckets)
-                    if (totalsOf(b.dates) case final t)
-                      (label: b.label, protein: t.protein, fat: t.fat, carbs: t.carbs),
-                ],
-              ),
+              if (total == 0)
+                _Note(l.anKcalEmpty)
+              else
+                MacroBars(
+                  rows: [
+                    for (final b in buckets)
+                      if (totalsOver(b.dates) case final t)
+                        (label: b.label, protein: t.protein, fat: t.fat, carbs: t.carbs),
+                  ],
+                ),
             ],
           ),
         ),
 
         _Block(
-          title: 'Гідратація',
-          aside: 'норма ${thousands(goal.waterMl)} мл',
+          title: l.anWater,
+          aside: l.anWaterGoal(thousands(goal.waterMl)),
           child: Builder(
             builder: (context) {
               /* Water is asked of every day in the window, then drawn per
@@ -259,11 +300,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 children: [
                   Row(
                     children: [
-                      _Figure(value: '$hit', suffix: '/${dates.length}', cap: 'днів у нормі'),
+                      _Figure(value: '$hit', suffix: '/${dates.length}', cap: l.anDaysInNorm),
                       const SizedBox(width: 18),
                       Container(width: 1, height: 34, color: c.cardBorder),
                       const SizedBox(width: 18),
-                      _Figure(value: thousands(avgMl), cap: 'у середньому, мл'),
+                      _Figure(value: thousands(avgMl), cap: l.anWaterAvg),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -275,13 +316,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         ),
 
         _Block(
-          title: 'Заміри',
-          aside: 'зміна $tapeLabel',
+          title: l.anMeasures,
+          aside: l.anMeasuresChange(tapeLabel),
           child: field == null
-              ? const CalviNora(
-                  text: 'Замірів ще немає.',
-                  hint: 'Заміряйся раз на місяць, і я покажу, що рухається',
-                )
+              ? CalviNora(text: l.anMeasuresEmpty, hint: l.anMeasuresEmptyHint)
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -311,9 +349,17 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                           // animation.
                           key: ValueKey(field.key),
                           values: [for (final m in points) m[field.key]!],
-                          // No axis under the tape: four readings a year would
-                          // need four dates, and they do not fit side by side.
-                          labels: const [],
+                          /* Дві дати, перша й остання, а не підпис під кожною
+                             точкою.
+                           *
+                           * Тут не було жодної, і крива висіла в повітрі: видно,
+                           * що щось змінилось, і незрозуміло, за який час. Але
+                           * чотири заміри за рік це чотири дати, які не стають
+                           * поруч, тому named саме кінці відрізка: між ними все
+                           * інше читається само. */
+                          labels: points.length < 2
+                              ? const []
+                              : [dayInfo(points.first.date).full, dayInfo(points.last.date).full],
                           unit: field.unit,
                         );
                       },
@@ -323,13 +369,101 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         ),
 
         _Block(
-          title: 'БЖВ у середньому',
-          child: Column(
-            children: [
-              MacroLine(label: 'Білок', value: 96, goal: goal.protein, colour: c.protein),
-              MacroLine(label: 'Жири', value: 71, goal: goal.fat, colour: c.fats),
-              MacroLine(label: 'Вуглеводи', value: 268, goal: goal.carbs, colour: c.carbs),
-            ],
+          title: l.anMacrosAvg,
+          /* Підпис називає вибраний період, а не кількість записаних днів.
+           *
+           * «За 6 днів» стояло однаково при будь-якому виборі згори і читалось
+           * як «цей блок живе своїм життям». Період тут той самий, що й у решти
+           * сторінки; скільки з нього днів справді записано, сказано нижче. */
+          aside: periods[_period].label.toLowerCase(),
+          child: Builder(
+            builder: (context) {
+              /* Тут стояли числа 96, 71 і 268, вписані в код.
+               *
+               * Вони малювались завжди: на порожньому щоденнику теж, і поруч із
+               * чесними нулями вище. Людина бачила заповнені смуги і вирішувала
+               * по них, скільки їй ще їсти сьогодні. Тепер це середнє за ті дні,
+               * коли справді щось записано, бо ділити на календар означало б
+               * ділити тиждень, відкритий у пʼятницю, на сім. */
+              final sum = totalsOver(dates);
+              final over = logged == 0 ? 1 : logged;
+
+              if (logged == 0) {
+                return _Note(l.anMacrosEmpty);
+              }
+
+              /* І малювалось це шкалою до норми, що для середнього неправильно
+                 по суті: смуга відповідає на питання «скільки лишилось», а воно
+                 про сьогодні. Середнє за тиждень нікуди не лишається, воно
+                 просто число, і стоїть тут як число. */
+              final rows = [
+                (
+                  label: l.macroProtein,
+                  avg: sum.protein / over,
+                  goal: goal.protein,
+                  colour: c.protein,
+                ),
+                (label: l.macroFat, avg: sum.fat / over, goal: goal.fat, colour: c.fats),
+                (label: l.macroCarbs, avg: sum.carbs / over, goal: goal.carbs, colour: c.carbs),
+              ];
+
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (final r in rows)
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(color: r.colour, shape: BoxShape.circle),
+                              ),
+                              const SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  r.label,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: context.t.labelSmall,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text.rich(
+                            TextSpan(
+                              text: '${r.avg.round()}',
+                              children: [
+                                TextSpan(
+                                  text: ' ${l.unitG}',
+                                  style: context.t.labelSmall?.copyWith(color: c.textSecondary),
+                                ),
+                              ],
+                            ),
+                            style: context.t.titleLarge,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            l.anPerDay,
+                            style: context.t.labelSmall?.copyWith(color: c.textSecondary),
+                          ),
+                          const SizedBox(height: 1),
+                          Text(
+                            l.anMacroGoal(r.goal),
+                            style: context.t.labelSmall?.copyWith(
+                              color: c.textSecondary.withValues(alpha: 0.7),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
         ),
       ],
@@ -377,6 +511,7 @@ class _Block extends StatelessWidget {
               color: c.card,
               border: Border.all(color: c.cardBorder),
               borderRadius: BorderRadius.circular(CalviSize.rLarge),
+              boxShadow: context.shadowCard,
             ),
             child: child,
           ),
@@ -423,7 +558,7 @@ class _Badge extends StatelessWidget {
           ],
         ),
         style: context.t.labelSmall?.copyWith(
-          color: warn ? const Color(0xFF9A6300) : const Color(0xFF1F8A3D),
+          color: chipInk(context, warn ? context.c.carbs : context.c.success),
         ),
       ),
     );
@@ -526,7 +661,7 @@ class _TapeHead extends StatelessWidget {
                 style: context.t.headlineLarge?.copyWith(fontSize: 27),
               ),
               const SizedBox(height: 3),
-              Text('зараз', style: context.t.labelSmall),
+              Text(L.of(context).anNow, style: context.t.labelSmall),
             ],
           ),
         ),
@@ -537,7 +672,7 @@ class _TapeHead extends StatelessWidget {
             borderRadius: BorderRadius.circular(CalviSize.rPill),
           ),
           child: Text(
-            d == null ? 'один замір' : '${d > 0 ? '+' : ''}${_trim(d)} ${field.unit}',
+            d == null ? L.of(context).anOneReading : '${d > 0 ? '+' : ''}${_trim(d)} ${field.unit}',
             style: context.t.titleMedium?.copyWith(
               fontSize: 13,
               color: good == null
@@ -558,13 +693,16 @@ class _Note extends StatelessWidget {
 
   final String text;
 
+  /* Висновок це не примітка під рискою, а тихий блок: сіра подушка каже «це
+     сказав застосунок», і око знаходить його одразу після графіка. */
   @override
   Widget build(BuildContext context) => Container(
     width: double.infinity,
     margin: const EdgeInsets.only(top: 14),
-    padding: const EdgeInsets.only(top: 13),
+    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
     decoration: BoxDecoration(
-      border: Border(top: BorderSide(color: context.c.cardBorder)),
+      color: context.c.fillSecondary,
+      borderRadius: BorderRadius.circular(CalviSize.rCard),
     ),
     child: Text.rich(_spans(context, text), style: context.t.bodyMedium?.copyWith(height: 1.5)),
   );
@@ -578,9 +716,7 @@ class _Note extends StatelessWidget {
         for (final (i, p) in parts.indexed)
           TextSpan(
             text: p,
-            style: i.isOdd
-                ? TextStyle(color: context.c.text, fontWeight: FontWeight.w600)
-                : null,
+            style: i.isOdd ? TextStyle(color: context.c.text, fontWeight: FontWeight.w600) : null,
           ),
       ],
     );

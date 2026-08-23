@@ -1,6 +1,9 @@
 /// Everything the settings screens edit, in one place.
 library;
 
+import 'measure.dart';
+import 'repeat.dart';
+
 import 'day.dart';
 import 'fixtures.dart';
 
@@ -8,7 +11,13 @@ enum Sex { m, f, x }
 
 enum AppTheme { light, dark, system }
 
-enum Lang { uk, en }
+/// Мова інтерфейсу.
+///
+/// `system` це не «жодна» і не середнє між двома: це відмова вибирати за людину.
+/// Застосунок бере мову телефона, якщо вона в нас є, і англійську, якщо немає.
+/// Саме тому англійська стоїть першою в `supportedLocales`: Flutter бере першу
+/// підтримувану як запасну.
+enum Lang { system, uk, en }
 
 enum Direction { lose, keep, gain }
 
@@ -41,8 +50,9 @@ class Reminder {
     required this.id,
     required this.kind,
     required this.label,
-    required this.at,
+    required this.times,
     required this.on,
+    this.repeat = const DailyRepeat(),
   });
 
   final String id;
@@ -50,64 +60,47 @@ class Reminder {
 
   /// What exactly, within the kind: «Сніданок», «Після роботи».
   final String label;
-  final String at;
+
+  /* Години, а не одна година.
+   *
+   * Ліки пʼють двічі на день, воду пʼють увесь день, і робити з цього два
+   * окремі нагадування означає змусити людину заводити те саме двічі й вимикати
+   * теж двічі. */
+  final List<String> times;
+
+  /// Як часто. Спільна модель із препаратами: питання там і тут одне.
+  final Repeat repeat;
+
   final bool on;
 
-  Reminder copyWith({String? at, bool? on}) =>
-      Reminder(id: id, kind: kind, label: label, at: at ?? this.at, on: on ?? this.on);
+  Reminder copyWith({List<String>? times, Repeat? repeat, String? label, bool? on}) => Reminder(
+    id: id,
+    kind: kind,
+    label: label ?? this.label,
+    times: times ?? this.times,
+    repeat: repeat ?? this.repeat,
+    on: on ?? this.on,
+  );
 }
 
+/* Вид нагадування і його значок.
+ *
+ * Слів тут немає навмисно: назва й підказка живуть у `l10n/labels.dart`, як і
+ * все інше, що шар даних називає кодом, а екран показує словами. */
 class ReminderKindInfo {
-  const ReminderKindInfo({
-    required this.id,
-    required this.title,
-    required this.icon,
-    required this.hint,
-  });
+  const ReminderKindInfo({required this.id, required this.icon});
 
   final ReminderKind id;
-  final String title;
   final String icon;
-  final String hint;
 }
 
 const reminderKinds = <ReminderKindInfo>[
-  ReminderKindInfo(
-    id: ReminderKind.meal,
-    title: 'Їжа',
-    icon: 'utensils',
-    hint: 'нагадаю записати прийом',
-  ),
-  ReminderKindInfo(
-    id: ReminderKind.water,
-    title: 'Вода',
-    icon: 'drink',
-    hint: 'нагадаю попити',
-  ),
-  ReminderKindInfo(
-    id: ReminderKind.meds,
-    title: 'Препарати',
-    icon: 'pill',
-    hint: 'за розкладом із журналу',
-  ),
-  ReminderKindInfo(
-    id: ReminderKind.workout,
-    title: 'Тренування',
-    icon: 'gym',
-    hint: 'нагадаю про заплановане',
-  ),
-  ReminderKindInfo(
-    id: ReminderKind.weigh,
-    title: 'Зважування',
-    icon: 'scale',
-    hint: 'щоб графік ваги не рвався',
-  ),
-  ReminderKindInfo(
-    id: ReminderKind.summary,
-    title: 'Підсумок дня',
-    icon: 'chart',
-    hint: 'коротко про день перед сном',
-  ),
+  ReminderKindInfo(id: ReminderKind.meal, icon: 'utensils'),
+  ReminderKindInfo(id: ReminderKind.water, icon: 'drink'),
+  ReminderKindInfo(id: ReminderKind.meds, icon: 'pill'),
+  ReminderKindInfo(id: ReminderKind.workout, icon: 'gym'),
+  ReminderKindInfo(id: ReminderKind.weigh, icon: 'scale'),
+  ReminderKindInfo(id: ReminderKind.summary, icon: 'chart'),
 ];
 
 class SettingsState {
@@ -128,6 +121,8 @@ class SettingsState {
     required this.waterMl,
     required this.allergies,
     required this.memory,
+    this.addressAs,
+    this.tracked = defaultTracked,
     required this.reminders,
     required this.analytics,
     required this.crash,
@@ -159,6 +154,17 @@ class SettingsState {
   final int waterMl;
   final List<Allergy> allergies;
   final List<Memo> memory;
+
+  /// Як Нора звертається до людини. Порожньо, поки та не назвалась.
+  final String? addressAs;
+
+  /* Які поля вимірювань людина веде.
+   *
+   * Жило тільки в памʼяті екрана: людина додавала груди й біцепс, місяць їх
+   * записувала, а після перезапуску картка показувала знову вагу й талію. Самі
+   * заміри при цьому лишались у базі, тобто дані були цілі, а побачити їх було
+   * ніде. */
+  final List<String> tracked;
   final List<Reminder> reminders;
   final bool analytics;
   final bool crash;
@@ -188,6 +194,8 @@ class SettingsState {
     int? waterMl,
     List<Allergy>? allergies,
     List<Memo>? memory,
+    String? addressAs,
+    List<String>? tracked,
     List<Reminder>? reminders,
     bool? analytics,
     bool? crash,
@@ -210,6 +218,8 @@ class SettingsState {
     waterMl: waterMl ?? this.waterMl,
     allergies: allergies ?? this.allergies,
     memory: memory ?? this.memory,
+    addressAs: addressAs ?? this.addressAs,
+    tracked: tracked ?? this.tracked,
     reminders: reminders ?? this.reminders,
     analytics: analytics ?? this.analytics,
     crash: crash ?? this.crash,
@@ -229,10 +239,7 @@ class SettingsState {
 /// Тілесні числа тут теж стоять, але вони живуть рівно до кінця «Старту», який
 /// перепише їх усі. Порожні насправді тільки ті списки, які має наповнити сама
 /// людина.
-SettingsState emptySettings() => initialSettings().copyWith(
-  allergies: const [],
-  memory: const [],
-);
+SettingsState emptySettings() => initialSettings().copyWith(allergies: const [], memory: const []);
 
 /// Демонстраційна людина: те, що видно у вітрині і в демо-режимі застосунку.
 SettingsState initialSettings() => SettingsState(
@@ -251,13 +258,31 @@ SettingsState initialSettings() => SettingsState(
   carbs: 311,
   waterMl: 2200,
   allergies: const [Allergy(id: 'hazelnut', severe: true)],
-  memory: const [
-    Memo(id: 'm1', text: 'Не їсть свинину', pinned: true),
-    Memo(id: 'm2', text: 'Тренується вранці, снідає після тренування', pinned: false),
-    Memo(id: 'm3', text: 'Каву пʼє без цукру', pinned: false),
-    Memo(id: 'm4', text: 'Вдома готує сам, на роботі бере готове', pinned: false),
+  memory: [
+    Memo(id: 'm1', text: demoDish('Не їсть свинину', 'Does not eat pork'), pinned: true),
+    Memo(
+      id: 'm2',
+      text: demoDish(
+        'Тренується вранці, снідає після тренування',
+        'Trains in the morning, has breakfast after',
+      ),
+      pinned: false,
+    ),
+    Memo(
+      id: 'm3',
+      text: demoDish('Каву пʼє без цукру', 'Takes coffee without sugar'),
+      pinned: false,
+    ),
+    Memo(
+      id: 'm4',
+      text: demoDish(
+        'Вдома готує сам, на роботі бере готове',
+        'Cooks at home, buys ready-made at work',
+      ),
+      pinned: false,
+    ),
   ],
-  reminders: defaultReminders(),
+  reminders: const [],
   analytics: true,
   crash: true,
   /* Light on a first run, whatever the phone is set to.
@@ -267,15 +292,14 @@ SettingsState initialSettings() => SettingsState(
      it see a theme nobody chose for them. The three-way choice, «Тема пристрою»
      included, sits in settings from the first minute. */
   theme: AppTheme.light,
-  lang: Lang.uk,
+  lang: Lang.system,
 );
 
+/// Рівень активності: сам множник, без слів. Назва його в `l10n/labels.dart`.
 class ActivityLevel {
-  const ActivityLevel({required this.v, required this.label, required this.hint});
+  const ActivityLevel({required this.v});
 
   final double v;
-  final String label;
-  final String hint;
 }
 
 /// What the age and height drums offer, at the start and in the profile.
@@ -283,11 +307,11 @@ final ages = List.generate(87, (i) => i + 14);
 final heights = List.generate(91, (i) => i + 130);
 
 const activityLevels = <ActivityLevel>[
-  ActivityLevel(v: 1.2, label: 'Сидячий', hint: 'майже без руху'),
-  ActivityLevel(v: 1.375, label: 'Легка активність', hint: '1-2 тренування на тиждень'),
-  ActivityLevel(v: 1.55, label: 'Помірна', hint: '3-4 тренування'),
-  ActivityLevel(v: 1.725, label: 'Висока', hint: '5-6 тренувань'),
-  ActivityLevel(v: 1.9, label: 'Дуже висока', hint: 'фізична робота або спорт щодня'),
+  ActivityLevel(v: 1.2),
+  ActivityLevel(v: 1.375),
+  ActivityLevel(v: 1.55),
+  ActivityLevel(v: 1.725),
+  ActivityLevel(v: 1.9),
 ];
 
 /// The assistant is Nora. Swapping personas is not on the table yet.
@@ -327,21 +351,6 @@ int weeksToTarget(SettingsState s) {
   return ((s.weightKg - s.targetKg).abs() / s.pace).ceil();
 }
 
-const _months = [
-  'січня',
-  'лютого',
-  'березня',
-  'квітня',
-  'травня',
-  'червня',
-  'липня',
-  'серпня',
-  'вересня',
-  'жовтня',
-  'листопада',
-  'грудня',
-];
-
 /// Коли ціль буде досягнута, за нинішнім темпом.
 ///
 /// Рахується від сьогодні, а не від дати, зашитої в код. Обіцянка «будеш на
@@ -349,67 +358,31 @@ const _months = [
 /// прогноз, а напис.
 String targetDate(int weeks) {
   final d = calendarDay(weeks * 7);
-  return '${d.day} ${_months[d.month - 1]} ${d.year}';
+  return '${d.day} ${monthName(d.month)} ${d.year}';
 }
 
 /// The same day without the year, for a sentence that is already about this one.
 String targetDay(int weeks) {
   final d = calendarDay(weeks * 7);
-  return '${d.day} ${_months[d.month - 1]}';
+  return '${d.day} ${monthName(d.month)}';
 }
 
 class ThemeOption {
-  const ThemeOption({
-    required this.id,
-    required this.title,
-    required this.hint,
-    required this.icon,
-  });
+  const ThemeOption({required this.id, required this.icon});
 
   final AppTheme id;
-  final String title;
-  final String hint;
   final String icon;
 }
 
 const themeOptions = <ThemeOption>[
-  ThemeOption(
-    id: AppTheme.light,
-    title: 'Світла',
-    hint: 'завжди світлий інтерфейс',
-    icon: 'sun',
-  ),
-  ThemeOption(id: AppTheme.dark, title: 'Темна', hint: 'завжди темний інтерфейс', icon: 'moon'),
-  ThemeOption(
-    id: AppTheme.system,
-    title: 'Тема пристрою',
-    hint: 'слухає налаштування системи',
-    icon: 'settings',
-  ),
+  ThemeOption(id: AppTheme.light, icon: 'sun'),
+  ThemeOption(id: AppTheme.dark, icon: 'moon'),
+  ThemeOption(id: AppTheme.system, icon: 'settings'),
 ];
 
-class LangOption {
-  const LangOption({required this.id, required this.title, required this.hint});
-
-  final Lang id;
-  final String title;
-  final String hint;
-}
-
-const langOptions = <LangOption>[
-  LangOption(id: Lang.uk, title: 'Українська', hint: 'мова за замовчуванням'),
-  LangOption(id: Lang.en, title: 'English', hint: 'переклад ще не готовий'),
-];
-
-String langLabel(Lang l) => langOptions.firstWhere((x) => x.id == l).title;
-
-String themeLabel(AppTheme t) => themeOptions.firstWhere((x) => x.id == t).title;
-
-String sexLabel(Sex s) => switch (s) {
-  Sex.m => 'Ч',
-  Sex.f => 'Ж',
-  Sex.x => 'Інше',
-};
+/* Порядок мов у списку сталий і не залежить від того, якою зараз говорять:
+   перелік, що перетасовується на кожному перемиканні, читається як помилка. */
+const langOptions = <Lang>[Lang.system, Lang.uk, Lang.en];
 
 /* --- Where the reminder times come from ---
  *
@@ -420,9 +393,6 @@ String sexLabel(Sex s) => switch (s) {
  * So each one is read from the person's own records: the usual hour of that meal,
  * the gaps between meals for water, the morning for the weigh-in. Until there is
  * enough history the reminder simply stays off and says why. */
-
-String _hhmm(int mins) =>
-    '${(mins ~/ 60).toString().padLeft(2, '0')}:${(mins % 60).toString().padLeft(2, '0')}';
 
 int _toMins(String t) {
   final p = t.split(':');
@@ -448,91 +418,36 @@ int? usualHour(String slotId) {
   return mid == null ? null : (mid / 15).round() * 15;
 }
 
-List<Reminder> defaultReminders() {
-  final out = <Reminder>[];
-  const meals = [('breakfast', 'Сніданок'), ('lunch', 'Обід'), ('dinner', 'Вечеря')];
+/* Тут була defaultReminders: шість груп нагадувань, увімкнених наперед.
+ *
+ * Половина з них не стосувалась нікого конкретного, і перше, що з ними робили,
+ * це вимикали. Наперед увімкнене нагадування це не турбота, а припущення про
+ * чуже життя. Тепер список порожній, поки людина не заведе своє, рівно як у
+ * препаратах. */
 
-  final hours = <int>[];
-  for (final (id, label) in meals) {
-    final h = usualHour(id);
-    if (h == null) {
-      // No history for this meal, so no hour to guess. Off, and honest about it.
-      out.add(
-        Reminder(id: 'meal-$id', kind: ReminderKind.meal, label: label, at: '--:--', on: false),
-      );
-    } else {
-      hours.add(h);
-      // Fifteen minutes after the usual hour: a nudge for a meal already eaten
-      // and not written down beats one that interrupts it.
-      out.add(
-        Reminder(
-          id: 'meal-$id',
-          kind: ReminderKind.meal,
-          label: label,
-          at: _hhmm(h + 15),
-          on: true,
-        ),
-      );
-    }
+/// Скільки шляху до цілі вже пройдено, від нуля до одиниці.
+///
+/// Тут довго стояло `(старт - зараз) / (старт - ціль)` з умовою «тільки якщо
+/// старт більший за ціль». Для схуднення це правильно, а для набору ваги знизу
+/// виходило відʼємне число, умова не спрацьовувала, і кільце лишалось порожнім
+/// назавжди. Людина набрала три кілограми з пʼяти і бачила нуль.
+///
+/// Напрямок не має значення для самого питання: пройдено це відстань від старту
+/// в бік цілі, поділена на всю відстань. Рух у зворотний бік не зараховується,
+/// але й не йде в мінус: кільце показує здобуте, а не борг.
+double goalProgress(SettingsState s) {
+  final total = s.targetKg - s.goalStartKg;
+  final moved = s.weightKg - s.goalStartKg;
+
+  /* Ціль «тримати вагу» це нульова відстань, і ділити на неї нема чого. Там
+     пройдене міряється інакше: кільце повне, поки вага тримається біля цілі, і
+     порожніє, коли відходить далі ніж на три кілограми. */
+  if (total.abs() < 0.05) {
+    final off = (s.weightKg - s.targetKg).abs();
+    return (1 - off / 3).clamp(0.0, 1.0);
   }
 
-  /* Water goes in the gaps between meals, where nothing else is asking for
-     attention. */
-  hours.sort();
-  for (var i = 0; i < hours.length - 1; i++) {
-    out.add(
-      Reminder(
-        id: 'water-$i',
-        kind: ReminderKind.water,
-        label: 'Склянка води',
-        at: _hhmm(((hours[i] + hours[i + 1]) / 2 / 15).round() * 15),
-        on: i == 0,
-      ),
-    );
-  }
-
-  out.add(
-    const Reminder(
-      id: 'meds',
-      kind: ReminderKind.meds,
-      label: 'За розкладом препаратів',
-      at: '--:--',
-      on: true,
-    ),
-  );
-  out.add(
-    const Reminder(
-      id: 'workout',
-      kind: ReminderKind.workout,
-      label: 'Тренування',
-      at: '--:--',
-      on: false,
-    ),
-  );
-
-  if (hours.isNotEmpty) {
-    // Before the first meal, because weight is read on an empty stomach.
-    out.add(
-      Reminder(
-        id: 'weigh',
-        kind: ReminderKind.weigh,
-        label: 'Зважитись, щопонеділка',
-        at: _hhmm(hours.first - 60),
-        on: true,
-      ),
-    );
-    out.add(
-      Reminder(
-        id: 'summary',
-        kind: ReminderKind.summary,
-        label: 'Підсумок дня',
-        at: _hhmm(hours.last + 120),
-        on: true,
-      ),
-    );
-  }
-
-  return out;
+  return (moved / total).clamp(0.0, 1.0);
 }
 
 /// The day's norm as the settings currently have it.
@@ -540,10 +455,5 @@ List<Reminder> defaultReminders() {
 /// The day is measured against what the person set, not against a figure baked
 /// into the fixtures: settings that change the norm and a home card that keeps
 /// showing the old one are two answers to the same question.
-DayGoal goalOf(SettingsState s) => DayGoal(
-  kcal: dailyKcal(s),
-  protein: s.protein,
-  fat: s.fat,
-  carbs: s.carbs,
-  waterMl: s.waterMl,
-);
+DayGoal goalOf(SettingsState s) =>
+    DayGoal(kcal: dailyKcal(s), protein: s.protein, fat: s.fat, carbs: s.carbs, waterMl: s.waterMl);

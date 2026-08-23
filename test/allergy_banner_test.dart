@@ -5,6 +5,7 @@ import 'package:calvi/data/app_scope.dart';
 import 'package:calvi/data/settings.dart';
 import 'package:calvi/design/theme.dart';
 import 'package:calvi/screens/settings/panel_allergy.dart';
+import 'package:calvi/l10n/app_localizations.dart';
 
 /// An allergy is set where it is read.
 ///
@@ -20,12 +21,12 @@ void main() {
         meds: const [],
         setMeds: (_) {},
         child: MaterialApp(
+          localizationsDelegates: L.localizationsDelegates,
+          supportedLocales: L.supportedLocales,
+          locale: const Locale('uk'),
           theme: calviLightTheme,
           scrollBehavior: const CalviScroll(),
-          home: AllergyPanel(
-            s: read(),
-            set: (patch) => setState(() => write(patch(read()))),
-          ),
+          home: AllergyPanel(s: read(), set: (patch) => setState(() => write(patch(read())))),
         ),
       ),
     );

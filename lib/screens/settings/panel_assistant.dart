@@ -7,6 +7,7 @@ import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import '../today/slot_card.dart';
 import 'panels_account.dart';
+import '../../l10n/app_localizations.dart';
 
 /// What the assistant remembers about you.
 ///
@@ -58,31 +59,25 @@ class _AssistantPanelState extends State<AssistantPanel> {
     final c = context.c;
     final pinned = s.memory.where((m) => m.pinned).length;
 
+    final l = L.of(context);
     return CalviScreen(
       onBack: widget.onBack,
-      title: 'Помічник',
-      hint:
-          '$assistantName веде щоденник разом із тобою і памʼятає те, що ти про себе розповів.',
+      title: l.assistantTitle,
+      hint: l.assistantHint(assistantName),
       foot: CalviButton(
-        label: 'Готово',
+        label: l.actionDone,
         onTap: () => (widget.onBack ?? Navigator.of(context).pop)(),
       ),
       children: [
         CalviSection(
-          title: 'Памʼять',
-          aside: '${s.memory.length}, закріплено $pinned',
+          title: l.assistantMemory,
+          aside: l.assistantPinned(s.memory.length, pinned),
           // Nothing remembered yet is one sentence from Nora, and a card round a
           // sentence from Nora is a frame round a frame.
           bare: s.memory.isEmpty,
-          note:
-              'Тап по запису закріплює його. Закріплене йде в кожну розмову, решта може '
-              'витіснитись, коли контекст ущільнюється.',
           children: [
             if (s.memory.isEmpty)
-              const CalviNora(
-                text: 'Поки нічого не запамʼятала.',
-                hint: 'Памʼять зʼявляється з розмов, або додай вручну',
-              )
+              CalviNora(text: l.assistantMemoryEmpty, hint: l.assistantMemoryEmptyHint)
             else
               for (final (i, m) in s.memory.indexed)
                 Container(
@@ -103,15 +98,40 @@ class _AssistantPanelState extends State<AssistantPanel> {
                             ),
                           ),
                           behavior: HitTestBehavior.opaque,
+                          /* Закріплений запис: не лише інший значок, а
+                             кольорове коло навколо нього і жирніший текст.
+                             Сама зміна значка помітна тільки тому, хто знає,
+                             що вона буває. */
                           child: Row(
                             children: [
-                              CalviIcon(
-                                m.pinned ? 'target' : 'note',
-                                size: 16,
-                                color: m.pinned ? c.accent : c.textSecondary,
+                              AnimatedContainer(
+                                duration: CalviMotion.normal,
+                                curve: CalviMotion.ease,
+                                width: 30,
+                                height: 30,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: m.pinned
+                                      ? c.accent.withValues(alpha: 0.16)
+                                      : const Color(0x00000000),
+                                ),
+                                child: CalviIcon(
+                                  m.pinned ? 'target' : 'note',
+                                  size: 16,
+                                  color: m.pinned ? c.accent : c.textSecondary,
+                                ),
                               ),
-                              const SizedBox(width: 10),
-                              Expanded(child: Text(m.text, style: context.t.bodyMedium)),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  m.text,
+                                  style: context.t.bodyMedium?.copyWith(
+                                    color: c.text,
+                                    fontWeight: m.pinned ? FontWeight.w500 : FontWeight.w400,
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -119,12 +139,10 @@ class _AssistantPanelState extends State<AssistantPanel> {
                       const SizedBox(width: 8),
                       Semantics(
                         button: true,
-                        label: 'Забути',
+                        label: L.of(context).assistantForget,
                         child: GestureDetector(
                           onTap: () => widget.set(
-                            (v) => v.copyWith(
-                              memory: v.memory.where((x) => x.id != m.id).toList(),
-                            ),
+                            (v) => v.copyWith(memory: v.memory.where((x) => x.id != m.id).toList()),
                           ),
                           behavior: HitTestBehavior.opaque,
                           child: Container(
@@ -147,7 +165,7 @@ class _AssistantPanelState extends State<AssistantPanel> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: CalviSize.gutter),
           child: AddRow(
-            label: _adding ? 'Згорнути' : 'Додати в памʼять',
+            label: _adding ? l.assistantCollapse : l.assistantAddMemory,
             open: _adding,
             onTap: () => setState(() => _adding = !_adding),
           ),
@@ -159,7 +177,7 @@ class _AssistantPanelState extends State<AssistantPanel> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Що памʼятати', style: context.t.labelSmall),
+                Text(l.assistantWhatToRemember, style: context.t.labelSmall),
                 const SizedBox(height: 6),
                 Container(
                   height: 48,
@@ -179,25 +197,20 @@ class _AssistantPanelState extends State<AssistantPanel> {
                       isDense: true,
                       counterText: '',
                       border: InputBorder.none,
-                      hintText: 'Наприклад, не їм гриби',
+                      hintText: l.assistantExample,
                       hintStyle: context.t.labelSmall?.copyWith(fontSize: 15),
                     ),
                   ),
                 ),
                 const SizedBox(height: 10),
                 CalviButton(
-                  label: 'Зберегти',
+                  label: l.actionSave,
                   enabled: _text.text.trim().isNotEmpty,
                   onTap: _add,
                 ),
               ],
             ),
           ),
-
-        const CalviNote(
-          'Вибір іншого характеру помічника поки не робимо: спершу має бути добре зроблена одна.',
-          lead: 12,
-        ),
       ],
     );
   }

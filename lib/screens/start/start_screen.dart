@@ -1,9 +1,14 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform;
+import 'package:flutter/gestures.dart' show TapGestureRecognizer;
 import 'package:flutter/material.dart';
 
 import '../../data/allergens.dart';
+import '../../data/app_scope.dart';
+import '../../data/remote/login_service.dart';
+import '../../data/legal.dart';
 import '../../data/settings.dart';
 import '../../design/icons.dart';
 import '../../design/ring.dart';
@@ -12,20 +17,21 @@ import '../../design/shell.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import '../../design/wheel.dart';
+import '../../l10n/app_localizations.dart';
+import '../../l10n/labels.dart';
+import '../settings/panel_legal.dart';
 import '../../format.dart';
 
-/// Names of the nine screens, in order. The demo panel jumps by index.
-const startSteps = [
-  'Вітання',
-  'Стать',
-  'Вік і зріст',
-  'Вага',
-  'Ціль',
-  'Темп',
-  'Спосіб життя',
-  'Твоя норма',
-  'Вхід',
-];
+/* Скільки кроків у першому запуску.
+ *
+ * Тільки число: заповнення смуги вгорі це єдине, що з нього читають, а самі
+ * назви ніде не показуються. Раніше тут лежав список їхніх імен, і це був
+ * єдиний перелік у застосунку, який ніхто ніколи не бачив.
+ *
+ * Стать, вік і зріст стояли трьома екранами на дві секунди роботи кожен.
+ * Питання одного роду і одного призначення: всі три йдуть у формулу норми і
+ * жодне з них не потребує роздумів. Разом вони коротші, ніж три «Далі». */
+const startSteps = 8;
 
 /* Allergies asked at the start are only the common ones. The full reference is
    in settings; a first run is not the place to scroll thirty seven entries. */
@@ -41,16 +47,11 @@ const _common = [
   'sesame',
 ];
 
-const _sexes = [
-  (id: Sex.m, label: 'Чоловіча'),
-  (id: Sex.f, label: 'Жіноча'),
-  (id: Sex.x, label: 'Інше'),
-];
-
-const _goals = [
-  (id: Direction.lose, label: 'Схуднути', hint: 'дефіцит під обраний темп'),
-  (id: Direction.keep, label: 'Тримати вагу', hint: 'скільки витрачаєш, стільки й повертаєш'),
-  (id: Direction.gain, label: 'Набрати', hint: 'профіцит під обраний темп'),
+/// Три напрямки, словами тієї мови, якою зараз говорить застосунок.
+List<({Direction id, String label, String hint})> _goals(L l) => [
+  (id: Direction.lose, label: l.startGoalLose, hint: l.startGoalLoseHint),
+  (id: Direction.keep, label: l.startGoalKeep, hint: l.startGoalKeepHint),
+  (id: Direction.gain, label: l.startGoalGain, hint: l.startGoalGainHint),
 ];
 
 /// First run, nine screens.
@@ -133,6 +134,10 @@ class StartDraft {
 }
 
 class _StartScreenState extends State<StartScreen> {
+  /* Переклад геттером, а не полем: `L.of` тягне залежність від локалі, і
+     збережене в `initState` значення пережило б зміну мови. */
+  L get l => L.of(context);
+
   late int _step = widget.step;
 
   Sex _sex = Sex.m;
@@ -189,6 +194,11 @@ class _StartScreenState extends State<StartScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      /* Прозорий навмисно: під сторінкою лежить ґрунт, а суцільне тло
+         Scaffold накрило б його рівним кольором і від «Вугілля» лишився б
+         один тон. Непрозорість сторінки під час переходу дає CalviGround,
+         а не це поле, тож нічого не просвічує. */
+      backgroundColor: const Color(0x00000000),
       body: SafeArea(
         child: Column(
           children: [
@@ -200,7 +210,7 @@ class _StartScreenState extends State<StartScreen> {
                   children: [
                     _Back(onTap: () => _go(_step - 1)),
                     const SizedBox(width: 14),
-                    Expanded(child: _Progress(at: _step / (startSteps.length - 1))),
+                    Expanded(child: _Progress(at: _step / (startSteps - 1))),
                   ],
                 ),
               ),
@@ -217,56 +227,63 @@ class _StartScreenState extends State<StartScreen> {
 
   Widget _body() => switch (_step) {
     0 => _Hello(onNext: () => _go(1)),
-    1 => _sexStep(),
-    2 => _sizeStep(),
-    3 => _weightStep(),
-    4 => _goalStep(),
-    5 => _paceStep(),
-    6 => _lifeStep(),
-    7 => _normStep(),
+    1 => _aboutStep(),
+    2 => _weightStep(),
+    3 => _goalStep(),
+    4 => _paceStep(),
+    5 => _lifeStep(),
+    6 => _normStep(),
     _ => _SignIn(onDone: _done),
   };
 
-  Widget _sexStep() => _Step(
-    title: 'Стать',
-    cta: 'Далі',
+  /* Три відповіді одним екраном, і всі три без роздумів.
+   *
+   * Стать рядом, а не трьома картками: три слова без пояснень займають висоту
+   * одного рядка і читаються так само. Барабани стиснуті до трьох рядів, щоб
+   * екран уміщався цілком: прокрутка тут означала б, що людина не бачить
+   * кнопку, поки не догортає до неї. */
+  Widget _aboutStep() => _Step(
+    title: l.startAbout,
+    cta: l.actionNext,
     onNext: () => _go(2),
     children: [
-      for (final x in _sexes)
-        CalviPick(
-          label: x.label,
-          icon: 'user',
-          on: _sex == x.id,
-          onTap: () => setState(() => _sex = x.id),
-        ),
-    ],
-  );
-
-  /* Age and height on drums, the way the profile in settings asks the same two:
-     a value picked once and rarely revisited reads better under a band than
-     along a tape. */
-  Widget _sizeStep() => _Step(
-    title: 'Вік і зріст',
-    cta: 'Далі',
-    onNext: () => _go(3),
-    children: [
       _Block(
-        title: 'Вік',
-        aside: '$_age років',
+        title: l.startSex,
+        child: CalviSegments(
+          labels: [l.startSexMale, l.startSexFemale, l.startSexOther],
+          index: switch (_sex) {
+            Sex.m => 0,
+            Sex.f => 1,
+            Sex.x => 2,
+          },
+          onPick: (i) => setState(
+            () => _sex = switch (i) {
+              0 => Sex.m,
+              1 => Sex.f,
+              _ => Sex.x,
+            },
+          ),
+        ),
+      ),
+      _Block(
+        title: l.startAge,
+        aside: l.startAgeYears(_age),
         child: CalviWheel(
           values: ages,
           value: _age,
-          suffix: 'років',
+          suffix: l.startYearsShort,
+          compact: true,
           onPick: (v) => setState(() => _age = v),
         ),
       ),
       _Block(
-        title: 'Зріст',
-        aside: '$_heightCm см',
+        title: l.startHeight,
+        aside: '$_heightCm ${l.unitCm}',
         child: CalviWheel(
           values: heights,
           value: _heightCm,
-          suffix: 'см',
+          suffix: l.unitCm,
+          compact: true,
           onPick: (v) => setState(() => _heightCm = v),
         ),
       ),
@@ -276,28 +293,28 @@ class _StartScreenState extends State<StartScreen> {
   /* The weight has a screen to itself and stands in the middle of it: it is the
      one number here that will be asked again every week. */
   Widget _weightStep() => _Step(
-    title: 'Вага зараз',
-    cta: 'Далі',
-    onNext: () => _go(4),
+    title: l.startWeightNow,
+    cta: l.actionNext,
+    onNext: () => _go(3),
     middle: true,
     children: [
       CalviRuler(
         value: _weightKg,
         min: 40,
         max: 180,
-        suffix: 'кг',
+        suffix: l.unitKg,
         onChange: (v) => setState(() => _weightKg = v),
       ),
     ],
   );
 
   Widget _goalStep() => _Step(
-    title: 'Куди рухаємось',
-    cta: 'Далі',
+    title: l.startGoal,
+    cta: l.actionNext,
     // Holding weight needs no target and no pace, so the next step is skipped.
-    onNext: () => _go(_direction == Direction.keep ? 6 : 5),
+    onNext: () => _go(_direction == Direction.keep ? 5 : 4),
     children: [
-      for (final g in _goals)
+      for (final g in _goals(l))
         CalviPick(
           label: g.label,
           hint: g.hint,
@@ -306,15 +323,15 @@ class _StartScreenState extends State<StartScreen> {
         ),
       if (_direction != Direction.keep)
         _Field(
-          label: 'Цільова вага',
+          label: l.startTargetWeight,
           value: _targetKg.toStringAsFixed(1),
-          unit: 'кг',
+          unit: l.unitKg,
           child: CalviRuler(
             showValue: false,
             value: _targetKg,
             min: 40,
             max: 180,
-            suffix: 'кг',
+            suffix: l.unitKg,
             onChange: (v) => setState(() => _targetKg = v),
           ),
         ),
@@ -326,16 +343,16 @@ class _StartScreenState extends State<StartScreen> {
   Widget _paceStep() {
     final weeks = weeksToTarget(_draft);
     return _Step(
-      title: 'Як швидко',
-      cta: 'Далі',
-      onNext: () => _go(6),
+      title: l.startPace,
+      cta: l.actionNext,
+      onNext: () => _go(5),
       children: [
         Text.rich(
           TextSpan(
             text: _pace.toStringAsFixed(1),
             children: [
               TextSpan(
-                text: '  кг на тиждень',
+                text: '  ${l.startPaceUnit}',
                 style: context.t.bodyMedium?.copyWith(fontSize: CalviSize.fsBody),
               ),
             ],
@@ -348,7 +365,7 @@ class _StartScreenState extends State<StartScreen> {
           min: 0.2,
           max: 1.2,
           step: 0.1,
-          marks: const ['повільно', 'звично', 'швидко'],
+          marks: [l.startPaceSlow, l.startPaceUsual, l.startPaceFast],
           onChange: (v) => setState(() => _pace = v),
         ),
         if (weeks > 0)
@@ -361,26 +378,23 @@ class _StartScreenState extends State<StartScreen> {
                 color: context.c.fillSecondary,
                 borderRadius: BorderRadius.circular(CalviSize.rCard),
               ),
+              /* Речення трьома шматками, бо дата і строк у ньому жирні.
+               *
+               * Скільки тижнів це окремий рядок із множиною, а не число плюс
+               * слово: українська має тут три форми, і склеєне в коді давало
+               * «5 тижні». */
               child: Text.rich(
                 TextSpan(
-                  text: 'Ціль приблизно ',
+                  text: l.startPaceEtaHead,
                   children: [
                     TextSpan(
                       text: targetDate(weeks),
                       style: TextStyle(color: context.c.text, fontWeight: FontWeight.w600),
                     ),
-                    const TextSpan(text: ', це '),
+                    TextSpan(text: l.startPaceEtaTail),
                     TextSpan(
-                      text: '$weeks',
+                      text: l.startPaceWeeks(weeks),
                       style: TextStyle(color: context.c.text, fontWeight: FontWeight.w600),
-                    ),
-                    TextSpan(
-                      text:
-                          ' ${weeks == 1
-                              ? 'тиждень'
-                              : weeks < 5
-                              ? 'тижні'
-                              : 'тижнів'}',
                     ),
                   ],
                 ),
@@ -391,24 +405,20 @@ class _StartScreenState extends State<StartScreen> {
 
         /* Only when there is something to say. A line that confirms nothing is
            wrong teaches people to stop reading the lines. */
-        if (_pace > 0.8)
-          const _Note(
-            'Такий темп тримається важко і зазвичай зривається. Нижче за 0.8 кг на тиждень '
-            'результат виходить повільніший, але лишається.',
-          ),
+        if (_pace > 0.8) _Note(l.startPaceWarning),
       ],
     );
   }
 
   Widget _lifeStep() => _Step(
-    title: 'Спосіб життя',
-    cta: 'Далі',
-    onNext: () => _go(7),
+    title: l.startLife,
+    cta: l.actionNext,
+    onNext: () => _go(6),
     children: [
       for (final a in activityLevels)
         CalviPick(
-          label: a.label,
-          hint: a.hint,
+          label: activityTitle(context, a.v),
+          hint: activityHint(context, a.v),
           on: _activity == a.v,
           onTap: () => setState(() => _activity = a.v),
         ),
@@ -416,7 +426,7 @@ class _StartScreenState extends State<StartScreen> {
       Align(
         alignment: Alignment.centerLeft,
         child: Text(
-          'Алергії',
+          l.startAllergies,
           style: context.t.titleMedium?.copyWith(fontSize: CalviSize.fsCaption),
         ),
       ),
@@ -445,9 +455,9 @@ class _StartScreenState extends State<StartScreen> {
     final weeks = weeksToTarget(_draft);
 
     return _Step(
-      title: 'Твоя норма',
-      cta: 'Далі',
-      onNext: () => _go(8),
+      title: l.startNorm,
+      cta: l.actionNext,
+      onNext: () => _go(7),
       children: [
         Container(
           padding: const EdgeInsets.all(22),
@@ -455,6 +465,7 @@ class _StartScreenState extends State<StartScreen> {
             color: c.card,
             border: Border.all(color: c.cardBorder),
             borderRadius: BorderRadius.circular(CalviSize.rLarge),
+            boxShadow: context.shadowCard,
           ),
           child: Row(
             children: [
@@ -464,7 +475,7 @@ class _StartScreenState extends State<StartScreen> {
                   children: [
                     Text(thousands(kcal), style: context.t.displayLarge?.copyWith(height: 1)),
                     const SizedBox(height: 6),
-                    Text('ккал на день', style: context.t.bodyMedium),
+                    Text(l.startNormPerDay, style: context.t.bodyMedium),
                   ],
                 ),
               ),
@@ -486,7 +497,7 @@ class _StartScreenState extends State<StartScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      weeks > 0 ? 'тижнів' : 'тримаємо',
+                      weeks > 0 ? l.startNormWeeks : l.startNormHold,
                       style: context.t.labelSmall?.copyWith(fontSize: 9, height: 1),
                     ),
                   ],
@@ -498,24 +509,16 @@ class _StartScreenState extends State<StartScreen> {
         const SizedBox(height: CalviSize.gapCard),
         Row(
           children: [
-            _MacroDot(label: 'Білок', value: _protein, colour: c.protein),
+            _MacroDot(label: l.macroProtein, value: _protein, colour: c.protein),
             const SizedBox(width: CalviSize.gapCard),
-            _MacroDot(label: 'Жири', value: _fat, colour: c.fats),
+            _MacroDot(label: l.macroFat, value: _fat, colour: c.fats),
             const SizedBox(width: CalviSize.gapCard),
-            _MacroDot(label: 'Вуглеводи', value: _carbs, colour: c.carbs),
+            _MacroDot(label: l.macroCarbs, value: _carbs, colour: c.carbs),
           ],
         ),
         const SizedBox(height: CalviSize.gapCard),
-        const CalviNora(
-          text: 'Порахувала. Далі простіше.',
-          hint:
-              'Пиши або кажи як зручно: «два яйця і тост», «випив 300 води». Решту, що '
-              'знадобиться, спитаю в розмові.',
-        ),
-        const _Note(
-          'Це розрахунок за формулою Міффліна-Сан Жеора, а не медична рекомендація. Якщо є '
-          'захворювання, вагітність або призначена дієта, звіряйся з лікарем.',
-        ),
+        CalviNora(text: l.startNormNora, hint: l.startNormNoraHint),
+        _Note(l.startNormNote),
       ],
     );
   }
@@ -574,10 +577,13 @@ class _Title extends StatelessWidget {
 }
 
 class _Block extends StatelessWidget {
-  const _Block({required this.title, required this.aside, required this.child});
+  const _Block({required this.title, this.aside, required this.child});
 
   final String title;
-  final String aside;
+
+  /// Число, яке відповідає на заголовок, справа того ж рядка. Не в кожного
+  /// блока воно є: у вибору статі відповідь стоїть у самому ряду кнопок.
+  final String? aside;
   final Widget child;
 
   @override
@@ -593,7 +599,7 @@ class _Block extends StatelessWidget {
             textBaseline: TextBaseline.alphabetic,
             children: [
               Expanded(child: Text(title, style: context.t.titleMedium)),
-              Text(aside, style: context.t.bodyMedium),
+              if (aside != null) Text(aside!, style: context.t.bodyMedium),
             ],
           ),
         ),
@@ -659,7 +665,7 @@ class _Step extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [context.c.bg.withValues(alpha: 0), context.c.bg],
+                colors: [context.on.withValues(alpha: 0), context.on],
               ),
             ),
             child: const SizedBox.expand(),
@@ -692,7 +698,7 @@ class _BackState extends State<_Back> {
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: 'Назад',
+      label: L.of(context).actionBack,
       child: GestureDetector(
         onTap: widget.onTap,
         onTapDown: (_) => setState(() => _down = true),
@@ -708,10 +714,7 @@ class _BackState extends State<_Back> {
             height: 40,
             alignment: Alignment.center,
             decoration: BoxDecoration(shape: BoxShape.circle, color: context.c.fillSecondary),
-            child: Transform.rotate(
-              angle: math.pi,
-              child: const CalviIcon('chevron', size: 19),
-            ),
+            child: Transform.rotate(angle: math.pi, child: const CalviIcon('chevron', size: 19)),
           ),
         ),
       ),
@@ -725,12 +728,7 @@ class _BackState extends State<_Back> {
 /* A ruler with its own heading, so a screen carrying three of them does not read
    as three identical drums. */
 class _Field extends StatelessWidget {
-  const _Field({
-    required this.label,
-    required this.value,
-    required this.unit,
-    required this.child,
-  });
+  const _Field({required this.label, required this.value, required this.unit, required this.child});
 
   final String label;
   final String value;
@@ -799,12 +797,16 @@ class _MacroDot extends StatelessWidget {
           color: c.card,
           border: Border.all(color: c.cardBorder),
           borderRadius: BorderRadius.circular(CalviSize.rCard),
+          boxShadow: context.shadowCard,
         ),
         child: Column(
           children: [
             CalviRing(progress: 1, size: 40, stroke: 5, color: colour),
             const SizedBox(height: 8),
-            Text('$valueг', style: context.t.titleMedium?.copyWith(fontSize: CalviSize.fsBody)),
+            Text(
+              L.of(context).gramsUnit(value),
+              style: context.t.titleMedium?.copyWith(fontSize: CalviSize.fsBody),
+            ),
             const SizedBox(height: 8),
             Text(
               label,
@@ -886,12 +888,11 @@ class _Hello extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'Тут нічого не треба вести. Скажи Норі «два яйця і тост», і день порахований: '
-              'ні пошуку в довідниках, ні грамів, ні таблиць. Далі вона сама.',
+              L.of(context).startHelloText,
               style: context.t.bodyMedium?.copyWith(fontSize: CalviSize.fsBody, height: 1.45),
             ),
             const Spacer(),
-            CalviButton(label: 'Почати', onTap: onNext),
+            CalviButton(label: L.of(context).startHelloAction, onTap: onNext),
             // A CSS percentage margin measures the width, not the height.
             SizedBox(height: box.maxWidth * 0.18),
           ],
@@ -916,16 +917,70 @@ class _SignIn extends StatefulWidget {
 class _SignInState extends State<_SignIn> {
   bool _agree = true;
 
+  /// Поки триває обмін із Google і нашим сервером. Другий тап тут дав би другий
+  /// вхід, а не швидший перший.
+  bool _busy = false;
+
+  /* Вхід і його три кінці.
+   *
+   * Вийшло: йдемо далі, щоденник підписаний. Людина закрила вікно Google: теж
+   * ідемо далі мовчки, бо це не помилка, а передумала. Не вийшло через мережу:
+   * кажемо про це і лишаємось тут, бо повторити варто.
+   *
+   * Питання про два щоденники тут не ставиться навмисно: на першому запуску
+   * місцевих записів ще немає, і сама ситуація неможлива. */
+  Future<void> _google() async {
+    final sync = AppScope.maybeOf(context)?.sync;
+    if (sync == null) return widget.onDone();
+
+    setState(() => _busy = true);
+    final result = await sync.login.signIn(deviceName: L.of(context).startDeviceFirstRun);
+    if (!mounted) return;
+    setState(() => _busy = false);
+
+    switch (result) {
+      case LoginResult.done:
+      case LoginResult.canceled:
+        widget.onDone();
+      case LoginResult.needsChoice:
+        // На порожньому телефоні цього не буває, але мовчати теж не можна.
+        widget.onDone();
+      case LoginResult.failed:
+        // Причина в тексті: без неї збій виглядає як мовчання, а до сервера він
+        // не доходить, тому в логах його теж немає.
+        final why = sync.login.error;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              why == null
+                  ? L.of(context).startSignInFailed
+                  : L.of(context).startSignInFailedWhy(why),
+            ),
+            duration: const Duration(seconds: 10),
+          ),
+        );
+    }
+  }
+
+  /* Документ відкривається аркушем, а не в браузері.
+   *
+   * Розходження з сайтом тут уже не загрожує: слова лежать в одному місці, і
+   * `tools/legal.mjs` розвозить їх звідти і в сторінку сайту, і в застосунок.
+   * А от браузер посеред знайомства коштував дорого: людина йшла читати умови й
+   * поверталась у застосунок, який доводилось починати спочатку. Ще гірше без
+   * мережі, де вона не поверталась узагалі. */
+
   @override
   Widget build(BuildContext context) {
     final c = context.c;
+    final l = L.of(context);
     /* The buttons sit in the body, not pinned to the floor: the sentence above
        them is the reason to press one, and it has to be read first. */
     return ListView(
       padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 0, CalviSize.gutter, 16),
       children: [
         Text(
-          'Збережімо це',
+          l.startSignInTitle,
           style: context.t.displayLarge?.copyWith(
             fontSize: 34,
             letterSpacing: 34 * -0.03,
@@ -934,8 +989,7 @@ class _SignInState extends State<_SignIn> {
         ),
         const SizedBox(height: 12),
         Text(
-          'Норма порахована. Увійди, щоб вона лишилась при собі: історія, заміри й записи '
-          'будуть на всіх пристроях, а не тільки тут.',
+          l.startSignInText,
           style: context.t.bodyMedium?.copyWith(fontSize: CalviSize.fsBody, height: 1.5),
         ),
         const SizedBox(height: 24),
@@ -947,16 +1001,31 @@ class _SignInState extends State<_SignIn> {
             ignoring: !_agree,
             child: Column(
               children: [
-                CalviButton(label: 'Продовжити з Google', onTap: widget.onDone),
-                const SizedBox(height: 10),
+                /* Кнопка є тільки тоді, коли за нею щось стоїть.
+                 *
+                 * Порожній ідентифікатор означає, що вхід ще не налаштований у
+                 * цій збірці. Показувати кнопку, яка нічого не зробить, гірше,
+                 * ніж не показувати її: людина натискає, нічого не відбувається,
+                 * і застосунок виглядає зламаним, а не незавершеним. */
+                if (AppScope.maybeOf(context)?.sync?.login.available ?? false) ...[
+                  CalviButton(
+                    label: _busy ? l.startSignInBusy : l.startSignInGoogle,
+                    onTap: _busy ? () {} : () => unawaited(_google()),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+
                 /* Apple where Apple is. On Android the button leads nowhere, and
                    a way in that cannot be walked is worse than one less way in. */
                 if (defaultTargetPlatform == TargetPlatform.iOS ||
                     defaultTargetPlatform == TargetPlatform.macOS) ...[
-                  _Ghost(label: 'Продовжити з Apple', onTap: widget.onDone),
+                  _Ghost(label: l.startSignInApple, onTap: widget.onDone),
                   const SizedBox(height: 10),
                 ],
-                _Ghost(label: 'Продовжити з поштою', onTap: widget.onDone),
+
+                /* Далі без входу. Раніше тут стояла кнопка «Продовжити з
+                   поштою», за якою не було нічого: ні маршруту, ні планів. */
+                _Ghost(label: l.startSignInSkip, onTap: widget.onDone),
               ],
             ),
           ),
@@ -982,13 +1051,32 @@ class _SignInState extends State<_SignIn> {
                 child: _agree ? CalviIcon('check', size: 13, color: c.buttonText) : null,
               ),
               const SizedBox(width: 10),
+              /* Документи відкриваються, а не просто називаються.
+               *
+               * Тут стояв звичайний рядок тексту, і людина ставила галочку під
+               * тим, чого не могла прочитати: слова «умови» і «політика» ні на
+               * що не вели. Згода на непрочитане це не згода. */
               Expanded(
-                child: Text(
-                  'Погоджуюсь з умовами користування і політикою приватності',
-                  style: context.t.bodyMedium?.copyWith(
-                    fontSize: CalviSize.fsMicro,
-                    height: 1.45,
+                child: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(text: l.startAgreeHead),
+                      TextSpan(
+                        text: l.startAgreeTerms,
+                        style: TextStyle(color: c.text, decoration: TextDecoration.underline),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () => legalSheet(context, terms),
+                      ),
+                      TextSpan(text: l.startAgreeAnd),
+                      TextSpan(
+                        text: l.startAgreePrivacy,
+                        style: TextStyle(color: c.text, decoration: TextDecoration.underline),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () => legalSheet(context, privacy),
+                      ),
+                    ],
                   ),
+                  style: context.t.bodyMedium?.copyWith(fontSize: CalviSize.fsMicro, height: 1.45),
                 ),
               ),
             ],

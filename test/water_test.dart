@@ -48,7 +48,11 @@ void main() {
   });
 
   test('менше забирає з найсвіжішого, а не з ранкової склянки', () async {
-    final morning = DateTime.now().subtract(const Duration(hours: 6));
+    /* Не «шість годин тому»: о пів на першу ночі це вже вчора, і тест падав
+       рівно тоді, коли його ганяли пізно. Ранок будується від сьогоднішньої
+       опівночі, і день у нього завжди той самий. */
+    final now = DateTime.now();
+    final morning = DateTime(now.year, now.month, now.day, 0, 1);
     await db.diaryDao.addWater(ml: 300, at: morning);
     await db.diaryDao.setWaterTotal(500);
 

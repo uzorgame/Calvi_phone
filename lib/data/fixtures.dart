@@ -16,17 +16,27 @@ import 'workout.dart';
 /// and so the fixtures mean the same thing from one session to the next.
 const fixtureGoal = DayGoal(kcal: 2380, protein: 135, fat: 66, carbs: 311, waterMl: 2200);
 
+/* Назва показової страви двома мовами.
+ *
+ * Демо-день це вітрина, і дивиться на неї людина, яка ще не зробила жодного
+ * свого запису. Українські назви в англійському інтерфейсі читаються там не як
+ * чужа мова, а як поламаний застосунок.
+ *
+ * Тут, а не в ARB: це дані, а не напис. Назва їде далі в модель страви, у
+ * підсумки і в аналітику, і жодне з тих місць про переклад не знає. */
+String demoDish(String uk, String en) => dataLang == 'uk' ? uk : en;
+
 SlotDef _s(String id) => baseSlots[id]!;
 
 /// Every day the fixtures know, for anything that reads across the history.
 final allDays = <int, DayModel>{
   -5: DayModel(
     slots: [_s('breakfast'), _s('lunch'), _s('dinner')],
-    meals: const [
+    meals: [
       Meal(
         id: 'a1',
         icon: 'egg',
-        title: 'Омлет із двох яєць',
+        title: demoDish('Омлет із двох яєць', 'Two-egg omelette'),
         time: '08:40',
         slotId: 'breakfast',
         grams: 180,
@@ -38,7 +48,7 @@ final allDays = <int, DayModel>{
       Meal(
         id: 'a2',
         icon: 'soup',
-        title: 'Курячий суп',
+        title: demoDish('Курячий суп', 'Chicken soup'),
         time: '13:10',
         slotId: 'lunch',
         grams: 350,
@@ -50,7 +60,7 @@ final allDays = <int, DayModel>{
       Meal(
         id: 'a3',
         icon: 'meat',
-        title: 'Індичка з рисом',
+        title: demoDish('Індичка з рисом', 'Turkey with rice'),
         time: '19:20',
         slotId: 'dinner',
         grams: 320,
@@ -62,7 +72,7 @@ final allDays = <int, DayModel>{
       Meal(
         id: 'a4',
         icon: 'pancake',
-        title: 'Сирники',
+        title: demoDish('Сирники', 'Cheese pancakes'),
         time: '16:20',
         slotId: 'snack',
         grams: 180,
@@ -74,7 +84,7 @@ final allDays = <int, DayModel>{
       Meal(
         id: 'a5',
         icon: 'nuts',
-        title: 'Горіхи волоські',
+        title: demoDish('Горіхи волоські', 'Walnuts'),
         time: '11:10',
         slotId: 'snack',
         grams: 45,
@@ -86,7 +96,7 @@ final allDays = <int, DayModel>{
       Meal(
         id: 'a6',
         icon: 'pasta',
-        title: 'Паста з куркою',
+        title: demoDish('Паста з куркою', 'Pasta with chicken'),
         time: '20:10',
         slotId: 'dinner',
         grams: 320,
@@ -96,18 +106,18 @@ final allDays = <int, DayModel>{
         carbs: 72,
       ),
     ],
-    workouts: const [
+    workouts: [
       Workout(id: 'w1', activity: 'run', title: 'Біг', minutes: 34, kcal: 310, time: '07:20'),
     ],
     waterMl: 1800,
   ),
   -4: DayModel(
     slots: [_s('breakfast'), _s('lunch'), _s('dinner')],
-    meals: const [
+    meals: [
       Meal(
         id: 'b1',
         icon: 'grain',
-        title: 'Вівсянка з бананом',
+        title: demoDish('Вівсянка з бананом', 'Porridge with banana'),
         time: '08:15',
         slotId: 'breakfast',
         grams: 260,
@@ -119,7 +129,7 @@ final allDays = <int, DayModel>{
       Meal(
         id: 'b2',
         icon: 'fish',
-        title: 'Лосось і салат',
+        title: demoDish('Лосось і салат', 'Salmon and salad'),
         time: '13:40',
         slotId: 'lunch',
         grams: 300,
@@ -131,7 +141,7 @@ final allDays = <int, DayModel>{
       Meal(
         id: 'b3',
         icon: 'dairy',
-        title: 'Сир із медом',
+        title: demoDish('Сир із медом', 'Cottage cheese with honey'),
         time: '20:05',
         slotId: 'dinner',
         grams: 200,
@@ -143,7 +153,7 @@ final allDays = <int, DayModel>{
       Meal(
         id: 'b4',
         icon: 'chicken',
-        title: 'Куряча грудка',
+        title: demoDish('Куряча грудка', 'Chicken breast'),
         time: '19:00',
         slotId: 'dinner',
         grams: 220,
@@ -155,7 +165,7 @@ final allDays = <int, DayModel>{
       Meal(
         id: 'b5',
         icon: 'dumpling',
-        title: 'Вареники з сиром',
+        title: demoDish('Вареники з сиром', 'Dumplings with cheese'),
         time: '13:20',
         slotId: 'lunch',
         grams: 260,
@@ -167,7 +177,7 @@ final allDays = <int, DayModel>{
       Meal(
         id: 'b6',
         icon: 'fruit',
-        title: 'Банан',
+        title: demoDish('Банан', 'Banana'),
         time: '16:30',
         slotId: 'snack',
         grams: 130,
@@ -182,11 +192,11 @@ final allDays = <int, DayModel>{
   // The day that went over: the strip shows this one red.
   -3: DayModel(
     slots: [_s('breakfast'), _s('lunch'), _s('dinner'), _s('snack')],
-    meals: const [
+    meals: [
       Meal(
         id: 'c1',
         icon: 'bread',
-        title: 'Тост з авокадо',
+        title: demoDish('Тост з авокадо', 'Avocado toast'),
         time: '09:00',
         slotId: 'breakfast',
         grams: 210,
@@ -198,7 +208,7 @@ final allDays = <int, DayModel>{
       Meal(
         id: 'c2',
         icon: 'meat',
-        title: 'Бургер і картопля',
+        title: demoDish('Бургер і картопля', 'Burger and chips'),
         time: '14:20',
         slotId: 'lunch',
         grams: 480,
@@ -210,7 +220,7 @@ final allDays = <int, DayModel>{
       Meal(
         id: 'c3',
         icon: 'sweet',
-        title: 'Тістечко',
+        title: demoDish('Тістечко', 'A pastry'),
         time: '17:10',
         slotId: 'snack',
         grams: 120,
@@ -222,7 +232,7 @@ final allDays = <int, DayModel>{
       Meal(
         id: 'c4',
         icon: 'plate',
-        title: 'Паста карбонара',
+        title: demoDish('Паста карбонара', 'Pasta carbonara'),
         time: '20:40',
         slotId: 'dinner',
         grams: 340,
@@ -236,11 +246,11 @@ final allDays = <int, DayModel>{
   ),
   -2: DayModel(
     slots: [_s('breakfast'), _s('lunch'), _s('dinner')],
-    meals: const [
+    meals: [
       Meal(
         id: 'd1',
         icon: 'egg',
-        title: 'Яєчня і кава',
+        title: demoDish('Яєчня і кава', 'Fried eggs and coffee'),
         time: '08:05',
         slotId: 'breakfast',
         grams: 190,
@@ -252,7 +262,7 @@ final allDays = <int, DayModel>{
       Meal(
         id: 'd2',
         icon: 'grain',
-        title: 'Гречка з куркою',
+        title: demoDish('Гречка з куркою', 'Buckwheat with chicken'),
         time: '13:25',
         slotId: 'lunch',
         grams: 380,
@@ -262,18 +272,25 @@ final allDays = <int, DayModel>{
         carbs: 58,
       ),
     ],
-    workouts: const [
-      Workout(id: 'w2', activity: 'gym', title: 'Зал', minutes: 62, kcal: 445, time: '18:00'),
+    workouts: [
+      Workout(
+        id: 'w2',
+        activity: 'gym',
+        title: demoDish('Зал', 'Gym'),
+        minutes: 62,
+        kcal: 445,
+        time: '18:00',
+      ),
     ],
     waterMl: 2600,
   ),
   -1: DayModel(
     slots: [_s('breakfast'), _s('lunch'), _s('dinner')],
-    meals: const [
+    meals: [
       Meal(
         id: 'e1',
         icon: 'dairy',
-        title: 'Йогурт з ягодами',
+        title: demoDish('Йогурт з ягодами', 'Yoghurt with berries'),
         time: '08:30',
         slotId: 'breakfast',
         grams: 220,
@@ -285,7 +302,7 @@ final allDays = <int, DayModel>{
       Meal(
         id: 'e2',
         icon: 'vegetable',
-        title: 'Салат з тунцем',
+        title: demoDish('Салат з тунцем', 'Tuna salad'),
         time: '13:50',
         slotId: 'lunch',
         grams: 320,
@@ -297,7 +314,7 @@ final allDays = <int, DayModel>{
       Meal(
         id: 'e3',
         icon: 'meat',
-        title: 'Стейк і овочі',
+        title: demoDish('Стейк і овочі', 'Steak and vegetables'),
         time: '19:35',
         slotId: 'dinner',
         grams: 360,
@@ -309,7 +326,7 @@ final allDays = <int, DayModel>{
       Meal(
         id: 'e4',
         icon: 'fish',
-        title: 'Лосось запечений',
+        title: demoDish('Лосось запечений', 'Baked salmon'),
         time: '19:30',
         slotId: 'dinner',
         grams: 200,
@@ -321,7 +338,7 @@ final allDays = <int, DayModel>{
       Meal(
         id: 'e5',
         icon: 'yogurt',
-        title: 'Йогурт грецький',
+        title: demoDish('Йогурт грецький', 'Greek yoghurt'),
         time: '10:40',
         slotId: 'snack',
         grams: 200,
@@ -333,7 +350,7 @@ final allDays = <int, DayModel>{
       Meal(
         id: 'e6',
         icon: 'bread',
-        title: 'Тост із авокадо',
+        title: demoDish('Тост із авокадо', 'Avocado toast'),
         time: '08:50',
         slotId: 'breakfast',
         grams: 140,
@@ -348,11 +365,11 @@ final allDays = <int, DayModel>{
   // Today. Dinner is deliberately empty: the card stands anyway.
   0: DayModel(
     slots: [_s('breakfast'), _s('lunch'), _s('dinner')],
-    meals: const [
+    meals: [
       Meal(
         id: 'f1',
         icon: 'egg',
-        title: 'Яєчня з двох яєць',
+        title: demoDish('Яєчня з двох яєць', 'Two fried eggs'),
         time: '08:20',
         slotId: 'breakfast',
         grams: 160,
@@ -364,7 +381,7 @@ final allDays = <int, DayModel>{
       Meal(
         id: 'f2',
         icon: 'drink',
-        title: 'Кава з молоком',
+        title: demoDish('Кава з молоком', 'Coffee with milk'),
         time: '08:35',
         slotId: 'breakfast',
         grams: 200,
@@ -376,7 +393,7 @@ final allDays = <int, DayModel>{
       Meal(
         id: 'f3',
         icon: 'soup',
-        title: 'Борщ з куркою',
+        title: demoDish('Борщ з куркою', 'Borscht with chicken'),
         time: '13:05',
         slotId: 'lunch',
         grams: 300,
@@ -388,7 +405,7 @@ final allDays = <int, DayModel>{
       Meal(
         id: 'f4',
         icon: 'bread',
-        title: 'Хліб житній',
+        title: demoDish('Хліб житній', 'Rye bread'),
         time: '13:12',
         slotId: 'lunch',
         grams: 60,
@@ -398,11 +415,11 @@ final allDays = <int, DayModel>{
         carbs: 26,
       ),
     ],
-    workouts: const [
+    workouts: [
       Workout(
         id: 'w4',
         activity: 'bike',
-        title: 'Велосипед',
+        title: demoDish('Велосипед', 'Cycling'),
         minutes: 42,
         kcal: 310,
         time: '17:30',
@@ -414,7 +431,7 @@ final allDays = <int, DayModel>{
 
 /// A day with nothing in it still has its three cards.
 DayModel dayFor(int date) =>
-    allDays[date] ?? DayModel(slots: alwaysSlots.map(_s).toList(), meals: const []);
+    allDays[date] ?? DayModel(slots: alwaysSlots.map(_s).toList(), meals: []);
 
 /// Whether the fixtures know anything about this day at all.
 bool hasDay(int date) => allDays.containsKey(date);
@@ -470,10 +487,7 @@ List<DayBucket> bucketDays(int days) {
     final dates = [for (var d = last - size + 1; d <= last; d++) d];
     final opens = dates.first;
     out.add(
-      DayBucket(
-        label: size == 1 ? dayInfo(opens).label : '${dayInfo(opens).day}',
-        dates: dates,
-      ),
+      DayBucket(label: size == 1 ? dayInfo(opens).label : '${dayInfo(opens).day}', dates: dates),
     );
   }
   return out;

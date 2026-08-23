@@ -1,0 +1,35 @@
+{
+  "medsTitle": "Препарати",
+  "medsMine": "Мої препарати",
+  "medsEmpty": "Тут порожньо. Додай препарат, і я нагадаю в потрібний час.",
+  "medsEmptyHint": "Веду журнал прийомів, дозування не рахую",
+  "medsNoneToday": "Сьогодні прийомів немає",
+  "medsAllTaken": "На сьогодні все прийнято",
+  "medsNextAt": "Далі о ",
+  "medsAdd": "Додати препарат",
+  "medsPast": "Минулі",
+  "medsPastEmpty": "Тут будуть курси, які ти вже не приймаєш. Препарат, прибраний зі списку, лишається в днях, коли ти його пив.",
+  "medsSince": "з {date}",
+  "medsNow": "ЗАРАЗ",
+
+  "medsDose": "Доза",
+  "medsHours": "Години",
+  "medsSchedule": "Розклад",
+  "medsCourse": "Курс",
+  "medsNote": "Примітка",
+  "medsResume": "Відновити курс",
+
+  "medsNew": "Новий препарат",
+  "medsOne": "Препарат",
+  "medsTime": "Час",
+  "medsName": "Назва",
+  "medsNameExample": "Наприклад, Магній B6",
+  "medsPerTake": "Скільки за раз",
+  "medsAt": "О котрій",
+  "medsHowOften": "Як часто",
+  "medsRemind": "Нагадувати",
+  "medsRemindHint": "у вибрані години",
+  "medsFinish": "Закінчити курс",
+
+  "medsUntil": "до {date}"
+}

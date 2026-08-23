@@ -7,6 +7,7 @@ import '../../design/shell.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import 'slot_card.dart';
+import '../../l10n/app_localizations.dart';
 
 /// The tape, on the home screen and permanent.
 ///
@@ -15,12 +16,22 @@ import 'slot_card.dart';
 /// add a waist, a few care about a bicep. The plus is how the rest arrive, one
 /// at a time, when they are actually wanted.
 ///
-/// Every field is prefilled with its last reading, not with zero: a body does
-/// not start from nothing every month, and typing numbers from scratch is how a
-/// measurement habit dies. Change what moved, leave the rest.
+/// **Поля порожні щодня, а не заповнені вчорашнім.**
+///
+/// Спершу тут стояло минуле значення, і виглядало це розумно: тіло не
+/// починається з нуля щомісяця. Насправді виходила неправда. Картка казала
+/// «останнє сьогодні» і показувала число, якого сьогодні ніхто не міряв, а
+/// значок рахував не заміри, а поля, які людина вирішила відстежувати: два
+/// увімкнені поля давали «2 заміри» на порожній картці.
+///
+/// Тому поле показує рівно те, що записано на цей день, а минуле число стоїть
+/// підказкою всередині: видно, від чого відштовхуватись, і видно, що це ще не
+/// сьогоднішнє. Записане в минулі дні лишається недоторканим: на ньому
+/// тримається вся аналітика.
 class MeasureCard extends StatefulWidget {
   const MeasureCard({
     super.key,
+    required this.date,
     required this.list,
     required this.tracked,
     required this.onTrack,
@@ -29,6 +40,9 @@ class MeasureCard extends StatefulWidget {
     required this.open,
     required this.onToggle,
   });
+
+  /// Який день зараз на екрані. Заміри належать дню, а не «взагалі».
+  final int date;
 
   final List<Measure> list;
   final List<String> tracked;
@@ -55,10 +69,57 @@ class _MeasureCardState extends State<MeasureCard> {
     super.dispose();
   }
 
+  /* Поле має показувати те, що в базі, а не те, що там було при першій побудові.
+   *
+   * Контролер створюється один раз, і число, яке прийшло пізніше, у нього вже не
+   * потрапляло. Найпомітніше це було з Норою: людина каже «запиши вагу 77.5»,
+   * запис лягає в базу, значок чесно пише «1 замір», а поле поруч порожнє. Той
+   * самий контролер тягнувся і при перемиканні днів, показуючи вчорашнє число на
+   * сьогоднішній картці.
+   *
+   * Недописане людиною не чіпаємо: чернетка живе, поки її не збережуть. */
+  @override
+  void didUpdateWidget(covariant MeasureCard old) {
+    super.didUpdateWidget(old);
+    if (old.list == widget.list && old.date == widget.date) return;
+
+    // День змінився, значить чернетка була про інший день.
+    if (old.date != widget.date) _draft.clear();
+
+    for (final entry in _controllers.entries) {
+      if (_draft.containsKey(entry.key)) continue;
+      final fresh = _value(entry.key);
+      if (entry.value.text != fresh) entry.value.text = fresh;
+    }
+  }
+
+  /// Що записано на цей день. Порожньо, якщо сьогодні ще не міряли.
   String _value(String key) {
     if (_draft.containsKey(key)) return _draft[key]!;
-    final l = latestMeasure(widget.list, key);
-    return l == null ? '' : _trim(l.v);
+    final v = _onThisDay(key);
+    return v == null ? '' : _trim(v);
+  }
+
+  double? _onThisDay(String key) {
+    for (final m in widget.list) {
+      if (m.date == widget.date) {
+        final v = m[key];
+        if (v != null) return v;
+      }
+    }
+    return null;
+  }
+
+  /// Останнє раніше за цей день: підказка в порожньому полі.
+  String? _before(String key) {
+    ({double v, int date})? best;
+    for (final m in widget.list) {
+      if (m.date >= widget.date) continue;
+      final v = m[key];
+      if (v == null) continue;
+      if (best == null || m.date > best.date) best = (v: v, date: m.date);
+    }
+    return best == null ? null : _trim(best.v);
   }
 
   TextEditingController _controllerFor(String key) =>
@@ -75,7 +136,7 @@ class _MeasureCardState extends State<MeasureCard> {
       // would bend the chart for months.
       if (n != null && n >= f.min && n <= f.max) values[key] = n;
     }
-    widget.onSave(Measure(date: 0, values: values));
+    widget.onSave(Measure(date: widget.date, values: values));
 
     /* The fields are put back to what was actually stored. Clearing the draft
        alone left a rejected number sitting in its box: the chart had ignored it,
@@ -85,12 +146,7 @@ class _MeasureCardState extends State<MeasureCard> {
     setState(() {
       for (final key in widget.tracked) {
         final kept = values[key];
-        final last = latestMeasure(widget.list, key);
-        _controllers[key]?.text = kept != null
-            ? _trim(kept)
-            : last == null
-            ? ''
-            : _trim(last.v);
+        _controllers[key]?.text = kept == null ? '' : _trim(kept);
       }
       _draft.clear();
     });
@@ -109,11 +165,18 @@ class _MeasureCardState extends State<MeasureCard> {
 
     return SlotCard(
       icon: 'ruler',
-      title: 'Вимірювання',
-      sub: last == null ? 'ще не робив' : 'останнє ${measureAgo(last.date)}',
-      badge: fields.isEmpty
-          ? 'нічого'
-          : '${fields.length} ${fields.length == 1 ? 'замір' : 'заміри'}',
+      title: L.of(context).measureTitle,
+      sub: last == null
+          ? L.of(context).measureNever
+          : L.of(context).measureLast(measureAgo(last.date)),
+      /* Значок рахує заміри цього дня, а не ввімкнені поля. Порожня картка з
+         написом «2 заміри» казала неправду двічі: замірів не було, а число
+         означало щось геть інше. */
+      badge: () {
+        final done = fields.where((f) => _onThisDay(f.key) != null).length;
+        if (done == 0) return L.of(context).measureNothing;
+        return L.of(context).measureCount(done);
+      }(),
       open: widget.open,
       onToggle: widget.onToggle,
       child: Column(
@@ -122,10 +185,7 @@ class _MeasureCardState extends State<MeasureCard> {
           if (fields.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Text(
-                'Обери, що будеш міряти. Досить одного, якщо решта не цікавить.',
-                style: context.t.bodyMedium,
-              ),
+              child: Text(L.of(context).measurePick, style: context.t.bodyMedium),
             )
           else
             LayoutBuilder(
@@ -138,6 +198,9 @@ class _MeasureCardState extends State<MeasureCard> {
                       width: (box.maxWidth - 10) / 2,
                       field: f,
                       controller: _controllerFor(f.key),
+                      // Минуле число підказкою: видно, від чого відштовхуватись,
+                      // і видно, що це ще не сьогоднішнє.
+                      was: _before(f.key),
                       onChanged: (v) => setState(() => _draft[f.key] = v),
                       onDrop: () {
                         _controllers.remove(f.key)?.dispose();
@@ -165,9 +228,13 @@ class _MeasureCardState extends State<MeasureCard> {
                       child: CalviIcon(_picking ? 'minus' : 'plus', size: 16, color: c.text),
                     ),
                     const SizedBox(width: 10),
-                    Text(
-                      _picking ? 'Згорнути' : 'Додати вимірювання',
-                      style: context.t.bodyMedium,
+                    // Гнучкий: напис довгий, а картка вузька, і текст у ряду
+                    // без цього не переноситься, а вилазить за край.
+                    Expanded(
+                      child: Text(
+                        _picking ? L.of(context).measureCollapse : L.of(context).measureAdd,
+                        style: context.t.bodyMedium,
+                      ),
                     ),
                   ],
                 ),
@@ -209,7 +276,7 @@ class _MeasureCardState extends State<MeasureCard> {
 
           if (fields.isNotEmpty && _draft.isNotEmpty) ...[
             const SizedBox(height: 16),
-            CalviButton(label: 'Зберегти заміри', onTap: _save),
+            CalviButton(label: L.of(context).measureSave, onTap: _save),
           ],
 
           const SizedBox(height: 4),
@@ -223,9 +290,13 @@ class _MeasureCardState extends State<MeasureCard> {
                 children: [
                   CalviIcon('chart', size: 15, color: c.textSecondary),
                   const SizedBox(width: 8),
-                  Text(
-                    'Статистика замірів',
-                    style: context.t.labelSmall?.copyWith(fontSize: 13),
+                  // Гнучкий, бо ряд вирівняний по центру і місця має рівно
+                  // стільки, скільки лишилось від картки.
+                  Flexible(
+                    child: Text(
+                      L.of(context).measureStats,
+                      style: context.t.labelSmall?.copyWith(fontSize: 13),
+                    ),
                   ),
                 ],
               ),
@@ -244,7 +315,11 @@ class _Field extends StatelessWidget {
     required this.controller,
     required this.onChanged,
     required this.onDrop,
+    this.was,
   });
+
+  /// Останнє записане раніше за цей день. Стоїть підказкою в порожньому полі.
+  final String? was;
 
   final double width;
   final MeasureField field;
@@ -304,7 +379,7 @@ class _Field extends StatelessWidget {
                       isDense: true,
                       contentPadding: EdgeInsets.zero,
                       border: InputBorder.none,
-                      hintText: '—',
+                      hintText: was ?? '',
                       hintStyle: context.t.headlineMedium?.copyWith(
                         fontSize: 19,
                         color: c.textSecondary,

@@ -4,8 +4,10 @@ import 'package:flutter/widgets.dart';
 
 import '../local/database.dart';
 import 'api.dart';
-import 'chat_repository.dart';
 import 'config.dart';
+import 'google_login.dart';
+import 'login_service.dart';
+import 'chat_repository.dart';
 import 'food_repository.dart';
 import 'sync_repository.dart';
 
@@ -16,8 +18,7 @@ import 'sync_repository.dart';
 /// for anything and never shows its progress: the local database is what the
 /// screens read, and this only makes sure the same rows exist on the server.
 class SyncService with WidgetsBindingObserver {
-  SyncService(this.db, {CalviApi? api})
-    : _api = api ?? CalviApi(base: Uri.parse(apiBase));
+  SyncService(this.db, {CalviApi? api}) : _api = api ?? CalviApi(base: Uri.parse(apiBase));
 
   final CalviDb db;
   final CalviApi _api;
@@ -48,8 +49,25 @@ class SyncService with WidgetsBindingObserver {
   }
 
   /// Asks Nora, over the same client and the same account as the sync.
-  Future<NoraReply> ask({required String text, required String slot, Shot? image}) =>
-      ChatRepository(db, _api).send(text: text, slot: slot, image: image);
+  Future<NoraReply> ask({
+    required String text,
+    required String slot,
+    Shot? image,
+    List<Map<String, String>> history = const [],
+  }) => ChatRepository(db, _api).send(text: text, slot: slot, image: image, history: history);
+
+  /* Вхід через Google. Живе тут, бо саме тут лежить той самий клієнт і та сама
+     база: вхід міняє обліковий запис, і робити це повз синхронізацію означало б
+     мати два уявлення про те, хто зараз у застосунку. */
+  late final LoginService login = LoginService(
+    db: db,
+    api: _api,
+    google: GoogleLogin(serverClientId: googleClientId),
+  );
+
+  /// Вага, обрана дотиком. Без токена: страву вже розібрано.
+  Future<NoraReply> weigh({required int grams, required String slot, String? askId}) =>
+      ChatRepository(db, _api).weigh(grams: grams, slot: slot, askId: askId);
 
   /// Що на знімку. Числа для картки сканера, без запису в день.
   Future<Analysis> look(Shot shot) => ChatRepository(db, _api).look(shot);

@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../data/settings.dart';
+import '../../design/icons.dart';
 import '../../design/shell.dart';
+import '../../design/theme.dart';
+import '../../design/tokens.dart';
+import '../../l10n/app_localizations.dart';
+import '../../l10n/labels.dart';
 
 typedef SetSettings = void Function(SettingsState Function(SettingsState));
 
@@ -23,29 +28,27 @@ class ThemePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     return CalviScreen(
       onBack: onBack,
-      title: 'Тема',
-      foot: CalviButton(label: 'Готово', onTap: () => (onBack ?? Navigator.of(context).pop)()),
+      title: l.setTheme,
+      foot: CalviButton(label: l.actionDone, onTap: () => (onBack ?? Navigator.of(context).pop)()),
       children: [
         CalviSection(
-          title: 'Вигляд',
+          title: l.themeSectionLook,
           bare: true,
           children: [
             for (final t in themeOptions)
               CalviPick(
-                label: t.title,
-                hint: t.hint,
+                label: themeTitle(context, t.id),
+                hint: themeHint(context, t.id),
                 icon: t.icon,
                 on: s.theme == t.id,
                 onTap: () => set((v) => v.copyWith(theme: t.id)),
               ),
           ],
         ),
-        const CalviNote(
-          'Темна тема тут нейтральна, без синього відтінку: чорнило застосунку в ній '
-          'перевертається у світле, а не міняє колір.',
-        ),
+        CalviNote(l.themeNote),
       ],
     );
   }
@@ -68,26 +71,23 @@ class LangPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     return CalviScreen(
       onBack: onBack,
-      title: 'Мова',
-      foot: CalviButton(label: 'Готово', onTap: () => (onBack ?? Navigator.of(context).pop)()),
+      title: l.setLang,
+      foot: CalviButton(label: l.actionDone, onTap: () => (onBack ?? Navigator.of(context).pop)()),
       children: [
         CalviSection(
-          title: 'Мова інтерфейсу',
+          title: l.langSection,
           bare: true,
           children: [
-            for (final l in langOptions)
+            for (final option in langOptions)
               CalviPick(
-                label: l.title,
-                hint: l.hint,
-                on: s.lang == l.id,
-                onTap: () => set((v) => v.copyWith(lang: l.id)),
+                label: langTitle(context, option),
+                on: s.lang == option,
+                onTap: () => set((v) => v.copyWith(lang: option)),
               ),
           ],
-        ),
-        const CalviNote(
-          'Переклад англійською ще не зроблено: поки вибір лише запамʼятовується.',
         ),
       ],
     );
@@ -111,50 +111,73 @@ class _PlanPanelState extends State<PlanPanel> {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     return CalviScreen(
       onBack: widget.onBack,
-      title: 'Підписка',
+      title: l.planTitle,
       foot: CalviButton(
-        label: 'Оформити',
+        label: l.planBuy,
         onTap: () => (widget.onBack ?? Navigator.of(context).pop)(),
-        second: 'Не зараз',
+        second: l.planLater,
         onSecond: () => (widget.onBack ?? Navigator.of(context).pop)(),
       ),
       children: [
-        const CalviSection(
-          title: 'Зараз',
+        CalviSection(
+          title: l.planNow,
           bare: true,
           trail: 0,
           children: [
             CalviFacts(
               inset: false,
-              rows: [('План', 'Безкоштовний'), ('Токени', '2 на добу')],
-              note: 'Безлімітні токени, історія без обмежень і звіти за будь-який період.',
+              rows: [(l.planPlan, l.planFree), (l.planTokens, l.planTokensFree)],
             ),
           ],
         ),
+
+        /* Переваги списком із галочками, а не реченням у примітці: екран
+           продає, і кожен рядок має читатись окремим «так». */
         CalviSection(
-          title: 'План',
+          title: l.planPerks,
+          bare: true,
+          trail: 0,
+          children: [
+            _Perks(rows: [l.planPerkChat, l.planPerkHistory, l.planPerkReports]),
+          ],
+        ),
+
+        /* Два плани двома картками, і вигода річного названа числом на чіпі, а
+           не захована в підказці, де про неї треба здогадатись. */
+        CalviSection(
+          title: l.planPlan,
           bare: true,
           children: [
-            CalviPick(
-              label: 'Рік',
-              hint: '150 грн на місяць, списується раз на рік',
-              on: _plan == 'year',
-              onTap: () => setState(() => _plan = 'year'),
-            ),
-            CalviPick(
-              label: 'Місяць',
-              hint: '180 грн',
-              on: _plan == 'month',
-              onTap: () => setState(() => _plan = 'month'),
+            Row(
+              children: [
+                Expanded(
+                  child: _PlanCard(
+                    name: l.planYear,
+                    save: l.planSave,
+                    price: l.planYearPrice,
+                    note: l.planYearBilled,
+                    on: _plan == 'year',
+                    onTap: () => setState(() => _plan = 'year'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _PlanCard(
+                    name: l.planMonth,
+                    price: l.planMonthPrice,
+                    note: l.planMonthBilled,
+                    on: _plan == 'month',
+                    onTap: () => setState(() => _plan = 'month'),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
-        const CalviNote(
-          'Оплата проходить через App Store або Google Play. Скасувати можна там само, '
-          'у налаштуваннях передплат, і Calvi на це не впливає.',
-        ),
+        CalviNote(l.planStoreNote),
       ],
     );
   }
@@ -173,37 +196,37 @@ class PrivacyPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     return CalviScreen(
       onBack: onBack,
-      title: 'Приватність',
-      hint: 'Що саме залишає твій телефон, і що не залишає його ніколи.',
-      foot: CalviButton(label: 'Готово', onTap: () => (onBack ?? Navigator.of(context).pop)()),
+      title: l.privacyTitle,
+      foot: CalviButton(label: l.actionDone, onTap: () => (onBack ?? Navigator.of(context).pop)()),
       children: [
-        const CalviSection(
-          title: 'Що ми не збираємо',
+        /* Три обіцянки трьома рядками, а не абзацом.
+           Це головне, що людина хоче тут прочитати, і суцільний сірий текст
+           вона пробігає очима, не читаючи жодної з них. */
+        CalviSection(
+          title: l.privacyNotCollected,
           bare: true,
           trail: 0,
           children: [
-            CalviFacts(
-              inset: false,
-              rows: [],
-              note: 'Фото страв ',
-              noteBold: 'не зберігаються',
-              noteRest:
-                  ': знімок іде в обробку і зникає. В аналітику не потрапляють ні страви, ні '
-                  'вага, ні алергії, ні препарати. Це особлива категорія персональних даних, і '
-                  'віддавати її третій стороні не можна незалежно від зручності.',
+            _Guarantees(
+              rows: [
+                (l.privacyNoPhotosHead, l.privacyNoPhotosSub),
+                (l.privacyDiaryHead, l.privacyDiarySub),
+                (l.privacyHealthHead, l.privacyHealthSub),
+              ],
             ),
           ],
         ),
         CalviSection(
-          title: 'Що можна вимкнути',
+          title: l.privacyOptional,
           children: [
             CalviRow(
               icon: 'chart',
               first: true,
-              title: 'Знеособлена статистика',
-              hint: 'які екрани відкривають, без вмісту записів',
+              title: l.privacyStats,
+              hint: l.privacyStatsHint,
               trailing: CalviSwitch(
                 on: s.analytics,
                 onChanged: (v) => set((x) => x.copyWith(analytics: v)),
@@ -211,8 +234,8 @@ class PrivacyPanel extends StatelessWidget {
             ),
             CalviRow(
               icon: 'shield',
-              title: 'Звіти про збої',
-              hint: 'стек помилки, без даних щоденника',
+              title: l.privacyCrash,
+              hint: l.privacyCrashHint,
               trailing: CalviSwitch(
                 on: s.crash,
                 onChanged: (v) => set((x) => x.copyWith(crash: v)),
@@ -242,46 +265,256 @@ class _DeletePanelState extends State<DeletePanel> {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     return CalviScreen(
       onBack: widget.onBack,
-      title: 'Видалити акаунт',
-      hint:
-          'Видаляється все: щоденник, вага, вимірювання, алергії, препарати, історія розмов. '
-          'Відновити після цього неможливо.',
+      title: l.deleteTitle,
+      hint: l.deleteNote,
       foot: CalviButton(
-        label: 'Видалити назавжди',
+        label: l.deleteForever,
         enabled: _sure,
         danger: true,
         onTap: () => (widget.onBack ?? Navigator.of(context).pop)(),
-        second: 'Скасувати',
+        second: l.actionCancel,
         onSecond: () => (widget.onBack ?? Navigator.of(context).pop)(),
       ),
       children: [
-        const CalviSection(
+        CalviSection(
           bare: true,
           trail: 0,
           children: [
             CalviFacts(
               inset: false,
-              rows: [
-                ('Записів у щоденнику', '412'),
-                ('Замірів ваги', '37'),
-                ('Днів із Calvi', '94'),
-              ],
+              rows: [(l.deleteEntries, '412'), (l.deleteWeighings, '37'), (l.deleteDays, '94')],
             ),
           ],
         ),
         CalviCheck(
           on: _sure,
           onToggle: () => setState(() => _sure = !_sure),
-          text: 'Я розумію, що дані буде видалено назавжди і відновити їх не вийде.',
+          text: l.deleteConfirm,
         ),
-        const CalviNote(
-          'Якщо річ у підписці, її можна скасувати окремо в App Store або Google Play, '
-          'не видаляючи акаунт.',
-          lead: 12,
-        ),
+        CalviNote(l.deleteSubNote, lead: 12),
       ],
+    );
+  }
+}
+
+/// Гарантії списком, зі значком щита перед кожною.
+///
+/// Щит, а не галочка: тут перелік не переваг, а того, чого ми не робимо, і
+/// значок має говорити про захист, а не про виконаний пункт.
+class _Guarantees extends StatelessWidget {
+  const _Guarantees({required this.rows});
+
+  final List<(String, String)> rows;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: c.card,
+        border: Border.all(color: c.cardBorder),
+        borderRadius: BorderRadius.circular(CalviSize.rLarge),
+        boxShadow: context.shadowCard,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final (i, row) in rows.indexed) ...[
+            if (i > 0) const SizedBox(height: 14),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 22,
+                  height: 22,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: c.fats.withValues(alpha: 0.16),
+                  ),
+                  child: CalviIcon('shield', size: 12, color: c.fats),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        row.$1,
+                        style: context.t.bodyLarge?.copyWith(
+                          fontSize: CalviSize.fsCaption,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(row.$2, style: context.t.labelSmall),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Переваги списком, кожна окремим «так».
+class _Perks extends StatelessWidget {
+  const _Perks({required this.rows});
+
+  final List<String> rows;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: c.card,
+        border: Border.all(color: c.cardBorder),
+        borderRadius: BorderRadius.circular(CalviSize.rLarge),
+        boxShadow: context.shadowCard,
+      ),
+      child: Column(
+        children: [
+          for (final (i, row) in rows.indexed) ...[
+            if (i > 0) const SizedBox(height: 12),
+            Row(
+              children: [
+                Container(
+                  width: 22,
+                  height: 22,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: c.success.withValues(alpha: 0.16),
+                  ),
+                  child: CalviIcon('check', size: 12, color: c.success),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    row,
+                    style: context.t.bodyLarge?.copyWith(fontSize: CalviSize.fsCaption),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Один план карткою: назва, ціна великим числом, умова списання дрібним.
+///
+/// Обраний обведений чорнилом, як обрана мова: це вибір серед рівних, а не
+/// кнопка дії, і фарбувати його чорним означало б зробити з нього кнопку.
+class _PlanCard extends StatelessWidget {
+  const _PlanCard({
+    required this.name,
+    required this.price,
+    required this.note,
+    required this.on,
+    required this.onTap,
+    this.save,
+  });
+
+  final String name;
+  final String price;
+  final String note;
+  final bool on;
+  final VoidCallback onTap;
+
+  /// Скільки економить річний, числом на чіпі. Порожньо в місячного.
+  final String? save;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+    return CalviPress(
+      onTap: onTap,
+      builder: (context, down) => AnimatedScale(
+        scale: down ? 0.98 : 1,
+        duration: CalviMotion.fast,
+        curve: CalviMotion.ease,
+        child: AnimatedContainer(
+          duration: CalviMotion.fast,
+          curve: CalviMotion.ease,
+          padding: EdgeInsets.all(on ? 13 : 14),
+          decoration: BoxDecoration(
+            color: c.card,
+            border: Border.all(color: on ? c.button : c.cardBorder, width: on ? 2 : 1),
+            borderRadius: BorderRadius.circular(CalviSize.rCard),
+            boxShadow: context.shadowCard,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /* Назва і чіп знижки в один рядок, і саме тому обидва мусять
+                 уміти стискатись: на вузькому телефоні з великим системним
+                 шрифтом «Рік» і «-17%» разом не влазили в половину ширини, і
+                 екран показував смугастий бар замість карток. */
+              Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.t.bodyLarge?.copyWith(
+                        fontSize: CalviSize.fsCaption,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  if (save != null) ...[
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1),
+                        decoration: BoxDecoration(
+                          color: c.success.withValues(alpha: 0.16),
+                          borderRadius: BorderRadius.circular(CalviSize.rPill),
+                        ),
+                        child: Text(
+                          save!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.t.labelSmall?.copyWith(
+                            fontSize: 11,
+                            color: c.success,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                price,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.t.headlineMedium?.copyWith(
+                  fontSize: 21,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(note, style: context.t.labelSmall?.copyWith(fontSize: 11)),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

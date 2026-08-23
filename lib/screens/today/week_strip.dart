@@ -39,6 +39,19 @@ const _stagger = 24;
 const _staggerMax = 190;
 const _settleMs = 520;
 
+/// Прозорість дорівнюється швидше за форму, і від цього рух мʼякший: день уже
+/// видно повністю, поки він ще розкладається. Так само в демці.
+const _fadeMs = 440;
+
+/// Глибина, якою день відходить, коли стрічку тягнуть.
+///
+/// Числа зняті з демки: нахил 26 градусів, відхід на 64 пікселі вглиб,
+/// зменшення на пʼяту частину, прозорість до 0.4 на самому краю.
+const _tilt = 26 * math.pi / 180;
+const _depthPx = 64.0;
+const _shrink = 0.2;
+const _fade = 0.6;
+
 class _WeekStripState extends State<WeekStrip> with SingleTickerProviderStateMixin {
   final _controller = ScrollController();
 
@@ -147,9 +160,7 @@ class _WeekStripState extends State<WeekStrip> with SingleTickerProviderStateMix
             final front = (_controller.offset / was).round();
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (!mounted || !_controller.hasClients) return;
-              _controller.jumpTo(
-                (front * _cell).clamp(0.0, _controller.position.maxScrollExtent),
-              );
+              _controller.jumpTo((front * _cell).clamp(0.0, _controller.position.maxScrollExtent));
             });
           }
           return ShaderMask(
@@ -276,11 +287,7 @@ class _DayState extends State<_Day> {
     final scope = AppScope.maybeOf(context);
     final state = scope == null
         ? DayState.empty
-        : scope.stats.stateOn(
-            date,
-            goalKcal: goalOf(scope.s).kcal,
-            direction: scope.s.direction,
-          );
+        : scope.stats.stateOn(date, goalKcal: goalOf(scope.s).kcal, direction: scope.s.direction);
 
     final ring = switch (state) {
       DayState.ok => c.success,
@@ -346,22 +353,37 @@ class _DayState extends State<_Day> {
              whole run instead of a timer per cell. */
             const total = (_settleMs + _staggerMax) * 1.0;
             final wait = math.min(k * (viewport / cell) * _stagger, _staggerMax.toDouble());
-            final flat = Interval(
+
+            /* Форма і прозорість розкладаються різний час, і саме звідси береться
+               мʼякість. У демці це два переходи в одному рядку: transform 520 мс,
+               opacity 440 мс. Прозорість добігає раніше, тож день уже видно
+               повністю, поки він ще дорівнюється, і рух дочитується оком, а не
+               обривається разом із проявленням. */
+            double at(int ms) => Interval(
               wait / total,
-              math.min(1, (wait + _settleMs) / total),
+              math.min(1, (wait + ms) / total),
               curve: CalviMotion.easeRise,
             ).transform(settle.value);
 
-            final depth = 1 - flat;
-            if (depth < 0.001) return child!;
+            final depth = 1 - at(_settleMs);
+            final veil = 1 - at(_fadeMs);
+            if (depth < 0.001 && veil < 0.001) return child!;
 
+            /* Числа зняті з демки один в один: нахил 26 градусів, глибина 64
+               пікселі, зменшення на пʼяту частину, прозорість до 0.4.
+               Тут стояв нахил 0.9 радіана, тобто 51 градус: удвічі різкіше за
+               демку, від чого крайні дні лягали майже ребром. Глибини не було
+               зовсім, і без неї нахил читався як перекіс, а не як відхід удалину. */
             return Transform(
               alignment: Alignment.centerRight,
               transform: Matrix4.identity()
-                ..setEntry(3, 2, 0.0018)
-                ..rotateY(0.9 * k * depth)
-                ..scaleByDouble(1 - 0.22 * k * k * depth, 1 - 0.22 * k * k * depth, 1, 1),
-              child: Opacity(opacity: 1 - 0.55 * k * k * depth, child: child),
+                // Перспектива 560 пікселів, як `perspective: 560px` у демці.
+                ..setEntry(3, 2, 1 / 560)
+                ..translateByDouble(0, 0, -_depthPx * k * depth, 1)
+                ..rotateY(_tilt * k * depth)
+                ..scaleByDouble(1 - _shrink * k * depth, 1 - _shrink * k * depth, 1, 1),
+              // Квадрат навмисно: прозорість наростає пізніше за нахил.
+              child: Opacity(opacity: 1 - _fade * k * k * veil, child: child),
             );
           },
           child: cellChild,
@@ -461,13 +483,7 @@ class _DashedRing extends CustomPainter {
     const dashes = 16;
     const arc = math.pi * 2 / dashes;
     for (var i = 0; i < dashes; i++) {
-      canvas.drawArc(
-        Rect.fromCircle(center: centre, radius: r),
-        i * arc,
-        arc * 0.55,
-        false,
-        paint,
-      );
+      canvas.drawArc(Rect.fromCircle(center: centre, radius: r), i * arc, arc * 0.55, false, paint);
     }
   }
 

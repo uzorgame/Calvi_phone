@@ -7,6 +7,7 @@ import 'package:calvi/design/ruler.dart';
 import 'package:calvi/design/theme.dart';
 import 'package:calvi/screens/settings/panels_body.dart';
 import 'package:calvi/screens/start/start_screen.dart';
+import 'package:calvi/l10n/app_localizations.dart';
 
 /// A small push on the tape moves the weight a little.
 ///
@@ -28,6 +29,9 @@ void main() {
           meds: const [],
           setMeds: (_) {},
           child: MaterialApp(
+            localizationsDelegates: L.localizationsDelegates,
+            supportedLocales: L.supportedLocales,
+            locale: const Locale('uk'),
             theme: calviLightTheme,
             scrollBehavior: const CalviScroll(),
             home: WeightPanel(s: s, set: (patch) => setState(() => s = patch(s))),
@@ -82,6 +86,9 @@ void main() {
           meds: const [],
           setMeds: (_) {},
           child: MaterialApp(
+            localizationsDelegates: L.localizationsDelegates,
+            supportedLocales: L.supportedLocales,
+            locale: const Locale('uk'),
             theme: calviLightTheme,
             scrollBehavior: const CalviScroll(),
             home: WeightPanel(s: s, set: (patch) => setState(() => s = patch(s))),
@@ -94,6 +101,9 @@ void main() {
     var start = 0.0;
     final inStart = await fling(
       MaterialApp(
+        localizationsDelegates: L.localizationsDelegates,
+        supportedLocales: L.supportedLocales,
+        locale: const Locale('uk'),
         theme: calviLightTheme,
         scrollBehavior: const CalviScroll(),
         home: StartScreen(step: 3, onFinish: (d) {}),

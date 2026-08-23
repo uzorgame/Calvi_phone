@@ -8,12 +8,15 @@ import 'package:flutter/services.dart';
 
 import 'package:mobile_scanner/mobile_scanner.dart';
 
+import '../../data/allergens.dart';
 import '../../data/app_scope.dart';
 import '../../data/remote/api.dart';
 import '../../design/icons.dart';
 import '../../design/shell.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
+import '../../l10n/app_localizations.dart';
+import '../../l10n/labels.dart';
 import 'live_feed.dart';
 import 'sight.dart';
 
@@ -24,22 +27,11 @@ sealed class CamShot {
   const CamShot();
 }
 
-/// Кадр страви, який ще ніхто не розбирав. Лишається для випадку без мережі:
-/// тоді знімок їде в чат і чекає там своєї відповіді.
+/// Кадр страви. Їде повідомленням у чат до Нори, і відповідь приходить туди.
 class PhotoShot extends CamShot {
   const PhotoShot(this.shot);
 
   final Shot shot;
-}
-
-/// Розібрана страва, яку людина підтвердила.
-///
-/// Числа вже є і нікуди більше не їдуть: модель відпрацювала на екрані сканера,
-/// поки страва була перед очима. Лишається записати.
-class DishShot extends CamShot {
-  const DishShot(this.dish);
-
-  final Estimate dish;
 }
 
 /// Прочитаний штрихкод і те, що знайшлось у довіднику. Не коштує нічого: код
@@ -49,6 +41,14 @@ class CodeShot extends CamShot {
 
   final String code;
   final FoodHit food;
+}
+
+/// Код, якого не знає жодна база. Їде в чат розмовою, а не записом: Нора
+/// розпитує про продукт, і нічого не лягає в день без слова людини.
+class CodeTalk extends CamShot {
+  const CodeTalk(this.code);
+
+  final String code;
 }
 
 class _ModeInfo {
@@ -62,9 +62,9 @@ class _ModeInfo {
 /* Two modes, two different jobs for the same lens. Food goes to the model and
    comes back as an estimate; a barcode is read on the device, hits the product
    base and costs nothing. */
-const _modes = <_ModeInfo>[
-  _ModeInfo(id: CamMode.food, icon: 'utensils', title: 'Страва'),
-  _ModeInfo(id: CamMode.barcode, icon: 'barcode', title: 'Штрихкод'),
+List<_ModeInfo> _modes(L l) => [
+  _ModeInfo(id: CamMode.food, icon: 'utensils', title: l.camDish),
+  _ModeInfo(id: CamMode.barcode, icon: 'barcode', title: l.camBarcode),
 ];
 
 /// The one product the demo base knows.
@@ -120,9 +120,7 @@ class _CameraScreenState extends State<CameraScreen> {
      застосунок. */
   Shot? _shot;
 
-  /* Що Нора побачила на знімку, і чому не побачила, якщо не побачила. Обидва
-     живуть тільки до закриття екрана: у день лягає те, що людина підтвердила. */
-  Estimate? _dish;
+  /* Чому кадр не відбувся, коли не відбувся. Живе тільки до закриття екрана. */
   String? _trouble;
 
   /* Прочитаний код і те, що по ньому знайшлось. Читає сам телефон, шукає наш
@@ -341,7 +339,6 @@ class _CameraScreenState extends State<CameraScreen> {
       _code = null;
       _food = null;
       _unknown = false;
-      _dish = null;
       _trouble = null;
       // Аж тепер рамка знову вільна шукати.
       _parked = false;
@@ -363,7 +360,8 @@ class _CameraScreenState extends State<CameraScreen> {
     }
   }
 
-  /// Віддає нагору те, що справді є: розібрану страву, продукт або сам кадр.
+  /// Віддає нагору те, що справді є: продукт зі штрихкоду, розмову про
+  /// незнайомий код або сам кадр.
   void _send() {
     final food = _food;
     final code = _code;
@@ -372,13 +370,12 @@ class _CameraScreenState extends State<CameraScreen> {
       return;
     }
 
-    final dish = _dish;
-    if (dish != null) {
-      widget.onSend(DishShot(dish));
+    // Код прочитався, але його не знає жодна база: не запис, а розмова.
+    if (code != null && _unknown) {
+      widget.onSend(CodeTalk(code));
       return;
     }
 
-    // Розбору не було: без мережі знімок їде в чат і чекає там.
     final shot = _shot;
     if (shot != null) widget.onSend(PhotoShot(shot));
   }
@@ -405,68 +402,43 @@ class _CameraScreenState extends State<CameraScreen> {
     final shot = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 85);
     if (shot == null || !mounted) return;
     _shot = Shot(mime: 'image/jpeg', bytes: await shot.readAsBytes());
-    await _look();
+    _leave();
   }
 
+  /* Затвор надсилає, а не розбирає.
+   *
+   * Знімок їде повідомленням до Нори, видошукач закривається за ним, і чат
+   * відкривається з уже надісланим фото: відповідь прийде саме туди. Розбір на
+   * самому екрані сканера тут був і його прибрано: він тримав людину з
+   * піднятим телефоном ті десять секунд, поки модель думає, а чат уміє чекати
+   * сам. */
   void _shoot() {
     if (_busy) return;
     HapticFeedback.mediumImpact();
     unawaited(() async {
+      setState(() => _busy = true);
       await _capture();
-      await _look();
+      _leave();
     }());
   }
 
-  /* Розбір відбувається тут, поки страва ще перед очима.
-   *
-   * Раніше знімок просто їхав у чат, і відповідь приходила туди ж, через десяток
-   * секунд, коли телефон уже опустили. Тепер числа зʼявляються там само, де їх
-   * можна звірити з тарілкою: «схоже» чи «не схоже» вирішується поглядом, а не
-   * памʼяттю про те, що там було. */
-  Future<void> _look() async {
+  /// Кадр є, і він їде в чат. Кадру немає, і картка чесно каже, що не вийшло.
+  void _leave() {
     if (!mounted) return;
-    setState(() {
-      _busy = true;
-      _done = false;
-      _dish = null;
-      _trouble = null;
-    });
 
     final shot = _shot;
-    final sync = shot == null ? null : AppScope.of(context).sync;
-
-    /* Без мережі і без акаунта розбору не буде, але знімок нікуди не дівається:
-       його все одно можна надіслати Норі в чат, коли звʼязок буде. */
-    if (sync == null) {
-      _finishLook(trouble: shot == null ? 'Кадр не вийшов' : null);
+    if (shot != null) {
+      _send();
       return;
     }
 
-    try {
-      final answer = await sync.look(shot!);
-      _finishLook(dish: answer.estimate, trouble: answer.trouble);
-    } on ApiFailure catch (e) {
-      _finishLook(trouble: _lookTrouble(e));
-    }
-  }
-
-  void _finishLook({Estimate? dish, String? trouble}) {
-    if (!mounted) return;
     HapticFeedback.selectionClick();
     setState(() {
-      _dish = dish;
-      _trouble = trouble;
+      _trouble = L.of(context).camShotFailed;
       _busy = false;
       _done = true;
     });
   }
-
-  static String _lookTrouble(ApiFailure e) => switch (e.code) {
-    'offline' => 'Не дістаю мережі. Знімок можна надіслати Норі пізніше',
-    'slow' => 'Розбір затягнувся. Спробуй ще раз',
-    'no_tokens' => 'Токени на сьогодні скінчились',
-    _ => 'Не вийшло розібрати знімок',
-  };
 
   @override
   Widget build(BuildContext context) {
@@ -495,6 +467,7 @@ class _CameraScreenState extends State<CameraScreen> {
       Rect.fromLTRB(view.width * 0.12, view.height * 0.26, view.width * 0.88, view.height * 0.66);
 
   Widget _stage({required bool slim, required Rect window, required Rect frame}) {
+    final l = L.of(context);
     return Stack(
       children: [
         /* Одна лінза, два читачі, і вони не уживаються разом: у режимі
@@ -518,7 +491,8 @@ class _CameraScreenState extends State<CameraScreen> {
                     // людина не знає, чи камера зайнята, чи дозволу немає, чи
                     // застосунок просто завис.
                     placeholderBuilder: (context) => const _Handing(),
-                    errorBuilder: (context, error) => _Trouble(text: _scanReason(error)),
+                    errorBuilder: (context, error) =>
+                        _Trouble(text: _scanReason(L.of(context), error)),
                     fit: BoxFit.cover,
                   )
                 : LiveFeed(
@@ -566,13 +540,13 @@ class _CameraScreenState extends State<CameraScreen> {
                   children: [
                     _Round(
                       icon: 'chevron',
-                      label: 'Назад',
+                      label: l.actionBack,
                       turn: true,
                       onTap: () => Navigator.of(context).pop(),
                     ),
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Сканер',
+                        l.camTitle,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: _ink,
@@ -598,7 +572,7 @@ class _CameraScreenState extends State<CameraScreen> {
                    stop seeing on the second day. */
               if (_busy)
                 Text(
-                  'Читаю…',
+                  l.camReading,
                   style: TextStyle(
                     color: _ink.withValues(alpha: 0.78),
                     fontSize: CalviSize.fsMicro,
@@ -644,7 +618,6 @@ class _CameraScreenState extends State<CameraScreen> {
               slot: widget.slot,
               code: _code,
               food: _food,
-              dish: _dish,
               trouble: _trouble,
               unknown: _unknown,
               onAgain: _again,
@@ -662,11 +635,10 @@ class _CameraScreenState extends State<CameraScreen> {
 /// стоїть людина з телефоном у руці. Різниця між «немає дозволу» і «камера
 /// зайнята» для неї величезна: у першому випадку треба йти в налаштування, у
 /// другому закрити інший застосунок.
-String _scanReason(MobileScannerException e) => switch (e.errorCode) {
-  MobileScannerErrorCode.permissionDenied =>
-    'Немає дозволу на камеру. Його можна дати в налаштуваннях телефона.',
-  MobileScannerErrorCode.unsupported => 'Цей телефон не вміє читати коди камерою.',
-  _ => 'Камера не відкрилась. Найчастіше вона зайнята іншим застосунком.',
+String _scanReason(L l, MobileScannerException e) => switch (e.errorCode) {
+  MobileScannerErrorCode.permissionDenied => l.camNoPermission,
+  MobileScannerErrorCode.unsupported => l.camNoScanner,
+  _ => l.camBusy,
 };
 
 /// Пусті чверть секунди, поки камера переходить від одного читача до іншого.
@@ -709,7 +681,7 @@ class _Trouble extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              'Знімок страви і галерея працюють як завжди.',
+              L.of(context).camStillWorks,
               textAlign: TextAlign.center,
               style: TextStyle(color: _ink.withValues(alpha: 0.5), fontSize: CalviSize.fsMicro),
             ),
@@ -1095,6 +1067,7 @@ class _Deck extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -1112,7 +1085,7 @@ class _Deck extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    for (final m in _modes)
+                    for (final m in _modes(l))
                       Padding(
                         padding: const EdgeInsets.only(right: 4),
                         child: m.id == mode
@@ -1140,7 +1113,7 @@ class _Deck extends StatelessWidget {
                               )
                             : _Mode(icon: m.icon, label: m.title, onTap: () => onMode(m.id)),
                       ),
-                    _Mode(icon: 'image', label: 'З галереї', onTap: onGallery),
+                    _Mode(icon: 'image', label: l.camGallery, onTap: onGallery),
                   ],
                 ),
               ),
@@ -1156,7 +1129,21 @@ class _Deck extends StatelessWidget {
                   child: _Flash(on: flash, onTap: onFlash),
                 ),
               ),
-              _Shutter(busy: busy, onTap: onShoot),
+              /* Затвора в штрихкоді немає навмисно.
+               *
+               * Код читається сам, щойно потрапив у рамку, і кнопка «зняти»
+               * тут обіцяла дію, якої не існує: знімок у цьому режимі нікуди
+               * не йде. Людина тисла її і не розуміла, чому нічого не
+               * відбувається, бо на той момент сканер уже або прочитав код,
+               * або ще шукає його.
+               *
+               * Місце кнопки лишається порожнім: без нього спалах і підпис
+               * картки роз'їхались би до країв, і нижній ряд стрибав би
+               * щоразу, коли міняють режим. */
+              if (mode == CamMode.barcode)
+                const SizedBox(width: 68, height: 68)
+              else
+                _Shutter(busy: busy, onTap: onShoot),
               Expanded(
                 child: Align(
                   alignment: Alignment.centerRight,
@@ -1168,7 +1155,7 @@ class _Deck extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         color: _chrome,
                         child: Text(
-                          'в $slot',
+                          l.camIntoSlot(slot),
                           style: TextStyle(color: _ink, fontSize: CalviSize.fsMicro),
                         ),
                       ),
@@ -1249,7 +1236,7 @@ class _FlashState extends State<_Flash> {
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: 'Спалах',
+      label: L.of(context).camFlash,
       child: GestureDetector(
         onTap: widget.onTap,
         onTapDown: (_) => setState(() => _down = true),
@@ -1319,7 +1306,7 @@ class _ShutterState extends State<_Shutter> with SingleTickerProviderStateMixin 
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: 'Зняти',
+      label: L.of(context).camShoot,
       child: GestureDetector(
         onTap: widget.onTap,
         onTapDown: (_) => setState(() => _down = true),
@@ -1413,6 +1400,61 @@ class _RoundState extends State<_Round> {
   }
 }
 
+/// Попередження про алергени, які людина сама позначила в застосунку.
+///
+/// «Містить» і «може містити сліди» окремими рядками, бо на упаковці це дві
+/// різні обіцянки. Важка алергія фарбує рядок у попереджувальний колір теми.
+class _AllergyWarning extends StatelessWidget {
+  const _AllergyWarning({required this.item});
+
+  final FoodHit item;
+
+  String _names(BuildContext context, List<String> ids) =>
+      ids.map((id) => allergenById(id)?.name ?? id).join(', ').toLowerCase();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+    final l = L.of(context);
+    /* Червоним завжди, і той самий червоний, яким день каже про перебір:
+       алергія це не новий колір, а та сама мова тривоги. */
+    final colour = c.protein;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: colour.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(CalviSize.rCard),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l.camAllergen,
+            style: context.t.titleMedium?.copyWith(
+              fontSize: 16,
+              color: colour,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 4),
+          if (item.warnContains.isNotEmpty)
+            Text(
+              l.camAllergyContains(_names(context, item.warnContains)),
+              style: context.t.bodyMedium?.copyWith(color: colour, fontWeight: FontWeight.w600),
+            ),
+          if (item.warnTraces.isNotEmpty)
+            Text(
+              l.camAllergyTraces(_names(context, item.warnTraces)),
+              style: context.t.bodyMedium?.copyWith(color: colour),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
 /* What comes back differs by mode, and pretending otherwise would hide the one
    thing worth showing: a barcode hit costs nothing and is exact, a photo is an
    estimate and says so. */
@@ -1424,7 +1466,6 @@ class _Result extends StatelessWidget {
     required this.onSend,
     this.code,
     this.food,
-    this.dish,
     this.trouble,
     this.unknown = false,
   });
@@ -1438,8 +1479,7 @@ class _Result extends StatelessWidget {
   final String? code;
   final FoodHit? food;
 
-  /// Що Нора побачила на знімку, і чому не побачила, якщо не побачила.
-  final Estimate? dish;
+  /// Чому кадр не відбувся, коли не відбувся.
   final String? trouble;
 
   /// Код прочитано, але такого продукту не знає ні наша база, ні відкрита.
@@ -1448,6 +1488,7 @@ class _Result extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.c;
+    final l = L.of(context);
     final found = mode == CamMode.barcode;
     final item = food;
     // Числа за звичну порцію, а за її відсутності за сто грамів.
@@ -1483,12 +1524,23 @@ class _Result extends StatelessWidget {
               ),
               const SizedBox(height: 14),
 
-              /* Чотири різні відповіді, і жодна з них не вигадана.
+              /* Три різні відповіді, і жодна з них не вигадана.
                *
                * Продукт зі штрихкодом це точні числа з упаковки. Незнайомий код
-               * це чесне «не знаю», а не підставлений схожий товар. Розібрана
-               * страва це оцінка, і вона так і підписана. А коли розбір не
-               * вийшов, тут стоїть причина, а не мовчання. */
+               * це чесне «не знаю», а не підставлений схожий товар. А коли кадр
+               * не вийшов, тут стоїть причина, а не мовчання. Числа за знімком
+               * страви сюди не приходять узагалі: знімок їде в чат, і відповідь
+               * Нори приходить туди. */
+              /* Алерген стоїть найпершим, вище коду й назви.
+               *
+               * Людина зі списком алергій сканує упаковку саме заради цього
+               * рядка, і він не має чекати, поки око пройде числа. Звірив
+               * сервер: перетин складу з алергіями саме цієї людини. */
+              if (item != null && (item.warnContains.isNotEmpty || item.warnTraces.isNotEmpty)) ...[
+                _AllergyWarning(item: item),
+                const SizedBox(height: 12),
+              ],
+
               if (found && code != null) ...[
                 Text(code!, style: context.t.labelSmall?.copyWith(fontSize: 12)),
                 const SizedBox(height: 4),
@@ -1502,7 +1554,7 @@ class _Result extends StatelessWidget {
                     text: '${plate.kcal}',
                     children: [
                       TextSpan(
-                        text: ' ккал на ${plate.grams.round()} г',
+                        text: l.camKcalPer(plate.grams.round()),
                         style: context.t.labelSmall?.copyWith(fontSize: 14),
                       ),
                     ],
@@ -1512,92 +1564,67 @@ class _Result extends StatelessWidget {
                 const SizedBox(height: 10),
                 Row(
                   children: [
+                    /* Кожній клітинці її колір, той самий, що в кілець дня:
+                       око вже вивчило цю мову на головному екрані. */
                     for (final chip in [
-                      'Б ${plate.protein.round()}',
-                      'Ж ${plate.fat.round()}',
-                      'В ${plate.carbs.round()}',
+                      (l.macroPShort(plate.protein.round()), c.protein),
+                      (l.macroFShort(plate.fat.round()), c.fats),
+                      (l.macroCShort(plate.carbs.round()), c.carbs),
                     ])
                       Padding(
                         padding: const EdgeInsets.only(right: 6),
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                           decoration: BoxDecoration(
-                            color: c.fillSecondary,
+                            color: chip.$2.withValues(alpha: 0.14),
                             borderRadius: BorderRadius.circular(CalviSize.rPill),
                           ),
-                          child: Text(chip, style: context.t.labelSmall?.copyWith(fontSize: 12)),
+                          child: Text(
+                            chip.$1,
+                            style: context.t.labelSmall?.copyWith(
+                              fontSize: 12,
+                              color: chip.$2,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                       ),
                   ],
                 ),
                 const SizedBox(height: 10),
-                Text('Числа з упаковки. Запис не коштує токенів.', style: context.t.bodyMedium),
-              ] else if (unknown) ...[
-                Text('Не знаю цього коду', style: context.t.titleMedium?.copyWith(fontSize: 17)),
-                const SizedBox(height: 8),
+                /* Чесність про грамовку. Коли виробник назвав порцію, числа
+                   стоять за неї, і це сказано прямо. Коли ні, числа за сто
+                   грамів, і це теж сказано прямо, бо «367 ккал» без ваги
+                   виглядає як ціна всієї пачки, хоча нею не є. */
                 Text(
-                  'Ні в нашій базі, ні у відкритій його немає. Сфотографуй саму страву або напиши назву словами, і Нора порахує.',
+                  item.portionG != null ? l.camPortionPack(item.portionG!.round()) : l.camPer100,
                   style: context.t.bodyMedium,
                 ),
-              ] else if (dish != null) ...[
-                /* Розбір відбувся тут, поки страва ще перед очима, і саме тому
-                   він тут і показаний. Число, яке приходить у чат через десять
-                   секунд, звіряти вже нема з чим: телефон опущено, тарілку
-                   відсунуто. */
-                Text(dish!.name, style: context.t.titleMedium?.copyWith(fontSize: 17)),
-                const SizedBox(height: 8),
-                Text.rich(
-                  TextSpan(
-                    // Хвилька перед числом це не прикраса: оцінка на око не має
-                    // виглядати як зважене.
-                    text: '~${dish!.kcal}',
-                    children: [
-                      TextSpan(
-                        text: dish!.grams == null
-                            ? ' ккал, оцінка'
-                            : ' ккал за ${dish!.grams!.round()} г',
-                        style: context.t.labelSmall?.copyWith(fontSize: 14),
-                      ),
-                    ],
+                Text(l.camFromPack, style: context.t.bodyMedium),
+                /* Склад, дослівно з упаковки. Його читає людина, яка вирішує,
+                   чи їй це можна, тому він тут, а не за зайвим дотиком. Довгий
+                   обрізається: картка лишається карткою, а не договором. */
+                if (item.ingredients != null && item.ingredients!.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    l.camIngredients(item.ingredients!),
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.t.labelSmall?.copyWith(fontSize: 12, height: 1.4),
                   ),
-                  style: context.t.headlineMedium,
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    for (final chip in [
-                      'Б ${dish!.protein.round()}',
-                      'Ж ${dish!.fat.round()}',
-                      'В ${dish!.carbs.round()}',
-                    ])
-                      Padding(
-                        padding: const EdgeInsets.only(right: 6),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                          decoration: BoxDecoration(
-                            color: c.fillSecondary,
-                            borderRadius: BorderRadius.circular(CalviSize.rPill),
-                          ),
-                          child: Text(chip, style: context.t.labelSmall?.copyWith(fontSize: 12)),
-                        ),
-                      ),
-                  ],
-                ),
-                if (dish!.note.isNotEmpty) ...[
-                  const SizedBox(height: 10),
-                  Text(dish!.note, style: context.t.bodyMedium),
                 ],
+              ] else if (unknown) ...[
+                Text(l.camUnknownCode, style: context.t.titleMedium?.copyWith(fontSize: 17)),
+                const SizedBox(height: 8),
+                Text(l.camUnknownCodeNote, style: context.t.bodyMedium),
               ] else if (trouble != null) ...[
-                Text('Не розібрала', style: context.t.titleMedium?.copyWith(fontSize: 17)),
+                Text(l.camNotRead, style: context.t.titleMedium?.copyWith(fontSize: 17)),
                 const SizedBox(height: 8),
                 Text(trouble!, style: context.t.bodyMedium),
               ] else ...[
-                Text('Знімок готовий', style: context.t.titleMedium?.copyWith(fontSize: 17)),
+                Text(l.camShotReady, style: context.t.titleMedium?.copyWith(fontSize: 17)),
                 const SizedBox(height: 8),
-                Text(
-                  'Нора розбере його і відповість у чаті: назве страву, оцінить порцію і покаже, звідки взялося число. Коштує два токени.',
-                  style: context.t.bodyMedium,
-                ),
+                Text(l.camShotReadyNote, style: context.t.bodyMedium),
               ],
               const SizedBox(height: 14),
 
@@ -1614,7 +1641,10 @@ class _Result extends StatelessWidget {
                           color: c.fillSecondary,
                           borderRadius: BorderRadius.circular(CalviSize.rCard),
                         ),
-                        child: Text('Ще раз', style: context.t.titleMedium?.copyWith(fontSize: 15)),
+                        child: Text(
+                          l.camAgain,
+                          style: context.t.titleMedium?.copyWith(fontSize: 15),
+                        ),
                       ),
                     ),
                   ),
@@ -1624,9 +1654,9 @@ class _Result extends StatelessWidget {
                     child: CalviButton(
                       // Знайдений продукт пишеться в день одразу; знімок їде до
                       // Нори, і запис зробить уже вона.
-                      label: item != null || dish != null
-                          ? 'Записати в $slot'
-                          : 'Надіслати Норі',
+                      label: item != null
+                          ? l.camLogInto(slotIntoLabel(context, slot))
+                          : l.camSendToNora,
                       onTap: onSend,
                     ),
                   ),

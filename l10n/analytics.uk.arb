@@ -1,0 +1,45 @@
+{
+  "anTitle": "Аналітика",
+  "anWeek": "Тиждень",
+  "anMonth": "Місяць",
+  "anQuarter": "3 місяці",
+  "anYear": "Рік",
+
+  "anForYear": "за рік",
+  "anForQuarter": "за 3 місяці",
+  "anForMonth": "за місяць",
+
+  "anGoalProgress": "Прогрес до цілі",
+  "anNowKg": "поточна, кг",
+  "anTargetKg": "ціль, кг",
+  "anWeightEmpty": "Крива зʼявиться після другого зважування. Скажи Норі вагу, і вона сама її запише.",
+  "anEtaHead": "За поточним темпом ціль близько *{date}*",
+
+  "anKcal": "Калорії",
+  "anShareOfNorm": "{share}% від норми",
+  "anKcalTotal": "за період, ккал",
+  "anKcalAvg": "у середньому за день",
+  "anKcalEmpty": "За цей період ще нічого не записано. Скажи Норі, що зʼїв, і графік почне збиратись сам.",
+
+  "anWater": "Гідратація",
+  "anWaterAvg": "у середньому, мл",
+
+  "anMeasures": "Заміри",
+  "anMeasuresChange": "зміна {period}",
+  "anMeasuresEmpty": "Замірів ще немає.",
+  "anMeasuresEmptyHint": "Заміряйся раз на місяць, і я покажу, що рухається",
+  "anNow": "зараз",
+  "anOneReading": "один замір",
+
+  "anMacrosAvg": "БЖВ у середньому",
+  "anMacrosEmpty": "Середнє зʼявиться, щойно буде що усереднювати: запиши хоча б один день.",
+  "anPerDay": "за день",
+  "anMacroGoal": "норма {grams} г",
+
+  "anOneWeighing": "Поки один замір. Другий покаже напрямок, і з нього почнеться лінія.",
+  "anChartGoal": "ціль {value}",
+
+  "anWaterGoal": "норма {ml} мл",
+  "anDaysInNorm": "днів у нормі",
+  "anDonePercent": "{percent}% пройдено"
+}

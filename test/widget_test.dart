@@ -8,6 +8,8 @@ import 'package:calvi/main.dart';
 
 void main() {
   testWidgets('застосунок відкривається першим запуском, а не днем', (tester) async {
+    tester.platformDispatcher.localesTestValue = const [Locale('uk')];
+    addTearDown(tester.platformDispatcher.clearLocalesTestValue);
     await tester.pumpWidget(const CalviApp(storage: false));
     await tester.pump(const Duration(seconds: 1));
 
@@ -19,6 +21,8 @@ void main() {
     tester.view.physicalSize = const Size(390, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
+    tester.platformDispatcher.localesTestValue = const [Locale('uk')];
+    addTearDown(tester.platformDispatcher.clearLocalesTestValue);
 
     await tester.pumpWidget(const CalviApp(storage: false));
     await tester.pump(const Duration(seconds: 1));
@@ -28,15 +32,15 @@ void main() {
     // the tree for the length of the slide, and two «Далі» is an ambiguous tap.
     await tester.pumpAndSettle();
 
-    // Стать, Вік і зріст, Вага, Ціль, Темп, Спосіб життя, Норма.
-    for (var i = 0; i < 7; i++) {
+    // Про тебе, Вага, Ціль, Темп, Спосіб життя, Норма.
+    for (var i = 0; i < 6; i++) {
       await tester.tap(find.text('Далі'));
       await tester.pumpAndSettle();
     }
 
     expect(find.text('Збережімо це'), findsOneWidget, reason: 'акаунт останній, не перший');
 
-    await tester.tap(find.text('Продовжити з Google'));
+    await tester.tap(find.text('Поки без входу'));
     await tester.pump(const Duration(seconds: 1));
 
     // Breakfast, lunch and dinner stand whether or not anything went into them.

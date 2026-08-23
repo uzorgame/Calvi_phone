@@ -1,6 +1,6 @@
 // GENERATED FILE. Do not edit by hand.
 //
-// Source: Demo_Flutter/src/styles/tokens.css
+// Source: Demo_Flutter_001/src/styles/tokens.css
 // Regenerate: node tools/tokens.mjs
 //
 // A value is decided in the demo, where it can be seen on a screen, and lands
@@ -82,13 +82,9 @@ class CalviSize {
   static const double rLarge = 24;
   static const double rPill = 999;
   static const double buttonH = 56;
-
-  /* How much of the day the assistant bar covers: the chip, the field and the
-     padding around them. The day ends above it, and anything scrolling itself
-     into view has to stop above it too. */
-  static const double barRoom = 148;
   static const double iconCircleSize = 44;
   static const double inputBarH = 64;
+  static const double barRoom = 148;
   static const double navH = 52;
 }
 
@@ -109,9 +105,9 @@ class CalviMotion {
 }
 
 const calviLight = CalviColors(
-  bg: Color(0xFFFFFFFF),
+  bg: Color(0xFFF6F6F8),
   card: Color(0xFFFFFFFF),
-  cardBorder: Color(0xFFF0F0F0),
+  cardBorder: Color(0xFFEDEDF0),
   fillSecondary: Color(0xFFF5F5F7),
   iconCircle: Color(0xFFF4F4F7),
   track: Color(0xFFEFEFF2),
@@ -136,7 +132,7 @@ const calviLight = CalviColors(
 );
 
 const calviDark = CalviColors(
-  bg: Color(0xFF0F0F10),
+  bg: Color(0xFF121215),
   card: Color(0xFF171719),
   cardBorder: Color(0xFF252527),
   fillSecondary: Color(0xFF1D1D20),

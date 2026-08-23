@@ -5,6 +5,7 @@ import '../../design/icons.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import 'slot_card.dart';
+import '../../l10n/app_localizations.dart';
 
 /// One tap is one hundred millilitres.
 const waterStep = 100;
@@ -38,11 +39,15 @@ class WaterCard extends StatelessWidget {
     final pct = (ml / goalMl * 100).round();
     final glasses = (ml / 250).round();
 
+    /* Скільки склянок у нормі. Обмежене згори, бо чотирнадцять поділок на
+       ширину телефона це вже не поділки, а сірий пунктир. */
+    final goalGlasses = (goalMl / 250).round().clamp(1, 12);
+
     return SlotCard(
       icon: 'drink',
-      title: 'Вода',
-      sub: glasses == 0 ? 'нічого не випито' : 'близько $glasses склянок',
-      badge: '${thousands(ml)} мл',
+      title: L.of(context).waterTitle,
+      sub: glasses == 0 ? L.of(context).waterNone : L.of(context).waterGlasses(glasses),
+      badge: '${thousands(ml)} ${L.of(context).unitMl}',
       open: open,
       onToggle: onToggle,
       child: Padding(
@@ -51,7 +56,7 @@ class WaterCard extends StatelessWidget {
           children: [
             _Step(
               icon: 'minus',
-              label: 'Менше на $waterStep мл',
+              label: L.of(context).waterLess(waterStep),
               onTap: () => onChange((ml - waterStep).clamp(0, 1 << 30)),
             ),
             const SizedBox(width: 14),
@@ -63,7 +68,7 @@ class WaterCard extends StatelessWidget {
                       text: thousands(ml),
                       children: [
                         TextSpan(
-                          text: ' / ${thousands(goalMl)} мл',
+                          text: L.of(context).waterOf(thousands(goalMl)),
                           style: context.t.labelSmall?.copyWith(fontSize: 13),
                         ),
                       ],
@@ -75,46 +80,39 @@ class WaterCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(CalviSize.rPill),
-                    child: SizedBox(
-                      height: 6,
-                      /* Full width, said out loud. A stack sizes itself by its
-                         unpositioned children, and the fill is one of those: at
-                         forty per cent the whole bar came out forty per cent
-                         wide and sat centred, with no track to either side. */
-                      width: double.infinity,
-                      child: Stack(
-                        children: [
-                          Positioned.fill(child: ColoredBox(color: c.fillSecondary)),
-                          // Grows on its own track rather than jumping: a bar that
-                          // snaps reads as a redraw, not as water going in.
-                          FractionallySizedBox(
-                            alignment: Alignment.centerLeft,
-                            widthFactor: (pct / 100).clamp(0.0, 1.0),
-                            // Without this the fill has no height to take: a
-                            // Stack hands out loose constraints and a coloured
-                            // box with no child shrinks to nothing.
-                            heightFactor: 1,
+                  /* Смуга поділена на склянки, а не суцільна.
+                     Воду люди рахують склянками, і підпис картки так і каже.
+                     Суцільна смуга просила рахувати відсотки, яких ніхто не
+                     пʼє: тепер видно, скільки склянок є і скільки лишилось. */
+                  SizedBox(
+                    height: 6,
+                    child: Row(
+                      children: [
+                        for (var i = 0; i < goalGlasses; i++) ...[
+                          if (i > 0) const SizedBox(width: 4),
+                          Expanded(
                             child: AnimatedContainer(
                               duration: CalviMotion.normal,
                               curve: CalviMotion.ease,
-                              color: c.fats,
+                              decoration: BoxDecoration(
+                                color: i < glasses ? c.fats : c.fillSecondary,
+                                borderRadius: BorderRadius.circular(CalviSize.rPill),
+                              ),
                             ),
                           ),
                         ],
-                      ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text('$pct% денної цілі', style: context.t.labelSmall),
+                  Text(L.of(context).waterShare(pct), style: context.t.labelSmall),
                 ],
               ),
             ),
             const SizedBox(width: 14),
             _Step(
               icon: 'plus',
-              label: 'Більше на $waterStep мл',
+              label: L.of(context).waterMore(waterStep),
               onTap: () => onChange(ml + waterStep),
             ),
           ],

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -5,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'icons.dart';
 import 'theme.dart';
 import 'tokens.dart';
+import '../l10n/app_localizations.dart';
 
 /// The frame every screen behind Today wears: a back arrow, a title, and the
 /// same gutter as the day. The arrow sits on the left and nothing balances it on
@@ -83,7 +85,7 @@ class _CalviScreenState extends State<CalviScreen> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [context.c.bg.withValues(alpha: 0), context.c.bg],
+                colors: [context.on.withValues(alpha: 0), context.on],
                 stops: const [0, 0.26],
               ),
             ),
@@ -91,6 +93,11 @@ class _CalviScreenState extends State<CalviScreen> {
           );
 
     return Scaffold(
+      /* Прозорий навмисно: під сторінкою лежить ґрунт, а суцільне тло
+         Scaffold накрило б його рівним кольором і від «Вугілля» лишився б
+         один тон. Непрозорість сторінки під час переходу дає CalviGround,
+         а не це поле, тож нічого не просвічує. */
+      backgroundColor: const Color(0x00000000),
       body: SafeArea(
         bottom: false,
         child: Stack(
@@ -142,8 +149,7 @@ class _CalviScreenState extends State<CalviScreen> {
                   ),
               ],
             ),
-            if (foot != null && _over)
-              Positioned(left: 0, right: 0, bottom: 0, child: foot),
+            if (foot != null && _over) Positioned(left: 0, right: 0, bottom: 0, child: foot),
           ],
         ),
       ),
@@ -157,7 +163,13 @@ class CalviNote extends StatelessWidget {
 
   /// A note with one run standing out of the sentence, for the figure it is
   /// about: the demo's `<b>` inside a note.
-  const CalviNote.rich(this.text, {super.key, required this.bold, required this.rest, this.lead = 0});
+  const CalviNote.rich(
+    this.text, {
+    super.key,
+    required this.bold,
+    required this.rest,
+    this.lead = 0,
+  });
 
   final String text;
   final String? bold;
@@ -195,7 +207,7 @@ class CalviNote extends StatelessWidget {
   }
 }
 
-/// A card of plain «label — value» lines.
+/// A card of plain «label, value» lines.
 class CalviFacts extends StatelessWidget {
   const CalviFacts({
     super.key,
@@ -229,6 +241,7 @@ class CalviFacts extends StatelessWidget {
           color: c.card,
           border: Border.all(color: c.cardBorder),
           borderRadius: BorderRadius.circular(CalviSize.rLarge),
+          boxShadow: context.shadowCard,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -236,13 +249,33 @@ class CalviFacts extends StatelessWidget {
             for (final (label, value) in rows)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 7),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: [
-                    Expanded(child: Text(label, style: context.t.bodyMedium)),
-                    Text(value, style: context.t.titleMedium),
-                  ],
+                child: LayoutBuilder(
+                  builder: (context, box) => Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      /* Значення має стелю ширини, а не половину рядка.
+                     *
+                     * Рядок у Flex дає нерозтяжній дитині безмежну ширину, тому
+                     * довге значення не переносилось, а вилазило за край: на
+                     * вузькому телефоні з великим системним шрифтом замість
+                     * картки був смугастий бар переповнення. Ділити рядок
+                     * навпіл теж не можна: тоді «24 жовтня 2026» переносилось
+                     * би там, де місця вистачало. Тому стеля, як у рядках
+                     * налаштувань: значення бере скільки треба, але не більше
+                     * двох третин. */
+                      Expanded(child: Text(label, style: context.t.bodyMedium)),
+                      const SizedBox(width: 10),
+                      ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: box.maxWidth * 0.78),
+                        child: Text(
+                          value,
+                          textAlign: TextAlign.right,
+                          style: context.t.titleMedium,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             if (note != null)
@@ -252,7 +285,9 @@ class CalviFacts extends StatelessWidget {
                 padding: EdgeInsets.only(top: rows.isEmpty ? 0 : 13),
                 decoration: rows.isEmpty
                     ? null
-                    : BoxDecoration(border: Border(top: BorderSide(color: c.cardBorder))),
+                    : BoxDecoration(
+                        border: Border(top: BorderSide(color: c.cardBorder)),
+                      ),
                 child: Text.rich(
                   TextSpan(
                     text: note,
@@ -352,7 +387,7 @@ class _CalviBackState extends State<CalviBack> with SingleTickerProviderStateMix
 
     return Semantics(
       button: true,
-      label: 'Назад',
+      label: L.of(context).actionBack,
       child: GestureDetector(
         onTap: widget.onTap,
         onTapDown: (_) => setState(() => _down = true),
@@ -387,9 +422,13 @@ class _CalviBackState extends State<CalviBack> with SingleTickerProviderStateMix
             width: 40,
             height: 40,
             alignment: Alignment.center,
+            /* Біла таблетка з тінню, як усі поверхні: на тонованому ґрунті
+               сіре коло зливалося з ним. */
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: _down ? c.hover : c.fillSecondary,
+              color: _down ? c.hover : c.card,
+              border: Border.all(color: c.cardBorder),
+              boxShadow: context.shadowCard,
             ),
             // The arrow leans under the finger, in the direction the CSS sends
             // it: the shift is written inside the flipped frame.
@@ -397,10 +436,7 @@ class _CalviBackState extends State<CalviBack> with SingleTickerProviderStateMix
               duration: CalviMotion.fast,
               curve: CalviMotion.ease,
               offset: Offset(_down ? 0.15 : 0, 0),
-              child: Transform.rotate(
-                angle: math.pi,
-                child: const CalviIcon('chevron', size: 20),
-              ),
+              child: Transform.rotate(angle: math.pi, child: const CalviIcon('chevron', size: 20)),
             ),
           ),
         ),
@@ -516,6 +552,7 @@ class CalviSection extends StatelessWidget {
                 color: context.c.card,
                 border: Border.all(color: context.c.cardBorder),
                 borderRadius: BorderRadius.circular(CalviSize.rLarge),
+                boxShadow: context.shadowCard,
               ),
               clipBehavior: Clip.antiAlias,
               child: Column(children: children),
@@ -618,12 +655,7 @@ class CalviRow extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: hint == null
-                      ? Text(
-                          title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: titleStyle,
-                        )
+                      ? Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: titleStyle)
                       : Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -631,9 +663,7 @@ class CalviRow extends StatelessWidget {
                             const SizedBox(height: 2),
                             Text(
                               hint!,
-                              style: context.t.labelSmall?.copyWith(
-                                fontWeight: FontWeight.w400,
-                              ),
+                              style: context.t.labelSmall?.copyWith(fontWeight: FontWeight.w400),
                             ),
                           ],
                         ),
@@ -768,7 +798,7 @@ class CalviChoice extends StatelessWidget {
                 child: Container(
                   width: 8,
                   height: 8,
-                  decoration: BoxDecoration(shape: BoxShape.circle, color: c.bg),
+                  decoration: BoxDecoration(shape: BoxShape.circle, color: c.card),
                 ),
               ),
             ),
@@ -784,7 +814,8 @@ class CalviChoice extends StatelessWidget {
 /// Chosen is white and outlined rather than filled: these are choices among
 /// equals, and filling one black would make it read as the screen's action.
 class CalviPick extends StatelessWidget {
-  const CalviPick({super.key,
+  const CalviPick({
+    super.key,
     required this.label,
     this.hint,
     this.icon,
@@ -841,7 +872,10 @@ class CalviPick extends StatelessWidget {
                         letterSpacing: CalviSize.fsBody * -0.02,
                       ),
                     ),
-                    if (hint != null) ...[
+                    /* Порожній рядок це не підказка. Без цієї перевірки картка
+                       без підказки малювала порожній текст із відступом, і
+                       назва стояла не по центру, а трохи вище. */
+                    if (hint != null && hint!.isNotEmpty) ...[
                       const SizedBox(height: 2),
                       Text(
                         hint!,
@@ -952,13 +986,21 @@ class _CalviButtonState extends State<CalviButton> {
           decoration: BoxDecoration(
             color: fill,
             borderRadius: BorderRadius.circular(CalviSize.rPill),
+            /* Головна дія має вагу: тінь свого ж кольору. Вимкнена її не
+               кидає, бо натиснути її зараз не можна. */
+            boxShadow: widget.enabled
+                ? [
+                    BoxShadow(
+                      color: fill.withValues(alpha: 0.3),
+                      blurRadius: 18,
+                      offset: const Offset(0, 6),
+                    ),
+                  ]
+                : null,
           ),
           child: Text(
             widget.label,
-            style: context.t.titleMedium?.copyWith(
-              fontSize: CalviSize.fsBody,
-              color: c.buttonText,
-            ),
+            style: context.t.titleMedium?.copyWith(fontSize: CalviSize.fsBody, color: c.buttonText),
           ),
         ),
       ),
@@ -976,7 +1018,10 @@ class _CalviButtonState extends State<CalviButton> {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 12),
             alignment: Alignment.center,
-            child: Text(widget.second!, style: context.t.bodyLarge?.copyWith(color: c.textSecondary)),
+            child: Text(
+              widget.second!,
+              style: context.t.bodyLarge?.copyWith(color: c.textSecondary),
+            ),
           ),
         ),
       ],
@@ -992,91 +1037,148 @@ Future<T?> calviSheet<T>(
   BuildContext context, {
   required String title,
   required Widget Function(BuildContext) builder,
-  String doneLabel = 'Готово',
+
+  /// Напис на кнопці згоди. Порожньо означає «Готово» мовою застосунку.
+  String? doneLabel,
   bool info = false,
   VoidCallback? onDone,
+
+  /// Кнопка згоди стоїть унизу на всю ширину, а не словом у кутку.
+  ///
+  /// Для форм, які людина заповнює зверху вниз: рішення приймається в кінці
+  /// шляху, і саме там на нього має чекати кнопка, під великим пальцем.
+  /// Дрібним словом у кутку лишається те, що кутка й заслуговує: коліщатко
+  /// годинника, з якого виходять одним дотиком.
+  bool footDone = false,
 }) {
+  /* 340 ms на кривій підйому, як у кожної іншої панелі, що приходить.
+   *
+   * Свій контролер це єдиний спосіб задати аркушу тривалість, але за нього
+   * доводиться і прибирати: Flutter звільняє лише той, що зробив сам, а
+   * принесений ззовні лишає жити. Кожне відкриття аркуша лишало по одному
+   * тікеру на навігаторі, і за сеанс їх набиралися сотні.
+   *
+   * Звільняється тоді, коли аркуш опустився до кінця, а не коли його закрили:
+   * закриття це початок зворотного шляху, і контролер потрібен ще всю його
+   * довжину. Мікрозадача тому, що прибирати слухача зсередини нього самого
+   * означає рвати список, яким Flutter саме йде. */
+  final rise = AnimationController(
+    vsync: Navigator.of(context),
+    duration: const Duration(milliseconds: 340),
+    reverseDuration: CalviMotion.normal,
+  );
+  rise.addStatusListener((state) {
+    if (state == AnimationStatus.dismissed) scheduleMicrotask(rise.dispose);
+  });
+
   return showModalBottomSheet<T>(
     context: context,
-    // 340 ms on the rise curve, the same as every other panel that arrives.
-    transitionAnimationController: AnimationController(
-      vsync: Navigator.of(context),
-      duration: const Duration(milliseconds: 340),
-      reverseDuration: CalviMotion.normal,
-    ),
+    transitionAnimationController: rise,
     backgroundColor: const Color(0x00000000),
     barrierColor: context.c.text.withValues(alpha: 0.34),
     isScrollControlled: true,
     builder: (sheetContext) {
       final c = sheetContext.c;
-      return Container(
-        margin: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
+      /* Аркуш заходить у краї екрана, скруглений тільки згори.
+       *
+       * Тут був відступ у вісім пікселів з усіх боків, і аркуш висів карткою:
+       * знизу й по боках проглядало затемнене тло. Аркуш, що приходить знизу,
+       * має впиратись у край, інакше він читається як вікно поверх екрана, а не
+       * як продовження екрана. */
+      /* Стеля висоти живе тут, а не в кожній формі окремо.
+       *
+       * Аркуш це картка знизу, і три чверті екрана це вже його межа: вище він
+       * читається як повноекранне вікно, і затемнений день за ним зникає.
+       * Форма всередині прокручується, тому впиратись у стелю їй не боляче.
+       * Доти правило трималось на тому, що вміст випадково влазив, і кнопка
+       * згоди внизу його порушила. */
+      return ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(sheetContext).height * 0.75),
+        child: CalviOn(
+          // Усе всередині лежить на аркуші, а не на сторінці. Див. [CalviOn].
           color: c.card,
-          borderRadius: BorderRadius.circular(CalviSize.rLarge),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: SafeArea(
-          top: false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: Container(
-                  width: 38,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: c.hairline,
-                    borderRadius: BorderRadius.circular(CalviSize.rPill),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 84,
-                      child: info
-                          ? null
-                          : GestureDetector(
-                              onTap: () => Navigator.of(sheetContext).pop(),
-                              behavior: HitTestBehavior.opaque,
-                              child: Text(
-                                'Скасувати',
-                                style: sheetContext.t.labelSmall?.copyWith(fontSize: 14),
-                              ),
-                            ),
-                    ),
-                    Expanded(
-                      child: Text(
-                        title,
-                        textAlign: TextAlign.center,
-                        style: sheetContext.t.titleMedium,
+          child: Container(
+            decoration: BoxDecoration(
+              color: c.card,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(CalviSize.rLarge)),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: SafeArea(
+              top: false,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: Container(
+                      width: 38,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: c.hairline,
+                        borderRadius: BorderRadius.circular(CalviSize.rPill),
                       ),
                     ),
-                    SizedBox(
-                      width: 84,
-                      child: GestureDetector(
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 84,
+                          child: info
+                              ? null
+                              : GestureDetector(
+                                  onTap: () => Navigator.of(sheetContext).pop(),
+                                  behavior: HitTestBehavior.opaque,
+                                  child: Text(
+                                    L.of(context).actionCancel,
+                                    style: sheetContext.t.labelSmall?.copyWith(fontSize: 14),
+                                  ),
+                                ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            title,
+                            textAlign: TextAlign.center,
+                            style: sheetContext.t.titleMedium,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 84,
+                          child: footDone
+                              ? null
+                              : GestureDetector(
+                                  onTap: () {
+                                    onDone?.call();
+                                    Navigator.of(sheetContext).pop();
+                                  },
+                                  behavior: HitTestBehavior.opaque,
+                                  child: Text(
+                                    doneLabel ?? L.of(sheetContext).actionDone,
+                                    textAlign: TextAlign.right,
+                                    style: sheetContext.t.titleMedium?.copyWith(fontSize: 14),
+                                  ),
+                                ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Flexible(child: builder(sheetContext)),
+                  if (footDone)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 18, CalviSize.gutter, 4),
+                      child: CalviButton(
+                        label: doneLabel ?? L.of(sheetContext).actionDone,
                         onTap: () {
                           onDone?.call();
                           Navigator.of(sheetContext).pop();
                         },
-                        behavior: HitTestBehavior.opaque,
-                        child: Text(
-                          doneLabel,
-                          textAlign: TextAlign.right,
-                          style: sheetContext.t.titleMedium?.copyWith(fontSize: 14),
-                        ),
                       ),
                     ),
-                  ],
-                ),
+                  const SizedBox(height: 8),
+                ],
               ),
-              Flexible(child: builder(sheetContext)),
-              const SizedBox(height: 8),
-            ],
+            ),
           ),
         ),
       );
@@ -1140,12 +1242,12 @@ class CalviSegments extends StatelessWidget {
                 bottom: 4,
                 width: w,
                 child: DecoratedBox(
+                  /* Картка, а не ґрунт: відколи сторінка тонована, бігунок на
+                     `bg` зливався б із жолобом, у якому їздить. */
                   decoration: BoxDecoration(
-                    color: c.bg,
+                    color: c.card,
                     borderRadius: BorderRadius.circular(CalviSize.rPill),
-                    boxShadow: const [
-                      BoxShadow(color: Color(0x1F000000), blurRadius: 3, offset: Offset(0, 1)),
-                    ],
+                    boxShadow: context.shadowCard,
                   ),
                 ),
               ),
@@ -1206,9 +1308,12 @@ class CalviNora extends StatelessWidget {
     final c = context.c;
     return Container(
       padding: const EdgeInsets.all(16),
+      // Порожній стан це теж картка: біла поверхня на тонованому ґрунті.
       decoration: BoxDecoration(
+        color: c.card,
         border: Border.all(color: c.cardBorder),
         borderRadius: BorderRadius.circular(CalviSize.rLarge),
+        boxShadow: context.shadowCard,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1242,10 +1347,7 @@ class CalviNora extends StatelessWidget {
                 ),
                 if (hint != null) ...[
                   const SizedBox(height: 6),
-                  Text(
-                    hint!,
-                    style: context.t.labelSmall?.copyWith(fontSize: CalviSize.fsMicro),
-                  ),
+                  Text(hint!, style: context.t.labelSmall?.copyWith(fontSize: CalviSize.fsMicro)),
                 ],
               ],
             ),

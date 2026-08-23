@@ -7,6 +7,7 @@ import 'package:calvi/data/chat.dart';
 import 'package:calvi/design/icons.dart';
 import 'package:calvi/design/theme.dart';
 import 'package:calvi/screens/today/bottom_bar.dart';
+import 'package:calvi/l10n/app_localizations.dart';
 
 /// Один круг на дві дії.
 ///
@@ -14,7 +15,10 @@ import 'package:calvi/screens/today/bottom_bar.dart';
 /// стає «надіслати», і кнопка має стати саме нею: дві кнопки поруч питали б
 /// людину, якою з них вона хоче зробити те саме.
 void main() {
-  Widget bar({VoidCallback? onVoice, ValueChanged<String>? onSend}) => MaterialApp(
+  Widget bar({void Function(Offset, double)? onHold, ValueChanged<String>? onSend}) => MaterialApp(
+    localizationsDelegates: L.localizationsDelegates,
+    supportedLocales: L.supportedLocales,
+    locale: const Locale('uk'),
     theme: calviLightTheme,
     home: Scaffold(
       body: BottomBar(
@@ -22,7 +26,8 @@ void main() {
         messages: const <Msg>[],
         onSend: onSend ?? (_) {},
         onCamera: () {},
-        onVoice: onVoice ?? () {},
+        onHold: onHold ?? (_, _) {},
+        onLetGo: () {},
         open: false,
         onOpen: (_) {},
         onClose: () {},
@@ -178,9 +183,7 @@ void main() {
     var said = '';
     var listened = false;
 
-    await tester.pumpWidget(
-      bar(onSend: (text) => said = text, onVoice: () => listened = true),
-    );
+    await tester.pumpWidget(bar(onSend: (text) => said = text, onHold: (_, _) => listened = true));
     await tester.pumpAndSettle();
 
     await tester.enterText(find.byType(TextField), 'два яйця');

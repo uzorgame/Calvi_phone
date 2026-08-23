@@ -1,34 +1,52 @@
 /// Training, and the calories it gives back to the day.
 library;
 
+import '../l10n/data_lang.dart';
 import 'fixtures.dart';
 
 /// One kind of activity. `met` is the metabolic equivalent used to turn minutes
 /// into calories.
 class Activity {
-  const Activity({required this.key, required this.label, required this.met});
+  const Activity({required this.key, required this.met});
 
   /// Also the name of its mark in the icon set.
   final String key;
-  final String label;
   final double met;
+
+  /// Назва береться з перекладу, а не лежить у сталій разом із коефіцієнтом.
+  String get label => switch (key) {
+    'gym' => dataL.actGym,
+    'run' => dataL.actRun,
+    'bike' => dataL.actBike,
+    'walk' => dataL.actWalk,
+    'swim' => dataL.actSwim,
+    'yoga' => dataL.actYoga,
+    'hiit' => dataL.actHiit,
+    'jumprope' => dataL.actJumprope,
+    'stretch' => dataL.actStretch,
+    'football' => dataL.actFootball,
+    'basketball' => dataL.actBasketball,
+    'tennis' => dataL.actTennis,
+    'dance' => dataL.actDance,
+    _ => dataL.actSki,
+  };
 }
 
 const activities = <Activity>[
-  Activity(key: 'gym', label: 'Зал', met: 5),
-  Activity(key: 'run', label: 'Біг', met: 9.8),
-  Activity(key: 'bike', label: 'Велосипед', met: 7.5),
-  Activity(key: 'walk', label: 'Ходьба', met: 3.5),
-  Activity(key: 'swim', label: 'Плавання', met: 7),
-  Activity(key: 'yoga', label: 'Йога', met: 2.5),
-  Activity(key: 'hiit', label: 'HIIT', met: 8),
-  Activity(key: 'jumprope', label: 'Скакалка', met: 11),
-  Activity(key: 'stretch', label: 'Розтяжка', met: 2.3),
-  Activity(key: 'football', label: 'Футбол', met: 7),
-  Activity(key: 'basketball', label: 'Баскетбол', met: 6.5),
-  Activity(key: 'tennis', label: 'Теніс', met: 7.3),
-  Activity(key: 'dance', label: 'Танці', met: 5),
-  Activity(key: 'ski', label: 'Лижі', met: 7),
+  Activity(key: 'gym', met: 5),
+  Activity(key: 'run', met: 9.8),
+  Activity(key: 'bike', met: 7.5),
+  Activity(key: 'walk', met: 3.5),
+  Activity(key: 'swim', met: 7),
+  Activity(key: 'yoga', met: 2.5),
+  Activity(key: 'hiit', met: 8),
+  Activity(key: 'jumprope', met: 11),
+  Activity(key: 'stretch', met: 2.3),
+  Activity(key: 'football', met: 7),
+  Activity(key: 'basketball', met: 6.5),
+  Activity(key: 'tennis', met: 7.3),
+  Activity(key: 'dance', met: 5),
+  Activity(key: 'ski', met: 7),
 ];
 
 Activity? activityFor(String key) {

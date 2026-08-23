@@ -1,4 +1,4 @@
-package ua.calvi.calvi
+package com.calvi.calvi
 
 import io.flutter.embedding.android.FlutterActivity
 

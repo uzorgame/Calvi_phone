@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:calvi/design/slide.dart';
+import 'package:calvi/l10n/app_localizations.dart';
 
 /// Кільце навколо кнопки «назад» малювалось двічі на кожному екрані налаштувань.
 ///
@@ -36,6 +37,9 @@ void main() {
     var births = 0;
 
     Widget app(Object value) => MaterialApp(
+      localizationsDelegates: L.localizationsDelegates,
+      supportedLocales: L.supportedLocales,
+      locale: const Locale('uk'),
       home: Slide(
         value: value,
         dir: 1,
@@ -63,6 +67,9 @@ void main() {
     var births = 0;
 
     Widget app(Object value) => MaterialApp(
+      localizationsDelegates: L.localizationsDelegates,
+      supportedLocales: L.supportedLocales,
+      locale: const Locale('uk'),
       home: Slide(
         value: value,
         dir: 0,
@@ -81,6 +88,9 @@ void main() {
     var births = 0;
 
     Widget app(Object value, int dir) => MaterialApp(
+      localizationsDelegates: L.localizationsDelegates,
+      supportedLocales: L.supportedLocales,
+      locale: const Locale('uk'),
       home: Slide(
         value: value,
         dir: dir,

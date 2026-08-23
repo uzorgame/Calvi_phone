@@ -1,0 +1,54 @@
+{
+  "sexShortMale": "M",
+  "sexShortFemale": "F",
+  "sexOther": "Other",
+  "@sexShortMale": {
+    "description": "One letter, as the profile row prints it beside age and height."
+  },
+
+  "activitySedentary": "Sedentary",
+  "activitySedentaryHint": "almost no movement",
+  "activityLight": "Lightly active",
+  "activityLightHint": "1-2 workouts a week",
+  "activityModerate": "Moderate",
+  "activityModerateHint": "3-4 workouts",
+  "activityHigh": "High",
+  "activityHighHint": "5-6 workouts",
+  "activityVeryHigh": "Very high",
+  "activityVeryHighHint": "physical work or sport every day",
+
+  "themeLight": "Light",
+  "themeLightHint": "always the light interface",
+  "themeDark": "Dark",
+  "themeDarkHint": "always the dark interface",
+  "themeSystem": "Device theme",
+  "themeSystemHint": "follows the system setting",
+
+  "langSystem": "Device language",
+
+  "reminderMeal": "Food",
+  "reminderMealHint": "I will remind you to log the meal",
+  "reminderWater": "Water",
+  "reminderWaterHint": "I will remind you to drink",
+  "reminderMeds": "Medications",
+  "reminderMedsHint": "on the schedule from the journal",
+  "reminderWorkout": "Workout",
+  "reminderWorkoutHint": "I will remind you about the planned one",
+  "reminderWeigh": "Weigh-in",
+  "reminderWeighHint": "so the weight chart does not break",
+  "reminderSummary": "Day summary",
+  "reminderSummaryHint": "briefly about the day before bed",
+
+  "reminderBodyMeal": "Log what it was",
+  "reminderBodyWater": "Time to drink",
+  "reminderBodyWorkout": "Log it if it happened",
+  "reminderBodyWeigh": "In the morning, before eating",
+  "reminderBodySummary": "What did you not log today?",
+  "reminderBodyMeds": "On schedule",
+  "@reminderBodyMeal": {
+    "description": "The one line inside a notification. No exclamation marks, emoji or reproach: a reminder that nags gets switched off on the third day."
+  },
+
+  "notifyChannel": "Reminders",
+  "notifyChannelHint": "Reminders about food, water, medications and weigh-ins"
+}

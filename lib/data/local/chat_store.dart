@@ -56,24 +56,26 @@ class ChatStore {
   Future<void> save(Msg m, {int spent = 0}) async {
     if (m.pending || m.text.trim().isEmpty) return;
 
-    await db.into(db.chatMessages).insertOnConflictUpdate(
-      ChatMessagesCompanion.insert(
-        /* Ідентифікатор з екрана короткий (`m12`), а рядок, який поїде на
+    await db
+        .into(db.chatMessages)
+        .insertOnConflictUpdate(
+          ChatMessagesCompanion.insert(
+            /* Ідентифікатор з екрана короткий (`m12`), а рядок, який поїде на
            сервер, має бути uuid. Тому екранний перетворюється на сталий uuid:
            той самий вхід дає той самий ключ, і повторний запис оновлює рядок, а
            не додає другий. Саме на це спирається відповідь Нори, яка лягає в ту
            саму бульбашку, де щойно крутилось кільце. */
-        id: _uuid.v5(Namespace.url.value, 'calvi:msg:${m.id}'),
-        updatedAt: DateTime.now(),
-        role: switch (m.from) {
-          MsgFrom.nora => 'nora',
-          MsgFrom.me => m.kind == MsgKind.photo ? 'user_photo' : 'user',
-        },
-        body: m.text,
-        at: DateTime.now(),
-        spent: Value(spent),
-      ),
-    );
+            id: _uuid.v5(Namespace.url.value, 'calvi:msg:${m.id}'),
+            updatedAt: DateTime.now(),
+            role: switch (m.from) {
+              MsgFrom.nora => 'nora',
+              MsgFrom.me => m.kind == MsgKind.photo ? 'user_photo' : 'user',
+            },
+            body: m.text,
+            at: DateTime.now(),
+            spent: Value(spent),
+          ),
+        );
   }
 
   /// Стирає розмову. Записи в щоденнику від цього не зникають: людина стирає
@@ -81,11 +83,7 @@ class ChatStore {
   Future<void> clear() async {
     final now = DateTime.now();
     await (db.update(db.chatMessages)..where((m) => m.deletedAt.isNull())).write(
-      ChatMessagesCompanion(
-        deletedAt: Value(now),
-        updatedAt: Value(now),
-        dirty: const Value(true),
-      ),
+      ChatMessagesCompanion(deletedAt: Value(now), updatedAt: Value(now), dirty: const Value(true)),
     );
   }
 

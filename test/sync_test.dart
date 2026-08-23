@@ -32,11 +32,11 @@ void main() {
 
       if (req.url.path.endsWith('/devices')) {
         return jsonResponse({
-            'user_id': 'u-1',
-            'access_token': 'access-1',
-            'refresh_token': 'refresh-1',
-            'tokens': {'balance': 30, 'next_grant_at': DateTime.now().toIso8601String()},
-          }, 201);
+          'user_id': 'u-1',
+          'access_token': 'access-1',
+          'refresh_token': 'refresh-1',
+          'tokens': {'balance': 30, 'next_grant_at': DateTime.now().toIso8601String()},
+        }, 201);
       }
 
       final body = jsonDecode(req.body) as Map<String, dynamic>;
@@ -44,7 +44,10 @@ void main() {
       return jsonResponse(onSync(body), 200);
     });
 
-    return (api: CalviApi(base: Uri.parse('https://api.calvi.test'), client: client), pushes: pushes);
+    return (
+      api: CalviApi(base: Uri.parse('https://api.calvi.test'), client: client),
+      pushes: pushes,
+    );
   }
 
   Map<String, dynamic> answer({
@@ -54,7 +57,9 @@ void main() {
     bool hasMore = false,
   }) => {
     'cursor': cursor,
-    'accepted': [for (final e in accepted.entries) {'id': e.key, 'seq': e.value}],
+    'accepted': [
+      for (final e in accepted.entries) {'id': e.key, 'seq': e.value},
+    ],
     'changes': changes,
     'has_more': hasMore,
   };
@@ -150,11 +155,11 @@ void main() {
       if (req.url.path.endsWith('/devices')) {
         devices++;
         return jsonResponse({
-            'user_id': 'u-1',
-            'access_token': 'access-1',
-            'refresh_token': 'refresh-1',
-            'tokens': {'balance': 30},
-          }, 201);
+          'user_id': 'u-1',
+          'access_token': 'access-1',
+          'refresh_token': 'refresh-1',
+          'tokens': {'balance': 30},
+        }, 201);
       }
       return jsonResponse(answer(), 200);
     });

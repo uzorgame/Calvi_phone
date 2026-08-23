@@ -104,10 +104,7 @@ void main() {
     final server = fake(offline: true);
 
     expect(await FoodRepository(api: server.api, db: db).enrich(id, 'борщ'), isFalse);
-    expect(
-      await (db.select(db.meals)..where((m) => m.id.equals(id))).getSingle(),
-      isNotNull,
-    );
+    expect(await (db.select(db.meals)..where((m) => m.id.equals(id))).getSingle(), isNotNull);
   });
 
   test('те саме слово не питають у сервера двічі', () async {

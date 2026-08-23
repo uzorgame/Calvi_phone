@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:calvi/design/theme.dart';
 import 'package:calvi/design/tokens.dart';
 import 'package:calvi/screens/today/slot_card.dart';
+import 'package:calvi/l10n/app_localizations.dart';
 
 /// The page comes down with the card it was asked to open.
 ///
@@ -23,6 +24,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: L.localizationsDelegates,
+        supportedLocales: L.supportedLocales,
+        locale: const Locale('uk'),
         theme: calviLightTheme,
         home: StatefulBuilder(
           builder: (context, setState) => Scaffold(
@@ -91,6 +95,9 @@ void _middle() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: L.localizationsDelegates,
+        supportedLocales: L.supportedLocales,
+        locale: const Locale('uk'),
         theme: calviLightTheme,
         home: StatefulBuilder(
           builder: (context, setState) => Scaffold(
@@ -148,6 +155,9 @@ void _visible() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: L.localizationsDelegates,
+        supportedLocales: L.supportedLocales,
+        locale: const Locale('uk'),
         theme: calviLightTheme,
         home: StatefulBuilder(
           builder: (context, setState) => Scaffold(

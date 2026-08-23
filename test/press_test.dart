@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:calvi/data/day.dart';
 import 'package:calvi/design/theme.dart';
 import 'package:calvi/screens/today/week_strip.dart';
+import 'package:calvi/l10n/app_localizations.dart';
 
 /// A tap on a date answers on that date.
 ///
@@ -18,6 +19,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: L.localizationsDelegates,
+        supportedLocales: L.supportedLocales,
+        locale: const Locale('uk'),
         theme: calviLightTheme,
         home: Scaffold(
           body: WeekStrip(date: todayDate, onPick: (_) {}),

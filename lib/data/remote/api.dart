@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
+import '../../l10n/data_lang.dart';
 
 /// The one server this app talks to.
 ///
@@ -60,7 +61,10 @@ class CalviApi {
 
   /// One exchange: what this device wrote goes up, what it has not seen comes
   /// down, and the cursor moves.
-  Future<SyncAnswer> sync({required int cursor, required List<Map<String, dynamic>> changes}) async {
+  Future<SyncAnswer> sync({
+    required int cursor,
+    required List<Map<String, dynamic>> changes,
+  }) async {
     final body = await _post('/v1/sync', {'cursor': cursor, 'changes': changes});
 
     return SyncAnswer(
@@ -102,37 +106,77 @@ class CalviApi {
     required String day,
     required String idempotencyKey,
     Shot? image,
+    List<Map<String, String>> history = const [],
   }) async {
     final body = await _post('/v1/chat', {
       'text': text,
       'slot': slot,
       'day': day,
+      /* Кілька попередніх реплік, щоб розмова була розмовою.
+       *
+       * Доти кожне повідомлення йшло саме по собі, і Нора не памʼятала навіть
+       * власного питання. На «скільки це було?» відповідь «тарілка» приходила
+       * без страви, і відповісти на неї не було чим. */
+      if (history.isNotEmpty) 'history': history,
+      /* Пояс телефона. «О восьмій ранку» це восьма там, де живе людина, а не
+         там, де стоїть сервер. */
+      'tz_offset_min': DateTime.now().timeZoneOffset.inMinutes,
       'idempotency_key': idempotencyKey,
+      'lang': dataLang,
       /* Знімок їде в тілі запиту і ніде не зберігається: ні тут, ні на сервері.
          База64 замість multipart, бо це один невеликий кадр у складі звичайного
          повідомлення, а не завантаження файлу. */
-      if (image != null)
-        'image': {'mime': image.mime, 'data': base64Encode(image.bytes)},
+      if (image != null) 'image': {'mime': image.mime, 'data': base64Encode(image.bytes)},
     }, wait: _thinking);
 
-    return NoraReply(
-      text: body['text'] as String? ?? '',
-      balance: body['balance'] as int? ?? 0,
-      logged: [
-        for (final m in (body['logged'] as List<dynamic>? ?? []).cast<Map<String, dynamic>>())
-          LoggedMeal(
-            name: m['name'] as String? ?? '',
-            kcal: (m['kcal'] as num?)?.round() ?? 0,
-            grams: (m['grams'] as num?)?.toDouble(),
-            protein: (m['protein_g'] as num?)?.toDouble() ?? 0,
-            fat: (m['fat_g'] as num?)?.toDouble() ?? 0,
-            carbs: (m['carbs_g'] as num?)?.toDouble() ?? 0,
-            icon: m['icon'] as String? ?? 'plate',
-            fromReference: m['from'] == 'reference',
-          ),
-      ],
-      warning: body['warning'] as String?,
+    return NoraReply.fromWire(body, slot: slot, day: day);
+  }
+
+  /// Вхід через Google: міняє токен від Google на наш обліковий запис.
+  ///
+  /// Заголовок із нашим токеном іде разом із запитом, якщо він уже є. Це не
+  /// формальність: саме за ним сервер розуміє, що людина приходить зі своїм
+  /// пристроєм, і підписує наявний щоденник її іменем, а не заводить другий
+  /// порожній.
+  Future<GoogleAccount> signInWithGoogle({required String idToken, String? device}) async {
+    final body = await _post('/v1/auth/google', {
+      'id_token': idToken,
+      'tz': DateTime.now().timeZoneName,
+      if (device != null) 'device': device,
+    }, auth: token != null);
+
+    return GoogleAccount(
+      userId: body['user_id'] as String,
+      accessToken: body['access_token'] as String,
+      refreshToken: body['refresh_token'] as String,
+      outcome: body['outcome'] as String? ?? 'returned',
+      previousUserId: body['previous_user_id'] as String?,
+      email: body['email'] as String?,
+      joinedAt: DateTime.tryParse(body['created_at'] as String? ?? '')?.toLocal(),
+      balance: ((body['tokens'] as Map<String, dynamic>?)?['balance'] as num?)?.round() ?? 0,
     );
+  }
+
+  /// Вага, обрана дотиком у відповідь на питання Нори.
+  ///
+  /// Окремий маршрут, а не повідомлення в чат, і саме тому він не коштує токена:
+  /// страву вже розібрано попереднім повідомленням, її числа лежать на сервері,
+  /// і лишилось помножити їх на названу вагу. Чекати на модель тут теж немає за
+  /// чим, тому відповідь приходить одразу.
+  Future<NoraReply> weigh({
+    required int grams,
+    required String slot,
+    required String day,
+    String? askId,
+  }) async {
+    final body = await _post('/v1/chat/weigh', {
+      'grams': grams,
+      /* Яке питання закриває ця вага. Порожньо лишається для старих відповідей,
+         які ще висять у розмові з часів, коли питання було одне. */
+      if (askId != null) 'ask_id': askId,
+      'lang': dataLang,
+    });
+    return NoraReply.fromWire(body, slot: slot, day: day);
   }
 
   /// Розбір знімка без запису: числа повертаються, щоденник не чіпається.
@@ -144,6 +188,7 @@ class CalviApi {
     final body = await _post('/v1/analyze', {
       'idempotency_key': idempotencyKey,
       'image': {'mime': shot.mime, 'data': base64Encode(shot.bytes)},
+      'lang': dataLang,
     }, wait: _thinking);
 
     final balance = body['balance'] as int? ?? 0;
@@ -154,14 +199,14 @@ class CalviApi {
     if (e == null) {
       return Analysis(
         balance: balance,
-        trouble: body['trouble'] as String? ?? 'Не впізнала страву на цьому знімку',
+        trouble: body['trouble'] as String? ?? dataL.photoNotRecognized,
       );
     }
 
     return Analysis(
       balance: balance,
       estimate: Estimate(
-        name: e['name'] as String? ?? 'Страва',
+        name: e['name'] as String? ?? dataL.photoDish,
         canonicalName: e['canonical_name'] as String?,
         grams: (e['grams'] as num?)?.toDouble(),
         kcal: (e['kcal'] as num?)?.round() ?? 0,
@@ -195,7 +240,9 @@ class CalviApi {
     try {
       final body = await _get('/v1/foods/barcode/$code');
       final food = body['food'] as Map<String, dynamic>?;
-      return food == null ? null : FoodHit.fromJson(food);
+      return food == null
+          ? null
+          : FoodHit.fromJson(food, warns: body['warns'] as Map<String, dynamic>?);
     } on ApiFailure catch (e) {
       // Nobody has ever scanned it: an answer, not a breakage.
       if (e.status == 404) return null;
@@ -330,13 +377,215 @@ class SyncAnswer {
 }
 
 /// What Nora said, and what it changed.
+/// Запис, який Нора переписала на прохання людини.
+class FixedMeal {
+  const FixedMeal({
+    required this.id,
+    required this.name,
+    required this.kcal,
+    this.grams,
+    this.protein = 0,
+    this.fat = 0,
+    this.carbs = 0,
+  });
+
+  final String id;
+  final String name;
+  final int kcal;
+  final double? grams;
+  final double protein;
+  final double fat;
+  final double carbs;
+}
+
+/// Обліковий запис після входу через Google.
+class GoogleAccount {
+  const GoogleAccount({
+    required this.userId,
+    required this.accessToken,
+    required this.refreshToken,
+    required this.outcome,
+    required this.balance,
+    this.previousUserId,
+    this.email,
+    this.joinedAt,
+  });
+
+  final String userId;
+  final String accessToken;
+  final String refreshToken;
+
+  /* Що саме сталося: `created` це перший вхід у житті, `linked` це підпис
+     наявного щоденника, `returned` це повернення до старого. Застосунок питає
+     про місцеві записи тільки в третьому випадку. */
+  final String outcome;
+
+  /// Запис, який був на цьому пристрої до входу, якщо він інший.
+  final String? previousUserId;
+  final String? email;
+
+  /// Коли зʼявився обліковий запис, а не коли людина увійшла.
+  final DateTime? joinedAt;
+  final int balance;
+
+  /// Чи щоденник на телефоні належить не тому, хто щойно увійшов.
+  bool get switched => previousUserId != null && previousUserId != userId;
+}
+
+/// Запис, який переїхав в іншу картку або на інший день. Числа не міняються.
+class MovedMeal {
+  const MovedMeal({
+    required this.id,
+    required this.name,
+    required this.slot,
+    required this.day,
+    this.at,
+  });
+
+  final String id;
+  final String name;
+  final String slot;
+  final String day;
+
+  /// Час після переносу: він переїжджає разом із карткою, щоб не стояти не там.
+  final String? at;
+}
+
+/// Питання про вагу однієї страви: номер у черзі, назва і три ваги на вибір.
+///
+/// Номер потрібен, щоб відповідь закрила рівно своє питання. Коли страв кілька,
+/// людина відповідає в тому порядку, у якому їй зручно, і без номера друга
+/// відповідь лягла б на першу страву.
+class WeightAsk {
+  const WeightAsk({required this.id, required this.name, required this.weights});
+
+  final String id;
+
+  /// Слова людини про цю страву. З них складається саме питання.
+  final String name;
+
+  final List<int> weights;
+}
+
 class NoraReply {
   const NoraReply({
     required this.text,
     required this.balance,
     required this.logged,
+    this.deleted = const [],
+    this.fixed = const [],
+    this.moved = const [],
+    this.asks = const [],
+    this.water,
+    this.workouts = const [],
+    this.remembered = const [],
+    this.measures = const [],
     this.warning,
   });
+
+  /// Відповідь сервера, як вона приходить проводом.
+  ///
+  /// Один розбір на два маршрути: звичайне повідомлення і вагу, обрану дотиком.
+  /// Другий повертає ту саму форму, і дублювати сюди її розбір означало б рано чи
+  /// пізно розійтись у полях.
+  factory NoraReply.fromWire(
+    Map<String, dynamic> body, {
+    required String slot,
+    required String day,
+  }) {
+    return NoraReply(
+      text: body['text'] as String? ?? '',
+      balance: body['balance'] as int? ?? 0,
+      logged: [
+        for (final m in (body['logged'] as List<dynamic>? ?? []).cast<Map<String, dynamic>>())
+          LoggedMeal(
+            id: m['id'] as String? ?? '',
+            slot: m['slot'] as String? ?? slot,
+            day: m['day'] as String? ?? day,
+            at: m['at'] as String?,
+            name: m['name'] as String? ?? '',
+            kcal: (m['kcal'] as num?)?.round() ?? 0,
+            grams: (m['grams'] as num?)?.toDouble(),
+            protein: (m['protein_g'] as num?)?.toDouble() ?? 0,
+            fat: (m['fat_g'] as num?)?.toDouble() ?? 0,
+            carbs: (m['carbs_g'] as num?)?.toDouble() ?? 0,
+            icon: m['icon'] as String? ?? 'plate',
+            fromReference: m['from'] == 'reference',
+          ),
+      ],
+      deleted: [
+        for (final m in (body['deleted'] as List<dynamic>? ?? []).cast<Map<String, dynamic>>())
+          m['id'] as String? ?? '',
+      ]..removeWhere((id) => id.isEmpty),
+      fixed: [
+        for (final m in (body['fixed'] as List<dynamic>? ?? []).cast<Map<String, dynamic>>())
+          FixedMeal(
+            id: m['id'] as String? ?? '',
+            name: m['name'] as String? ?? '',
+            kcal: (m['kcal'] as num?)?.round() ?? 0,
+            grams: (m['grams'] as num?)?.toDouble(),
+            protein: (m['protein_g'] as num?)?.toDouble() ?? 0,
+            fat: (m['fat_g'] as num?)?.toDouble() ?? 0,
+            carbs: (m['carbs_g'] as num?)?.toDouble() ?? 0,
+          ),
+      ]..removeWhere((m) => m.id.isEmpty),
+      moved: [
+        for (final m in (body['moved'] as List<dynamic>? ?? []).cast<Map<String, dynamic>>())
+          MovedMeal(
+            id: m['id'] as String? ?? '',
+            name: m['name'] as String? ?? '',
+            slot: m['slot'] as String? ?? slot,
+            day: m['day'] as String? ?? day,
+            at: m['at'] as String?,
+          ),
+      ]..removeWhere((m) => m.id.isEmpty),
+      asks: [
+        for (final a in (body['asks'] as List<dynamic>? ?? []))
+          if (a is Map<String, dynamic>)
+            WeightAsk(
+              id: a['id'] as String? ?? '',
+              name: a['name'] as String? ?? '',
+              weights: [for (final g in (a['weights'] as List<dynamic>? ?? [])) (g as num).round()],
+            ),
+      ]..removeWhere((a) => a.id.isEmpty || a.weights.isEmpty),
+      water: body['water'] == null
+          ? null
+          : PouredWater(
+              id: (body['water'] as Map<String, dynamic>)['id'] as String? ?? '',
+              ml: ((body['water'] as Map<String, dynamic>)['ml'] as num?)?.round() ?? 0,
+              totalMl: ((body['water'] as Map<String, dynamic>)['total_ml'] as num?)?.round() ?? 0,
+            ),
+      workouts: [
+        for (final w in (body['workouts'] as List<dynamic>? ?? []).cast<Map<String, dynamic>>())
+          DoneWorkout(
+            id: w['id'] as String? ?? '',
+            kind: w['kind'] as String? ?? 'gym',
+            minutes: (w['minutes'] as num?)?.round() ?? 0,
+            kcal: (w['kcal'] as num?)?.round() ?? 0,
+          ),
+      ],
+      measures: [
+        for (final m in (body['measures'] as List<dynamic>? ?? []).cast<Map<String, dynamic>>())
+          TakenMeasure(
+            id: m['id'] as String? ?? '',
+            part: m['part'] as String? ?? '',
+            value: (m['value'] as num?)?.toDouble() ?? 0,
+            day: m['day'] as String? ?? day,
+            at: m['at'] as String?,
+          ),
+      ],
+      remembered: [
+        for (final n in (body['remembered'] as List<dynamic>? ?? []).cast<Map<String, dynamic>>())
+          Remembered(
+            id: n['id'] as String? ?? '',
+            text: n['text'] as String? ?? '',
+            pinned: n['pinned'] as bool? ?? false,
+            name: n['name'] as String?,
+          ),
+      ],
+      warning: body['warning'] as String?,
+    );
+  }
 
   final String text;
 
@@ -344,8 +593,87 @@ class NoraReply {
   final int balance;
   final List<LoggedMeal> logged;
 
+  /// Ідентифікатори прибраного. Застосунок гасить ці рядки в себе одразу, тим
+  /// самим ключем, і не чекає синхронізації, щоб показати результат прохання.
+  final List<String> deleted;
+
+  /* Виправлені записи. Приходять цілим рядком, а не самою різницею: половина
+     полів лишила б запис неузгодженим із тим, що лежить на сервері. */
+  final List<FixedMeal> fixed;
+
+  /* Перенесені записи: та сама страва, інша картка або інший день.
+   *
+   * Окремо від виправлених, бо застосунок робить із ними різне: виправлений
+   * рядок перемальовується на місці, а перенесений має зникнути з однієї картки
+   * і зʼявитись в іншій. */
+  final List<MovedMeal> moved;
+
+  /* Питання про вагу, по одному на кожну страву, вагу якої не назвали і не
+     памʼятають.
+   *
+   * Список, а не один набір ваг. Одне повідомлення легко несе три страви, і
+   * доти в застосунок доїжджало питання лише про останню: набір був один, і
+   * кожна наступна страва його перезаписувала. */
+  final List<WeightAsk> asks;
+
+  /// Випите, якщо Нора записала воду. Окремо від їжі, бо в застосунку це своя
+  /// картка і своя норма.
+  final PouredWater? water;
+
+  /// Записані тренування. Своя картка і свій внесок у баланс дня.
+  final List<DoneWorkout> workouts;
+
+  /// Записані заміри: вага і обхвати. Картка вимірювань бере їх звідси, і бере
+  /// одразу, бо «записала вагу 77.5» без зміни числа на екрані це обіцянка, за
+  /// якою нічого не стоїть.
+  final List<TakenMeasure> measures;
+
+  /// Що Нора запамʼятала цим повідомленням. Сторінка памʼяті бере це звідси, і
+  /// бере одразу: обіцянка «запамʼятаю» має бути видною тут же, а не після
+  /// наступної синхронізації.
+  final List<Remembered> remembered;
+
   /// «Тут важкий алерген», when the allergen check saw one.
   final String? warning;
+}
+
+/// Один запис памʼяті, який щойно зробила Нора.
+class Remembered {
+  const Remembered({required this.id, required this.text, required this.pinned, this.name});
+
+  final String id;
+  final String text;
+  final bool pinned;
+
+  /// Імʼя, якщо його щойно дізнались.
+  final String? name;
+}
+
+/// Записане тренування: вид, тривалість і скільки з нього вийшло калорій.
+class DoneWorkout {
+  const DoneWorkout({
+    required this.id,
+    required this.kind,
+    required this.minutes,
+    required this.kcal,
+  });
+
+  final String id;
+  final String kind;
+  final int minutes;
+  final int kcal;
+}
+
+/// Записана вода: скільки цього разу і скільки стало за день.
+class PouredWater {
+  const PouredWater({required this.id, required this.ml, required this.totalMl});
+
+  /// Ідентифікатор рядка, який сервер уже створив. Без нього телефон записав би
+  /// ту саму склянку вдруге, і в день лягла б подвійна вода.
+  final String id;
+
+  final int ml;
+  final int totalMl;
 }
 
 /// Страва, яку Нора щойно записала, з усіма її числами.
@@ -354,6 +682,10 @@ class NoraReply {
 /// відповіддю. «Записала яєчню» без жодної цифри це половина відповіді.
 class LoggedMeal {
   const LoggedMeal({
+    required this.id,
+    required this.slot,
+    required this.day,
+    this.at,
     required this.name,
     required this.kcal,
     this.grams,
@@ -363,6 +695,22 @@ class LoggedMeal {
     this.icon = 'plate',
     this.fromReference = false,
   });
+
+  /// Ідентифікатор рядка, який сервер уже створив. За ним та сама страва
+  /// лягає на телефон одразу і не подвоюється, коли приїде синхронізацією.
+  final String id;
+
+  /* Куди і на коли це лягло на сервері.
+   *
+   * Телефон бере саме ці три, а не картку, відкриту на екрані. Людина казала
+   * «запиши на сніданок», сервер чесно писав у сніданок, а на телефоні страва
+   * зʼявлялась в обіді, бо обід був відкритий: відповідь і щоденник розходились
+   * на очах. */
+  final String slot;
+  final String day;
+
+  /// Момент часу, як його вирішив сервер. Порожньо для старих відповідей.
+  final String? at;
 
   final String name;
   final int kcal;
@@ -440,9 +788,13 @@ class FoodHit {
     required this.icon,
     required this.canonicalName,
     this.portionG,
+    this.ingredients,
+    this.warnContains = const [],
+    this.warnTraces = const [],
+    this.warnSevere = false,
   });
 
-  factory FoodHit.fromJson(Map<String, dynamic> j) => FoodHit(
+  factory FoodHit.fromJson(Map<String, dynamic> j, {Map<String, dynamic>? warns}) => FoodHit(
     id: j['id'] as String,
     name: j['name'] as String,
     canonicalName: j['canonicalName'] as String? ?? '',
@@ -452,6 +804,10 @@ class FoodHit {
     carbsG: (j['carbsG'] as num?)?.toDouble() ?? 0,
     icon: j['icon'] as String? ?? 'plate',
     portionG: (j['portionG'] as num?)?.toDouble(),
+    ingredients: j['ingredients'] as String?,
+    warnContains: [...?(warns?['contains'] as List?)?.cast<String>()],
+    warnTraces: [...?(warns?['traces'] as List?)?.cast<String>()],
+    warnSevere: warns?['severe'] == true,
   );
 
   final String id;
@@ -464,11 +820,19 @@ class FoodHit {
   final String icon;
   final double? portionG;
 
+  /// Склад з упаковки, дослівно і мовою джерела. Порожньо, коли база його
+  /// не знає.
+  final String? ingredients;
+
+  /* Перетин алергенів продукту з алергіями цієї людини, кодами. Звіряє
+     сервер: у нього і список алергій, і алергени продукту вже поруч. */
+  final List<String> warnContains;
+  final List<String> warnTraces;
+  final bool warnSevere;
+
   /// The numbers for a real plate. Without a weight the usual portion is used,
   /// and if the reference has none either, 100 g is the honest default.
-  ({int kcal, double protein, double fat, double carbs, double grams}) forGrams([
-    double? grams,
-  ]) {
+  ({int kcal, double protein, double fat, double carbs, double grams}) forGrams([double? grams]) {
     final g = grams ?? portionG ?? 100;
     final k = g / 100;
     return (
@@ -496,4 +860,26 @@ class ApiFailure implements Exception {
 
   @override
   String toString() => 'ApiFailure($code, $status)';
+}
+
+/// Один замір, який щойно записала Нора: вага або обхват.
+class TakenMeasure {
+  const TakenMeasure({
+    required this.id,
+    required this.part,
+    required this.value,
+    required this.day,
+    this.at,
+  });
+
+  final String id;
+
+  /// «weight» або ключ частини тіла: «waist», «chest» і так далі.
+  final String part;
+
+  /// Кілограми для ваги, сантиметри для обхватів.
+  final double value;
+
+  final String day;
+  final String? at;
 }

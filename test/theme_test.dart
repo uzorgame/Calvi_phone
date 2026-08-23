@@ -15,6 +15,8 @@ void main() {
        would show half the people a theme they never picked. */
     tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
     addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+    tester.platformDispatcher.localesTestValue = const [Locale('uk')];
+    addTearDown(tester.platformDispatcher.clearLocalesTestValue);
 
     await tester.pumpWidget(const CalviApp(storage: false));
     await tester.pump();
@@ -24,6 +26,8 @@ void main() {
   });
 
   testWidgets('вибір у налаштуваннях далі веде застосунок', (tester) async {
+    tester.platformDispatcher.localesTestValue = const [Locale('uk')];
+    addTearDown(tester.platformDispatcher.clearLocalesTestValue);
     await tester.pumpWidget(const CalviApp(storage: false));
     await tester.pump();
 

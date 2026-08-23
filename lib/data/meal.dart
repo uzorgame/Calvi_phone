@@ -56,12 +56,7 @@ class Meal {
 
 /// A card on the day.
 class SlotDef {
-  const SlotDef({
-    required this.id,
-    required this.label,
-    required this.order,
-    required this.icon,
-  });
+  const SlotDef({required this.id, required this.label, required this.order, required this.icon});
 
   final String id;
   final String label;

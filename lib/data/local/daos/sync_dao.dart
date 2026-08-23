@@ -54,19 +54,42 @@ class SyncDao extends DatabaseAccessor<CalviDb> with _$SyncDaoMixin {
 
   /// Which account this data belongs to. A fresh install signing in as somebody
   /// else must not adopt the previous person's meals.
-  Future<void> setUser(String? userId) =>
-      (update(syncMeta)..where((s) => s.id.equals(1))).write(SyncMetaCompanion(userId: Value(userId)));
+  Future<void> setUser(String? userId) => (update(
+    syncMeta,
+  )..where((s) => s.id.equals(1))).write(SyncMetaCompanion(userId: Value(userId)));
 
   /// The account this device was given, and the way back into it.
   Future<void> setAccount({
     required String userId,
     required String accessToken,
     required String refreshToken,
+    String? email,
+    DateTime? joinedAt,
   }) => (update(syncMeta)..where((s) => s.id.equals(1))).write(
     SyncMetaCompanion(
       userId: Value(userId),
       accessToken: Value(accessToken),
       refreshToken: Value(refreshToken),
+      email: Value(email),
+      joinedAt: Value(joinedAt),
+    ),
+  );
+
+  /* Вихід з акаунта, і тільки з нього.
+   *
+   * Щоденник лишається на місці: людина виходить, щоб перестати синхронізувати,
+   * а не щоб усе стерти. Стирання це окрема дія з окремим питанням, і плутати
+   * їх не можна, бо друга необоротна.
+   *
+   * `userId` теж чиститься: без нього наступний вхід іншим акаунтом не вважає
+   * місцеві записи своїми. */
+  Future<void> clearAccount() => (update(syncMeta)..where((s) => s.id.equals(1))).write(
+    const SyncMetaCompanion(
+      userId: Value(null),
+      accessToken: Value(null),
+      refreshToken: Value(null),
+      email: Value(null),
+      joinedAt: Value(null),
     ),
   );
 
@@ -74,53 +97,61 @@ class SyncDao extends DatabaseAccessor<CalviDb> with _$SyncDaoMixin {
   ///
   /// Ordered by the time it changed, so a create reaches the server before the
   /// edit that follows it.
-  Future<List<MealRow>> pendingMeals({int limit = 200}) => (select(meals)
-        ..where((m) => m.dirty.equals(true))
-        ..orderBy([(m) => OrderingTerm(expression: m.updatedAt)])
-        ..limit(limit))
-      .get();
+  Future<List<MealRow>> pendingMeals({int limit = 200}) =>
+      (select(meals)
+            ..where((m) => m.dirty.equals(true))
+            ..orderBy([(m) => OrderingTerm(expression: m.updatedAt)])
+            ..limit(limit))
+          .get();
 
-  Future<List<WaterLog>> pendingWater({int limit = 200}) => (select(waterLogs)
-        ..where((w) => w.dirty.equals(true))
-        ..orderBy([(w) => OrderingTerm(expression: w.updatedAt)])
-        ..limit(limit))
-      .get();
+  Future<List<WaterLog>> pendingWater({int limit = 200}) =>
+      (select(waterLogs)
+            ..where((w) => w.dirty.equals(true))
+            ..orderBy([(w) => OrderingTerm(expression: w.updatedAt)])
+            ..limit(limit))
+          .get();
 
-  Future<List<Weight>> pendingWeights({int limit = 200}) => (select(weights)
-        ..where((w) => w.dirty.equals(true))
-        ..orderBy([(w) => OrderingTerm(expression: w.updatedAt)])
-        ..limit(limit))
-      .get();
+  Future<List<Weight>> pendingWeights({int limit = 200}) =>
+      (select(weights)
+            ..where((w) => w.dirty.equals(true))
+            ..orderBy([(w) => OrderingTerm(expression: w.updatedAt)])
+            ..limit(limit))
+          .get();
 
-  Future<List<Measurement>> pendingMeasures({int limit = 200}) => (select(measurements)
-        ..where((m) => m.dirty.equals(true))
-        ..orderBy([(m) => OrderingTerm(expression: m.updatedAt)])
-        ..limit(limit))
-      .get();
+  Future<List<Measurement>> pendingMeasures({int limit = 200}) =>
+      (select(measurements)
+            ..where((m) => m.dirty.equals(true))
+            ..orderBy([(m) => OrderingTerm(expression: m.updatedAt)])
+            ..limit(limit))
+          .get();
 
-  Future<List<WorkoutRow>> pendingWorkouts({int limit = 200}) => (select(workouts)
-        ..where((w) => w.dirty.equals(true))
-        ..orderBy([(w) => OrderingTerm(expression: w.updatedAt)])
-        ..limit(limit))
-      .get();
+  Future<List<WorkoutRow>> pendingWorkouts({int limit = 200}) =>
+      (select(workouts)
+            ..where((w) => w.dirty.equals(true))
+            ..orderBy([(w) => OrderingTerm(expression: w.updatedAt)])
+            ..limit(limit))
+          .get();
 
-  Future<List<Medication>> pendingMeds({int limit = 200}) => (select(medications)
-        ..where((m) => m.dirty.equals(true))
-        ..orderBy([(m) => OrderingTerm(expression: m.updatedAt)])
-        ..limit(limit))
-      .get();
+  Future<List<Medication>> pendingMeds({int limit = 200}) =>
+      (select(medications)
+            ..where((m) => m.dirty.equals(true))
+            ..orderBy([(m) => OrderingTerm(expression: m.updatedAt)])
+            ..limit(limit))
+          .get();
 
-  Future<List<MedicationTake>> pendingTakes({int limit = 200}) => (select(medicationTakes)
-        ..where((t) => t.dirty.equals(true))
-        ..orderBy([(t) => OrderingTerm(expression: t.updatedAt)])
-        ..limit(limit))
-      .get();
+  Future<List<MedicationTake>> pendingTakes({int limit = 200}) =>
+      (select(medicationTakes)
+            ..where((t) => t.dirty.equals(true))
+            ..orderBy([(t) => OrderingTerm(expression: t.updatedAt)])
+            ..limit(limit))
+          .get();
 
-  Future<List<Allergy>> pendingAllergies({int limit = 200}) => (select(allergies)
-        ..where((a) => a.dirty.equals(true))
-        ..orderBy([(a) => OrderingTerm(expression: a.updatedAt)])
-        ..limit(limit))
-      .get();
+  Future<List<Allergy>> pendingAllergies({int limit = 200}) =>
+      (select(allergies)
+            ..where((a) => a.dirty.equals(true))
+            ..orderBy([(a) => OrderingTerm(expression: a.updatedAt)])
+            ..limit(limit))
+          .get();
 
   /// Таблиці, які їздять, за іменем на дроті.
   ///
@@ -196,9 +227,9 @@ class SyncDao extends DatabaseAccessor<CalviDb> with _$SyncDaoMixin {
       await (update(syncMeta)..where((s) => s.id.equals(1))).write(
         const SyncMetaCompanion(cursor: Value(0), userId: Value(null)),
       );
-      await (update(tokenState)..where((t) => t.id.equals(1))).write(
-        const TokenStateCompanion(balance: Value(0)),
-      );
+      await (update(
+        tokenState,
+      )..where((t) => t.id.equals(1))).write(const TokenStateCompanion(balance: Value(0)));
     });
   }
 }

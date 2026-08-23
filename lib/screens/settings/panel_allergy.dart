@@ -9,6 +9,7 @@ import '../../design/shell.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import 'panels_account.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Allergies, chosen from the reference rather than typed.
 ///
@@ -106,28 +107,20 @@ class _AllergyPanelState extends State<AllergyPanel> {
       if (!groups.contains(a.group)) groups.add(a.group);
     }
 
+    final l = L.of(context);
+    /* Без кнопки «Готово» внизу: тут нема чого підтверджувати, кожна алергія
+       зберігається своєю кнопкою в банері, а вихід це «назад» зверху зліва. */
     return CalviScreen(
       onBack: widget.onBack,
-      title: 'Алергії',
-      hint:
-          'Обирай зі списку, а не пиши текстом: попередження спрацьовує за кодом алергену в '
-          'складі, і саме тому воно не залежить від того, як страву назвали.',
-      foot: CalviButton(
-        label: 'Готово',
-        onTap: () => (widget.onBack ?? Navigator.of(context).pop)(),
-      ),
+      title: l.allergyTitle,
       children: [
         _Search(
           controller: _q,
           onChanged: (_) => setState(() {}),
-          hint: 'Пошук серед ${allergens.length} алергенів',
+          hint: l.allergySearch(allergens.length),
         ),
 
-        if (found.isEmpty)
-          const CalviNote(
-            'Нічого не знайшлось. Якщо алергену немає в списку, напиши Норі: додамо його в '
-            'довідник, щоб він працював у всіх, а не лишався текстом в одного.',
-          ),
+        if (found.isEmpty) CalviNote(l.allergyNothing),
 
         for (final g in groups)
           CalviSection(
@@ -148,15 +141,11 @@ class _AllergyPanelState extends State<AllergyPanel> {
             ],
           ),
 
-        const CalviNote(
-          'Якщо складу продукту немає в базі, я не мовчу і не вважаю це безпекою: скажу окремо, '
-          'що склад невідомий.',
-        ),
+        CalviNote(l.allergyNote),
       ],
     );
   }
 }
-
 
 class _Search extends StatelessWidget {
   const _Search({required this.controller, required this.onChanged, required this.hint});
@@ -264,7 +253,20 @@ class _AllergenRow extends StatelessWidget {
     return AnimatedContainer(
       duration: CalviMotion.normal,
       curve: CalviMotion.ease,
-      color: tone,
+      /* Розгорнутий рядок підіймається над списком: тло картки і тінь кажуть,
+         що вибір важкості стосується саме нього, а не сторінки загалом. Доти
+         банер просто виростав знизу, і око не бачило межі.
+       *
+       * Позначений алерген це вкладена плашка з повітрям по краях, а не
+       * заливка на всю ширину: у білій картці повнорозмірна заливка читалась
+       * як зламана секція, а плашка читається як позначка. */
+      margin: const EdgeInsets.fromLTRB(8, 3, 8, 3),
+      decoration: BoxDecoration(
+        color: open ? c.card : tone,
+        borderRadius: BorderRadius.circular(14),
+        border: open ? Border.all(color: c.cardBorder) : null,
+        boxShadow: open ? context.shadowFloat : const [],
+      ),
       child: Column(
         children: [
           GestureDetector(
@@ -318,9 +320,14 @@ class _AllergenRow extends StatelessWidget {
                   ),
                   if (mine case final a?) ...[
                     const SizedBox(width: 10),
+                    // Важкість підписана своїм кольором: слово і плашка кажуть
+                    // одне, і рядок читається без вчитування.
                     Text(
-                      a.severe ? 'важка' : 'легка',
-                      style: context.t.labelSmall?.copyWith(fontWeight: FontWeight.w400),
+                      a.severe ? L.of(context).allergySevereShort : L.of(context).allergyMildShort,
+                      style: context.t.labelSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: a.severe ? c.protein : Color.lerp(c.carbs, c.text, 0.4),
+                      ),
                     ),
                   ],
                 ],
@@ -351,68 +358,63 @@ class _AllergenRow extends StatelessWidget {
                 child: !alive
                     ? const SizedBox(width: double.infinity)
                     : Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      CalviSegments(
-                        labels: const ['Легка', 'Важка'],
-                        index: severe ? 1 : 0,
-                        height: 38,
-                        onPick: (i) => onSeverity(i == 1),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(2, 10, 2, 12),
-                        child: Text(
-                          severe
-                              ? 'Зупиню до запису і скажу прямо.'
-                              : 'Попереджу в тексті, запис не блокую.',
-                          style: context.t.labelSmall?.copyWith(fontWeight: FontWeight.w400),
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: CalviPress(
-                              onTap: onConfirm,
-                              builder: (context, down) => AnimatedScale(
-                                scale: down ? 0.98 : 1,
-                                duration: CalviMotion.fast,
-                                curve: CalviMotion.ease,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 12),
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(
-                                    color: c.button,
-                                    borderRadius: BorderRadius.circular(CalviSize.rPill),
-                                  ),
-                                  child: Text(
-                                    'Підтвердити',
-                                    style: context.t.titleMedium?.copyWith(
-                                      fontSize: CalviSize.fsCaption,
-                                      fontWeight: FontWeight.w600,
-                                      color: c.buttonText,
+                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            CalviSegments(
+                              labels: [L.of(context).allergyMild, L.of(context).allergySevere],
+                              index: severe ? 1 : 0,
+                              height: 38,
+                              onPick: (i) => onSeverity(i == 1),
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: CalviPress(
+                                    onTap: onConfirm,
+                                    builder: (context, down) => AnimatedScale(
+                                      scale: down ? 0.98 : 1,
+                                      duration: CalviMotion.fast,
+                                      curve: CalviMotion.ease,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(vertical: 12),
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: c.button,
+                                          borderRadius: BorderRadius.circular(CalviSize.rPill),
+                                        ),
+                                        child: Text(
+                                          L.of(context).allergyConfirm,
+                                          style: context.t.titleMedium?.copyWith(
+                                            fontSize: CalviSize.fsCaption,
+                                            fontWeight: FontWeight.w600,
+                                            color: c.buttonText,
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
+                                // Only where there is something to take away.
+                                if (set)
+                                  GestureDetector(
+                                    onTap: onDrop,
+                                    behavior: HitTestBehavior.opaque,
+                                    child: Padding(
+                                      padding: const EdgeInsets.fromLTRB(14, 12, 4, 12),
+                                      child: Text(
+                                        L.of(context).allergyRemove,
+                                        style: context.t.bodyMedium,
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
-                          ),
-                          // Only where there is something to take away.
-                          if (set)
-                            GestureDetector(
-                              onTap: onDrop,
-                              behavior: HitTestBehavior.opaque,
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(14, 12, 4, 12),
-                                child: Text('Прибрати', style: context.t.bodyMedium),
-                              ),
-                            ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ],
-                  ),
-                ),
               ),
             ),
           ),

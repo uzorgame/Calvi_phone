@@ -43,3 +43,26 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# --- Таємниці ---
+#
+# Цей блок стояв у .gitignore великого репозиторію, а застосунок живе тепер
+# окремо, тож сітка мусить бути своя. Порожній список тут означає, що перший же
+# `git add .` покладе сховище ключів або конфіг Google у відкриту історію, а
+# звідти воно вже не зникає.
+.env
+.env.local
+*.pem
+*.p8
+*.jks
+*.keystore
+key.properties
+google-services.json
+GoogleService-Info.plist
+
+# --- Складене ---
+*.apk
+*.aab
+
+# Вивід невдалого golden-тесту: перезаписується щоразу і нікому не потрібен.
+test/failures/

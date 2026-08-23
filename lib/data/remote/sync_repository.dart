@@ -32,10 +32,7 @@ class SyncRepository {
     }
 
     try {
-      final account = await api.registerDevice(
-        tz: DateTime.now().timeZoneName,
-        device: deviceName,
-      );
+      final account = await api.registerDevice(tz: DateTime.now().timeZoneName, device: deviceName);
       await db.syncDao.setAccount(
         userId: account.userId,
         accessToken: account.accessToken,

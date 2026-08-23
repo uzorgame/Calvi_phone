@@ -6,6 +6,7 @@ import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import 'slot_card.dart';
 import 'workout_form.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Training.
 ///
@@ -35,9 +36,8 @@ class _WorkoutCardState extends State<WorkoutCard> {
   Activity? _picked;
 
   String _plural(int n) {
-    if (n == 0) return 'нічого не записано';
-    if (n == 1) return '1 сесія';
-    return n < 5 ? '$n сесії' : '$n сесій';
+    if (n == 0) return L.of(context).workoutNone;
+    return L.of(context).workoutSessions(n);
   }
 
   void _save(Activity a, {required int minutes, required int kcal, String? note}) {
@@ -66,9 +66,9 @@ class _WorkoutCardState extends State<WorkoutCard> {
 
     return SlotCard(
       icon: 'gym',
-      title: 'Тренування',
+      title: L.of(context).workoutTitle,
       sub: _plural(widget.workouts.length),
-      badge: burned > 0 ? '−$burned ккал' : '0 ккал',
+      badge: L.of(context).workoutBurned(burned),
       open: widget.open,
       onToggle: widget.onToggle,
       child: Column(
@@ -83,7 +83,7 @@ class _WorkoutCardState extends State<WorkoutCard> {
             )
           else ...[
             AddRow(
-              label: _picking ? 'Згорнути' : 'Додати тренування',
+              label: _picking ? L.of(context).workoutCollapse : L.of(context).workoutAdd,
               open: _picking,
               onTap: () => setState(() => _picking = !_picking),
             ),
@@ -122,7 +122,9 @@ class _WorkoutRow extends StatelessWidget {
                 Text(workout.title, style: context.t.bodyLarge?.copyWith(fontSize: 15)),
                 const SizedBox(height: 2),
                 Text(
-                  workout.minutes > 0 ? '${workout.minutes} хв' : 'без тривалості',
+                  workout.minutes > 0
+                      ? L.of(context).wfMin(workout.minutes)
+                      : L.of(context).wcNoTime,
                   style: context.t.labelSmall,
                 ),
               ],
@@ -133,10 +135,7 @@ class _WorkoutRow extends StatelessWidget {
             children: [
               // Green, and negative: this is the one number on the day that
               // moves the norm the right way.
-              Text(
-                '−${workout.kcal}',
-                style: context.t.titleMedium?.copyWith(color: c.success),
-              ),
+              Text('−${workout.kcal}', style: context.t.titleMedium?.copyWith(color: c.success)),
               Text(workout.time, style: context.t.labelSmall?.copyWith(fontSize: 11)),
             ],
           ),

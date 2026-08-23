@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:calvi/design/theme.dart';
 import 'package:calvi/screens/camera/camera_screen.dart';
+import 'package:calvi/l10n/app_localizations.dart';
 
 /// The sheet under the viewfinder is the bottom of the screen, not a card near
 /// it: floating with a margin, it read as something that had failed to land.
@@ -14,6 +15,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: L.localizationsDelegates,
+        supportedLocales: L.supportedLocales,
+        locale: const Locale('uk'),
         theme: calviLightTheme,
         home: CameraScreen(slot: 'Вечеря', onSend: (_) {}),
       ),
@@ -29,9 +33,7 @@ void main() {
     final sheet = find.text('Надіслати Норі');
     expect(sheet, findsOneWidget, reason: 'картка розбору не зʼявилась');
 
-    final box = tester.getRect(
-      find.ancestor(of: sheet, matching: find.byType(Container)).last,
-    );
+    final box = tester.getRect(find.ancestor(of: sheet, matching: find.byType(Container)).last);
 
     expect(box.left, 0, reason: 'ліворуч лишилась смуга видошукача');
     expect(box.right, 390, reason: 'праворуч лишилась смуга видошукача');

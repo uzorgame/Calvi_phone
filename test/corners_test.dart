@@ -9,6 +9,7 @@ import 'package:calvi/data/app_scope.dart';
 import 'package:calvi/data/settings.dart';
 import 'package:calvi/design/theme.dart';
 import 'package:calvi/screens/today/bottom_bar.dart';
+import 'package:calvi/l10n/app_localizations.dart';
 
 /// The corners of the chat, read off the painted pixels rather than off the code.
 ///
@@ -30,6 +31,9 @@ void main() {
         meds: const [],
         setMeds: (_) {},
         child: MaterialApp(
+          localizationsDelegates: L.localizationsDelegates,
+          supportedLocales: L.supportedLocales,
+          locale: const Locale('uk'),
           theme: calviLightTheme,
           home: Scaffold(
             // Ink behind the panel, so a corner that is cut shows it through.
@@ -47,7 +51,8 @@ void main() {
                   onClose: () {},
                   onSend: (_) {},
                   onCamera: () {},
-                  onVoice: () {},
+                  onHold: (_, _) {},
+                  onLetGo: () {},
                 ),
               ),
             ),
@@ -120,6 +125,9 @@ void main() {
         meds: const [],
         setMeds: (_) {},
         child: MaterialApp(
+          localizationsDelegates: L.localizationsDelegates,
+          supportedLocales: L.supportedLocales,
+          locale: const Locale('uk'),
           theme: calviLightTheme,
           home: Scaffold(
             // Ink behind the panel, so a corner that is cut shows it through.
@@ -137,7 +145,8 @@ void main() {
                   onClose: () {},
                   onSend: (_) {},
                   onCamera: () {},
-                  onVoice: () {},
+                  onHold: (_, _) {},
+                  onLetGo: () {},
                 ),
               ),
             ),
@@ -210,6 +219,9 @@ void main() {
         meds: const [],
         setMeds: (_) {},
         child: MaterialApp(
+          localizationsDelegates: L.localizationsDelegates,
+          supportedLocales: L.supportedLocales,
+          locale: const Locale('uk'),
           theme: calviLightTheme,
           home: Scaffold(
             // Ink behind the panel, so a corner that is cut shows it through.
@@ -227,7 +239,8 @@ void main() {
                   onClose: () {},
                   onSend: (_) {},
                   onCamera: () {},
-                  onVoice: () {},
+                  onHold: (_, _) {},
+                  onLetGo: () {},
                 ),
               ),
             ),

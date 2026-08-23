@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import '../../format.dart';
+import '../../l10n/app_localizations.dart';
 
 /// A run of readings drawn as one smooth line.
 ///
@@ -22,7 +23,7 @@ class LineChart extends StatefulWidget {
     this.goal,
     this.highlight,
     this.highlightNote,
-    this.unit = 'кг',
+    this.unit,
     this.height = 150,
     this.draw = const Duration(milliseconds: 900),
   });
@@ -38,7 +39,10 @@ class LineChart extends StatefulWidget {
 
   /// The line under the figure in that callout, usually a date.
   final String? highlightNote;
-  final String unit;
+
+  /// Одиниця під виділеною точкою. Порожньо означає кілограми: так стоїть
+  /// майже скрізь, а слово для них знає лише екран.
+  final String? unit;
   final double height;
 
   /// How long the line takes to draw itself. The tape redraws faster than the
@@ -50,12 +54,23 @@ class LineChart extends StatefulWidget {
 }
 
 class _LineChartState extends State<LineChart> with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(
-    vsync: this,
-    // The line draws itself once. Long enough to follow, short enough that a
-    // second look at the screen never catches it mid-stroke.
-    duration: widget.draw,
-  )..forward();
+  /* Створюється в initState, а не лінивим полем: ліниве народжується при
+     першому зверненні, а ним може виявитись сам dispose. Віджет, який створили
+     і прибрали, не намалювавши, тоді заводить тікер на вже відчепленому
+     елементі і падає на пошуку предка. Довгий список, який ховає нижні картки,
+     робить це буденною ситуацією, а не крайнім випадком. */
+  late final AnimationController _c;
+
+  @override
+  void initState() {
+    super.initState();
+    _c = AnimationController(
+      vsync: this,
+      // The line draws itself once. Long enough to follow, short enough that a
+      // second look at the screen never catches it mid-stroke.
+      duration: widget.draw,
+    )..forward();
+  }
 
   @override
   void dispose() {
@@ -86,7 +101,7 @@ class _LineChartState extends State<LineChart> with SingleTickerProviderStateMix
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 22),
         child: Text(
-          'Поки один замір. Другий покаже напрямок, і з нього почнеться лінія.',
+          L.of(context).anOneWeighing,
           textAlign: TextAlign.center,
           style: context.t.bodyMedium,
         ),
@@ -134,10 +149,10 @@ class _LineChartState extends State<LineChart> with SingleTickerProviderStateMix
                             borderRadius: BorderRadius.circular(CalviSize.rPill),
                           ),
                           child: Text(
-                            'ціль ${_trimGoal(widget.goal!)}',
+                            L.of(context).anChartGoal(_trimGoal(widget.goal!)),
                             style: context.t.labelSmall?.copyWith(
                               fontSize: 10,
-                              color: const Color(0xFF1F8A3D),
+                              color: chipInk(context, c.success),
                             ),
                           ),
                         ),
@@ -149,7 +164,9 @@ class _LineChartState extends State<LineChart> with SingleTickerProviderStateMix
                     if (widget.highlight != null)
                       _Callout(
                         at: _pointAt(widget.highlight!, box.biggest),
-                        value: '${widget.values[widget.highlight!]} ${widget.unit}',
+                        value:
+                            '${widget.values[widget.highlight!]} '
+                            '${widget.unit ?? L.of(context).unitKg}',
                         note: widget.highlightNote,
                         shown: drawn > 0.98,
                       ),
@@ -337,17 +354,22 @@ class _MacroBarsState extends State<MacroBars> with SingleTickerProviderStateMix
   /* One controller for the whole row; each bar takes its own slice of it, so a
      column arrives a beat after the one to its left instead of the row snapping
      into place as a block. */
-  late final AnimationController _grow = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 520 + 55 * 6),
-  )..forward();
+  late final AnimationController _grow;
+
+  @override
+  void initState() {
+    super.initState();
+    _grow = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 520 + 55 * 6),
+    )..forward();
+  }
 
   @override
   void didUpdateWidget(MacroBars old) {
     super.didUpdateWidget(old);
     // A new period is a new chart, and it earns the growth again.
-    if (old.rows.length != widget.rows.length ||
-        old.rows.first.label != widget.rows.first.label) {
+    if (old.rows.length != widget.rows.length || old.rows.first.label != widget.rows.first.label) {
       _grow.forward(from: 0);
     }
   }
@@ -361,6 +383,7 @@ class _MacroBarsState extends State<MacroBars> with SingleTickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     final c = context.c;
+    final l = L.of(context);
     final rows = widget.rows;
     final totals = [for (final r in rows) r.protein * 4 + r.carbs * 4 + r.fat * 9];
     final max = totals.fold<int>(1, math.max);
@@ -412,9 +435,9 @@ class _MacroBarsState extends State<MacroBars> with SingleTickerProviderStateMix
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _Key(label: 'Білок', colour: c.protein),
-            _Key(label: 'Жири', colour: c.fats),
-            _Key(label: 'Вуглеводи', colour: c.carbs),
+            _Key(label: l.macroProtein, colour: c.protein),
+            _Key(label: l.macroFat, colour: c.fats),
+            _Key(label: l.macroCarbs, colour: c.carbs),
           ],
         ),
       ],
@@ -501,11 +524,46 @@ class _Key extends StatelessWidget {
 /// Bars against the target line, because the only question worth asking of water
 /// is how often you got there, not what the average came to. An average of 2200
 /// made of one 4000 day and six dry ones is not hydration.
-class HydrationBars extends StatelessWidget {
+/// Скільки випито за кожен відрізок, стовпчиками знизу догори.
+///
+/// Тут стояли сірі прямокутники, які фарбувались у колір тільки в день, коли
+/// норму перекрито. День на півтора літра виглядав так само, як день, коли не
+/// пито взагалі: обидва сірі, різні лише висотою. Тепер вода завжди синя, а її
+/// висота і є відповідь; за нею стоїть доріжка на всю висоту, щоб порожній день
+/// читався як порожній слот, а не як відсутній стовпчик.
+class HydrationBars extends StatefulWidget {
   const HydrationBars({super.key, required this.rows, required this.goalMl});
 
   final List<({String label, int ml})> rows;
   final int goalMl;
+
+  @override
+  State<HydrationBars> createState() => _HydrationBarsState();
+}
+
+class _HydrationBarsState extends State<HydrationBars> with SingleTickerProviderStateMixin {
+  static const _height = 112.0;
+
+  /* Створюється в initState, а не лінивим полем.
+   *
+   * Ліниве поле народжується при першому зверненні, а першим зверненням може
+   * виявитись сам dispose: якщо віджет побудували і прибрали, не намалювавши,
+   * контролер створює тікер уже на відчепленому елементі, і застосунок падає на
+   * пошуку предка. */
+  late final AnimationController _rise;
+
+  @override
+  void initState() {
+    super.initState();
+    _rise = AnimationController(vsync: this, duration: const Duration(milliseconds: 620))
+      ..forward();
+  }
+
+  @override
+  void dispose() {
+    _rise.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -513,31 +571,81 @@ class HydrationBars extends StatelessWidget {
     /* Headroom above whichever is taller, the target or the best day. Without it
        a week where nobody cleared the target pins the line to the ceiling and
        its label climbs out of the chart. */
-    final top = rows.fold<int>(goalMl, (a, r) => math.max(a, r.ml));
+    final top = widget.rows.fold<int>(widget.goalMl, (a, r) => math.max(a, r.ml));
     final max = top * 1.18;
 
     return Column(
       children: [
         SizedBox(
-          height: 112,
+          height: _height,
           child: Stack(
             children: [
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  for (final r in rows)
+                  for (final r in widget.rows)
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: FractionallySizedBox(
-                          heightFactor: (r.ml / max).clamp(0.0, 1.0),
+                        /* Тільки вода, без сірої доріжки під нею.
+                         *
+                         * Доріжка тут була, щоб порожній день лишав місце в
+                         * ряду, і вона мала сенс, поки стовпчики були сірі й
+                         * ледь помітні. Тепер вода синя і видна сама, а сім
+                         * сірих прямокутників поруч із нею читаються як
+                         * заповнені стовпчики, тобто як дані, яких немає.
+                         * Порожньо має виглядати порожньо. */
+                        child: Stack(
                           alignment: Alignment.bottomCenter,
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: r.ml >= goalMl ? c.fats : c.track,
-                              borderRadius: BorderRadius.circular(5),
+                          children: [
+                            // Тримає ширину стовпчика, поки води ще немає.
+                            const SizedBox.expand(),
+                            AnimatedBuilder(
+                              animation: _rise,
+                              builder: (context, _) {
+                                /* Стовпчик росте знизу вгору, як наливається
+                                   склянка. Курва сповільнення на кінці: вода
+                                   не зупиняється різко. */
+                                final grown = Curves.easeOutCubic.transform(_rise.value);
+                                final full = (r.ml / max).clamp(0.0, 1.0);
+
+                                // Наскільки день дотягнув до норми: від цього
+                                // насиченість кольору.
+                                final full01 = widget.goalMl == 0
+                                    ? 1.0
+                                    : (r.ml / widget.goalMl).clamp(0.0, 1.0);
+
+                                /* Ширина задається явно, і це не косметика.
+                                 *
+                                 * Стовпчик без вмісту бере найменший розмір,
+                                 * який дозволяють обмеження, а всередині стопки
+                                 * ширина приходить вільною. Виходила смуга з
+                                 * правильною висотою і нульовою шириною: на
+                                 * екрані лишались самі доріжки, однакові й
+                                 * порожні, і день на тисячу триста мілілітрів
+                                 * виглядав так само, як день без жодної
+                                 * склянки. Той самий дефект колись ховав
+                                 * стовпчики БЖВ. */
+                                return FractionallySizedBox(
+                                  widthFactor: 1,
+                                  heightFactor: full * grown,
+                                  alignment: Alignment.bottomCenter,
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      /* Один колір на всю воду, а насиченість
+                                         росте разом із нею: що більше випито,
+                                         то контрастніший стовпчик. Норма
+                                         перекрита це повна сила кольору. Сірого,
+                                         який читався як «немає даних», тут
+                                         більше немає взагалі. */
+                                      color: c.fats.withValues(alpha: 0.35 + 0.65 * full01),
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
-                          ),
+                          ],
                         ),
                       ),
                     ),
@@ -549,13 +657,13 @@ class HydrationBars extends StatelessWidget {
               Positioned(
                 left: 0,
                 right: 0,
-                bottom: 112 * (goalMl / max),
+                bottom: _height * (widget.goalMl / max),
                 child: Row(
                   children: [
                     Expanded(child: Container(height: 1, color: c.hairline)),
                     const SizedBox(width: 6),
                     Text(
-                      thousands(goalMl),
+                      thousands(widget.goalMl),
                       style: context.t.labelSmall?.copyWith(fontSize: 10),
                     ),
                   ],
@@ -567,7 +675,7 @@ class HydrationBars extends StatelessWidget {
         const SizedBox(height: 8),
         Row(
           children: [
-            for (final r in rows)
+            for (final r in widget.rows)
               Expanded(
                 child: Text(
                   r.label,
@@ -641,12 +749,7 @@ class MacroLine extends StatelessWidget {
 
 /// The pill that names one reading on the line.
 class _Callout extends StatelessWidget {
-  const _Callout({
-    required this.at,
-    required this.value,
-    required this.note,
-    required this.shown,
-  });
+  const _Callout({required this.at, required this.value, required this.note, required this.shown});
 
   final Offset at;
   final String value;
@@ -671,10 +774,7 @@ class _Callout extends StatelessWidget {
           children: [
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-              decoration: BoxDecoration(
-                color: c.button,
-                borderRadius: BorderRadius.circular(10),
-              ),
+              decoration: BoxDecoration(color: c.button, borderRadius: BorderRadius.circular(10)),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [

@@ -5,6 +5,7 @@ import 'package:calvi/data/chat.dart';
 import 'package:calvi/design/theme.dart';
 import 'package:calvi/screens/today/bottom_bar.dart';
 import 'package:calvi/screens/today/plate_strip.dart';
+import 'package:calvi/l10n/app_localizations.dart';
 
 /// Чат, який не виглядає зламаним, поки Нора думає.
 ///
@@ -14,6 +15,9 @@ import 'package:calvi/screens/today/plate_strip.dart';
 /// без слів: коли слова приходять, бульбашка доростає з кільця.
 void main() {
   Widget bar(List<Msg> messages) => MaterialApp(
+    localizationsDelegates: L.localizationsDelegates,
+    supportedLocales: L.supportedLocales,
+    locale: const Locale('uk'),
     theme: calviLightTheme,
     home: Scaffold(
       body: BottomBar(
@@ -21,7 +25,8 @@ void main() {
         messages: messages,
         onSend: (_) {},
         onCamera: () {},
-        onVoice: () {},
+        onHold: (_, _) {},
+        onLetGo: () {},
         open: true,
         onOpen: (_) {},
         onClose: () {},
@@ -52,10 +57,7 @@ void main() {
     expect(find.byType(Thinking), findsOneWidget);
 
     await tester.pumpWidget(
-      bar([
-        msg(from: MsgFrom.me, text: 'борщ'),
-        waiting.answered(text: 'Записала борщ.'),
-      ]),
+      bar([msg(from: MsgFrom.me, text: 'борщ'), waiting.answered(text: 'Записала борщ.')]),
     );
     await tester.pump(const Duration(milliseconds: 600));
 

@@ -1,21 +1,41 @@
 /// The tape: what a body is measured with, and what was written down.
 library;
 
+import '../l10n/data_lang.dart';
+
 /// One field of the tape.
 class MeasureField {
   const MeasureField({
     required this.key,
-    required this.label,
-    required this.unit,
     required this.icon,
     required this.min,
     required this.max,
+    this.inCm = true,
   });
 
   final String key;
-  final String label;
-  final String unit;
   final String icon;
+
+  /// Сантиметрами міряють усе, крім ваги.
+  final bool inCm;
+
+  /* Назва й одиниця геттерами, а не полями.
+   *
+   * Список полів це стала, і зашити в неї слово означало б зашити мову. Тут
+   * лежать самі ключі, а слово під ключем береться з перекладу тієї миті, коли
+   * його малюють. */
+  String get label => switch (key) {
+    'weightKg' => dataL.fieldWeight,
+    'chest' => dataL.fieldChest,
+    'waist' => dataL.fieldWaist,
+    'hips' => dataL.fieldHips,
+    'thigh' => dataL.fieldThigh,
+    'wrist' => dataL.fieldWrist,
+    'neck' => dataL.fieldNeck,
+    _ => dataL.fieldBiceps,
+  };
+
+  String get unit => inCm ? dataL.unitCm : dataL.unitKg;
 
   /// Anything outside is dropped rather than stored: a slipped digit in one
   /// field would bend the chart for months.
@@ -24,14 +44,14 @@ class MeasureField {
 }
 
 const measureFields = <MeasureField>[
-  MeasureField(key: 'weightKg', label: 'Вага', unit: 'кг', icon: 'scale', min: 30, max: 250),
-  MeasureField(key: 'chest', label: 'Груди', unit: 'см', icon: 'user', min: 50, max: 180),
-  MeasureField(key: 'waist', label: 'Талія', unit: 'см', icon: 'user', min: 40, max: 200),
-  MeasureField(key: 'hips', label: 'Стегна', unit: 'см', icon: 'user', min: 50, max: 200),
-  MeasureField(key: 'thigh', label: 'Стегно', unit: 'см', icon: 'user', min: 30, max: 100),
-  MeasureField(key: 'wrist', label: 'Запʼясток', unit: 'см', icon: 'user', min: 10, max: 30),
-  MeasureField(key: 'neck', label: 'Шия', unit: 'см', icon: 'user', min: 25, max: 70),
-  MeasureField(key: 'biceps', label: 'Біцепс', unit: 'см', icon: 'gym', min: 15, max: 70),
+  MeasureField(key: 'weightKg', icon: 'scale', min: 30, max: 250, inCm: false),
+  MeasureField(key: 'chest', icon: 'user', min: 50, max: 180),
+  MeasureField(key: 'waist', icon: 'user', min: 40, max: 200),
+  MeasureField(key: 'hips', icon: 'user', min: 50, max: 200),
+  MeasureField(key: 'thigh', icon: 'user', min: 30, max: 100),
+  MeasureField(key: 'wrist', icon: 'user', min: 10, max: 30),
+  MeasureField(key: 'neck', icon: 'user', min: 25, max: 70),
+  MeasureField(key: 'biceps', icon: 'gym', min: 15, max: 70),
 ];
 
 MeasureField fieldFor(String key) => measureFields.firstWhere((f) => f.key == key);
@@ -119,15 +139,24 @@ const demoMeasures = <Measure>[
   return best;
 }
 
+/* Число і слово при ньому раніше складались тут вручну.
+ *
+ * «5 дні тому» стояло на головному екрані місяцями: правило зводилось до
+ * «менше семи означає дні», а насправді дві-чотири це дні, а пʼять і далі
+ * днів. Тепер це правило не наше: множина описана в `l10n/data.*.arb` і за
+ * категорію відповідає ICU, який знає його для кожної мови, а не для однієї. */
+
 /// How long ago a session was, in words.
 String measureAgo(int offset) {
   final d = -offset;
-  if (d <= 0) return 'сьогодні';
-  if (d == 1) return 'учора';
-  if (d < 7) return '$d дні тому';
+  if (d <= 0) return dataL.agoToday;
+  if (d == 1) return dataL.agoYesterday;
+  if (d < 7) return dataL.agoDays(d);
+
+  /* Рівно тиждень окремим рядком: «тиждень тому» читається краще за «1 тиждень
+     тому», а всередині множини такого винятку не зробити. */
   final w = (d / 7).round();
-  if (w == 1) return 'тиждень тому';
-  return w < 5 ? '$w тижні тому' : '$w тижнів тому';
+  return w == 1 ? dataL.agoWeek : dataL.agoWeeks(w);
 }
 
 /// Change between the oldest and newest reading inside a window of days.

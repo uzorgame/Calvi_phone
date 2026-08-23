@@ -1,0 +1,78 @@
+{
+  "startGoalLose": "Lose weight",
+  "startGoalLoseHint": "a deficit at the pace you pick",
+  "startGoalKeep": "Keep weight",
+  "startGoalKeepHint": "you put back exactly what you spend",
+  "startGoalGain": "Gain weight",
+  "startGoalGainHint": "a surplus at the pace you pick",
+
+  "startAbout": "About you",
+  "startSex": "Sex",
+  "startSexMale": "Male",
+  "startSexFemale": "Female",
+  "startSexOther": "Other",
+  "startAge": "Age",
+  "startAgeYears": "{count, plural, =1{1 year} other{{count} years}}",
+  "@startAgeYears": {
+    "description": "Age beside the drum. Ukrainian needs three forms, which is why this is a plural rather than a joined string.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "startYearsShort": "years",
+  "startHeight": "Height",
+
+  "startWeightNow": "Weight now",
+
+  "startGoal": "Where we are heading",
+  "startTargetWeight": "Target weight",
+
+  "startPace": "How fast",
+  "startPaceUnit": "kg a week",
+  "startPaceSlow": "slow",
+  "startPaceUsual": "steady",
+  "startPaceFast": "fast",
+  "startPaceEtaHead": "Goal around ",
+  "@startPaceEtaHead": {
+    "description": "Opening of the line that names the date. The date itself is bold, so the sentence arrives in three pieces."
+  },
+  "startPaceEtaTail": ", that is ",
+  "startPaceWeeks": "{count, plural, =1{1 week} other{{count} weeks}}",
+  "@startPaceWeeks": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "startPaceWarning": "A pace like this is hard to hold and usually breaks. Under 0.8 kg a week the result comes slower but stays.",
+
+  "startLife": "Lifestyle",
+  "startAllergies": "Allergies",
+
+  "startNorm": "Your norm",
+  "startNormPerDay": "kcal a day",
+  "startNormWeeks": "weeks",
+  "startNormHold": "holding",
+  "startNormNora": "Counted. It gets easier from here.",
+  "startNormNoraHint": "Write or say it however suits you: \"two eggs and toast\", \"drank 300 of water\". Whatever else I need, I will ask in the conversation.",
+  "startNormNote": "This is the Mifflin-St Jeor formula, not medical advice. If you have a condition, are pregnant, or follow a prescribed diet, check with your doctor.",
+
+  "startHelloText": "Nothing to keep here. Tell Nora \"two eggs and toast\" and the day is counted: no searching through references, no grams, no tables. She takes it from there.",
+  "startHelloAction": "Start",
+
+  "startDeviceFirstRun": "first run",
+  "startSignInFailed": "Could not sign in. Try again, or carry on without an account.",
+  "startSignInFailedWhy": "Could not sign in. {why}",
+  "@startSignInFailedWhy": {
+    "placeholders": { "why": { "type": "String" } }
+  },
+  "startSignInTitle": "Let us keep this",
+  "startSignInText": "The norm is counted. Sign in to keep it: history, measurements and entries will be on every device, not only here.",
+  "startSignInBusy": "Signing in…",
+  "startSignInGoogle": "Continue with Google",
+  "startSignInApple": "Continue with Apple",
+  "startSignInSkip": "Not now",
+
+  "startAgreeHead": "I agree to the ",
+  "@startAgreeHead": {
+    "description": "The consent line is assembled from spans, because the two document names are tappable."
+  },
+  "startAgreeTerms": "terms of use",
+  "startAgreeAnd": " and the ",
+  "startAgreePrivacy": "privacy policy"
+}

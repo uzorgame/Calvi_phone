@@ -1,0 +1,48 @@
+{
+  "sexShortMale": "Ч",
+  "sexShortFemale": "Ж",
+  "sexOther": "Інше",
+
+  "activitySedentary": "Сидячий",
+  "activitySedentaryHint": "майже без руху",
+  "activityLight": "Легка активність",
+  "activityLightHint": "1-2 тренування на тиждень",
+  "activityModerate": "Помірна",
+  "activityModerateHint": "3-4 тренування",
+  "activityHigh": "Висока",
+  "activityHighHint": "5-6 тренувань",
+  "activityVeryHigh": "Дуже висока",
+  "activityVeryHighHint": "фізична робота або спорт щодня",
+
+  "themeLight": "Світла",
+  "themeLightHint": "завжди світлий інтерфейс",
+  "themeDark": "Темна",
+  "themeDarkHint": "завжди темний інтерфейс",
+  "themeSystem": "Тема пристрою",
+  "themeSystemHint": "слухає налаштування системи",
+
+  "langSystem": "Мова пристрою",
+
+  "reminderMeal": "Їжа",
+  "reminderMealHint": "нагадаю записати прийом",
+  "reminderWater": "Вода",
+  "reminderWaterHint": "нагадаю попити",
+  "reminderMeds": "Препарати",
+  "reminderMedsHint": "за розкладом із журналу",
+  "reminderWorkout": "Тренування",
+  "reminderWorkoutHint": "нагадаю про заплановане",
+  "reminderWeigh": "Зважування",
+  "reminderWeighHint": "щоб графік ваги не рвався",
+  "reminderSummary": "Підсумок дня",
+  "reminderSummaryHint": "коротко про день перед сном",
+
+  "reminderBodyMeal": "Запиши, що було",
+  "reminderBodyWater": "Час попити",
+  "reminderBodyWorkout": "Запиши, якщо було",
+  "reminderBodyWeigh": "Вранці, до їжі",
+  "reminderBodySummary": "Що сьогодні не записав?",
+  "reminderBodyMeds": "За розкладом",
+
+  "notifyChannel": "Нагадування",
+  "notifyChannelHint": "Нагадування про їжу, воду, препарати і зважування"
+}

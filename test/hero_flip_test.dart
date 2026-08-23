@@ -6,6 +6,7 @@ import 'package:calvi/data/fixtures.dart';
 import 'package:calvi/data/settings.dart';
 import 'package:calvi/design/theme.dart';
 import 'package:calvi/screens/today/hero_card.dart';
+import 'package:calvi/l10n/app_localizations.dart';
 
 /// The deck holds both of its sides.
 ///
@@ -27,6 +28,9 @@ void main() {
         meds: const [],
         setMeds: (_) {},
         child: MaterialApp(
+          localizationsDelegates: L.localizationsDelegates,
+          supportedLocales: L.supportedLocales,
+          locale: const Locale('uk'),
           theme: calviLightTheme,
           // The phone can be set to a bigger font, and the card has to survive it.
           builder: (context, child) => MediaQuery.withNoTextScaling(

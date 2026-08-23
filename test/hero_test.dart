@@ -6,6 +6,7 @@ import 'package:calvi/data/app_scope.dart';
 import 'package:calvi/data/settings.dart';
 import 'package:calvi/design/theme.dart';
 import 'package:calvi/screens/today/hero_card.dart';
+import 'package:calvi/l10n/app_localizations.dart';
 
 /* The weight side reads the person's own figures, so the card needs the scope
    the app puts above every screen. */
@@ -15,6 +16,9 @@ Widget _wrap(Widget child) => AppScope(
   meds: const [],
   setMeds: (_) {},
   child: MaterialApp(
+    localizationsDelegates: L.localizationsDelegates,
+    supportedLocales: L.supportedLocales,
+    locale: const Locale('uk'),
     theme: calviLightTheme,
     home: Scaffold(body: Center(child: child)),
   ),
@@ -23,9 +27,7 @@ Widget _wrap(Widget child) => AppScope(
 void main() {
   testWidgets('картка стоїть на боці калорій і має висоту', (tester) async {
     await tester.pumpWidget(
-      _wrap(
-        HeroCard(day: dayFor(0), burned: dayFor(0).burned, goal: goalOf(initialSettings())),
-      ),
+      _wrap(HeroCard(day: dayFor(0), burned: dayFor(0).burned, goal: goalOf(initialSettings()))),
     );
     await tester.pump();
     /* Великим числом стоїть зʼїдене, залишок рядком під ним.
@@ -58,9 +60,7 @@ void main() {
 
   testWidgets('змах угору перевертає картку на вагу', (tester) async {
     await tester.pumpWidget(
-      _wrap(
-        HeroCard(day: dayFor(0), burned: dayFor(0).burned, goal: goalOf(initialSettings())),
-      ),
+      _wrap(HeroCard(day: dayFor(0), burned: dayFor(0).burned, goal: goalOf(initialSettings()))),
     );
     await tester.pump();
 
@@ -75,9 +75,7 @@ void main() {
        to nothing: that was the card disappearing the moment it turned. */
     expect(texts, contains('днів'), reason: 'бік калорій має лишитись у дереві');
     final faded = tester
-        .widgetList<Opacity>(
-          find.ancestor(of: find.text('днів'), matching: find.byType(Opacity)),
-        )
+        .widgetList<Opacity>(find.ancestor(of: find.text('днів'), matching: find.byType(Opacity)))
         .map((o) => o.opacity);
     expect(faded, contains(closeTo(0, 0.01)), reason: 'бік калорій не згас');
   });

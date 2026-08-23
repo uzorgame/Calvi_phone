@@ -8,6 +8,7 @@ import 'package:calvi/design/theme.dart';
 import 'package:calvi/design/ruler.dart';
 import 'package:calvi/design/wheel.dart';
 import 'package:calvi/screens/settings/panels_body.dart';
+import 'package:calvi/l10n/app_localizations.dart';
 
 /// Where the profile panel puts things, measured against the demo.
 ///
@@ -31,6 +32,9 @@ void main() {
           meds: const [],
           setMeds: (_) {},
           child: MaterialApp(
+            localizationsDelegates: L.localizationsDelegates,
+            supportedLocales: L.supportedLocales,
+            locale: const Locale('uk'),
             theme: calviLightTheme,
             scrollBehavior: const CalviScroll(),
             home: ProfilePanel(s: s, set: (patch) => setState(() => s = patch(s))),
@@ -44,41 +48,33 @@ void main() {
   testWidgets('профіль стоїть за розмірами демки', (tester) async {
     await open(tester);
 
-    final hint = tester.getRect(find.textContaining('Ці числа стоять'));
+    /* Підказки під заголовком більше немає: екран починається одразу з
+       облікового запису, і міряти тепер є від чого і без неї. */
+    final account = tester.getRect(find.text('Обліковий запис'));
     final sex = tester.getRect(find.text('Стать'));
-    final picks = find.byType(CalviPick);
-    // The card itself, not the ten of margin the option carries under it.
-    Rect card(int i) => tester.getRect(
-      find.descendant(of: picks.at(i), matching: find.byType(AnimatedContainer)).first,
-    );
-    final one = card(0);
-    final two = card(1);
-    final three = card(2);
-    final age = tester.getRect(find.text('Вік'));
-    final drum = tester.getRect(find.byType(CalviWheel).first);
+    final seg = tester.getRect(find.byType(CalviSegments));
 
-
-    // Everything stands at the same gutter, the options included.
-    for (final (name, r) in [('підказка', hint), ('Стать', sex), ('вибір', one)]) {
+    // Everything stands at the same gutter, the segmented row included.
+    for (final (name, r) in [('Обліковий запис', account), ('Стать', sex), ('вибір статі', seg)]) {
       expect(r.left, 24, reason: '$name не на відступі 24');
       expect(r.right, 366, reason: '$name не доходить до 366');
     }
 
-    // A section gap under the hint, then twelve under the title.
-    expect(sex.top - hint.bottom, closeTo(28, 2), reason: 'підказка не на секційному відступі');
-    expect(one.top - sex.bottom, closeTo(12, 2), reason: 'заголовок не на 12 над вибором');
+    // Twelve under every title.
+    expect(seg.top - sex.bottom, closeTo(12, 2), reason: 'заголовок не на 12 над вибором');
 
-    // Ten between options.
-    expect(two.top - one.bottom, closeTo(10, 0.5), reason: 'між виборами не 10');
-    expect(three.top - two.bottom, closeTo(10, 0.5), reason: 'між виборами не 10');
-    /* Only the one-line option is measured: a test has no Onest, so the width a
-       hint wraps at is the fallback font's, not the app's. */
-    expect(one.height, closeTo(70, 2), reason: 'вибір без підпису не 70 висотою');
+    /* Один ряд замість трьох карток. Висота тут і є вся економія: три вибори з
+       іконками стояли на 230, а ряд на 43, і саме заради цього він зроблений. */
+    expect(seg.height, 43, reason: 'ряд вибору не 43 висотою');
 
-    // A section gap below the last option, and the drum is five rows tall.
-    expect(age.top - three.bottom, closeTo(28, 2), reason: 'блок не на секційному відступі');
-    expect(drum.top - age.bottom, closeTo(12, 2), reason: 'заголовок не на 12 над барабаном');
-    expect(drum.height, 200, reason: 'барабан не 200 висотою');
+    /* Вік і зріст рядками, а не барабанами.
+     *
+     * Барабан це теж прокрутка, і всередині сторінки він забирав жест собі:
+     * палець тягнув угору, а рухався барабан. Тепер він живе в аркуші, який
+     * відкривається з цих рядків, і сторінка гортається звідусіль. */
+    expect(find.byType(CalviWheel), findsNothing, reason: 'барабан повернувся всередину сторінки');
+    expect(find.text('26 років'), findsOneWidget, reason: 'рядок не показує значення');
+    expect(find.text('183 см'), findsOneWidget);
   });
 
   testWidgets('вага стоїть за розмірами демки', (tester) async {
@@ -95,6 +91,9 @@ void main() {
           meds: const [],
           setMeds: (_) {},
           child: MaterialApp(
+            localizationsDelegates: L.localizationsDelegates,
+            supportedLocales: L.supportedLocales,
+            locale: const Locale('uk'),
             theme: calviLightTheme,
             scrollBehavior: const CalviScroll(),
             home: WeightPanel(s: v, set: (patch) => setState(() => v = patch(v))),

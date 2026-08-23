@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:calvi/design/slide.dart';
 import 'package:calvi/design/theme.dart';
+import 'package:calvi/l10n/app_localizations.dart';
 
 /// A swap inside a screen moves the way a route does.
 ///
@@ -12,6 +13,9 @@ import 'package:calvi/design/theme.dart';
 /// frames of the run were the bare window showing through the new one.
 void main() {
   Widget page(String text, int dir) => MaterialApp(
+    localizationsDelegates: L.localizationsDelegates,
+    supportedLocales: L.supportedLocales,
+    locale: const Locale('uk'),
     theme: calviLightTheme,
     home: Scaffold(
       body: Slide(value: text, dir: dir, child: Text(text)),
@@ -30,7 +34,9 @@ void main() {
 
     // Nothing in the swap is half transparent: the page travels, it does not fade.
     final fades = tester
-        .widgetList<Opacity>(find.descendant(of: find.byType(Slide), matching: find.byType(Opacity)))
+        .widgetList<Opacity>(
+          find.descendant(of: find.byType(Slide), matching: find.byType(Opacity)),
+        )
         .where((o) => o.opacity < 1);
     expect(fades, isEmpty, reason: 'сторінка проявляється, а має просто їхати');
 

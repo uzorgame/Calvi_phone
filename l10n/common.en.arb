@@ -1,0 +1,69 @@
+{
+  "kcalUnit": "{kcal} kcal",
+  "@kcalUnit": {
+    "description": "Calories with the unit, as it stands on badges and cards.",
+    "placeholders": { "kcal": { "type": "int" } }
+  },
+
+  "gramsUnit": "{grams} g",
+  "@gramsUnit": {
+    "description": "Weight with the unit.",
+    "placeholders": { "grams": { "type": "int" } }
+  },
+
+  "unitKcal": "kcal",
+  "unitKg": "kg",
+  "unitCm": "cm",
+  "unitG": "g",
+  "unitMl": "ml",
+  "@unitKcal": {
+    "description": "Bare units, for places that set the figure and the unit in different type."
+  },
+
+  "macroProtein": "Protein",
+  "macroFat": "Fat",
+  "macroCarbs": "Carbs",
+
+  "slotBreakfast": "Breakfast",
+  "slotLunch": "Lunch",
+  "slotDinner": "Dinner",
+  "slotSnack": "Snack",
+  "@slotBreakfast": {
+    "description": "The four meal cards. The assistant may rename a card by the time it happened, and then its own words are shown instead of these."
+  },
+
+  "slotIntoBreakfast": "into breakfast",
+  "slotIntoLunch": "into lunch",
+  "slotIntoDinner": "into dinner",
+  "slotIntoSnack": "into a snack",
+  "@slotIntoBreakfast": {
+    "description": "«Logged into breakfast». A whole phrase, not a preposition glued to the name: Ukrainian declines the noun after it («у вечерю», not «в вечеря») and alternates the preposition itself for sound, so neither half survives being assembled in code."
+  },
+
+  "slotIntoOther": "into “{name}”",
+  "@slotIntoOther": {
+    "description": "A card the assistant renamed by the time it happened. Its name arrives in her own words and cannot be declined, so quotes hold it out of the sentence instead.",
+    "placeholders": { "name": { "type": "String" } }
+  },
+
+  "actionDone": "Done",
+  "actionCancel": "Cancel",
+  "actionDelete": "Delete",
+  "actionNext": "Next",
+  "actionBack": "Back",
+  "actionSave": "Save",
+  "actionAdd": "Add",
+  "actionClose": "Close",
+
+  "macroPShort": "P {value}",
+  "@macroPShort": {"description":"Macro chips under a dish: one letter and the grams.","placeholders":{"value":{"type":"int"}}},
+  "macroFShort": "F {value}",
+  "@macroFShort": {"placeholders":{"value":{"type":"int"}}},
+  "macroCShort": "C {value}",
+  "@macroCShort": {"placeholders":{"value":{"type":"int"}}},
+
+  "macroProteinLetter": "P",
+  "@macroProteinLetter": {"description":"One letter over a macro column on the plate strip."},
+  "macroFatLetter": "F",
+  "macroCarbsLetter": "C"
+}

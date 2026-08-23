@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import '../../data/day.dart';
 import '../../format.dart';
 import '../../data/app_scope.dart';
+import '../../data/settings.dart';
 import '../../design/ring.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
+import '../../l10n/app_localizations.dart';
 
 /// The day's main card, one side at a time.
 ///
@@ -54,7 +56,8 @@ const _throw = 0.18;
 /// How far a drag can carry the card into the next side.
 const _reach = 0.46;
 
-class _HeroCardState extends State<HeroCard> with SingleTickerProviderStateMixin {
+class _HeroCardState extends State<HeroCard>
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   /* Built here rather than lazily: the deck no longer reads the controller while
      it paints, so a card that was never turned would have created it for the
      first time inside dispose, where there is no ticker to hang it on. */
@@ -63,8 +66,14 @@ class _HeroCardState extends State<HeroCard> with SingleTickerProviderStateMixin
   /// Where the deck stands, continuously, for the two faces to read.
   final _turn = ValueNotifier<double>(0);
 
+  /* Пише завжди, і останній кадр теж.
+   *
+   * Тут стояла охорона «якщо не анімується, вийти», і вона мовчки з'їдала
+   * останній кадр повороту: контролер зупиняє себе до того, як розсилає
+   * повідомлення. Потреби в ній немає відтоді, як `_origin` і `_target`
+   * ставляться до обнулення контролера: поштовх від обнулення тепер пише те
+   * саме місце, де колода й стоїть. */
   void _paint() {
-    if (!_c.isAnimating) return;
     _turn.value = _origin + (_target - _origin) * Curves.easeOutQuart.transform(_c.value);
   }
 
@@ -79,6 +88,39 @@ class _HeroCardState extends State<HeroCard> with SingleTickerProviderStateMixin
   void initState() {
     super.initState();
     _c = AnimationController(vsync: this)..addListener(_paint);
+    // Щоб дізнатись, що застосунок згортають: поворот має скінчитись до того.
+    WidgetsBinding.instance.addObserver(this);
+    _wait();
+  }
+
+  /* Застосунок згортають, і колода має стояти на цілій стороні.
+   *
+   * Поки застосунок попереду, поворот триває пів секунди й закінчується сам.
+   * Щойно він іде у фон, кадри припиняються, і поворот, який саме йшов,
+   * застигає посередині: обидві сторони видно одночасно, число калорій крізь
+   * число ваги. Саме таким застосунок і потрапляє в перелік недавніх, бо
+   * система знімає його в цю мить. Тому колода сідає негайно, без анімації.
+   *
+   * А годинник заводиться в кінці в будь-якому разі, і це головне.
+   *
+   * Спершу він тут гасився, а заводився назад тільки на `resumed`. Виглядало
+   * симетрично, а насправді ні: `inactive` Android надсилає в геть буденних
+   * ситуаціях, від шторки сповіщень до системного вікна поверх застосунку, і
+   * `resumed` після нього приходить не завжди. Один такий випадок, і колода
+   * більше не поверталась ніколи до перезапуску. Годинник, який не може
+   * згаснути, коштує одного таймера і знімає цілий клас таких випадків. */
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) {
+      _c.stop();
+      _from = null;
+      _held = 0;
+
+      final side = _turn.value.round() % 2 == 0 ? 0.0 : 1.0;
+      if (side != _pos) setState(() => _pos = side);
+      _turn.value = side;
+    }
+
     _wait();
   }
 
@@ -91,7 +133,19 @@ class _HeroCardState extends State<HeroCard> with SingleTickerProviderStateMixin
   void _wait() {
     _clock?.cancel();
     _clock = Timer(_side == 1 ? _weightHold : _kcalHold, () {
-      if (!mounted || _from != null) return;
+      if (!mounted) return;
+      /* Палець на картці: поворот чекає, але годинник заводиться на нове коло.
+         Доти цей вихід нічого не заводив, і якщо шторку сповіщень смикнули
+         посеред перетягування, колода лишалась стояти назавжди. */
+      if (_from != null) {
+        _wait();
+        return;
+      }
+      /* Гасити годинник у фоні не потрібно, і навіть шкідливо. Поворот, який
+         почався без кадрів, стоїть на самому своєму початку, тобто на цілій
+         стороні, і доїде тоді, коли кадри повернуться. А ось вимикач, який
+         вмикається назад тільки на `resumed`, це той самий спосіб загубити
+         годинник назавжди, від якого ми щойно пішли. */
       _glide(_pos.roundToDouble() + 1);
     });
   }
@@ -99,7 +153,14 @@ class _HeroCardState extends State<HeroCard> with SingleTickerProviderStateMixin
   void _glide(double to) {
     final from = _pos;
     final span = to - from;
-    if (span == 0) return;
+    if (span == 0) {
+      /* Їхати нікуди, але годинник має цокати далі. Без цього рядка колода,
+         яку легенько зачепили пальцем і відпустили на тому самому місці,
+         більше не поверталась ніколи: годинник гасився на початку дотику, а
+         завести його назад мав кінець повороту, якого не було. */
+      _wait();
+      return;
+    }
 
     _c
       ..stop()
@@ -107,9 +168,12 @@ class _HeroCardState extends State<HeroCard> with SingleTickerProviderStateMixin
       ..removeStatusListener(_landed)
       ..addStatusListener(_landed);
 
-    _c.value = 0;
+    /* Спершу куди і звідки, а вже потім обнулення. Обнулення розсилає
+       повідомлення слухачам, і при зворотному порядку воно писало місце з
+       попереднього повороту: колода смикалась на першому ж кадрі. */
     _target = to;
     _origin = from;
+    _c.value = 0;
     _c.forward();
   }
 
@@ -126,6 +190,7 @@ class _HeroCardState extends State<HeroCard> with SingleTickerProviderStateMixin
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _clock?.cancel();
     _c.dispose();
     _turn.dispose();
@@ -204,12 +269,7 @@ class _HeroCardState extends State<HeroCard> with SingleTickerProviderStateMixin
             final back = _face(false, pos);
             return Stack(
               children: [
-                _Side(
-                  shift: front.shift,
-                  scale: front.scale,
-                  opacity: front.opacity,
-                  child: kcal,
-                ),
+                _Side(shift: front.shift, scale: front.scale, opacity: front.opacity, child: kcal),
                 Positioned.fill(
                   child: _Side(
                     shift: back.shift,
@@ -282,6 +342,7 @@ class _Shell extends StatelessWidget {
         color: c.card,
         border: Border.all(color: c.cardBorder),
         borderRadius: BorderRadius.circular(CalviSize.rLarge),
+        boxShadow: context.shadowCard,
       ),
       child: Stack(
         /* The dots sit in the card's own padding, which is outside this stack:
@@ -351,6 +412,12 @@ class _Kcal extends StatelessWidget {
     final left = goal.kcal + burned - eaten;
     final progress = eaten / (goal.kcal + burned);
 
+    /* Серія рахується з тих самих підсумків, що малюють тиждень і аналітику, а
+       не тримається окремим числом. Без області це нуль: показати вигадану
+       серію гірше, ніж не показати жодної. */
+    final scope = AppScope.maybeOf(context);
+    final streak = scope == null ? 0 : scope.stats.streakOn(scope.s);
+
     /* Up to the norm the arc measures how much of the day is spent. Past it
        there is nothing left to measure, so it fills and starts to heat: full red
        a third over, and the saturation builds, so eighty extra calories look
@@ -375,39 +442,60 @@ class _Kcal extends StatelessWidget {
             TextSpan(
               text: thousands(eaten),
               children: [
-                TextSpan(text: ' ккал', style: context.t.bodyMedium?.copyWith(fontSize: 17)),
+                TextSpan(
+                  text: L.of(context).heroKcal,
+                  style: context.t.bodyMedium?.copyWith(fontSize: 17),
+                ),
               ],
             ),
             style: context.t.displayLarge?.copyWith(height: 1),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 7),
           Text.rich(
             TextSpan(
               children: [
                 if (left >= 0) ...[
-                  const TextSpan(text: 'лишилось '),
+                  TextSpan(text: L.of(context).heroLeft),
                   TextSpan(
                     text: thousands(left),
                     style: TextStyle(color: c.text, fontWeight: FontWeight.w600),
                   ),
-                  TextSpan(text: ' з ${thousands(goal.kcal + burned)}'),
+                  TextSpan(text: L.of(context).heroOf(thousands(goal.kcal + burned))),
                 ] else ...[
-                  const TextSpan(text: 'перебір на '),
+                  TextSpan(text: L.of(context).heroOver),
                   TextSpan(
                     text: thousands(left.abs()),
                     style: TextStyle(color: c.protein, fontWeight: FontWeight.w600),
                   ),
-                  TextSpan(text: ' від ${thousands(goal.kcal + burned)}'),
+                  TextSpan(text: L.of(context).heroFrom(thousands(goal.kcal + burned))),
                 ],
-                if (burned > 0)
-                  TextSpan(
-                    text: ' +$burned спалено',
-                    style: TextStyle(color: c.success),
-                  ),
               ],
             ),
-            style: context.t.bodyMedium,
+            style: context.t.bodyMedium?.copyWith(height: 1.5),
           ),
+          /* Спалене чіпом, а не словами в рядку.
+           *
+           * Мінус, бо тренування спалило калорії. Число пояснює себе саме:
+           * «-310 спалено» лишало питання, звідки воно взялось, а «за
+           * тренування» відповідає на нього і показує, чому норма сьогодні
+           * більша. */
+          if (burned > 0) ...[
+            const SizedBox(height: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+              decoration: BoxDecoration(
+                color: c.success.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(CalviSize.rPill),
+              ),
+              child: Text(
+                L.of(context).heroBurned(burned),
+                style: context.t.labelSmall?.copyWith(
+                  color: c.success,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
       ring: CalviRing(
@@ -427,7 +515,7 @@ class _Kcal extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             Text(
-              'днів',
+              L.of(context).heroDays,
               style: context.t.labelSmall?.copyWith(
                 fontSize: 9,
                 letterSpacing: 9 * 0.04,
@@ -454,8 +542,9 @@ class _Weight extends StatelessWidget {
     /* Measured from where the goal started, not from the oldest reading: the
        ring shows progress on this goal, and a weight from before it was set has
        nothing to do with it. */
-    final span = s.goalStartKg - s.targetKg;
-    final done = span > 0 ? ((s.goalStartKg - s.weightKg) / span).clamp(0.0, 1.0) : 0.0;
+    // Працює в обидва боки: схуднення і набір це та сама відстань, пройдена в
+    // різні сторони.
+    final done = goalProgress(s);
 
     return _Shell(
       dot: 1,
@@ -466,13 +555,13 @@ class _Weight extends StatelessWidget {
           Text.rich(
             TextSpan(
               text: s.weightKg.toStringAsFixed(1),
-              children: [TextSpan(text: ' кг', style: context.t.headlineLarge)],
+              children: [TextSpan(text: L.of(context).heroKg, style: context.t.headlineLarge)],
             ),
             style: context.t.displayLarge?.copyWith(height: 1),
           ),
           const SizedBox(height: 6),
           Text(
-            'зараз, від ${s.goalStartKg.toStringAsFixed(1)} кг на старті цілі',
+            L.of(context).heroWeightFrom(s.goalStartKg.toStringAsFixed(1)),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: context.t.bodyMedium?.copyWith(height: 1.25),
@@ -495,7 +584,7 @@ class _Weight extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             Text(
-              'ціль, кг',
+              L.of(context).heroGoalKg,
               style: context.t.labelSmall?.copyWith(
                 fontSize: 9,
                 letterSpacing: 9 * 0.04,

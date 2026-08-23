@@ -9,6 +9,14 @@
 # packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
+# Ширина рядка, на якій відформатований увесь проєкт.
+#
+# Записана тут, а не в чиїйсь памʼяті: стандарт `dart format` це 80, і один
+# запуск без прапорця переписує весь `lib` під іншу ширину. Відрізнити таку
+# правку від справжньої в діфі вже неможливо.
+formatter:
+  page_width: 100
+
 linter:
   # The lint rules applied to this project can be customized in the
   # section below to disable rules from the `package:flutter_lints/flutter.yaml`

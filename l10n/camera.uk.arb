@@ -1,0 +1,49 @@
+{
+  "camDish": "Страва",
+  "camBarcode": "Штрихкод",
+  "camTitle": "Сканер",
+  "camShoot": "Зняти",
+  "camFlash": "Спалах",
+  "camGallery": "З галереї",
+  "camIntoSlot": "в {slot}",
+
+  "camReading": "Читаю…",
+  "camHintDish": "наведи на тарілку",
+  "camHintBarcode": "код у рамку",
+
+  "camShotFailed": "Кадр не вийшов",
+  "camTookTooLong": "Розбір затягнувся. Спробуй ще раз",
+  "camCouldNotRead": "Не вийшло розібрати знімок",
+
+  "camNoPermission": "Немає дозволу на камеру. Його можна дати в налаштуваннях телефона.",
+  "camNoScanner": "Цей телефон не вміє читати коди камерою.",
+  "camBusy": "Камера не відкрилась. Найчастіше вона зайнята іншим застосунком.",
+  "camStillWorks": "Знімок страви і галерея працюють як завжди.",
+
+  "camFromPack": "Числа з упаковки. Запис не коштує токенів.",
+  "camIngredients": "Склад: {text}",
+  "camAllergen": "Алерген!",
+  "camPortionPack": "Порція з упаковки: {g} г. Числа за порцію.",
+  "@camPortionPack": { "placeholders": { "g": { "type": "int" } } },
+  "camPer100": "Точної ваги на упаковці немає: числа за 100 г.",
+  "camAllergyContains": "Містить твій алерген: {list}",
+  "@camAllergyContains": { "placeholders": { "list": { "type": "String" } } },
+  "camAllergyTraces": "Може містити сліди: {list}",
+  "@camAllergyTraces": { "placeholders": { "list": { "type": "String" } } },
+  "@camIngredients": { "placeholders": { "text": { "type": "String" } } },
+  "camUnknownCode": "Не знаю цього коду",
+  "camUnknownCodeNote": "Ні в нашій базі, ні у відкритій його немає. Сфотографуй саму страву або напиши назву словами, і Нора порахує.",
+  "camEstimate": " ккал, оцінка",
+  "camNotRead": "Не розібрала",
+  "camShotReady": "Знімок готовий",
+  "camShotReadyNote": "Нора розбере його і відповість у чаті: назве страву, оцінить порцію і покаже, звідки взялося число. Коштує два токени.",
+  "camAgain": "Ще раз",
+  "camLogInto": "Записати {slotInto}",
+  "camSendToNora": "Надіслати Норі",
+
+  "camOfflineShot": "Не дістаю мережі. Знімок можна надіслати Норі пізніше",
+  "camNoTokens": "Токени на сьогодні скінчились",
+
+  "camKcalPer": " ккал на {grams} г",
+  "camKcalFor": " ккал за {grams} г"
+}

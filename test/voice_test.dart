@@ -4,12 +4,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:calvi/design/theme.dart';
 import 'package:calvi/screens/voice/level_source.dart';
 import 'package:calvi/screens/voice/voice_overlay.dart';
+import 'package:calvi/l10n/app_localizations.dart';
 
 /// Диктування слухає телефон, а не вигадує.
 ///
-/// Сам двигун розпізнавання в тесті недосяжний, тож перевіряється те, за що
-/// відповідає застосунок: екран бере рівень із того джерела, яке йому дали, і
-/// віддає нагору саме почуте, а не показову фразу.
+/// Двигун розпізнавання в тесті недосяжний, тож перевіряється те, за що
+/// відповідає застосунок: накладка бере рівень із того джерела, яке їй дали, не
+/// перехоплює дотиків і не зникає раніше, ніж рідина повернулась.
 class _Loud implements LevelSource {
   const _Loud(this.value);
 
@@ -23,68 +24,57 @@ class _Loud implements LevelSource {
 }
 
 void main() {
-  Widget overlay({required ValueChanged<String> onDone, LevelSource? source}) => MaterialApp(
+  Widget overlay({
+    required bool leaving,
+    required VoidCallback onClosed,
+    LevelSource source = const _Loud(0.4),
+  }) => MaterialApp(
+    localizationsDelegates: L.localizationsDelegates,
+    supportedLocales: L.supportedLocales,
+    locale: const Locale('uk'),
     theme: calviLightTheme,
-    home: Scaffold(body: VoiceOverlay(onDone: onDone, source: source)),
+    home: Scaffold(
+      body: VoiceOverlay(
+        origin: const VoiceOrigin(at: Offset(337, 793), size: 42),
+        leaving: leaving,
+        onClosed: onClosed,
+        source: source,
+      ),
+    ),
   );
 
-  testWidgets('накладка бере рівень зі свого джерела', (tester) async {
-    await tester.pumpWidget(overlay(onDone: (_) {}, source: const _Loud(0.9)));
+  testWidgets('накладка живе і малює на своєму джерелі', (tester) async {
+    await tester.pumpWidget(overlay(leaving: false, onClosed: () {}, source: const _Loud(0.9)));
     await tester.pump(const Duration(milliseconds: 100));
 
-    // Смуги малюються, екран живий і не впав на відсутньому мікрофоні.
     expect(find.byType(CustomPaint), findsWidgets);
-    expect(find.bySemanticsLabel('Зупинити запис'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
-  testWidgets('дотик зупиняє і віддає почуте', (tester) async {
-    var said = '?';
-    await tester.pumpWidget(overlay(onDone: (text) => said = text, source: const _Loud(0.4)));
-
-    // Показова розшифровка набирається словами, тож даємо їй прозвучати.
-    await tester.pump(const Duration(seconds: 3));
-    await tester.tap(find.bySemanticsLabel('Зупинити запис'));
-    await tester.pump();
-
-    expect(said, isNot('?'), reason: 'зупинка нічого не віддала');
-    expect(said.trim(), said, reason: 'по краях лишились пробіли');
-  });
-
-  testWidgets('дотик повз мікрофон не обриває запис', (tester) async {
-    /* Диктують із телефоном у руці, а не поклавши його на стіл. Дотик долонею
-       чи великим пальцем обривав фразу посеред слова, бо зупиняло геть будь-де.
-       Тепер вимикає рівно той мікрофон, яким увімкнули. */
-    var said = '?';
-    await tester.pumpWidget(overlay(onDone: (text) => said = text, source: const _Loud(0.4)));
-    await tester.pump(const Duration(seconds: 1));
-
-    // Верх екрана, середина, підказка під смугами: усе повз кнопку.
-    for (final spot in const [Offset(200, 80), Offset(200, 400), Offset(200, 640)]) {
-      await tester.tapAt(spot);
-      await tester.pump();
-      expect(said, '?', reason: 'дотик у $spot обірвав диктування');
-    }
-
-    // А кнопка зупиняє.
-    await tester.tap(find.bySemanticsLabel('Зупинити запис'));
-    await tester.pump();
-    expect(said, isNot('?'));
-  });
-
-  testWidgets('підказка каже, чим зупиняти', (tester) async {
-    await tester.pumpWidget(overlay(onDone: (_) {}, source: const _Loud(0.2)));
+  testWidgets('дотиків не ловить жодних', (tester) async {
+    /* Палець лежить на кнопці внизу, і перехопити в неї подію означало б
+       обірвати запис на першому ж кадрі. */
+    await tester.pumpWidget(overlay(leaving: false, onClosed: () {}));
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(find.text('Говори. Торкнись мікрофона, щоб зупинити'), findsOneWidget);
+    /* Саме поглинає, а не пропускає. Тут стояв `IgnorePointer`, і крізь
+       відкритий екран натискалось усе, що під ним. */
+    final guard = tester.widget<AbsorbPointer>(
+      find.descendant(of: find.byType(VoiceOverlay), matching: find.byType(AbsorbPointer)).first,
+    );
+    expect(guard.absorbing, true);
   });
 
-  test('дихання без голосу лишається ледь помітним', () {
-    const idle = BreathingLevel();
+  testWidgets('знімається аж тоді, коли рідина повернулась', (tester) async {
+    var closed = false;
+    await tester.pumpWidget(overlay(leaving: false, onClosed: () => closed = true));
+    await tester.pump(const Duration(milliseconds: 900));
 
-    for (var ms = 0; ms < 2000; ms += 137) {
-      final v = idle.level(Duration(milliseconds: ms));
-      expect(v, greaterThanOrEqualTo(0));
-      expect(v, lessThanOrEqualTo(1));
-    }
+    await tester.pumpWidget(overlay(leaving: true, onClosed: () => closed = true));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(closed, false, reason: 'накладка зникла з рідиною в дорозі');
+
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(closed, true, reason: 'накладка не знялась і після зворотного шляху');
   });
 }

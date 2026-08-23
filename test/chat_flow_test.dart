@@ -6,12 +6,16 @@ import 'package:calvi/design/theme.dart';
 import 'package:calvi/main.dart';
 import 'package:calvi/screens/today/bottom_bar.dart';
 import 'package:calvi/screens/today/meal_card.dart';
+import 'package:calvi/l10n/app_localizations.dart';
 
 void main() {
   testWidgets('поле всередині картки віддає текст і очищається', (tester) async {
     final said = <String>[];
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: L.localizationsDelegates,
+        supportedLocales: L.supportedLocales,
+        locale: const Locale('uk'),
         theme: calviLightTheme,
         home: Scaffold(
           body: ListView(
@@ -47,6 +51,8 @@ void main() {
     tester.view.physicalSize = const Size(390, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
+    tester.platformDispatcher.localesTestValue = const [Locale('uk')];
+    addTearDown(tester.platformDispatcher.clearLocalesTestValue);
 
     await tester.pumpWidget(const CalviApp(storage: false));
     await tester.pump(const Duration(seconds: 1));
@@ -54,11 +60,11 @@ void main() {
     // Straight through the first run to the day.
     await tester.tap(find.text('Почати'));
     await tester.pumpAndSettle();
-    for (var i = 0; i < 7; i++) {
+    for (var i = 0; i < 6; i++) {
       await tester.tap(find.text('Далі'));
       await tester.pumpAndSettle();
     }
-    await tester.tap(find.text('Продовжити з Google'));
+    await tester.tap(find.text('Поки без входу'));
     await tester.pump(const Duration(seconds: 1));
 
     /* Through the bar at the bottom, which is where most sentences arrive. It
@@ -69,18 +75,14 @@ void main() {
     await tester.testTextInput.receiveAction(TextInputAction.send);
     await tester.pump(const Duration(milliseconds: 100));
 
+    expect(find.text('два яйця і тост'), findsOneWidget, reason: 'наше повідомлення вже в чаті');
     expect(
-      find.text('два яйця і тост'),
-      findsOneWidget,
-      reason: 'наше повідомлення вже в чаті',
-    );
-    expect(
-      find.textContaining('Записав'),
+      find.textContaining('Записала'),
       findsNothing,
       reason: 'обидва одразу означали б, що відповідь була написана наперед',
     );
 
     await tester.pump(const Duration(milliseconds: 900));
-    expect(find.textContaining('Записав'), findsOneWidget);
+    expect(find.textContaining('Записала'), findsOneWidget);
   });
 }

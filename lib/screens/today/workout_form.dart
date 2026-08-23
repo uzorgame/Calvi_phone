@@ -7,6 +7,7 @@ import '../../design/icons.dart';
 import '../../design/shell.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Durations offered as chips. What a person actually says after training is a
 /// round number, so the form offers those and keeps the odd ones out of the way.
@@ -91,7 +92,7 @@ class _WorkoutFormState extends State<WorkoutForm> {
             Expanded(child: Text(widget.activity.label, style: context.t.titleMedium)),
             Semantics(
               button: true,
-              label: 'Скасувати',
+              label: L.of(context).actionCancel,
               child: GestureDetector(
                 onTap: widget.onCancel,
                 behavior: HitTestBehavior.opaque,
@@ -109,25 +110,25 @@ class _WorkoutFormState extends State<WorkoutForm> {
         const SizedBox(height: 14),
 
         CalviSegments(
-          labels: const ['Хвилини', 'Вручну ккал'],
+          labels: [L.of(context).wfMinutes, L.of(context).wfManualKcal],
           index: _manual ? 1 : 0,
           onPick: (i) => setState(() => _manual = i == 1),
         ),
         const SizedBox(height: 14),
 
         if (_manual) ...[
-          _Label('Спалено, ккал'),
+          _Label(L.of(context).wfBurned),
           _Input(
             controller: _kcal,
-            hint: 'З годинника або тренажера',
+            hint: L.of(context).wfFromWatch,
             digits: 4,
             onChanged: (_) => setState(() {}),
           ),
           const SizedBox(height: 12),
-          _Label('Тривалість, хв', optional: true),
-          _Input(controller: _manualMinutes, hint: '—', digits: 3, onChanged: (_) {}),
+          _Label(L.of(context).wfDurationCap, optional: true),
+          _Input(controller: _manualMinutes, hint: '', digits: 3, onChanged: (_) {}),
         ] else ...[
-          _Label('Тривалість'),
+          _Label(L.of(context).wfDuration),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -142,7 +143,7 @@ class _WorkoutFormState extends State<WorkoutForm> {
                       borderRadius: BorderRadius.circular(CalviSize.rPill),
                     ),
                     child: Text(
-                      '$m хв',
+                      L.of(context).wfMin(m),
                       style: context.t.titleMedium?.copyWith(
                         fontSize: 14,
                         color: m == _minutes ? c.buttonText : c.text,
@@ -168,7 +169,7 @@ class _WorkoutFormState extends State<WorkoutForm> {
                     text: '≈ $_estimate',
                     children: [
                       TextSpan(
-                        text: ' ккал',
+                        text: L.of(context).wfKcal,
                         style: context.t.labelSmall?.copyWith(fontSize: 14),
                       ),
                     ],
@@ -177,18 +178,18 @@ class _WorkoutFormState extends State<WorkoutForm> {
                 ),
                 const SizedBox(height: 4),
                 // Named as an estimate on the screen, not only in the docs.
-                Text('Оцінка за твоєю вагою і типом активності', style: context.t.labelSmall),
+                Text(L.of(context).wfEstimate, style: context.t.labelSmall),
               ],
             ),
           ),
         ],
 
         const SizedBox(height: 12),
-        _Label('Нотатка', optional: true),
-        _Input(controller: _note, hint: 'Ноги, важко', onChanged: (_) {}),
+        _Label(L.of(context).wfNote, optional: true),
+        _Input(controller: _note, hint: L.of(context).wfNoteExample, onChanged: (_) {}),
         const SizedBox(height: 14),
 
-        CalviButton(label: 'Записати', enabled: _valid, onTap: _submit),
+        CalviButton(label: L.of(context).wfLog, enabled: _valid, onTap: _submit),
       ],
     );
   }
@@ -211,7 +212,7 @@ class _Label extends StatelessWidget {
           // nobody can fill is a field people invent a value for.
           if (optional)
             TextSpan(
-              text: '  необовʼязково',
+              text: L.of(context).wfOptional,
               style: context.t.labelSmall?.copyWith(fontSize: 11),
             ),
         ],
@@ -254,10 +255,7 @@ class _Input extends StatelessWidget {
         keyboardType: digits == null ? TextInputType.text : TextInputType.number,
         inputFormatters: digits == null
             ? [LengthLimitingTextInputFormatter(90)]
-            : [
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(digits),
-              ],
+            : [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(digits)],
         style: context.t.bodyLarge?.copyWith(fontSize: 15),
         decoration: InputDecoration(
           isDense: true,

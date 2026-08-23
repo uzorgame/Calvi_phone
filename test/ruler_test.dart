@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:calvi/design/ruler.dart';
 import 'package:calvi/design/theme.dart';
+import 'package:calvi/l10n/app_localizations.dart';
 
 /// The drum opens on the value it was given.
 ///
@@ -17,12 +18,13 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: L.localizationsDelegates,
+        supportedLocales: L.supportedLocales,
+        locale: const Locale('uk'),
         theme: calviLightTheme,
         home: Scaffold(
           body: ListView(
-            children: [
-              CalviRuler(value: 78.6, min: 40, max: 180, suffix: 'кг', onChange: (_) {}),
-            ],
+            children: [CalviRuler(value: 78.6, min: 40, max: 180, suffix: 'кг', onChange: (_) {})],
           ),
         ),
       ),
@@ -46,16 +48,12 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: L.localizationsDelegates,
+        supportedLocales: L.supportedLocales,
+        locale: const Locale('uk'),
         theme: calviLightTheme,
         home: Scaffold(
-          body: CalviRuler(
-            value: 178,
-            min: 120,
-            max: 220,
-            step: 1,
-            suffix: 'см',
-            onChange: (_) {},
-          ),
+          body: CalviRuler(value: 178, min: 120, max: 220, step: 1, suffix: 'см', onChange: (_) {}),
         ),
       ),
     );

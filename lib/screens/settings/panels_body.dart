@@ -7,8 +7,10 @@ import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import '../../design/wheel.dart';
 import '../../format.dart';
+import '../../l10n/app_localizations.dart';
+import '../../l10n/labels.dart';
+import 'account_block.dart';
 import 'panels_account.dart';
-
 
 /// The body the norm is calculated from: sex, age, height, activity.
 class ProfilePanel extends StatelessWidget {
@@ -21,75 +23,114 @@ class ProfilePanel extends StatelessWidget {
   /// way out is settings putting its list back rather than a route popping.
   final VoidCallback? onBack;
 
+  /* Значення застосовується на «Готово», а не на кожному оберті барабана.
+   *
+   * Крутячи його, людина проходить повз двадцять чисел, і кожне з них
+   * перерахувало б норму й усі підписи на екрані під аркушем. */
+  void _pickAge(BuildContext context) {
+    var picked = s.age;
+    calviSheet<void>(
+      context,
+      title: L.of(context).profileAge,
+      onDone: () => set((v) => v.copyWith(age: picked)),
+      builder: (sheet) => CalviWheel(
+        values: ages,
+        value: s.age,
+        suffix: L.of(sheet).startYearsShort,
+        onPick: (age) => picked = age,
+      ),
+    );
+  }
+
+  void _pickHeight(BuildContext context) {
+    var picked = s.heightCm;
+    calviSheet<void>(
+      context,
+      title: L.of(context).profileHeight,
+      onDone: () => set((v) => v.copyWith(heightCm: picked)),
+      builder: (sheet) => CalviWheel(
+        values: heights,
+        value: s.heightCm,
+        suffix: L.of(sheet).unitCm,
+        onPick: (h) => picked = h,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     return CalviScreen(
       onBack: onBack,
-      title: 'Профіль',
-      hint: 'Ці числа стоять у формулі денної норми, тому їх варто тримати точними.',
-      foot: CalviButton(label: 'Готово', onTap: () => (onBack ?? Navigator.of(context).pop)()),
+      title: l.setProfile,
+      foot: CalviButton(label: l.actionDone, onTap: () => (onBack ?? Navigator.of(context).pop)()),
       children: [
+        const AccountBlock(),
+
+        /* Три слова без пояснень не варті трьох рядків із іконками: у ряд вони
+           займають висоту одного і читаються так само. Пояснення лишилось у
+           «Інше», єдиного варіанта, який його потребує. */
         CalviSection(
-          title: 'Стать',
+          title: l.profileSex,
           bare: true,
+          trail: 0,
+          note: s.sex == Sex.x ? l.profileSexNote : null,
           children: [
-            /* Only the third option needs saying: the two formulas are what
-               everybody expects, and a note under each of them would be two
-               lines of arithmetic nobody asked to read. */
-            CalviPick(
-              label: 'Чоловіча',
-              icon: 'user',
-              on: s.sex == Sex.m,
-              onTap: () => set((v) => v.copyWith(sex: Sex.m)),
-            ),
-            CalviPick(
-              label: 'Жіноча',
-              icon: 'user',
-              on: s.sex == Sex.f,
-              onTap: () => set((v) => v.copyWith(sex: Sex.f)),
-            ),
-            CalviPick(
-              label: 'Інше',
-              hint: 'норма береться як середнє двох формул',
-              icon: 'user',
-              on: s.sex == Sex.x,
-              onTap: () => set((v) => v.copyWith(sex: Sex.x)),
+            CalviSegments(
+              labels: [l.startSexMale, l.startSexFemale, l.startSexOther],
+              index: switch (s.sex) {
+                Sex.m => 0,
+                Sex.f => 1,
+                Sex.x => 2,
+              },
+              onPick: (i) => set(
+                (v) => v.copyWith(
+                  sex: switch (i) {
+                    0 => Sex.m,
+                    1 => Sex.f,
+                    _ => Sex.x,
+                  },
+                ),
+              ),
             ),
           ],
         ),
 
-        _Titled(
-          title: 'Вік',
-          aside: '${s.age} років',
-          bare: true,
-          child: CalviWheel(
-            values: ages,
-            value: s.age,
-            suffix: 'років',
-            onPick: (age) => set((v) => v.copyWith(age: age)),
-          ),
-        ),
-
-        _Titled(
-          title: 'Зріст',
-          aside: '${s.heightCm} см',
-          bare: true,
-          child: CalviWheel(
-            values: heights,
-            value: s.heightCm,
-            suffix: 'см',
-            onPick: (h) => set((v) => v.copyWith(heightCm: h)),
-          ),
+        /* Барабани переїхали в аркуш, і це не про красу.
+         *
+         * Барабан це теж прокрутка. Палець, який починав рух на ньому, крутив
+         * барабан, а сторінка стояла: людина тягла вгору, екран сіпався і не
+         * піднімався. Двоє прокруток на одній осі не діляться, вибирає котрась
+         * одна, і всередині завжди виграє внутрішня.
+         *
+         * Той самий вихід уже стоїть у нагадуваннях: барабан живе в аркуші
+         * поверх сторінки, де конкурувати нема з чим. */
+        CalviSection(
+          children: [
+            CalviRow(
+              icon: 'clock',
+              first: true,
+              title: l.profileAge,
+              value: l.startAgeYears(s.age),
+              onTap: () => _pickAge(context),
+            ),
+            CalviRow(
+              icon: 'ruler',
+              title: l.profileHeight,
+              value: '${s.heightCm} ${l.unitCm}',
+              onTap: () => _pickHeight(context),
+            ),
+          ],
         ),
 
         CalviSection(
-          title: 'Активність',
+          title: l.profileActivity,
           bare: true,
           children: [
             for (final a in activityLevels)
               CalviPick(
-                label: a.label,
-                hint: a.hint,
+                label: activityTitle(context, a.v),
+                hint: activityHint(context, a.v),
                 on: s.activity == a.v,
                 onTap: () => set((v) => v.copyWith(activity: a.v)),
               ),
@@ -113,11 +154,12 @@ class WeightPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L.of(context);
     return CalviScreen(
       onBack: onBack,
-      title: 'Вага',
-      hint: 'Скільки ти важиш сьогодні. Ціль і темп до неї живуть окремо.',
-      foot: CalviButton(label: 'Готово', onTap: () => (onBack ?? Navigator.of(context).pop)()),
+      title: l.weightTitle,
+      hint: l.weightHint,
+      foot: CalviButton(label: l.actionDone, onTap: () => (onBack ?? Navigator.of(context).pop)()),
       children: [
         _Titled(
           bare: true,
@@ -125,14 +167,11 @@ class WeightPanel extends StatelessWidget {
             value: s.weightKg,
             min: 40,
             max: 180,
-            suffix: 'кг',
+            suffix: l.unitKg,
             onChange: (w) => set((v) => v.copyWith(weightKg: w)),
           ),
         ),
-        const CalviNote(
-          'Записуй вагу вранці, до їжі: так добові коливання не перетворюють графік на шум. '
-          'Один замір на тиждень уже дає тренд.',
-        ),
+        CalviNote(l.weightNote),
       ],
     );
   }
@@ -167,6 +206,7 @@ class _GoalPanelState extends State<GoalPanel> {
   Widget build(BuildContext context) {
     final s = widget.s;
     final set = widget.set;
+    final l = L.of(context);
     final pending = _draft ?? s.targetKg;
     final weeks = weeksToTarget(s);
     final kcal = calcKcal(s);
@@ -175,43 +215,44 @@ class _GoalPanelState extends State<GoalPanel> {
 
     return CalviScreen(
       onBack: widget.onBack,
-      title: 'Ціль',
-      hint:
-          'Куди рухаємось і як швидко. Швидше означає більший дефіцит, а не кращий результат.',
+      title: l.setGoal,
       foot: CalviButton(
-        label: _changed ? 'Поставити нову ціль' : 'Готово',
+        label: _changed ? l.goalNew : l.actionDone,
         onTap: () => _changed ? _confirm(context, pending) : Navigator.of(context).pop(),
       ),
       children: [
+        /* Той самий сегмент, що й стать: три рівні варіанти в один рядок.
+           Три високі картки з радіо важили більше, ніж рішення, яке несуть.
+           В онбордингу вони лишаються картками навмисно: там людина обирає
+           вперше і читає пояснення під кожним. */
         CalviSection(
-          title: 'Напрямок',
+          title: l.goalDirection,
           bare: true,
           children: [
-            CalviPick(
-              label: 'Схуднути',
-              icon: 'down',
-              on: s.direction == Direction.lose,
-              onTap: () => set((v) => v.copyWith(direction: Direction.lose)),
-            ),
-            CalviPick(
-              label: 'Тримати вагу',
-              icon: 'minus',
-              on: s.direction == Direction.keep,
-              onTap: () => set((v) => v.copyWith(direction: Direction.keep)),
-            ),
-            CalviPick(
-              label: 'Набрати',
-              icon: 'up',
-              on: s.direction == Direction.gain,
-              onTap: () => set((v) => v.copyWith(direction: Direction.gain)),
+            CalviSegments(
+              labels: [l.startGoalLose, l.goalKeepShort, l.startGoalGain],
+              index: switch (s.direction) {
+                Direction.lose => 0,
+                Direction.keep => 1,
+                Direction.gain => 2,
+              },
+              onPick: (i) => set(
+                (v) => v.copyWith(
+                  direction: switch (i) {
+                    0 => Direction.lose,
+                    1 => Direction.keep,
+                    _ => Direction.gain,
+                  },
+                ),
+              ),
             ),
           ],
         ),
 
         if (s.direction != Direction.keep) ...[
           _Titled(
-            title: 'Цільова вага',
-            aside: 'різниця ${diff.toStringAsFixed(1)} кг',
+            title: l.goalTarget,
+            aside: l.goalDiff(diff.toStringAsFixed(1)),
             bare: true,
             child: Column(
               children: [
@@ -219,16 +260,14 @@ class _GoalPanelState extends State<GoalPanel> {
                   value: pending,
                   min: 40,
                   max: 180,
-                  suffix: 'кг',
+                  suffix: l.unitKg,
                   onChange: (v) => setState(() => _draft = v),
                 ),
                 if (_changed)
                   CalviNote.rich(
-                    'Поточна ціль ',
-                    bold: '${s.targetKg.toStringAsFixed(1)} кг',
-                    rest:
-                        ' від ${s.goalStartKg.toStringAsFixed(1)} кг на старті. '
-                        'Нова ціль почнеться від сьогоднішньої ваги.',
+                    l.goalCurrent,
+                    bold: '${s.targetKg.toStringAsFixed(1)} ${l.unitKg}',
+                    rest: l.goalFromStart(s.goalStartKg.toStringAsFixed(1)) + l.goalFromToday,
                     lead: 12,
                   ),
               ],
@@ -236,7 +275,7 @@ class _GoalPanelState extends State<GoalPanel> {
           ),
 
           _Titled(
-            title: 'Темп',
+            title: l.goalPace,
             bare: true,
             child: Column(
               children: [
@@ -255,7 +294,7 @@ class _GoalPanelState extends State<GoalPanel> {
                       ),
                       Padding(
                         padding: const EdgeInsets.only(top: 6),
-                        child: Text('кг на тиждень', style: context.t.bodyMedium),
+                        child: Text(l.goalPaceUnit, style: context.t.bodyMedium),
                       ),
                     ],
                   ),
@@ -265,7 +304,7 @@ class _GoalPanelState extends State<GoalPanel> {
                   min: 0.1,
                   max: 1.2,
                   step: 0.1,
-                  marks: const ['Повільно', 'Рекомендовано', 'Швидко'],
+                  marks: [l.goalPaceSlow, l.goalPaceUsual, l.goalPaceFast],
                   onChange: (p) => set((v) => v.copyWith(pace: p)),
                 ),
               ],
@@ -275,15 +314,14 @@ class _GoalPanelState extends State<GoalPanel> {
 
         CalviFacts(
           rows: [
-            ('Денна норма', '${thousands(kcal)} ккал'),
-            if (weeks > 0) ('Ціль приблизно', targetDate(weeks)),
+            (l.goalDailyNorm, l.normKcalOf(thousands(kcal))),
+            if (weeks > 0) (l.goalEta, targetDate(weeks)),
           ],
           note: s.direction == Direction.keep
-              ? 'Норма тримає поточну вагу: скільки витрачаєш, стільки й повертаєш.'
+              ? l.goalKeepNote
               : brisk
-              ? 'Такий темп тримається важко і зазвичай зривається. Нижче за 0.8 кг на тиждень '
-                    'результат виходить повільніший, але лишається.'
-              : 'Це темп, який більшість витримує без зривів.',
+              ? l.startPaceWarning
+              : l.goalPaceOk,
         ),
       ],
     );
@@ -291,10 +329,11 @@ class _GoalPanelState extends State<GoalPanel> {
 
   void _confirm(BuildContext context, double pending) {
     final s = widget.s;
+    final l = L.of(context);
     calviSheet(
       context,
-      title: 'Нова ціль',
-      doneLabel: 'Поставити',
+      title: l.goalNewTitle,
+      doneLabel: l.goalSet,
       onDone: () {
         /* The new goal is anchored to today's weight, not to the old anchor:
            progress on a goal set this morning cannot start from a figure that
@@ -309,21 +348,17 @@ class _GoalPanelState extends State<GoalPanel> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _Was(
-              label: 'Було',
-              text: '${s.goalStartKg.toStringAsFixed(1)} → ${s.targetKg.toStringAsFixed(1)} кг',
+              label: l.goalWas,
+              text: l.goalRange(s.goalStartKg.toStringAsFixed(1), s.targetKg.toStringAsFixed(1)),
               strong: false,
             ),
             _Was(
-              label: 'Стане',
-              text: '${s.weightKg.toStringAsFixed(1)} → ${pending.toStringAsFixed(1)} кг',
+              label: l.goalBecomes,
+              text: l.goalRange(s.weightKg.toStringAsFixed(1), pending.toStringAsFixed(1)),
               strong: true,
             ),
             const SizedBox(height: 12),
-            Text(
-              'Ціль не редагується, вона замінюється. Прогрес почне рахуватись від сьогоднішньої '
-              'ваги, а стара ціль лишиться в історії. Підтверджуєш заміну?',
-              style: sheet.t.bodyMedium,
-            ),
+            Text(l.goalReplaceNote, style: sheet.t.bodyMedium),
           ],
         ),
       ),
@@ -348,10 +383,7 @@ class _Was extends StatelessWidget {
           Expanded(child: Text(label, style: context.t.bodyMedium)),
           Text(
             text,
-            style: context.t.titleMedium?.copyWith(
-              fontSize: 15,
-              color: strong ? c.accent : c.text,
-            ),
+            style: context.t.titleMedium?.copyWith(fontSize: 15, color: strong ? c.accent : c.text),
           ),
         ],
       ),
@@ -378,6 +410,7 @@ class NormPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.c;
+    final l = L.of(context);
     final auto = calcKcal(s);
     final manual = s.kcalManual != null;
     final kcal = dailyKcal(s);
@@ -388,72 +421,174 @@ class NormPanel extends StatelessWidget {
 
     return CalviScreen(
       onBack: onBack,
-      title: 'Норма',
-      foot: CalviButton(label: 'Готово', onTap: () => (onBack ?? Navigator.of(context).pop)()),
+      title: l.normTitle,
+      foot: CalviButton(label: l.actionDone, onTap: () => (onBack ?? Navigator.of(context).pop)()),
       children: [
+        /* Норма і склад однією тихою карткою.
+         *
+         * Доти тут стояли три великі блоки, і два з них казали одне: число
+         * норми вгорі, а нижче окрема кольорова смуга «2 378 з 2 250 ккал».
+         * Тепер це один предмет: число, під ним склад тією ж мовою кольору,
+         * що в кільцях дня, і рядок стану звичайним текстом. Кричати тут нема
+         * про що, сюди заходять раз на місяць. */
         Padding(
-          padding: const EdgeInsets.fromLTRB(0, 8, 0, 4),
-          child: Column(
-            children: [
-              Text(
-                thousands(kcal),
-                style: context.t.displayLarge?.copyWith(
-                  fontSize: 54,
-                  height: 1,
-                  letterSpacing: 54 * -0.02,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text('ккал на день', style: context.t.bodyMedium),
-              if (manual)
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
-                    decoration: BoxDecoration(
-                      // The colour of carbohydrates, thinned: a number somebody
-                      // typed is worth marking, not worth alarming about.
-                      color: c.carbs.withValues(alpha: 0.16),
-                      borderRadius: BorderRadius.circular(CalviSize.rPill),
+          padding: const EdgeInsets.fromLTRB(
+            CalviSize.gutter,
+            0,
+            CalviSize.gutter,
+            CalviSize.gapSection,
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: c.card,
+              border: Border.all(color: c.cardBorder),
+              borderRadius: BorderRadius.circular(CalviSize.rLarge),
+              boxShadow: context.shadowCard,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text(
+                      thousands(kcal),
+                      style: context.t.displayLarge?.copyWith(
+                        fontSize: 34,
+                        height: 1,
+                        letterSpacing: 34 * -0.03,
+                      ),
                     ),
-                    child: Text(
-                      'перевизначено вручну',
-                      style: context.t.labelSmall?.copyWith(color: const Color(0xFF9A6300)),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(l.normPerDay, style: context.t.bodyMedium)),
+                    if (manual)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+                        decoration: BoxDecoration(
+                          // The colour of carbohydrates, thinned: a number
+                          // somebody typed is worth marking, not alarming about.
+                          color: c.carbs.withValues(alpha: 0.16),
+                          borderRadius: BorderRadius.circular(CalviSize.rPill),
+                        ),
+                        child: Text(
+                          l.normManual,
+                          style: context.t.labelSmall?.copyWith(color: chipInk(context, c.carbs)),
+                        ),
+                      ),
+                  ],
+                ),
+
+                /* Склад як частки одного цілого: смуга сама показує, чого
+                   багато, а чого мало, і три числа під нею перестають бути
+                   трьома окремими фактами. */
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 16, 0, 12),
+                  child: SizedBox(
+                    height: 6,
+                    child: Row(
+                      children: [
+                        for (final (i, part) in [
+                          (s.protein * 4, c.protein),
+                          (s.fat * 9, c.fats),
+                          (s.carbs * 4, c.carbs),
+                        ].indexed) ...[
+                          if (i > 0) const SizedBox(width: 3),
+                          Expanded(
+                            flex: part.$1 < 1 ? 1 : part.$1,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: part.$2,
+                                borderRadius: BorderRadius.circular(CalviSize.rPill),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ),
-            ],
+
+                /* Стан рядком, а не кольоровою плашкою: коли все сходиться, це
+                   не подія, і зелений прямокутник святкував би арифметику. */
+                Text(
+                  ok ? l.normFits : l.normOffBy(thousands(sum), off.abs()),
+                  style: context.t.labelSmall?.copyWith(color: ok ? null : c.protein),
+                ),
+
+                /* Never block the exit on arithmetic the person did not create.
+                   Offer the fix instead: keep protein and fats, solve carbs. */
+                if (!ok)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 14),
+                    child: GestureDetector(
+                      onTap: () => set(
+                        (v) => v.copyWith(
+                          carbs: (((kcal - s.protein * 4 - s.fat * 9) / 4 / 5).round() * 5).clamp(
+                            0,
+                            1000,
+                          ),
+                        ),
+                      ),
+                      behavior: HitTestBehavior.opaque,
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 11),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: c.fillSecondary,
+                          borderRadius: BorderRadius.circular(CalviSize.rPill),
+                        ),
+                        child: Text(
+                          l.normFitCarbs,
+                          style: context.t.labelSmall?.copyWith(
+                            color: c.text,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
 
+        /* Два слова замість двох карток із поясненнями: вибір тут двійковий, і
+           рядок сегмента важить рівно стільки, скільки важить це рішення. */
         CalviSection(
-          title: 'Звідки це число',
+          title: l.normWhere,
           bare: true,
           children: [
-            CalviPick(
-              label: 'Рахувати автоматично',
-              hint: 'з ваги, зросту, віку, активності й цілі: ${thousands(auto)} ккал',
-              on: !manual,
-              onTap: () => set((v) => v.copyWith(clearKcalManual: true)),
+            CalviSegments(
+              labels: [l.normAutoShort, l.normByHandShort],
+              index: manual ? 1 : 0,
+              onPick: (i) => set(
+                (v) => i == 0
+                    ? v.copyWith(clearKcalManual: true)
+                    : v.copyWith(kcalManual: s.kcalManual ?? auto),
+              ),
             ),
-            CalviPick(
-              label: 'Задати вручну',
-              hint: 'аналітика рахуватиме проти цього числа',
-              on: manual,
-              onTap: () => set((v) => v.copyWith(kcalManual: s.kcalManual ?? auto)),
-            ),
+            if (!manual)
+              CalviNote.rich(
+                l.normAutoFrom,
+                bold: l.normKcalOf(thousands(auto)),
+                rest: '.',
+                lead: 12,
+              ),
             if (manual) ...[
               CalviStepper(
                 value: s.kcalManual ?? auto,
                 step: 50,
                 min: 1200,
-                suffix: 'ккал',
+                suffix: l.unitKcal,
                 onChange: (v) => set((x) => x.copyWith(kcalManual: v < 1200 ? 1200 : v)),
               ),
               CalviNote.rich(
-                'Розрахункове значення ',
-                bold: '${thousands(auto)} ккал',
-                rest: '. Повернутись до нього можна вибором «Рахувати автоматично».',
+                l.normCalculatedHead,
+                bold: l.normKcalOf(thousands(auto)),
+                rest: l.normCalculatedTail,
                 lead: 12,
               ),
             ],
@@ -461,87 +596,15 @@ class NormPanel extends StatelessWidget {
         ),
 
         _Titled(
-          title: 'БЖВ',
-          aside: '${s.protein} / ${s.fat} / ${s.carbs} г',
+          title: l.normMacros,
+          aside: l.normMacroSplit(s.protein, s.fat, s.carbs),
           bare: true,
           child: Column(
             children: [
-              /* Green while the three add up to the norm, pink when they do not:
-                 the sum is the one number on this screen that can be wrong, and
-                 it says so by its ground rather than by a warning. */
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                decoration: BoxDecoration(
-                  color: (ok ? c.success : c.protein).withValues(alpha: ok ? 0.10 : 0.08),
-                  borderRadius: BorderRadius.circular(CalviSize.rLarge),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: [
-                    Text(
-                      thousands(sum),
-                      style: context.t.headlineMedium?.copyWith(
-                        fontSize: 24,
-                        height: 1.26,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 24 * -0.02,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text('з ${thousands(kcal)} ккал', style: context.t.bodyMedium),
-                    ),
-                    if (!ok)
-                      Text(
-                        '${off > 0 ? '+' : ''}$off',
-                        style: context.t.titleMedium?.copyWith(
-                          fontSize: CalviSize.fsCaption,
-                          color: c.protein,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-
-              /* Never block the exit on arithmetic the person did not create.
-                 Offer the fix instead: keep protein and fats, solve carbs. */
-              if (!ok)
-                Padding(
-                  padding: const EdgeInsets.only(top: 14),
-                  child: GestureDetector(
-                    onTap: () => set(
-                      (v) => v.copyWith(
-                        carbs: (((kcal - s.protein * 4 - s.fat * 9) / 4 / 5).round() * 5).clamp(
-                          0,
-                          1000,
-                        ),
-                      ),
-                    ),
-                    behavior: HitTestBehavior.opaque,
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 13),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: c.fillSecondary,
-                        borderRadius: BorderRadius.circular(CalviSize.rPill),
-                      ),
-                      child: Text(
-                        'Підігнати вуглеводи під норму',
-                        style: context.t.titleMedium?.copyWith(
-                          fontSize: CalviSize.fsCaption,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-              // The sum stands a section clear of the sliders under it.
-              const SizedBox(height: CalviSize.gapSection - 18),
-              _MacroRow(label: 'Білок', value: '${s.protein} г'),
+              /* Сума і кнопка підгонки переїхали в картку норми вгорі: там
+                 вони стоять поруч із числом, проти якого рахуються, а тут
+                 повторювали б його вдруге. */
+              _MacroRow(label: l.macroProtein, value: l.normGrams(s.protein)),
               CalviSlider(
                 value: s.protein.toDouble(),
                 min: 40,
@@ -549,7 +612,7 @@ class NormPanel extends StatelessWidget {
                 step: 5,
                 onChange: (v) => set((x) => x.copyWith(protein: v.round())),
               ),
-              _MacroRow(label: 'Жири', value: '${s.fat} г'),
+              _MacroRow(label: l.macroFat, value: l.normGrams(s.fat)),
               CalviSlider(
                 value: s.fat.toDouble(),
                 min: 20,
@@ -557,7 +620,7 @@ class NormPanel extends StatelessWidget {
                 step: 2,
                 onChange: (v) => set((x) => x.copyWith(fat: v.round())),
               ),
-              _MacroRow(label: 'Вуглеводи', value: '${s.carbs} г'),
+              _MacroRow(label: l.macroCarbs, value: l.normGrams(s.carbs)),
               CalviSlider(
                 value: s.carbs.toDouble(),
                 min: 40,
@@ -570,22 +633,20 @@ class NormPanel extends StatelessWidget {
         ),
 
         _Titled(
-          title: 'Вода',
+          title: l.normWater,
           bare: true,
           child: Column(
             children: [
               CalviStepper(
                 value: s.waterMl,
                 step: 100,
-                suffix: 'мл',
+                suffix: l.unitMl,
                 onChange: (v) => set((x) => x.copyWith(waterMl: v)),
               ),
               CalviNote.rich(
-                'Це ',
-                bold: '$perKg мл',
-                rest:
-                    ' на кілограм ваги. Звична орієнтовна вилка це 30-40 мл, але вона залежить '
-                    'від спеки й тренувань, тому число тут не жорстке.',
+                l.normWaterHead,
+                bold: '$perKg ${l.unitMl}',
+                rest: l.normWaterTail,
                 lead: 12,
               ),
             ],
@@ -659,6 +720,7 @@ class _Titled extends StatelessWidget {
                 color: c.card,
                 border: Border.all(color: c.cardBorder),
                 borderRadius: BorderRadius.circular(CalviSize.rLarge),
+                boxShadow: context.shadowCard,
               ),
               clipBehavior: Clip.antiAlias,
               child: child,

@@ -1,0 +1,59 @@
+{
+  "camDish": "Meal",
+  "camBarcode": "Barcode",
+  "camTitle": "Scanner",
+  "camShoot": "Take a photo",
+  "camFlash": "Flash",
+  "camGallery": "From the gallery",
+  "camIntoSlot": "into {slot}",
+  "@camIntoSlot": {
+    "description": "Under the shutter: which card the shot will be written into.",
+    "placeholders": { "slot": { "type": "String" } }
+  },
+
+  "camReading": "Reading…",
+  "camHintDish": "point it at the plate",
+  "camHintBarcode": "the code inside the frame",
+
+  "camShotFailed": "The shot did not work",
+  "camTookTooLong": "Reading it took too long. Try again",
+  "camCouldNotRead": "Could not read the shot",
+
+  "camNoPermission": "No camera permission. You can grant it in the phone's settings.",
+  "camNoScanner": "This phone cannot read codes with the camera.",
+  "camBusy": "The camera did not open. Usually another app is holding it.",
+  "camStillWorks": "Meal photos and the gallery work as usual.",
+
+  "camFromPack": "Figures from the packaging. Logging this costs no tokens.",
+  "camIngredients": "Ingredients: {text}",
+  "camAllergen": "Allergen!",
+  "camPortionPack": "Portion from the packaging: {g} g. Figures are per portion.",
+  "@camPortionPack": { "placeholders": { "g": { "type": "int" } } },
+  "camPer100": "No exact weight on the packaging: figures are per 100 g.",
+  "camAllergyContains": "Contains your allergen: {list}",
+  "@camAllergyContains": { "placeholders": { "list": { "type": "String" } } },
+  "camAllergyTraces": "May contain traces of: {list}",
+  "@camAllergyTraces": { "placeholders": { "list": { "type": "String" } } },
+  "@camIngredients": { "placeholders": { "text": { "type": "String" } } },
+  "camUnknownCode": "I do not know this code",
+  "camUnknownCodeNote": "It is not in our base, and not in the open one either. Photograph the meal itself or write the name in words, and Nora will count it.",
+  "camEstimate": " kcal, an estimate",
+  "camNotRead": "Could not make it out",
+  "camShotReady": "The shot is ready",
+  "camShotReadyNote": "Nora will read it and answer in the chat: she will name the dish, estimate the portion and show where the figure came from. It costs two tokens.",
+  "camAgain": "Again",
+  "camLogInto": "Log it {slotInto}",
+  "@camLogInto": {
+    "description": "The whole phrase comes from the shared slot phrases, because Ukrainian declines the card name after the preposition.",
+    "placeholders": { "slotInto": { "type": "String" } }
+  },
+  "camSendToNora": "Send to Nora",
+
+  "camOfflineShot": "No connection. You can send the shot to Nora later",
+  "camNoTokens": "Out of tokens for today",
+
+  "camKcalPer": " kcal per {grams} g",
+  "@camKcalPer": {"placeholders":{"grams":{"type":"int"}}},
+  "camKcalFor": " kcal for {grams} g",
+  "@camKcalFor": {"placeholders":{"grams":{"type":"int"}}}
+}

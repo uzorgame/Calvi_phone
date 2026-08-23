@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:speech_to_text/speech_to_text.dart';
 
+import '../../l10n/data_lang.dart';
 import 'level_source.dart';
 
 /// Диктування: голос розпізнається на самому телефоні.
@@ -14,14 +15,38 @@ import 'level_source.dart';
 /// за роботу Нори над готовим текстом.
 ///
 /// **Слухає, доки не скажуть перестати.** Зупиняє диктування тільки людина,
-/// повторним дотиком до мікрофона. Пауза в голосі не означає, що вона
+/// прибравши палець із мікрофона. Пауза в голосі не означає, що вона
 /// договорила: людина згадує, що ще їла, і мовчить при цьому по кілька секунд.
 ///
 /// Клас одночасно є джерелом рівня для індикатора: смуги мають стрибати від
 /// справжнього голосу, бо метр, який танцює під тишу, вчить, що він нічого не
 /// означає.
+///
+/// ## Чому обʼєкт один на застосунок
+///
+/// Двигун під ним і так один: `SpeechToText()` віддає спільний екземпляр, а не
+/// новий. Гірше того, його `initialize` при повторному виклику виходить одразу
+/// і **не перереєстровує** обробники подій. Тобто перший, хто ініціалізував
+/// двигун, забирає всі його події назавжди, а кожен наступний обʼєкт лишається
+/// глухим: до нього не доходить ні «відрізок закінчено», ні помилка.
+///
+/// Доти клас створювався наново на кожне натискання мікрофона, і з другого разу
+/// безперервне слухання просто не працювало: перезапускати відрізки не було
+/// кому, а старий, нікому не потрібний обʼєкт і далі отримував події та крутив
+/// свої перезапуски. Звідси й бралися нескінченні системні звуки запису над
+/// давно закритою накладкою.
+///
+/// Тому обʼєкт тут рівно один, [shared], і всі його дії стоять у чергу.
 class Dictation implements LevelSource {
-  Dictation({SpeechToText? engine}) : _speech = engine ?? SpeechToText();
+  Dictation({SpeechToText? engine, Duration? patience})
+    : _speech = engine ?? SpeechToText(),
+      _maxDeaf = patience ?? const Duration(seconds: 25);
+
+  /// Той єдиний, яким користується застосунок.
+  ///
+  /// Створювати свій має сенс тільки в тестах, і тільки з підробленим двигуном:
+  /// два справжні однаково поділять один мікрофон і поб'ються за нього.
+  static final Dictation shared = Dictation();
 
   final SpeechToText _speech;
 
@@ -43,29 +68,78 @@ class Dictation implements LevelSource {
   /// Чи людина ще хоче, щоб її слухали. Двигун зупиняється сам, вона ні.
   bool _wanted = false;
 
-  /* Скільки разів поспіль двигун падав одразу після запуску.
+  /* Номер сеансу.
    *
-   * Рахуються саме падіння, а не тиша. Різниця тут коштувала всього: спершу тут
-   * рахувався кожен мовчазний відрізок, і чотирьох вистачало, щоб диктування
-   * здалось. На Android відрізок закривається за секунду-три тиші, тобто запис
-   * помирав приблизно за пʼять секунд роздумів, а людина ще й слова не сказала.
+   * Події від двигуна приходять із запізненням, і подія попереднього сеансу
+   * легко застає наступний. Без цього номера хвіст старої фрази дописувався б
+   * до нової, а «відрізок закінчено» від зупиненого сеансу перезапускало б
+   * мікрофон, якого ніхто не просив. */
+  int _session = 0;
+
+  /* Чи двигун уже піднятий. Піднімається один раз за життя застосунку, бо
+     повторний виклик усе одно нічого не робить. */
+  bool _ready = false;
+
+  /// Мова, якою двигун справді вміє, з'ясована один раз.
+  String? _localeId;
+  bool _localeKnown = false;
+
+  /* Черга з усіх дій над двигуном.
+   *
+   * Старт довгий: підняти двигун, спитати перелік мов, аж потім почати слухати.
+   * Палець устигає піднятись раніше, ніж старт добіжить, і зупинка, яка
+   * виконалась усередині старту, нічого не зупиняла: старт дограв після неї і
+   * вмикав мікрофон уже після того, як його відпустили. Спинити його після
+   * цього було нічим.
+   *
+   * Черга робить неможливим саме це: зупинка завжди чекає на свій старт, а
+   * новий старт завжди чекає на попередню зупинку. */
+  Future<void> _queue = Future<void>.value();
+
+  /* Відколи двигун падає одразу після запуску, не встигаючи нічого почути.
+   *
+   * Рахується час, а не кількість падінь, і це не дрібниця. З лічильником шість
+   * миттєвих падінь поспіль вимикали диктування, а людина, яка сказала «запиши»
+   * і задумалась, вигрібала їх за кілька секунд: запис тихо кінчався, поки вона
+   * ще тримала палець на кнопці, і все сказане далі не чув ніхто.
    *
    * Захист усе одно потрібен: якщо мікрофон відібрав дзвінок, двигун падатиме
    * миттєво після кожного запуску, і крутити це вічно означало б гріти телефон
-   * у кишені. Тому відрізок, який хоч трохи пожив, обнуляє лічильник. */
-  int _barren = 0;
+   * у кишені. Але пауза в голосі не має з цим нічого спільного, тому межа
+   * тепер по часу і настільки велика, що жодна пауза в неї не впирається. */
+  DateTime? _deafSince;
 
-  /// Скільки миттєвих падінь поспіль означає, що мікрофон таки не наш.
-  static const _maxBarren = 6;
+  /* Скільки суцільної глухоти означає, що мікрофон таки не наш.
+   *
+   * Задається ззовні тільки в тестах: перевірити відібраний мікрофон інакше
+   * означало б чекати ці двадцять пʼять секунд по-справжньому. */
+  final Duration _maxDeaf;
 
   /// Відрізок, коротший за це, вважається падінням, а не тишею.
   static const _tooShort = Duration(milliseconds: 900);
 
+  /* Скільки бібліотека чекає на підсумок від системи, перш ніж зробити його
+     сама з останнього проміжного результату. Її власна стандартна відповідь на
+     це дві секунди, і це задовго: людина стоїть із прибраним пальцем і чекає,
+     поки фраза піде. Стільки ж коштує неповна фраза, тому число мале, але не
+     нульове. */
+  static const _finalWait = Duration(milliseconds: 700);
+
+  /* Скільки на підсумок чекаємо ми. Трохи довше за [_finalWait], щоб вийти саме
+     на ньому, а не на власному таймауті. */
+  static const _lastWord = Duration(milliseconds: 950);
+
   /// Коли почався поточний відрізок.
   DateTime _segmentAt = DateTime.fromMillisecondsSinceEpoch(0);
 
+  /* Обіцянка останнього слова.
+   *
+   * Двигун не віддає фразу тієї миті, коли його спиняють: він домовляє її
+   * окремим викликом уже після. Доти ми забирали те, що лежало в цю мить, і
+   * хвіст фрази лишався в двигуні. Тепер [stop] чекає саме на цю обіцянку. */
+  Completer<String>? _finished;
+
   void Function(String words)? _onWords;
-  String? _localeId;
   Timer? _again;
 
   /// Усе почуте від початку диктування, зшите докупи.
@@ -76,47 +150,85 @@ class Dictation implements LevelSource {
   /// Чому не вийшло, якщо не вийшло. Порожньо, поки все гаразд.
   String? failure;
 
+  /// Ставить дію в чергу до двигуна.
+  Future<T> _inTurn<T>(Future<T> Function() job) {
+    final mine = _queue.then((_) => job());
+    // Хвіст черги не має вмирати від чужої помилки, інакше все наступне за нею
+    // не виконається ніколи.
+    _queue = mine.then((_) {}, onError: (_) {});
+    return mine;
+  }
+
   /// Вмикає слухання. Повертає false, якщо пристрій не вміє або не дозволили.
   ///
   /// Українська просто за замовчуванням: застосунок нею говорить. Якщо в системі
   /// її немає, розпізнавання йде мовою пристрою, і це краще, ніж відмовитись
   /// слухати зовсім.
-  Future<bool> start({
+  Future<bool> start({required void Function(String words) onWords, String locale = 'uk_UA'}) =>
+      _inTurn(() => _start(onWords: onWords, locale: locale));
+
+  Future<bool> _start({
     required void Function(String words) onWords,
-    String locale = 'uk_UA',
+    required String locale,
   }) async {
     _onWords = onWords;
+    _said = '';
+    _now = '';
+    _level = 0;
+    failure = null;
+    _session++;
 
-    final ready = await _speech.initialize(
-      onError: (e) => _trouble(e.errorMsg),
-      onStatus: (s) {
-        /* Двигун закінчив відрізок. Якщо людина не просила зупинятись, це не
-           кінець диктування, а лише кінець одного шматка. */
-        if (s == 'done' || s == 'notListening') _resume();
-      },
-    );
+    /* Усе, що може кинути, стоїть під `try`. Без нього невдалий підйом двигуна
+       лишав екран із зайнятим мікрофоном назавжди: помилка йшла в нікуди, а
+       кнопка після цього мовчала до перезапуску застосунку. */
+    try {
+      if (!_ready) {
+        _ready = await _speech.initialize(
+          finalTimeout: _finalWait,
+          onError: (e) => _trouble(e.errorMsg),
+          onStatus: (s) {
+            /* Двигун закінчив відрізок. Якщо людина не просила зупинятись, це не
+               кінець диктування, а лише кінець одного шматка. */
+            if (s == 'done' || s == 'notListening') _resume();
+          },
+        );
+      }
 
-    if (!ready) {
-      failure ??= 'Диктування недоступне на цьому телефоні';
+      if (!_ready) {
+        failure = dataL.dictationUnavailable;
+        return false;
+      }
+
+      if (!_localeKnown) {
+        final locales = await _speech.locales();
+        final has = locales.any((l) => l.localeId.replaceAll('-', '_') == locale);
+        _localeId = has ? locale : null;
+        _localeKnown = true;
+      }
+
+      _wanted = true;
+      _deafSince = null;
+      return await _listen();
+    } catch (e) {
+      _wanted = false;
+      failure = dataL.dictationFailed;
       return false;
     }
-
-    final locales = await _speech.locales();
-    final has = locales.any((l) => l.localeId.replaceAll('-', '_') == locale);
-    _localeId = has ? locale : null;
-
-    _wanted = true;
-    _barren = 0;
-    return _listen();
   }
 
   Future<bool> _listen() async {
+    final mine = _session;
+
     try {
       _segmentAt = DateTime.now();
       await _speech.listen(
         onResult: (r) {
+          // Подія від сеансу, який уже закінчився. Дописати її означало б
+          // приклеїти хвіст старої фрази до нової.
+          if (mine != _session) return;
+
           _now = r.recognizedWords;
-          if (_now.trim().isNotEmpty) _barren = 0;
+          if (_now.trim().isNotEmpty) _deafSince = null;
 
           /* Закритий відрізок переїжджає в накопичене. Не зробити цього означало
              б загубити його: наступний запуск починає розпізнавання з чистого
@@ -124,10 +236,14 @@ class Dictation implements LevelSource {
           if (r.finalResult) {
             _said = _join(_said, _now);
             _now = '';
+            /* Оце і є те останнє слово, на яке чекає [stop]. */
+            if (!(_finished?.isCompleted ?? true)) _finished!.complete(heard);
           }
           _onWords?.call(heard);
         },
         onSoundLevelChange: (raw) {
+          if (mine != _session) return;
+
           /* Android віддає щось на кшталт децибелів у діапазоні від нуля до
              десяти, iOS інакше. Нормалізуємо грубо і згладжуємо: індикатор має
              дихати разом із голосом, а не мигтіти. */
@@ -135,7 +251,7 @@ class Dictation implements LevelSource {
           _level = want > _level ? want : _level * 0.82 + want * 0.18;
 
           // Рівень іде, отже мікрофон живий. Те, що людина мовчить, це не збій.
-          _barren = 0;
+          _deafSince = null;
         },
         listenOptions: SpeechListenOptions(
           partialResults: true,
@@ -168,22 +284,28 @@ class Dictation implements LevelSource {
     if (_again?.isActive ?? false) return;
 
     /* Відрізок, який хоч трохи пожив, це нормальна тиша, а не поломка: людина
-       згадує, що ще їла. Лічильник росте тільки на тих, які обірвались одразу. */
-    if (DateTime.now().difference(_segmentAt) >= _tooShort) {
-      _barren = 0;
-    } else if (++_barren > _maxBarren) {
-      // Стільки миттєвих падінь поспіль означає, що мікрофона в нас немає.
-      _wanted = false;
-      failure ??= 'Мікрофон зайнятий. Спробуй ще раз';
-      _onWords?.call(heard);
-      return;
+       згадує, що ще їла. Годинник глухоти йде тільки на тих, які обірвались
+       одразу після запуску. */
+    final now = DateTime.now();
+    if (now.difference(_segmentAt) >= _tooShort) {
+      _deafSince = null;
+    } else {
+      _deafSince ??= now;
+      if (now.difference(_deafSince!) > _maxDeaf) {
+        // Стільки суцільної глухоти означає, що мікрофона в нас немає.
+        _wanted = false;
+        failure ??= dataL.dictationBusy;
+        _onWords?.call(heard);
+        return;
+      }
     }
 
     _again?.cancel();
     /* Чверть секунди на те, щоб платформа відпустила мікрофон. Запуск упритул
        до зупинки той самий мікрофон і не отримує. */
+    final mine = _session;
     _again = Timer(const Duration(milliseconds: 250), () {
-      if (_wanted) unawaited(_listen());
+      if (_wanted && mine == _session) unawaited(_listen());
     });
   }
 
@@ -208,16 +330,66 @@ class Dictation implements LevelSource {
     failure = _reasonOf(code);
   }
 
-  /// Зупиняє слухання і віддає почуте. Кличеться тільки з волі людини.
-  Future<String> stop() async {
+  /* Зупиняє слухання і віддає почуте цілком. Кличеться тільки з волі людини.
+   *
+   * Чекає на останнє слово, і це головне тут. Двигун домовляє фразу окремим
+   * викликом уже після того, як його спинили: доти ми забирали те, що лежало в
+   * цю саму мить, тобто передостанній проміжний результат, і кінець кожної
+   * фрази обрізався. Обрізало завжди приблизно однаково, бо це не випадковість,
+   * а рівно та частина, яку двигун ще не встиг оформити.
+   *
+   * Чекання обмежене [_lastWord]. Воно трохи довше за [_finalWait], з яким
+   * заведена сама бібліотека: та сама підстрахує нас своїм підсумком із
+   * останнього проміжного результату, і ми вийдемо на ньому, а не по таймауту.
+   *
+   * Якщо двигун у цю мить не слухає, чекати нема на що: відрізок уже закритий,
+   * і його підсумок давно в [_said]. */
+  Future<String> stop() => _inTurn(_stop);
+
+  Future<String> _stop() async {
     _wanted = false;
     _again?.cancel();
+
+    final pending = _speech.isListening;
+    if (pending) _finished = Completer<String>();
+
     try {
       await _speech.stop();
     } catch (_) {
       /* Двигун міг уже зупинитись сам між відрізками. Це не помилка. */
     }
-    return heard;
+
+    if (pending) {
+      await _finished!.future.timeout(_lastWord, onTimeout: () => heard);
+      _finished = null;
+    }
+
+    final text = heard;
+    _session++;
+    return text;
+  }
+
+  /// Кинути сеанс і нічого з нього не брати.
+  ///
+  /// Не те саме, що [stop]. Зупинка **завершує** розпізнавання: двигун оформлює
+  /// підсумок, а система дає звук кінця запису. Для сеансу, який усе одно
+  /// викидають (палець прибрали за мить, екран зникає, застосунок пішов у фон),
+  /// це зайвий звук і зайве чекання.
+  Future<void> cancel() => _inTurn(_cancel);
+
+  Future<void> _cancel() async {
+    _wanted = false;
+    _again?.cancel();
+    _session++;
+    _said = '';
+    _now = '';
+    _level = 0;
+
+    try {
+      await _speech.cancel();
+    } catch (_) {
+      // Двигун міг і не слухати. Це не помилка.
+    }
   }
 
   @override
@@ -231,11 +403,12 @@ class Dictation implements LevelSource {
     return _level;
   }
 
+  /* Обʼєкт живе, скільки живе застосунок, тому тут не смерть, а прибирання за
+     собою. Накладка кличе це, коли зникає, і мікрофон має замовкнути навіть
+     тоді, коли до [stop] справа не дійшла. */
   @override
   void dispose() {
-    _wanted = false;
-    _again?.cancel();
-    _speech.stop().ignore();
+    if (_wanted) unawaited(cancel());
   }
 
   /// Два шматки в одну фразу, без подвійного пробілу і без пробілу на початку.
@@ -249,10 +422,10 @@ class Dictation implements LevelSource {
 
   /// Людською мовою, а не кодом двигуна.
   static String _reasonOf(String code) => switch (code) {
-    'error_no_match' => 'Не почула нічого зрозумілого',
-    'error_speech_timeout' => 'Тиша. Спробуй ще раз ближче до мікрофона',
-    'error_network' || 'error_network_timeout' => 'Розпізнаванню потрібна мережа',
-    'error_permission' => 'Немає дозволу на мікрофон',
-    _ => 'Диктування не вийшло',
+    'error_no_match' => dataL.dictationNoMatch,
+    'error_speech_timeout' => dataL.dictationSilence,
+    'error_network' || 'error_network_timeout' => dataL.dictationNoNetwork,
+    'error_permission' => dataL.dictationNoPermission,
+    _ => dataL.dictationFailed,
   };
 }

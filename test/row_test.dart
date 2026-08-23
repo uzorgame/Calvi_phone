@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:calvi/design/shell.dart';
 import 'package:calvi/design/theme.dart';
+import 'package:calvi/l10n/app_localizations.dart';
 
 /// One row of settings, sized the way the demo sizes it.
 ///
@@ -12,6 +13,9 @@ import 'package:calvi/design/theme.dart';
 Future<Rect?> _rowOf(WidgetTester tester, String title, String value, Finder of) async {
   await tester.pumpWidget(
     MaterialApp(
+      localizationsDelegates: L.localizationsDelegates,
+      supportedLocales: L.supportedLocales,
+      locale: const Locale('uk'),
       theme: calviLightTheme,
       home: Scaffold(
         body: SizedBox(

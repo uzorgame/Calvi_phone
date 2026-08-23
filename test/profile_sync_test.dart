@@ -132,7 +132,9 @@ void main() {
     await SyncRepository(db, fake().api).run();
 
     final later = DateTime.now().add(const Duration(hours: 1)).toUtc().toIso8601String();
-    final server = fake(has: wire(at: later, waterMl: 3100, theme: 'dark'));
+    final server = fake(
+      has: wire(at: later, waterMl: 3100, theme: 'dark'),
+    );
     await SyncRepository(db, server.api).run();
 
     final back = await ProfileStore(db).load();
@@ -218,6 +220,10 @@ void main() {
     expect(await db.syncDao.pendingMeals(), isEmpty);
     expect(await db.syncDao.pendingWeights(), isEmpty);
     expect(id, isNotEmpty);
-    expect((await db.select(db.profile).getSingle()).dirty, isTrue, reason: 'поїде наступного разу');
+    expect(
+      (await db.select(db.profile).getSingle()).dirty,
+      isTrue,
+      reason: 'поїде наступного разу',
+    );
   });
 }

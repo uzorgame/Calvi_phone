@@ -4,6 +4,8 @@ import '../../data/meal.dart';
 import '../../design/icons.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
+import '../../l10n/app_localizations.dart';
+import '../../l10n/labels.dart';
 import 'slot_card.dart';
 
 /// A day's meals under one card.
@@ -32,28 +34,46 @@ class MealCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kcal = meals.fold<int>(0, (s, m) => s + m.kcal);
+    final l = L.of(context);
 
     return SlotCard(
       icon: slot.icon,
-      title: slot.label,
-      sub: meals.isEmpty
-          ? '0 записів'
-          : '${meals.length} ${meals.length == 1 ? 'запис' : 'записи'}',
-      badge: '$kcal ккал',
+      title: slotTitle(context, slot),
+      /* Множина, а не склеєний рядок. Українська має тут три форми («1 запис,
+         2 записи, 5 записів»), англійська дві, і саме на цьому ламається будь-яке
+         саморобне рішення. */
+      sub: l.entries(meals.length),
+      badge: l.kcalUnit(kcal),
       open: open,
       onToggle: onToggle,
       child: Column(
         children: [
           // The empty state is Nora, not a grey «немає даних».
+          /* Порожній стан зі знаком, а не голим рядком: мʼяке коло з виделкою
+             каже «тут буде їжа» швидше, ніж речення встигне прочитатись. */
           if (meals.isEmpty)
             Padding(
               padding: const EdgeInsets.fromLTRB(6, 14, 6, 10),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Тут поки порожньо. Напиши, що було, і я запишу.',
-                  style: context.t.bodyMedium?.copyWith(height: 1.45),
-                ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 34,
+                    height: 34,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: context.c.fillSecondary,
+                    ),
+                    child: CalviIcon('utensils', size: 14, color: context.c.faint),
+                  ),
+                  const SizedBox(width: 11),
+                  Expanded(
+                    child: Text(
+                      L.of(context).mealEmpty,
+                      style: context.t.bodyMedium?.copyWith(height: 1.45),
+                    ),
+                  ),
+                ],
               ),
             ),
           for (final m in meals) MealRow(meal: m),
@@ -109,7 +129,10 @@ class MealRow extends StatelessWidget {
                    Nora answers, and filling them with a guess would be the app
                    inventing data. */
                 if (meal.pending)
-                  Text('Нора рахує…', style: context.t.labelSmall?.copyWith(color: c.accent))
+                  Text(
+                    L.of(context).mealThinking,
+                    style: context.t.labelSmall?.copyWith(color: c.accent),
+                  )
                 else
                   _MacroChips(meal: meal),
               ],
@@ -120,7 +143,7 @@ class MealRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                meal.pending ? '—' : '${meal.kcal}',
+                meal.pending ? '···' : '${meal.kcal}',
                 style: context.t.titleMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                   letterSpacing: CalviSize.fsBody * -0.02,
@@ -132,11 +155,9 @@ class MealRow extends StatelessWidget {
               meal.auto
                   ? Text.rich(
                       TextSpan(
-                        text: 'авто ',
+                        text: L.of(context).mealAuto,
                         style: context.t.labelSmall?.copyWith(fontSize: 10, color: c.accent),
-                        children: [
-                          TextSpan(text: '· ${meal.time}', style: context.t.labelSmall),
-                        ],
+                        children: [TextSpan(text: '· ${meal.time}', style: context.t.labelSmall)],
                       ),
                     )
                   : Text(meal.time, style: context.t.labelSmall),
@@ -148,10 +169,16 @@ class MealRow extends StatelessWidget {
   }
 }
 
-/// Grams, then protein, carbohydrates and fat, each behind its own colour.
+/// Грами, а за ними білки, жири і вуглеводи, кожне за своїм кольором.
 ///
-/// Dots rather than letters: «Б 14 В 2 Ж 16» is four abbreviations to decode on
-/// every row, and the colours are already the ones the rings above use.
+/// Крапки, а не літери: «Б 14 Ж 16 В 2» це чотири скорочення на кожен рядок, а
+/// кольори тут ті самі, що в кільцях вище.
+///
+/// Порядок саме БЖВ, і це не дрібниця. Тут стояло Б, В, Ж: кольори збігались із
+/// числами, тобто рядок був правдивим, але читався він як неправда. Людина
+/// щойно подивилась на три картки вгорі в порядку БЖВ і читає рядок так само, не
+/// звіряючи кольорів, бо в другому місці поспіль вони не мають розходитись.
+/// Яєчня виглядала стравою на один грам жиру.
 class _MacroChips extends StatelessWidget {
   const _MacroChips({required this.meal});
 
@@ -162,21 +189,42 @@ class _MacroChips extends StatelessWidget {
     final c = context.c;
     final style = context.t.labelSmall;
 
-    return Row(
+    /* Переносяться, а не обрізаються. Рядок стоїть у колонці поруч із числом
+       калорій, і місця йому лишається сто пʼятдесят пікселів. Чотирьох чисел
+       туди вистачає рівно доти, доки вони двозначні: «980 г 145 116 232» вже не
+       влазить, а `Row` такому не поступається взагалі й вивалює смугасту
+       жовто-чорну стрічку поверх картки. Тепер зайве їде рядком нижче. */
+    return Wrap(
+      spacing: 9,
+      runSpacing: 2,
       children: [
-        Text('${meal.grams} г', style: style),
-        const SizedBox(width: 9),
-        _Dot(colour: c.protein),
-        Text('${meal.protein}', style: style),
-        const SizedBox(width: 9),
-        _Dot(colour: c.carbs),
-        Text('${meal.carbs}', style: style),
-        const SizedBox(width: 9),
-        _Dot(colour: c.fats),
-        Text('${meal.fat}', style: style),
+        Text(L.of(context).mealGrams(meal.grams), style: style),
+        _Macro(colour: c.protein, value: meal.protein),
+        _Macro(colour: c.fats, value: meal.fat),
+        _Macro(colour: c.carbs, value: meal.carbs),
       ],
     );
   }
+}
+
+/// Крапка і число за нею, нерозлучно.
+///
+/// Однією парою, а не двома сусідами в ряду: перенос має рвати рядок між
+/// макросами, а не між крапкою і її числом.
+class _Macro extends StatelessWidget {
+  const _Macro({required this.colour, required this.value});
+
+  final Color colour;
+  final int value;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      _Dot(colour: colour),
+      Text('$value', style: context.t.labelSmall),
+    ],
+  );
 }
 
 class _Dot extends StatelessWidget {

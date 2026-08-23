@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import '../../design/icons.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
+import '../../l10n/app_localizations.dart';
 
 /// The shell every card of the day wears.
 ///
@@ -141,6 +142,7 @@ class _SlotCardState extends State<SlotCard> with SingleTickerProviderStateMixin
         color: c.card,
         border: Border.all(color: c.cardBorder),
         borderRadius: BorderRadius.circular(CalviSize.rLarge),
+        boxShadow: context.shadowCard,
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -263,7 +265,15 @@ class AddRow extends StatelessWidget {
                 child: CalviIcon(open ? 'minus' : 'plus', size: 17, color: c.text),
               ),
               const SizedBox(width: 13),
-              Text(label, style: context.t.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
+              /* Гнучкий, бо напис буває довгим: «Додати до пізньої вечері» на
+                 вузькому телефоні не влазить у ряд, а негнучкий текст у ряду не
+                 переноситься, а вилазить за край смугастою стрічкою. */
+              Expanded(
+                child: Text(
+                  label,
+                  style: context.t.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                ),
+              ),
             ],
           ),
         ),
@@ -369,7 +379,7 @@ class _SlotInputState extends State<SlotInput> {
                      and «що ти їв» needs a gender. Both are traps in a field the
                      app fills in for itself, and the card above already says
                      which meal this is. */
-                  hintText: 'Напиши, що було',
+                  hintText: L.of(context).slotWriteWhat,
                   hintStyle: context.t.labelSmall?.copyWith(fontSize: 15),
                 ),
               ),
@@ -378,7 +388,7 @@ class _SlotInputState extends State<SlotInput> {
           const SizedBox(width: 8),
           Semantics(
             button: true,
-            label: 'Записати',
+            label: L.of(context).slotLog,
             child: GestureDetector(
               onTap: ready ? _send : null,
               behavior: HitTestBehavior.opaque,
@@ -402,6 +412,90 @@ class _SlotInputState extends State<SlotInput> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Картка, яка щойно народилась, виростає в список.
+///
+/// Нора відкриває перекус, коли в нього щось записали, і без цього він просто
+/// зʼявляється між двома кадрами: усе, що під ним, стрибає вниз на висоту цілої
+/// картки. Стрибок читається як збій верстки, а не як «зʼявилось нове», і людина
+/// не встигає помітити, що саме змінилось.
+///
+/// Рухи ті самі, що й у демці: висота росте з нуля, картка приходить із восьми
+/// пікселів угорі й трохи меншою, а прозорість добігає до повної раніше за
+/// висоту, щоб картка не проявлялась уже дорісши.
+class Arriving extends StatefulWidget {
+  const Arriving({super.key, required this.play, required this.child});
+
+  /// Грати появу. Хибно для карток, які вже стояли: щоденний сніданок не
+  /// народжується щоразу, коли перемалювався екран.
+  final bool play;
+
+  final Widget child;
+
+  @override
+  State<Arriving> createState() => _ArrivingState();
+}
+
+class _ArrivingState extends State<Arriving> with SingleTickerProviderStateMixin {
+  static const _ms = Duration(milliseconds: 460);
+
+  /* Створюється в initState, а не лінивим полем: ліниве народжується при
+     першому зверненні, а ним може виявитись сам dispose. */
+  late final AnimationController _in;
+
+  @override
+  void initState() {
+    super.initState();
+    _in = AnimationController(vsync: this, duration: _ms, value: widget.play ? 0 : 1);
+    if (widget.play) _in.forward();
+  }
+
+  @override
+  void dispose() {
+    _in.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    /* Обгортки лишаються назавжди, і це не марнотратство, а єдиний спосіб не
+       зламати картку під ними. Прибрати їх, коли поява добігла, означає інше
+       дерево на тому самому місці: Flutter будує картку заново, а з нею заново
+       народжується її стан. Неявні анімації всередині відлічують рух від того,
+       що бачили минулого разу, тож новонароджена картка відкривається ривком.
+       Найближче перемальовування після появи це і є дотик, яким її відкривають.
+
+       Коштують вони при цьому нічого. Дійшовши до кінця, кожна стає собою
+       тотожною, а такі шари Flutter не композитить: прозорість у одиницю
+       малює дитину напряму, перетворення без зсуву й масштабу теж, а обрізання
+       вимкнене прямо тут. */
+    return AnimatedBuilder(
+      animation: _in,
+      child: widget.child,
+      builder: (context, child) {
+        final done = _in.isCompleted;
+        final grown = CalviMotion.easeRise.transform(_in.value);
+
+        return ClipRect(
+          clipBehavior: done ? Clip.none : Clip.hardEdge,
+          child: Align(
+            alignment: Alignment.topCenter,
+            // Висота з нуля: сусіди зʼїжджають, а не стрибають.
+            heightFactor: grown,
+            child: Opacity(
+              // Повна прозорість добігає на сорока відсотках шляху, як у демці.
+              opacity: (_in.value / 0.4).clamp(0.0, 1.0),
+              child: Transform.translate(
+                offset: Offset(0, -8 * (1 - grown)),
+                child: Transform.scale(scale: 0.98 + 0.02 * grown, child: child),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

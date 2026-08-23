@@ -19,7 +19,13 @@ void main() {
 
   test('підсумки збираються по днях, а не в купу', () async {
     await db.diaryDao.addMeal(slot: 'lunch', name: 'Борщ', kcal: 300, protein: 8, at: daysAgo(0));
-    await db.diaryDao.addMeal(slot: 'dinner', name: 'Курка', kcal: 250, protein: 30, at: daysAgo(0));
+    await db.diaryDao.addMeal(
+      slot: 'dinner',
+      name: 'Курка',
+      kcal: 250,
+      protein: 30,
+      at: daysAgo(0),
+    );
     await db.diaryDao.addMeal(slot: 'lunch', name: 'Суп', kcal: 180, at: daysAgo(2));
 
     final stats = await DayReader(db).watchStats().first;
@@ -57,10 +63,7 @@ void main() {
   test('порожні підсумки не вигадують днів', () {
     expect(DayStats.empty.has(0), isFalse);
     expect(DayStats.empty.totalsOn(0).kcal, 0);
-    expect(
-      DayStats.empty.stateOn(-1, goalKcal: 2000, direction: Direction.lose),
-      DayState.empty,
-    );
+    expect(DayStats.empty.stateOn(-1, goalKcal: 2000, direction: Direction.lose), DayState.empty);
   });
 
   /// Учора, а не сьогодні: день, який ще триває, навмисно не оцінюється.
@@ -78,8 +81,14 @@ void main() {
      світився зеленим так само, як вдалий. */
   group('вирок дню', () {
     test('на схудненні норма зелена, перебір червоний', () {
-      expect(withKcal(2000).stateOn(yesterday, goalKcal: 2000, direction: Direction.lose), DayState.ok);
-      expect(withKcal(2100).stateOn(yesterday, goalKcal: 2000, direction: Direction.lose), DayState.over);
+      expect(
+        withKcal(2000).stateOn(yesterday, goalKcal: 2000, direction: Direction.lose),
+        DayState.ok,
+      );
+      expect(
+        withKcal(2100).stateOn(yesterday, goalKcal: 2000, direction: Direction.lose),
+        DayState.over,
+      );
     });
 
     test('на схудненні голод теж червоний', () {
@@ -96,15 +105,33 @@ void main() {
     });
 
     test('на наборі більше норми це і є ціль', () {
-      expect(withKcal(2600).stateOn(yesterday, goalKcal: 2400, direction: Direction.gain), DayState.ok);
-      expect(withKcal(2400).stateOn(yesterday, goalKcal: 2400, direction: Direction.gain), DayState.ok);
-      expect(withKcal(2100).stateOn(yesterday, goalKcal: 2400, direction: Direction.gain), DayState.under);
+      expect(
+        withKcal(2600).stateOn(yesterday, goalKcal: 2400, direction: Direction.gain),
+        DayState.ok,
+      );
+      expect(
+        withKcal(2400).stateOn(yesterday, goalKcal: 2400, direction: Direction.gain),
+        DayState.ok,
+      );
+      expect(
+        withKcal(2100).stateOn(yesterday, goalKcal: 2400, direction: Direction.gain),
+        DayState.under,
+      );
     });
 
     test('на утриманні запас працює в обидва боки', () {
-      expect(withKcal(2300).stateOn(yesterday, goalKcal: 2000, direction: Direction.keep), DayState.ok);
-      expect(withKcal(2500).stateOn(yesterday, goalKcal: 2000, direction: Direction.keep), DayState.over);
-      expect(withKcal(1500).stateOn(yesterday, goalKcal: 2000, direction: Direction.keep), DayState.under);
+      expect(
+        withKcal(2300).stateOn(yesterday, goalKcal: 2000, direction: Direction.keep),
+        DayState.ok,
+      );
+      expect(
+        withKcal(2500).stateOn(yesterday, goalKcal: 2000, direction: Direction.keep),
+        DayState.over,
+      );
+      expect(
+        withKcal(1500).stateOn(yesterday, goalKcal: 2000, direction: Direction.keep),
+        DayState.under,
+      );
     });
 
     test('день, що триває, ще не судять', () {

@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:calvi/design/theme.dart';
 import 'package:calvi/design/tokens.dart';
 import 'package:calvi/screens/today/slot_card.dart';
+import 'package:calvi/l10n/app_localizations.dart';
 
 /// Opening one card closes the other, and the day is a list: what shuts above
 /// or below you moves the ground under your feet. The page has to ride that out
@@ -21,6 +22,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: L.localizationsDelegates,
+        supportedLocales: L.supportedLocales,
+        locale: const Locale('uk'),
         theme: calviLightTheme,
         home: StatefulBuilder(
           builder: (context, setState) => Scaffold(

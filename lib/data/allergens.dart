@@ -1,3 +1,8 @@
+// GENERATED FILE. Не правити руками.
+//
+// Джерело: Demo_Flutter/src/data/allergens.ts
+// Оновити: node tools/allergens.mjs
+
 /// Allergen reference.
 ///
 /// Allergies are picked from this list, never typed in free text. The whole
@@ -5,132 +10,383 @@
 /// an ingredient list, and not on the model recognising a word. Free text puts
 /// the model back in the loop at exactly the place where being wrong is not a
 /// cosmetic problem.
-///
-/// [aka] exists so the same entry is found by whatever the person calls it, and
-/// so the ingredient matcher has the synonyms it needs. It never becomes a
-/// separate allergen.
-///
-/// Generated from Demo_Flutter/src/data/allergens.ts by tools/allergens.mjs.
 library;
+
+import '../l10n/data_lang.dart';
 
 class Allergen {
   const Allergen({
     required this.id,
-    required this.name,
-    required this.group,
-    required this.aka,
+    required this.nameUk,
+    required this.nameEn,
+    required this.groupUk,
+    required this.groupEn,
+    required this.akaUk,
+    required this.akaEn,
   });
 
   /// Stable code. This is what the matcher compares, not the label.
   final String id;
-  final String name;
-  final String group;
-  final List<String> aka;
+
+  final String nameUk;
+  final String nameEn;
+  final String groupUk;
+  final String groupEn;
+
+  /* Синоніми обома мовами.
+   *
+   * Показується назва мовою інтерфейсу, а шукається [aka] цілком, обома
+   * одразу. Це навмисно: склад продукту зі штрихкоду приходить так, як його
+   * написав виробник, і на українській банці цілком буває `soy lecithin`.
+   * Зайвий синонім у пошуку не коштує нічого, пропущений алерген коштує
+   * дорого. */
+  final List<String> akaUk;
+  final List<String> akaEn;
+
+  String get name => dataLang == 'uk' ? nameUk : nameEn;
+  String get group => dataLang == 'uk' ? groupUk : groupEn;
+
+  /// Усі синоніми, обома мовами. Саме за цим шукає і людина, і зіставлювач.
+  List<String> get aka => [...akaUk, ...akaEn];
 }
 
 const allergens = <Allergen>[
   Allergen(
     id: 'peanut',
-    name: 'Арахіс',
-    group: 'Горіхи',
-    aka: ['земляний горіх', 'арахісова паста'],
+    nameUk: 'Арахіс',
+    nameEn: 'Peanut',
+    groupUk: 'Горіхи',
+    groupEn: 'Nuts',
+    akaUk: ['земляний горіх', 'арахісова паста'],
+    akaEn: ['groundnut', 'peanut butter'],
   ),
-  Allergen(id: 'hazelnut', name: 'Фундук', group: 'Горіхи', aka: ['лісовий горіх']),
-  Allergen(id: 'almond', name: 'Мигдаль', group: 'Горіхи', aka: ['мигдальне молоко']),
-  Allergen(id: 'walnut', name: 'Волоський горіх', group: 'Горіхи', aka: []),
-  Allergen(id: 'cashew', name: 'Кешʼю', group: 'Горіхи', aka: []),
-  Allergen(id: 'pistachio', name: 'Фісташки', group: 'Горіхи', aka: []),
-  Allergen(id: 'pecan', name: 'Пекан', group: 'Горіхи', aka: []),
-  Allergen(id: 'macadamia', name: 'Макадамія', group: 'Горіхи', aka: []),
-  Allergen(id: 'brazilnut', name: 'Бразильський горіх', group: 'Горіхи', aka: []),
+  Allergen(
+    id: 'hazelnut',
+    nameUk: 'Фундук',
+    nameEn: 'Hazelnut',
+    groupUk: 'Горіхи',
+    groupEn: 'Nuts',
+    akaUk: ['лісовий горіх'],
+    akaEn: ['filbert', 'cobnut'],
+  ),
+  Allergen(
+    id: 'almond',
+    nameUk: 'Мигдаль',
+    nameEn: 'Almond',
+    groupUk: 'Горіхи',
+    groupEn: 'Nuts',
+    akaUk: ['мигдальне молоко'],
+    akaEn: ['almond milk', 'marzipan'],
+  ),
+  Allergen(
+    id: 'walnut',
+    nameUk: 'Волоський горіх',
+    nameEn: 'Walnut',
+    groupUk: 'Горіхи',
+    groupEn: 'Nuts',
+    akaUk: [],
+    akaEn: [],
+  ),
+  Allergen(
+    id: 'cashew',
+    nameUk: 'Кешʼю',
+    nameEn: 'Cashew',
+    groupUk: 'Горіхи',
+    groupEn: 'Nuts',
+    akaUk: [],
+    akaEn: [],
+  ),
+  Allergen(
+    id: 'pistachio',
+    nameUk: 'Фісташки',
+    nameEn: 'Pistachio',
+    groupUk: 'Горіхи',
+    groupEn: 'Nuts',
+    akaUk: [],
+    akaEn: [],
+  ),
+  Allergen(
+    id: 'pecan',
+    nameUk: 'Пекан',
+    nameEn: 'Pecan',
+    groupUk: 'Горіхи',
+    groupEn: 'Nuts',
+    akaUk: [],
+    akaEn: [],
+  ),
+  Allergen(
+    id: 'macadamia',
+    nameUk: 'Макадамія',
+    nameEn: 'Macadamia',
+    groupUk: 'Горіхи',
+    groupEn: 'Nuts',
+    akaUk: [],
+    akaEn: [],
+  ),
+  Allergen(
+    id: 'brazilnut',
+    nameUk: 'Бразильський горіх',
+    nameEn: 'Brazil nut',
+    groupUk: 'Горіхи',
+    groupEn: 'Nuts',
+    akaUk: [],
+    akaEn: [],
+  ),
   Allergen(
     id: 'milk',
-    name: 'Молоко',
-    group: 'Молочне',
-    aka: ['вершки', 'сметана', 'сир', 'масло'],
+    nameUk: 'Молоко',
+    nameEn: 'Milk',
+    groupUk: 'Молочне',
+    groupEn: 'Dairy',
+    akaUk: ['вершки', 'сметана', 'сир', 'масло'],
+    akaEn: ['cream', 'sour cream', 'cheese', 'butter'],
   ),
-  Allergen(id: 'lactose', name: 'Лактоза', group: 'Молочне', aka: ['молочний цукор']),
-  Allergen(id: 'casein', name: 'Казеїн', group: 'Молочне', aka: ['казеїнат']),
-  Allergen(id: 'gluten', name: 'Глютен', group: 'Злаки', aka: ['клейковина']),
+  Allergen(
+    id: 'lactose',
+    nameUk: 'Лактоза',
+    nameEn: 'Lactose',
+    groupUk: 'Молочне',
+    groupEn: 'Dairy',
+    akaUk: ['молочний цукор'],
+    akaEn: ['milk sugar'],
+  ),
+  Allergen(
+    id: 'casein',
+    nameUk: 'Казеїн',
+    nameEn: 'Casein',
+    groupUk: 'Молочне',
+    groupEn: 'Dairy',
+    akaUk: ['казеїнат'],
+    akaEn: ['caseinate', 'whey'],
+  ),
+  Allergen(
+    id: 'gluten',
+    nameUk: 'Глютен',
+    nameEn: 'Gluten',
+    groupUk: 'Злаки',
+    groupEn: 'Grains',
+    akaUk: ['клейковина'],
+    akaEn: ['seitan'],
+  ),
   Allergen(
     id: 'wheat',
-    name: 'Пшениця',
-    group: 'Злаки',
-    aka: ['борошно', 'манка', 'булгур', 'кускус'],
+    nameUk: 'Пшениця',
+    nameEn: 'Wheat',
+    groupUk: 'Злаки',
+    groupEn: 'Grains',
+    akaUk: ['борошно', 'манка', 'булгур', 'кускус'],
+    akaEn: ['flour', 'semolina', 'bulgur', 'couscous', 'spelt'],
   ),
-  Allergen(id: 'rye', name: 'Жито', group: 'Злаки', aka: ['житнє борошно']),
-  Allergen(id: 'barley', name: 'Ячмінь', group: 'Злаки', aka: ['солод', 'перловка']),
-  Allergen(id: 'oat', name: 'Овес', group: 'Злаки', aka: ['вівсянка', 'вівсяне борошно']),
+  Allergen(
+    id: 'rye',
+    nameUk: 'Жито',
+    nameEn: 'Rye',
+    groupUk: 'Злаки',
+    groupEn: 'Grains',
+    akaUk: ['житнє борошно'],
+    akaEn: ['rye flour'],
+  ),
+  Allergen(
+    id: 'barley',
+    nameUk: 'Ячмінь',
+    nameEn: 'Barley',
+    groupUk: 'Злаки',
+    groupEn: 'Grains',
+    akaUk: ['солод', 'перловка'],
+    akaEn: ['malt', 'pearl barley'],
+  ),
+  Allergen(
+    id: 'oat',
+    nameUk: 'Овес',
+    nameEn: 'Oats',
+    groupUk: 'Злаки',
+    groupEn: 'Grains',
+    akaUk: ['вівсянка', 'вівсяне борошно'],
+    akaEn: ['oatmeal', 'oat flour'],
+  ),
   Allergen(
     id: 'egg',
-    name: 'Яйця',
-    group: 'Тваринні',
-    aka: ['білок', 'жовток', 'меланж', 'майонез'],
+    nameUk: 'Яйця',
+    nameEn: 'Egg',
+    groupUk: 'Тваринні',
+    groupEn: 'Animal',
+    akaUk: ['білок', 'жовток', 'меланж', 'майонез'],
+    akaEn: ['egg white', 'yolk', 'albumen', 'mayonnaise'],
   ),
   Allergen(
     id: 'fish',
-    name: 'Риба',
-    group: 'Тваринні',
-    aka: ['тунець', 'лосось', 'оселедець', 'анчоуси'],
+    nameUk: 'Риба',
+    nameEn: 'Fish',
+    groupUk: 'Тваринні',
+    groupEn: 'Animal',
+    akaUk: ['тунець', 'лосось', 'оселедець', 'анчоуси'],
+    akaEn: ['tuna', 'salmon', 'herring', 'anchovy'],
   ),
   Allergen(
     id: 'crustacean',
-    name: 'Ракоподібні',
-    group: 'Тваринні',
-    aka: ['креветки', 'краби', 'лангустини'],
+    nameUk: 'Ракоподібні',
+    nameEn: 'Crustaceans',
+    groupUk: 'Тваринні',
+    groupEn: 'Animal',
+    akaUk: ['креветки', 'краби', 'лангустини'],
+    akaEn: ['shrimp', 'prawn', 'crab', 'lobster'],
   ),
   Allergen(
     id: 'mollusc',
-    name: 'Молюски',
-    group: 'Тваринні',
-    aka: ['мідії', 'кальмар', 'устриці', 'восьминіг'],
+    nameUk: 'Молюски',
+    nameEn: 'Molluscs',
+    groupUk: 'Тваринні',
+    groupEn: 'Animal',
+    akaUk: ['мідії', 'кальмар', 'устриці', 'восьминіг'],
+    akaEn: ['mussels', 'squid', 'oyster', 'octopus'],
   ),
-  Allergen(id: 'honey', name: 'Мед', group: 'Тваринні', aka: ['прополіс']),
+  Allergen(
+    id: 'honey',
+    nameUk: 'Мед',
+    nameEn: 'Honey',
+    groupUk: 'Тваринні',
+    groupEn: 'Animal',
+    akaUk: ['прополіс'],
+    akaEn: ['propolis'],
+  ),
   Allergen(
     id: 'soy',
-    name: 'Соя',
-    group: 'Бобові',
-    aka: ['соєвий соус', 'тофу', 'соєвий лецитин'],
+    nameUk: 'Соя',
+    nameEn: 'Soy',
+    groupUk: 'Бобові',
+    groupEn: 'Legumes',
+    akaUk: ['соєвий соус', 'тофу', 'соєвий лецитин'],
+    akaEn: ['soy sauce', 'tofu', 'soy lecithin', 'edamame'],
   ),
-  Allergen(id: 'lupin', name: 'Люпин', group: 'Бобові', aka: ['люпинове борошно']),
+  Allergen(
+    id: 'lupin',
+    nameUk: 'Люпин',
+    nameEn: 'Lupin',
+    groupUk: 'Бобові',
+    groupEn: 'Legumes',
+    akaUk: ['люпинове борошно'],
+    akaEn: ['lupin flour'],
+  ),
   Allergen(
     id: 'legume',
-    name: 'Бобові',
-    group: 'Бобові',
-    aka: ['квасоля', 'горох', 'нут', 'сочевиця'],
+    nameUk: 'Бобові',
+    nameEn: 'Pulses',
+    groupUk: 'Бобові',
+    groupEn: 'Legumes',
+    akaUk: ['квасоля', 'горох', 'нут', 'сочевиця'],
+    akaEn: ['beans', 'peas', 'chickpeas', 'lentils'],
   ),
-  Allergen(id: 'sesame', name: 'Кунжут', group: 'Рослинні', aka: ['тахіні', 'кунжутна олія']),
-  Allergen(id: 'mustard', name: 'Гірчиця', group: 'Рослинні', aka: ['гірчичний порошок']),
-  Allergen(id: 'celery', name: 'Селера', group: 'Рослинні', aka: ['корінь селери']),
+  Allergen(
+    id: 'sesame',
+    nameUk: 'Кунжут',
+    nameEn: 'Sesame',
+    groupUk: 'Рослинні',
+    groupEn: 'Plants',
+    akaUk: ['тахіні', 'кунжутна олія'],
+    akaEn: ['tahini', 'sesame oil'],
+  ),
+  Allergen(
+    id: 'mustard',
+    nameUk: 'Гірчиця',
+    nameEn: 'Mustard',
+    groupUk: 'Рослинні',
+    groupEn: 'Plants',
+    akaUk: ['гірчичний порошок'],
+    akaEn: ['mustard powder'],
+  ),
+  Allergen(
+    id: 'celery',
+    nameUk: 'Селера',
+    nameEn: 'Celery',
+    groupUk: 'Рослинні',
+    groupEn: 'Plants',
+    akaUk: ['корінь селери'],
+    akaEn: ['celeriac'],
+  ),
   Allergen(
     id: 'citrus',
-    name: 'Цитрусові',
-    group: 'Рослинні',
-    aka: ['апельсин', 'лимон', 'мандарин', 'грейпфрут'],
+    nameUk: 'Цитрусові',
+    nameEn: 'Citrus',
+    groupUk: 'Рослинні',
+    groupEn: 'Plants',
+    akaUk: ['апельсин', 'лимон', 'мандарин', 'грейпфрут'],
+    akaEn: ['orange', 'lemon', 'mandarin', 'grapefruit'],
   ),
-  Allergen(id: 'strawberry', name: 'Полуниця', group: 'Рослинні', aka: ['суниця']),
-  Allergen(id: 'kiwi', name: 'Ківі', group: 'Рослинні', aka: []),
-  Allergen(id: 'peach', name: 'Персик', group: 'Рослинні', aka: ['нектарин', 'абрикос']),
-  Allergen(id: 'tomato', name: 'Помідор', group: 'Рослинні', aka: ['томатна паста', 'кетчуп']),
-  Allergen(id: 'cocoa', name: 'Какао', group: 'Рослинні', aka: ['шоколад']),
+  Allergen(
+    id: 'strawberry',
+    nameUk: 'Полуниця',
+    nameEn: 'Strawberry',
+    groupUk: 'Рослинні',
+    groupEn: 'Plants',
+    akaUk: ['суниця'],
+    akaEn: ['wild strawberry'],
+  ),
+  Allergen(
+    id: 'kiwi',
+    nameUk: 'Ківі',
+    nameEn: 'Kiwi',
+    groupUk: 'Рослинні',
+    groupEn: 'Plants',
+    akaUk: [],
+    akaEn: [],
+  ),
+  Allergen(
+    id: 'peach',
+    nameUk: 'Персик',
+    nameEn: 'Peach',
+    groupUk: 'Рослинні',
+    groupEn: 'Plants',
+    akaUk: ['нектарин', 'абрикос'],
+    akaEn: ['nectarine', 'apricot'],
+  ),
+  Allergen(
+    id: 'tomato',
+    nameUk: 'Помідор',
+    nameEn: 'Tomato',
+    groupUk: 'Рослинні',
+    groupEn: 'Plants',
+    akaUk: ['томатна паста', 'кетчуп'],
+    akaEn: ['tomato paste', 'ketchup'],
+  ),
+  Allergen(
+    id: 'cocoa',
+    nameUk: 'Какао',
+    nameEn: 'Cocoa',
+    groupUk: 'Рослинні',
+    groupEn: 'Plants',
+    akaUk: ['шоколад'],
+    akaEn: ['chocolate'],
+  ),
   Allergen(
     id: 'sulphite',
-    name: 'Сульфіти',
-    group: 'Додатки',
-    aka: ['діоксид сірки', 'E220', 'E221'],
+    nameUk: 'Сульфіти',
+    nameEn: 'Sulphites',
+    groupUk: 'Додатки',
+    groupEn: 'Additives',
+    akaUk: ['діоксид сірки', 'E220', 'E221'],
+    akaEn: ['sulfur dioxide', 'E220', 'E221'],
   ),
-  Allergen(id: 'msg', name: 'Глутамат натрію', group: 'Додатки', aka: ['E621']),
-  Allergen(id: 'benzoate', name: 'Бензоати', group: 'Додатки', aka: ['E210', 'E211']),
+  Allergen(
+    id: 'msg',
+    nameUk: 'Глутамат натрію',
+    nameEn: 'Monosodium glutamate',
+    groupUk: 'Додатки',
+    groupEn: 'Additives',
+    akaUk: ['E621'],
+    akaEn: ['MSG', 'E621'],
+  ),
+  Allergen(
+    id: 'benzoate',
+    nameUk: 'Бензоати',
+    nameEn: 'Benzoates',
+    groupUk: 'Додатки',
+    groupEn: 'Additives',
+    akaUk: ['E210', 'E211'],
+    akaEn: ['E210', 'E211'],
+  ),
 ];
 
-Allergen? allergenById(String id) {
-  for (final a in allergens) {
-    if (a.id == id) return a;
-  }
-  return null;
-}
-
-/// Group names in the order the reference lists them.
+/// Групи в порядку появи: список на екрані читається згори вниз саме так.
 List<String> get allergenGroups {
   final seen = <String>[];
   for (final a in allergens) {
@@ -139,14 +395,22 @@ List<String> get allergenGroups {
   return seen;
 }
 
-/// Found by whatever the person calls it, not only by the printed name.
+Allergen? allergenById(String id) {
+  for (final a in allergens) {
+    if (a.id == id) return a;
+  }
+  return null;
+}
+
+/// Matches the label and every synonym, so «лісовий горіх» finds Фундук.
 List<Allergen> searchAllergens(String q) {
   final s = q.trim().toLowerCase();
   if (s.isEmpty) return allergens;
-  return allergens
-      .where(
-        (a) =>
-            a.name.toLowerCase().contains(s) || a.aka.any((k) => k.toLowerCase().contains(s)),
-      )
-      .toList();
+  return [
+    for (final a in allergens)
+      if (a.nameUk.toLowerCase().contains(s) ||
+          a.nameEn.toLowerCase().contains(s) ||
+          a.aka.any((k) => k.toLowerCase().contains(s)))
+        a,
+  ];
 }

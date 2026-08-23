@@ -6,6 +6,7 @@ import 'package:calvi/design/theme.dart';
 import 'package:calvi/screens/today/meal_card.dart';
 import 'package:calvi/screens/meds/meds_form.dart';
 import 'package:calvi/screens/today/slot_card.dart';
+import 'package:calvi/l10n/app_localizations.dart';
 
 /// Where the line actually sits inside the field it is typed into.
 ///
@@ -20,6 +21,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: L.localizationsDelegates,
+        supportedLocales: L.supportedLocales,
+        locale: const Locale('uk'),
         theme: calviLightTheme,
         home: Scaffold(
           body: ListView(
@@ -61,6 +65,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: L.localizationsDelegates,
+        supportedLocales: L.supportedLocales,
+        locale: const Locale('uk'),
         theme: calviLightTheme,
         home: Scaffold(body: SlotInput(onSend: (_) {})),
       ),
@@ -77,14 +84,28 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
+    /* Форма тепер приходить аркушем знизу, а не розгортається в списку, тому
+       відкриваємо її так, як її відкриває людина. */
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: L.localizationsDelegates,
+        supportedLocales: L.supportedLocales,
+        locale: const Locale('uk'),
         theme: calviLightTheme,
         home: Scaffold(
-          body: ListView(children: [MedsForm(onSave: (_) {}, onDone: () {}, now: 0)]),
+          body: Builder(
+            builder: (context) => Center(
+              child: GestureDetector(
+                onTap: () => openMedSheet(context, now: 0, onSave: (_) {}),
+                child: const Text('відкрити'),
+              ),
+            ),
+          ),
         ),
       ),
     );
+
+    await tester.tap(find.text('відкрити'));
     await tester.pumpAndSettle();
 
     /* The same fault the day's card had: a box of a fixed height puts what is

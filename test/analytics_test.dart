@@ -7,13 +7,20 @@ import 'package:calvi/data/measure.dart';
 import 'package:calvi/data/settings.dart';
 import 'package:calvi/design/theme.dart';
 import 'package:calvi/screens/analytics/analytics_screen.dart';
+import 'package:calvi/l10n/app_localizations.dart';
 
 Widget _wrap(Widget child) => AppScope(
   s: initialSettings(),
   set: (_) {},
   meds: const [],
   setMeds: (_) {},
-  child: MaterialApp(theme: calviLightTheme, home: child),
+  child: MaterialApp(
+    localizationsDelegates: L.localizationsDelegates,
+    supportedLocales: L.supportedLocales,
+    locale: const Locale('uk'),
+    theme: calviLightTheme,
+    home: child,
+  ),
 );
 
 void main() {
@@ -59,9 +66,7 @@ void main() {
 /// The big number standing above [cap].
 String _figure(WidgetTester tester, String cap) {
   final column = find.ancestor(of: find.text(cap), matching: find.byType(Column)).first;
-  final texts = tester.widgetList<Text>(
-    find.descendant(of: column, matching: find.byType(Text)),
-  );
+  final texts = tester.widgetList<Text>(find.descendant(of: column, matching: find.byType(Text)));
   for (final t in texts) {
     final s = t.data ?? t.textSpan?.toPlainText() ?? '';
     if (s != cap && s.trim().isNotEmpty) return s;

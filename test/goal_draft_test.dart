@@ -5,6 +5,7 @@ import 'package:calvi/data/app_scope.dart';
 import 'package:calvi/data/settings.dart';
 import 'package:calvi/design/theme.dart';
 import 'package:calvi/screens/settings/panels_body.dart';
+import 'package:calvi/l10n/app_localizations.dart';
 
 /// Opening the goal must not move the goal.
 ///
@@ -27,6 +28,9 @@ void main() {
           meds: const [],
           setMeds: (_) {},
           child: MaterialApp(
+            localizationsDelegates: L.localizationsDelegates,
+            supportedLocales: L.supportedLocales,
+            locale: const Locale('uk'),
             theme: calviLightTheme,
             scrollBehavior: const CalviScroll(),
             home: GoalPanel(s: s, set: (patch) => setState(() => s = patch(s))),

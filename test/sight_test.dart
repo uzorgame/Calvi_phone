@@ -17,12 +17,7 @@ void main() {
 
   Barcode at(Rect box) => Barcode(
     rawValue: '4820001234567',
-    corners: [
-      box.topLeft,
-      box.topRight,
-      box.bottomRight,
-      box.bottomLeft,
-    ],
+    corners: [box.topLeft, box.topRight, box.bottomRight, box.bottomLeft],
   );
 
   group('вікно читання', () {

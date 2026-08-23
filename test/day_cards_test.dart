@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:calvi/data/day.dart';
 import 'package:calvi/data/meal.dart';
 import 'package:calvi/data/measure.dart';
 import 'package:calvi/data/workout.dart';
@@ -11,8 +12,12 @@ import 'package:calvi/screens/today/measure_card.dart';
 import 'package:calvi/screens/today/meal_card.dart';
 import 'package:calvi/screens/today/water_card.dart';
 import 'package:calvi/screens/today/workout_card.dart';
+import 'package:calvi/l10n/app_localizations.dart';
 
 Widget _wrap(Widget child) => MaterialApp(
+  localizationsDelegates: L.localizationsDelegates,
+  supportedLocales: L.supportedLocales,
+  locale: const Locale('uk'),
   theme: calviLightTheme,
   home: Scaffold(body: ListView(children: [child])),
 );
@@ -70,14 +75,7 @@ void main() {
       _wrap(
         WorkoutCard(
           workouts: const [
-            Workout(
-              id: 'w',
-              activity: 'run',
-              title: 'Біг',
-              minutes: 34,
-              kcal: 310,
-              time: '07:20',
-            ),
+            Workout(id: 'w', activity: 'run', title: 'Біг', minutes: 34, kcal: 310, time: '07:20'),
           ],
           onAdd: (_) {},
           open: true,
@@ -101,6 +99,7 @@ void main() {
     await tester.pumpWidget(
       _wrap(
         MeasureCard(
+          date: todayDate,
           list: demoMeasures,
           tracked: const ['weightKg'],
           onTrack: (_) {},
@@ -114,8 +113,15 @@ void main() {
 
     expect(find.text('Вага'), findsOneWidget);
     expect(find.text('Біцепс'), findsNothing, reason: 'нестежене поле не має стояти в картці');
-    // Prefilled from the last session, not empty.
-    expect(find.text('78.6'), findsOneWidget);
+
+    /* Поле порожнє, а минуле число стоїть підказкою.
+     *
+     * Спершу тут підставлялось останнє значення як звичайний текст, і картка
+     * казала «останнє сьогодні» над числом, якого сьогодні ніхто не міряв.
+     * Заміри належать дню: минуле видно, але воно ще не сьогоднішнє. */
+    final field = tester.widget<TextField>(find.byType(TextField).first);
+    expect(field.controller?.text, isEmpty, reason: 'учорашнє число підставили як сьогоднішнє');
+    expect(field.decoration?.hintText, '78.6', reason: 'минуле мало лишитись підказкою');
     /* Nothing to save is nothing to press: the card offers the button only
        once a figure has actually been changed. */
     expect(find.text('Зберегти заміри'), findsNothing);
@@ -178,7 +184,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('Нора рахує…'), findsOneWidget);
-    expect(find.text('—'), findsOneWidget, reason: 'нуль калорій був би вигадкою');
+    expect(find.text('···'), findsOneWidget, reason: 'нуль калорій був би вигадкою');
   });
 }
 
@@ -191,6 +197,9 @@ void _sendMark() {
   testWidgets('плюс у картці читається і поки нічого не написано', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: L.localizationsDelegates,
+        supportedLocales: L.supportedLocales,
+        locale: const Locale('uk'),
         theme: calviLightTheme,
         home: Scaffold(
           body: ListView(
@@ -229,6 +238,9 @@ void _waterBar() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: L.localizationsDelegates,
+        supportedLocales: L.supportedLocales,
+        locale: const Locale('uk'),
         theme: calviLightTheme,
         home: Scaffold(
           body: ListView(
@@ -241,20 +253,21 @@ void _waterBar() {
     );
     await tester.pumpAndSettle();
 
-    final track = tester.getRect(find.byType(ClipRRect).first);
-    final fill = tester.getRect(
-      find.descendant(
-        of: find.byType(ClipRRect).first,
-        matching: find.byType(AnimatedContainer),
-      ),
-    );
+    /* Смуга це склянки, а не суцільне заповнення: воду рахують склянками, і
+       норма 2 200 мл це дев'ять їх, з яких 900 мл це чотири. */
+    final marks = tester.widgetList<AnimatedContainer>(find.byType(AnimatedContainer)).toList();
+    expect(marks.length, 9, reason: 'поділок не за нормою');
 
-    expect(track.width, greaterThan(200), reason: 'доріжка стиснулась до заповнення');
-    expect(fill.left, closeTo(track.left, 0.5), reason: 'заповнення не від лівого краю');
-    expect(
-      fill.width / track.width,
-      closeTo(900 / 2200, 0.02),
-      reason: 'заповнення не відповідає випитому',
+    final full = marks
+        .where((m) => (m.decoration as BoxDecoration).color == calviLight.fats)
+        .length;
+    expect(full, 4, reason: 'налито не стільки склянок, скільки випито');
+
+    /* Ряд поділок займає всю ширину картки: доріжка, що стиснулась до
+       заповнення, це та сама помилка, яку ловив попередній тест. */
+    final row = tester.getRect(
+      find.ancestor(of: find.byType(AnimatedContainer).first, matching: find.byType(Row)).first,
     );
+    expect(row.width, greaterThan(200), reason: 'ряд склянок стиснувся');
   });
 }

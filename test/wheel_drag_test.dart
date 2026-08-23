@@ -6,6 +6,7 @@ import 'package:calvi/data/settings.dart';
 import 'package:calvi/design/theme.dart';
 import 'package:calvi/design/wheel.dart';
 import 'package:calvi/screens/settings/panels_body.dart';
+import 'package:calvi/l10n/app_localizations.dart';
 
 /// A flick of the age drum travels as far as it was pushed.
 ///
@@ -28,6 +29,9 @@ void main() {
           meds: const [],
           setMeds: (_) {},
           child: MaterialApp(
+            localizationsDelegates: L.localizationsDelegates,
+            supportedLocales: L.supportedLocales,
+            locale: const Locale('uk'),
             theme: calviLightTheme,
             scrollBehavior: const CalviScroll(),
             home: ProfilePanel(s: s, set: (patch) => setState(() => s = patch(s))),
@@ -35,6 +39,11 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
+
+    /* Барабан живе в аркуші, а не в сторінці: усередині сторінки він забирав би
+       собі жест гортання. Відкриваємо аркуш і крутимо там. */
+    await tester.tap(find.text('Вік'));
     await tester.pumpAndSettle();
 
     final was = s.age;
@@ -47,6 +56,10 @@ void main() {
       await g.moveBy(const Offset(0, -20), timeStamp: Duration(milliseconds: 16 * i));
     }
     await g.up();
+    await tester.pumpAndSettle();
+
+    /* Значення застосовується на «Готово», тому спершу закриваємо аркуш. */
+    await tester.tap(find.text('Готово').last);
     await tester.pumpAndSettle();
 
     final moved = (s.age - was).abs();

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 
+import 'data/evening.dart';
 import 'data/local/database.dart';
 import 'data/remote/sync_service.dart';
 import 'data/meds.dart';
@@ -8,12 +9,16 @@ import 'data/settings.dart';
 import 'data/app_scope.dart';
 import 'data/day_stats.dart';
 import 'data/local/day_reader.dart';
+import 'data/local/meds_store.dart';
+import 'data/notifications.dart';
 import 'data/local/profile_store.dart';
 import 'design/slide.dart';
+import 'l10n/app_localizations.dart';
 import 'design/theme.dart';
 import 'data/measure.dart';
 import 'screens/analytics/analytics_screen.dart';
 import 'screens/camera/camera_screen.dart';
+import 'screens/voice/level_source.dart';
 import 'screens/voice/voice_overlay.dart';
 import 'screens/meds/meds_route.dart';
 import 'screens/settings/panel_allergy.dart';
@@ -24,6 +29,8 @@ import 'screens/settings/panels_body.dart';
 import 'screens/settings/settings_screen.dart';
 import 'screens/start/start_screen.dart';
 import 'screens/today/today_screen.dart';
+import 'data/meal.dart';
+import 'l10n/data_lang.dart';
 
 void main() => runApp(const CalviApp());
 
@@ -51,6 +58,24 @@ class _CalviAppState extends State<CalviApp> {
   /// Профіль на диску. Зʼявляється разом із базою, тобто на першому справжньому
   /// запуску.
   ProfileStore? _profiles;
+
+  /// Препарати на диску. Доти список жив тільки в памʼяті екрана і зникав
+  /// разом із застосунком, а на сервер не потрапляв ніколи.
+  MedsStore? _meds_;
+
+  /* Сповіщення. Один на застосунок: розклад переплановується цілком, і два
+     планувальники, які не знають один про одного, лишили б по собі привидів
+     старих годин. */
+  final _bell = Notifications();
+
+  /* Ключ навігатора, щоб відкрити екран у відповідь на сповіщення.
+   *
+   * Дотик приходить не з дерева віджетів, а ззовні, і контексту в нього немає.
+   * Ключ це єдиний спосіб дістатись до навігатора звідти. */
+  final _nav = GlobalKey<NavigatorState>();
+
+  /// Чи дозволила система показувати сповіщення. Питається один раз на запуск.
+  bool _bellOk = false;
   /* Empty on purpose, same as the demo: the fourth card on the home row is
      earned by adding a regimen, not granted by a fixture. */
   List<Med> _meds = const [];
@@ -98,7 +123,7 @@ class _CalviAppState extends State<CalviApp> {
   /// Switching to «мої» is what opens the database, and the first switch is the
   /// first time this phone writes anything of its own.
   void _setReal(bool real) => setState(() {
-    if (real && widget.storage) _open();
+    if (real && widget.storage) unawaited(_open());
     _real = real;
     // Назад у демо: підсумки теж мають бути демонстраційні, інакше на екрані
     // опиниться половина одного тижня і половина іншого.
@@ -111,15 +136,74 @@ class _CalviAppState extends State<CalviApp> {
     }
   });
 
-  /// Opens the database once, and starts the sync that follows it.
-  void _open() {
+  /* Opens the database once, and starts the sync that follows it.
+   *
+   * Спершу одне порожнє звертання до бази, і аж тоді все інше.
+   *
+   * `CalviDb()` не відкриває нічого: файл відкривається на першому ж запиті, і
+   * невдача випливає геть в іншому місці. Доти вона не випливала взагалі:
+   * профіль, препарати, підсумки й синхронізація йшли до бази кожен своєю
+   * дорогою, кожен без `catch`, і кожен лишав по собі необроблений виняток. На
+   * екрані при цьому був порожній день, тобто найстрашніше з можливих
+   * повідомлень, сказане тим, що не сказано нічого.
+   *
+   * Причин рівно три: зіпсований файл бази, телефон без місця, і браузер без
+   * `sqlite3.wasm`. Останнє й показало решту: у зібраному під web застосунку
+   * сторінка крутила той самий виняток без кінця.
+   *
+   * **Після проби обовʼязково `setState`.** Поля читає `AppScope`, а він
+   * збирається в `build`, і виставити їх після `await` без перебудови означає
+   * лишити дерево з `sync: null`. Найкоротший шлях до цього це перемикач «Демо
+   * → Мої»: він кличе `_open()` уже всередині `setState`, тобто перебудова
+   * відбувається раніше, ніж зʼявляється те, заради чого її робили, і картка
+   * акаунта показує застосунок, у якому входу не існує. */
+  Future<void> _open() async {
     if (_db != null) return;
     final db = CalviDb();
-    _db = db;
-    _sync = SyncService(db)..start();
-    _profiles = ProfileStore(db);
+
+    try {
+      await db.syncDao.state();
+    } catch (_) {
+      unawaited(db.close().catchError((_) {}));
+      if (!mounted) return;
+      // Не вийшло, значить лишаємось на показовому дні і кажемо про це вголос:
+      // демо це не «твої записи», але це принаймні чесно.
+      setState(() => _onboarding = false);
+      _say(dataL.storageBroken);
+      return;
+    }
+
+    if (!mounted) {
+      unawaited(db.close().catchError((_) {}));
+      return;
+    }
+
+    setState(() {
+      _db = db;
+      _sync = SyncService(db)..start();
+      _profiles = ProfileStore(db);
+      _meds_ = MedsStore(db);
+    });
+
+    /* Дотик по сповіщенню препаратів веде в препарати, а не на головну.
+     *
+     * Людина торкнулась «Магній B6, 2 таблетки» саме для того, щоб поставити
+     * галочку. Висадити її на головному екрані означає змусити шукати дорогу до
+     * того, за чим вона прийшла. */
+    unawaited(
+      _bell.granted().then((ok) {
+        if (mounted) _bellOk = ok;
+      }),
+    );
+    _bell.onTap = _openFrom;
+    unawaited(
+      _bell.launchedFrom().then((from) {
+        if (from != null) _openFrom(from);
+      }),
+    );
     _follow(db);
     unawaited(_loadProfile());
+    unawaited(_loadMeds());
   }
 
   /// Читає збережений профіль і вирішує, чи це перший запуск.
@@ -134,6 +218,7 @@ class _CalviAppState extends State<CalviApp> {
       if (saved != null) _s = saved;
       _onboarding = saved == null;
     });
+    _replan();
   }
 
   /// Кінець «Старту»: те, що зібрали, стає профілем і одразу лягає на диск.
@@ -150,14 +235,40 @@ class _CalviAppState extends State<CalviApp> {
   }
 
   /// Слухає підсумки днів зі сховища. Порожні, поки перша відповідь не прийшла.
+  /* Чи сховище вже підвело. Один раз на запуск, бо і сказати про це треба один
+     раз: повідомлення, яке повторюється на кожній спробі, це не повідомлення. */
+  bool _storageBroken = false;
+
   void _follow(CalviDb? db) {
     _statsFeed?.cancel();
     if (db == null) return;
 
     _stats = DayStats.empty;
-    _statsFeed = DayReader(db).watchStats().listen((next) {
-      if (mounted) setState(() => _stats = next);
-    });
+    _statsFeed = DayReader(db).watchStats().listen(
+      (next) {
+        if (mounted) setState(() => _stats = next);
+      },
+      /* База не відкрилась.
+       *
+       * Доти помилка йшла в нікуди: підписка вмирала мовчки, підсумки лишались
+       * порожніми назавжди, і людина бачила день без жодного запису. Тобто
+       * найстрашніше з можливих повідомлень, «твої дані зникли», сказане тим,
+       * що не сказано нічого.
+       *
+       * Причин рівно дві, і жодна не наша: зіпсований файл бази і телефон, на
+       * якому не лишилось місця. У браузері до цього додається третя, відсутній
+       * `sqlite3.wasm`, і саме на ній це й знайшлось: сторінка крутила той самий
+       * необроблений виняток без кінця.
+       *
+       * Тепер спроба одна, і про невдачу кажуть уголос. */
+      onError: (Object _) {
+        _statsFeed?.cancel();
+        _statsFeed = null;
+        if (_storageBroken) return;
+        _storageBroken = true;
+        _say(dataL.storageBroken);
+      },
+    );
   }
 
   /* Пише не одразу, а трохи згодом.
@@ -169,7 +280,24 @@ class _CalviAppState extends State<CalviApp> {
   Timer? _saveLater;
 
   void _set(SettingsState Function(SettingsState) patch) {
+    final had = _s.reminders;
     setState(() => _s = patch(_s));
+
+    /* Нагадування переставляються одразу, а дозвіл питається на першому з них.
+     *
+     * Не при встановленні: питати наперед означає питати до того, як людина
+     * зрозуміла, навіщо це їй. Тут вона щойно завела нагадування власноруч, і
+     * питання читається як частина тієї ж дії. */
+    if (!identical(had, _s.reminders)) {
+      unawaited(
+        _guard(
+          wants: _s.reminders.any((r) => r.on),
+          off: () => _set(
+            (v) => v.copyWith(reminders: [for (final r in v.reminders) r.copyWith(on: false)]),
+          ),
+        ),
+      );
+    }
 
     // У демо міняють вітрину, а не свій профіль: писати це на диск не можна.
     if (!_real || _onboarding != false) return;
@@ -182,7 +310,216 @@ class _CalviAppState extends State<CalviApp> {
     );
   }
 
-  void _setMeds(List<Med> Function(List<Med>) patch) => setState(() => _meds = patch(_meds));
+  /* День, за який зараз показані галочки прийому.
+   *
+   * Потрібен, бо «прийняв» це властивість дня, а не препарату: та сама таблетка
+   * о восьмій вчора і сьогодні це дві різні позначки. */
+  /* Береться щоразу заново, а не запамʼятовується при запуску.
+   *
+   * Тут стояло поле, ініціалізоване `DateTime.now()` один раз. Телефон,
+   * залишений увімкненим через північ, писав ранкову таблетку у вчорашній день:
+   * екран уже показував нову дату, а галочка лягала в стару. */
+  DateTime? _medsDayPin;
+  DateTime get _medsDay => _medsDayPin ?? DateTime.now();
+
+  /// Читає препарати з диска. Порожньо, поки людина не завела жодного.
+  Future<void> _loadMeds({DateTime? on}) async {
+    if (on != null) _medsDayPin = on;
+    final saved = await _meds_?.load(on: _medsDay);
+    if (!mounted || saved == null) return;
+    setState(() => _meds = saved);
+    _replan();
+  }
+
+  /* Кожна зміна списку одразу лягає на диск і стає в чергу на сервер.
+   *
+   * Порівнюється те, що було, з тим, що стало: екран віддає весь список, а не
+   * говорить, що саме змінилось. Дешевше порівняти два коротких списки, ніж
+   * провести через увесь застосунок ще один тип події. */
+  void _setMeds(List<Med> Function(List<Med>) patch) {
+    final was = _meds;
+
+    /* Курс без початку це курс «від завжди», і в минулих днях він виглядає так,
+       ніби людина пила його все життя. Тут єдине місце, через яке проходять усі
+       зміни списку, тому запобіжник стоїть саме тут. */
+    final today = dayKeyOf(DateTime.now());
+    final now = [
+      for (final m in patch(was))
+        if (m.startDay.isEmpty) m.copyWith(startDay: today) else m,
+    ];
+    setState(() => _meds = now);
+
+    final store = _meds_;
+    if (store == null) return;
+
+    Future<void> write() async {
+      for (final m in now) {
+        final before = was.where((x) => x.id == m.id).firstOrNull;
+        if (before == null || !_sameMed(before, m)) await store.save(m);
+
+        /* Галочки прийому це окремі рядки, і міняються вони найчастіше: саме на
+           них людина тисне щодня. */
+        for (final t in m.times) {
+          final had = before?.times.where((x) => x.at == t.at).firstOrNull;
+          if (had == null || had.taken != t.taken) {
+            await store.setTaken(medId: m.id, at: t.at, taken: t.taken, on: _medsDay);
+          }
+        }
+      }
+
+      /* Зниклий зі списку препарат означає «курс закінчено», а не «його не
+         було». Дні, коли людина його справді приймала, лишаються в щоденнику:
+         інакше історія переписується заднім числом. */
+      for (final gone in was.where((m) => now.every((x) => x.id != m.id))) {
+        await store.stop(gone.id);
+      }
+    }
+
+    unawaited(write().then((_) => _sync?.now()));
+
+    /* Дозвіл питається і тут теж.
+     *
+     * Раніше він питався тільки при першому нагадуванні, а препарати йшли цією
+     * дорогою і не питали нічого. Людина заводила препарат, перемикач ставав
+     * «увімкнено», системного дозволу не було, і сповіщення лягало в порожнечу.
+     * Дізнатись про це можна було тільки з пропущеного прийому. */
+    unawaited(
+      _guard(
+        wants: now.any((m) => m.remind),
+        off: () => _setMeds(
+          (list) => [
+            for (final m in list)
+              if (m.remind)
+                Med(
+                  id: m.id,
+                  name: m.name,
+                  dose: m.dose,
+                  form: m.form,
+                  remind: false,
+                  repeat: m.repeat,
+                  times: m.times,
+                  note: m.note,
+                )
+              else
+                m,
+          ],
+        ),
+      ),
+    );
+  }
+
+  /* Перемикач не має брехати.
+   *
+   * Увімкнений перемикач без системного дозволу це обіцянка, за якою нічого не
+   * станеться. Тому коли людина щось вмикає, ми питаємо систему, і якщо вона
+   * відмовила, повертаємо перемикач у вимкнене й кажемо чому. Мовчки лишити
+   * його увімкненим означало б, що застосунок бреше в очі. */
+  Future<void> _guard({required bool wants, required VoidCallback off}) async {
+    if (!wants) {
+      _replan();
+      return;
+    }
+
+    if (_bellOk) {
+      _replan();
+      return;
+    }
+
+    _bellOk = await _bell.granted();
+    if (!_bellOk) _bellOk = await _bell.ask();
+
+    if (_bellOk) {
+      _replan();
+      return;
+    }
+
+    off();
+    /* Повідомлення береться через [dataL], бо екрана в цю мить може ще не бути:
+       дозвіл питають на самому старті. */
+    _say(dataL.notifyDenied);
+  }
+
+  /// Коротке повідомлення внизу екрана.
+  void _say(String text) {
+    final nav = _nav.currentState;
+    final ctx = nav?.overlay?.context;
+    if (ctx == null) return;
+    ScaffoldMessenger.maybeOf(
+      ctx,
+    )?.showSnackBar(SnackBar(content: Text(text), duration: const Duration(seconds: 6)));
+  }
+
+  /// Куди веде дотик по сповіщенню.
+  void _openFrom(String from) {
+    /* Після кадру, а не тієї ж миті: сповіщення може прийти до того, як
+       навігатор узагалі народився, і штовхати екран у порожнечу нема сенсу. */
+    if (from == From.evening) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _askEvening());
+      return;
+    }
+    if (from != From.meds) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final nav = _nav.currentState;
+      if (nav == null) return;
+      nav.push(slideRoute(const MedsRoute()));
+    });
+  }
+
+  /* Вечірнє питання ставиться з самого дня, а не завченою фразою.
+   *
+   * Питати «як минув день» у того, хто все записав, означає навчити людину
+   * змахувати сповіщення не читаючи. Тому якщо в дні нічого не бракує, чат
+   * просто відкривається без питання. */
+  Future<void> _askEvening() async {
+    final db = _db;
+    if (db == null || !mounted) return;
+
+    final today = await DayReader(db).read(DateTime.now());
+    final ask = eveningAsk(day: today, goal: goalOf(_s));
+    if (!mounted || ask == null) return;
+
+    setState(() => _evening = ask);
+  }
+
+  /* Питання, яке чекає, поки відкриється день. Порожньо, коли питати нема про
+     що або коли його вже поставили. */
+  String? _evening;
+
+  /* Розклад переставляється щоразу, коли міняється те, з чого він складається.
+   *
+   * Через N днів система повторювати не вміє, тому такі сповіщення ставляться
+   * поштучно на кілька тижнів уперед і поповнюються тут же: застосунок
+   * відкривають частіше, ніж раз на два тижні, а хто не відкривав місяць, тому
+   * нагадування вже й не потрібні. */
+  /* Закінчені курси відсіює сам планувальник, тому сюди їде весь список.
+   *
+   * Перемикач «нагадувати про препарати» теж дивиться тільки на ті, що ще
+   * приймаються: інакше єдиний закритий курс з увімкненим дзвіночком тримав би
+   * його ввімкненим для всіх. */
+  void _replan() {
+    final live = medsAhead(_meds);
+    unawaited(
+      _bell.reschedule(reminders: _s.reminders, meds: _meds, medsRemind: live.any((m) => m.remind)),
+    );
+  }
+
+  /// Чи змінилось у препараті щось, що варто писати в базу.
+  static bool _sameMed(Med a, Med b) =>
+      a.name == b.name &&
+      a.dose == b.dose &&
+      a.form == b.form &&
+      a.remind == b.remind &&
+      /* Межі курсу теж рахуються за зміну.
+       *
+       * Без них «закінчити курс» нічого не писало в базу: останній день міняв
+       * тільки те, що лежить у памʼяті, і після перезапуску препарат
+       * повертався в активні, ніби нічого не було. */
+      a.startDay == b.startDay &&
+      a.endDay == b.endDay &&
+      a.note == b.note &&
+      repeatToJson(a.repeat) == repeatToJson(b.repeat) &&
+      a.times.map((t) => t.at).join(',') == b.times.map((t) => t.at).join(',');
 
   ThemeMode get _mode => switch (_s.theme) {
     AppTheme.light => ThemeMode.light,
@@ -195,7 +532,7 @@ class _CalviAppState extends State<CalviApp> {
     super.initState();
     // Real from the first frame, so nothing has to be switched on to be used.
     if (_real && widget.storage) {
-      _open();
+      unawaited(_open());
       return;
     }
     /* Без сховища питати нема кого, і відповідь тут одна: показати «Старт».
@@ -216,26 +553,63 @@ class _CalviAppState extends State<CalviApp> {
       stats: _stats,
       setReal: _setReal,
       child: MaterialApp(
+        navigatorKey: _nav,
         title: 'Calvi',
         debugShowCheckedModeBanner: false,
         scrollBehavior: const CalviScroll(),
         theme: calviLightTheme,
         darkTheme: calviDarkTheme,
         themeMode: _mode,
+
+        localizationsDelegates: L.localizationsDelegates,
+
+        /* Англійська **першою**, і це не про пріоритет, а про запасний варіант:
+           Flutter бере першу підтримувану мову для пристроїв, чиєї мови в списку
+           немає. Українська стоїть другою і вмикається сама на українському
+           телефоні. */
+        supportedLocales: const [Locale('en'), Locale('uk')],
+
+        /* `null` означає «спитай пристрій». Людина, яка обрала мову руками,
+           перебиває це, і її вибір переживає перезапуск: він лежить у профілі
+           поруч із темою. */
+        locale: switch (_s.lang) {
+          Lang.system => null,
+          Lang.uk => const Locale('uk'),
+          Lang.en => const Locale('en'),
+        },
+        /* Шар даних дізнається про мову звідси.
+         *
+         * Сповіщення, вечірнє питання і підписи, які збирає сховище для самого
+         * себе, малюються тоді, коли екрана може не бути взагалі, і `L.of` їм
+         * недоступний. Тому мова, обрана вище, дублюється в одне поле, а
+         * читається воно через `l10n/data_lang.dart`.
+         *
+         * Саме тут, а не в `build` вище: до цієї миті Flutter уже вирішив, яку
+         * з підтримуваних мов він узяв, зокрема коли вибір лишили за пристроєм. */
+        /* Ґрунт під усім, що малює застосунок. У темряві він градієнтний, а
+           колір Scaffold градієнта не тримає, тому це окремий шар під деревом
+           екранів. */
+        builder: (context, child) => CalviGround(child: child ?? const SizedBox()),
         home: Builder(
-          builder: (context) => _start(
-            switch (_onboarding) {
+          builder: (context) {
+            dataLang = Localizations.localeOf(context).languageCode;
+            return _start(switch (_onboarding) {
               /* Диск ще не відповів. Порожній екран кольору застосунку триває
                  кадр або два і виглядає як продовження заставки; будь-що інше
-                 тут блимнуло б і зникло. */
-              null => const ColoredBox(color: Color(0xFFFFFFFF)),
+                 тут блимнуло б і зникло.
+               *
+               * Прозорий, а не білий: під ним лежить ґрунт, який знає тему, а
+               * зашитий білий давав спалах у темряві саме тієї миті, коли
+               * застосунок відкривають уночі. */
+              null => const SizedBox.expand(),
               true => StartScreen(onFinish: _finishStart),
               false => TodayScreen(
+                ask: _evening,
                 onSettings: () => Navigator.of(context).push(slideRoute(const SettingsScreen())),
                 onMeds: () => Navigator.of(context).push(slideRoute(const MedsRoute())),
               ),
-            },
-          ),
+            });
+          },
         ),
       ),
     );
@@ -284,16 +658,28 @@ Widget _start(Widget home) {
             // The dev entry seeds the demo regimen so there is something to see.
             final scope = AppScope.of(context);
             if (scope.meds.isEmpty) {
-              WidgetsBinding.instance.addPostFrameCallback(
-                (_) => scope.setMeds((_) => demoMeds),
-              );
+              WidgetsBinding.instance.addPostFrameCallback((_) => scope.setMeds((_) => demoMeds));
             }
             return const MedsRoute();
           },
         ),
         'analytics' => AnalyticsScreen(measures: demoMeasures, onSettings: () {}),
-        'camera' => CameraScreen(slot: 'Обід', onSend: (_) {}),
-        'voice' => Scaffold(body: VoiceOverlay(onDone: (_) {})),
+        'camera' => CameraScreen(slot: baseSlots['lunch']!.label, onSend: (_) {}),
+        /* Диктування окремим маршрутом, щоб дивитись на нього в браузері.
+           Кнопка стоїть там же, де в барі: справа внизу. */
+        'voice' => Scaffold(
+          body: Builder(
+            builder: (context) {
+              final size = MediaQuery.sizeOf(context);
+              return VoiceOverlay(
+                origin: VoiceOrigin(at: Offset(size.width - 53, size.height - 51), size: 42),
+                leaving: false,
+                onClosed: () {},
+                source: const BreathingLevel(),
+              );
+            },
+          ),
+        ),
         'start' => StartScreen(
           onFinish: (_) {},
           step: int.tryParse(Uri.base.queryParameters['step'] ?? '') ?? 0,
@@ -304,9 +690,7 @@ Widget _start(Widget home) {
             // macro row: it cannot be reached from a cold start otherwise.
             final scope = AppScope.of(context);
             if (Uri.base.queryParameters['meds'] == '1' && scope.meds.isEmpty) {
-              WidgetsBinding.instance.addPostFrameCallback(
-                (_) => scope.setMeds((_) => demoMeds),
-              );
+              WidgetsBinding.instance.addPostFrameCallback((_) => scope.setMeds((_) => demoMeds));
             }
             return TodayScreen(
               chatOpen: Uri.base.queryParameters['chat'] == '1',

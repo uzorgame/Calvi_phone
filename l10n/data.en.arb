@@ -1,0 +1,89 @@
+{
+  "fieldWeight": "Weight",
+  "fieldChest": "Chest",
+  "fieldWaist": "Waist",
+  "fieldHips": "Hips",
+  "fieldThigh": "Thigh",
+  "fieldWrist": "Wrist",
+  "fieldNeck": "Neck",
+  "fieldBiceps": "Biceps",
+  "agoToday": "today",
+  "agoYesterday": "yesterday",
+  "agoDays": "{count, plural, =1{1 day ago} other{{count} days ago}}",
+  "@agoDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "agoWeeks": "{count, plural, other{{count} weeks ago}}",
+  "@agoWeeks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "actGym": "Gym",
+  "actRun": "Running",
+  "actBike": "Cycling",
+  "actWalk": "Walking",
+  "actSwim": "Swimming",
+  "actYoga": "Yoga",
+  "actHiit": "HIIT",
+  "actJumprope": "Skipping",
+  "actStretch": "Stretching",
+  "actFootball": "Football",
+  "actBasketball": "Basketball",
+  "actTennis": "Tennis",
+  "actDance": "Dancing",
+  "actSki": "Skiing",
+  "wdMon": "Mon",
+  "wdTue": "Tue",
+  "wdWed": "Wed",
+  "wdThu": "Thu",
+  "wdFri": "Fri",
+  "wdSat": "Sat",
+  "wdSun": "Sun",
+  "repDaily": "every day",
+  "repWeekdays": "on weekdays",
+  "repWeekends": "at weekends",
+  "repEveryOther": "every other day",
+  "repWeekly": "once a week",
+  "repEveryN": "{count, plural, other{every {count} days}}",
+  "@repEveryN": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "repPickDaily": "Every day",
+  "repPickWeekdays": "Days of the week",
+  "repPickNoDays": "No day is chosen, so the reminder will never fire.",
+  "repPickFromToday": "Counting from today.",
+  "wheelLess": "Less",
+  "wheelMore": "More",
+  "doseTabOne": "tablet",
+  "doseTabFew": "tablets",
+  "doseTabMany": "tablets",
+  "@doseTabOne": {
+    "description": "Dose forms. Three each, because Ukrainian picks between them by the number in front; English uses the same word for the last two."
+  },
+  "doseCapOne": "capsule",
+  "doseCapFew": "capsules",
+  "doseCapMany": "capsules",
+  "doseDropOne": "drop",
+  "doseDropFew": "drops",
+  "doseDropMany": "drops",
+  "doseMlOne": "ml",
+  "doseMlFew": "ml",
+  "doseMlMany": "ml",
+  "doseShotOne": "shot",
+  "doseShotFew": "shots",
+  "doseShotMany": "shots",
+  "agoWeek": "a week ago",
+
+  "repPickInterval": "Every other day"
+}

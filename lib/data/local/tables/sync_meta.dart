@@ -22,6 +22,16 @@ class SyncMeta extends Table {
   TextColumn get accessToken => text().nullable()();
   TextColumn get refreshToken => text().nullable()();
 
+  /* Пошта акаунта Google, і більше про людину ми ззовні не знаємо: імені й фото
+     ми не просимо. Порожньо тут це робочий стан, а не помилка: щоденник без
+     входу працює повністю, просто живе на одному телефоні. */
+  TextColumn get email => text().nullable()();
+
+  /* Коли зʼявився обліковий запис. Не коли людина увійшла: запис існує з
+     першого запуску, а вхід лише підписує його. Приходить із сервера, тому на
+     новому телефоні лишається старою датою. */
+  DateTimeColumn get joinedAt => dateTime().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }
