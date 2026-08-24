@@ -45,5 +45,20 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+
+	<!-- Навіщо застосунок просить камеру, мікрофон і галерею.
+
+	     На iOS без цих рядків застосунок не питає дозволу, а падає на першому ж
+	     зверненні, і рев'ю відхиляє збірку. Текст бачить людина в системному
+	     вікні, тому він написаний для неї, а не для перевіряльника: сказано, що
+	     саме береться і навіщо. -->
+	<key>NSCameraUsageDescription</key>
+	<string>Щоб сфотографувати страву або зчитати штрихкод. Знімок не зберігається ні на телефоні, ні в нас.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Щоб надиктувати, що ви з'їли, замість набирати. Розпізнає мову сам телефон, звук нам не надсилається.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Щоб узяти вже готове фото страви з галереї.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Щоб перетворити надиктоване на текст запису.</string>
 </dict>
 </plist>

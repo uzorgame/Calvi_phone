@@ -1,0 +1,110 @@
+# Збірка iOS на Codemagic і відправка в App Store Connect.
+#
+# Складати iOS можна тільки на macOS, а машини з macOS тут немає. Codemagic
+# орендує її на час збірки: забирає код із цього репозиторію, ставить Flutter,
+# підписує збірку сертифікатом Apple і кладе готовий файл у TestFlight.
+#
+# Що потрібно завести один раз, до першого запуску, описано в docs/CODEMAGIC.md
+# у робочому репозиторії проєкту. Коротко: ключ App Store Connect API і група
+# змінних `calvi-ios`.
+
+workflows:
+  ios-release:
+    name: iOS, у TestFlight
+    # Машина з macOS. m2 швидша за m1 приблизно вдвічі, а тарифікується той
+    # самий час, тож економія тут уявна.
+    instance_type: mac_mini_m2
+    # Стеля на випадок, якщо збірка зависне: платимо за хвилини.
+    max_build_duration: 60
+
+    integrations:
+      # Ключ заводиться в Codemagic → Teams → Integrations → App Store Connect.
+      # Ім'я нижче це ім'я ключа там, а не сам ключ.
+      app_store_connect: calvi-asc
+
+    environment:
+      groups:
+        # Змінні, які не можна тримати у файлі. Див. docs/CODEMAGIC.md.
+        - calvi-ios
+
+      vars:
+        BUNDLE_ID: com.calvi.calvi
+        # APP_STORE_APPLE_ID і CALVI_GOOGLE_IOS_CLIENT приходять із групи
+        # calvi-ios: перший це номер застосунку в App Store Connect, другий
+        # ідентифікатор клієнта Google для iOS.
+
+      # Версії закріплені навмисно. «latest» одного дня оновиться і збірка
+      # впаде на тому, чого ніхто не міняв.
+      flutter: 3.38.5
+      xcode: latest
+      cocoapods: default
+
+    scripts:
+      - name: Дістати сертифікати Apple
+        script: |
+          # Порожній ланцюжок ключів, куди ляжуть сертифікати цієї збірки.
+          keychain initialize
+
+          # Профіль і сертифікат беруться з App Store Connect за ключем API.
+          # `--create` дозволяє зробити їх, якщо їх ще немає.
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
+
+          keychain add-certificates
+          # Проставляє профіль у проєкт Xcode, щоб не робити цього руками.
+          xcode-project use-profiles
+
+      - name: Залежності
+        script: flutter pub get
+
+      - name: Аналіз і тести
+        script: |
+          flutter analyze lib/ test/
+          flutter test
+        # Тести падають, збірка не їде далі: у TestFlight не має потрапити те,
+        # що не проходить власних перевірок.
+
+      - name: Номер збірки
+        script: |
+          # Номер береться з того, що вже лежить у TestFlight, і збільшується на
+          # один. Apple відхиляє завантаження з номером, який уже був, і це
+          # найчастіша причина невдалої відправки.
+          #
+          # Прапорцем Flutter, а не через agvtool. У Flutter номер живе в
+          # pubspec і потрапляє в Info.plist змінною FLUTTER_BUILD_NUMBER, тому
+          # правка проєкту Xcode нічого не дає: збірка все одно візьме своє.
+          BUILD=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" || echo 0)
+          echo "останній у TestFlight: $BUILD"
+          echo "BUILD_NUMBER=$(($BUILD + 1))" >> $CM_ENV
+
+      - name: Зібрати ipa
+        script: |
+          # Ідентифікатор клієнта Google для iOS приходить змінною групи.
+          # Порожня теж робоча: кнопка входу тоді просто не показується, а не
+          # відкриває вікно, після якого нічого не відбувається.
+          flutter build ipa --release \
+            --build-number=$BUILD_NUMBER \
+            --dart-define=CALVI_GOOGLE_IOS_CLIENT=$CALVI_GOOGLE_IOS_CLIENT \
+            --export-options-plist=/Users/builder/export_options.plist
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - flutter_drive.log
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        # У TestFlight, не в магазин. Подання на перевірку робиться руками,
+        # коли збірку подивились очима.
+        submit_to_testflight: true
+        submit_to_app_store: false
+
+      email:
+        recipients:
+          - calvi.labs@gmail.com
+        # Лист тільки коли щось пішло не так: успішні збірки видно і так.
+        notify:
+          success: false
+          failure: true
