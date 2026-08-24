@@ -74,9 +74,16 @@ workflows:
           # Прапорцем Flutter, а не через agvtool. У Flutter номер живе в
           # pubspec і потрапляє в Info.plist змінною FLUTTER_BUILD_NUMBER, тому
           # правка проєкту Xcode нічого не дає: збірка все одно візьме своє.
-          BUILD=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" || echo 0)
+          #
+          # Перша збірка це окремий випадок: у TestFlight ще порожньо, і команда
+          # відповідає не числом, а помилкою або нічим. Тому все, що не суцільні
+          # цифри, вважається нулем, і збірка стає першою.
+          BUILD=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" 2>/dev/null || true)
+          case "$BUILD" in
+            '' | *[!0-9]* ) BUILD=0 ;;
+          esac
           echo "останній у TestFlight: $BUILD"
-          echo "BUILD_NUMBER=$(($BUILD + 1))" >> $CM_ENV
+          echo "BUILD_NUMBER=$((BUILD + 1))" >> $CM_ENV
 
       - name: Зібрати ipa
         script: |

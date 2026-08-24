@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:calvi/data/day.dart';
 import 'package:calvi/main.dart';
 
+import 'goldens.dart';
+
 /// Кадр посеред перемикання дати.
 ///
 /// Знімок, а не число: людина скаржилась саме на побачене, і побачити це можна
@@ -46,8 +48,10 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 150));
 
-    // Знімок має сенс лише тоді, коли перехід справді йде: два дні в дереві.
+    /* Знімок має сенс лише тоді, коли перехід справді йде: два дні в дереві.
+       Ця перевірка працює на будь-якій системі, і на чужій машині лишається
+       єдиною в тесті. */
     expect(find.text('Сніданок'), findsNWidgets(2), reason: 'перехід не почався, знімок ні про що');
-    await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/day_switch.png'));
+    await matchesGolden(find.byType(MaterialApp), 'day_switch.png');
   });
 }

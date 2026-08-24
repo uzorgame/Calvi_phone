@@ -6,11 +6,18 @@ import 'package:calvi/screens/voice/level_source.dart';
 import 'package:calvi/screens/voice/voice_overlay.dart';
 import 'package:calvi/l10n/app_localizations.dart';
 
+import 'goldens.dart';
+
 /// Кадри рідини, знятими очима того самого рушія, що малює на телефоні.
 ///
 /// Дивитись на це в браузері виявилось довше, ніж зняти: тут кожен кадр
 /// відтворюваний до пікселя і не залежить від того, скільки встигла намалювати
 /// панель попереднього перегляду.
+///
+/// Ці кадри збіглись і на macOS, на відміну від решти еталонів, але порівняння
+/// тут так само прив'язане до своєї системи: збіг без тексту і без довгих
+/// градієнтів це щастя, а не властивість, і покладатись на нього означає
+/// одного дня отримати червону збірку там, де ніхто нічого не міняв.
 Widget _screen({required bool leaving}) => MaterialApp(
   localizationsDelegates: L.localizationsDelegates,
   supportedLocales: L.supportedLocales,
@@ -38,10 +45,7 @@ void main() {
     for (final t in at) {
       await tester.pump(t - seen);
       seen = t;
-      await expectLater(
-        find.byType(VoiceOverlay),
-        matchesGoldenFile('goldens/voice_$name${t.inMilliseconds}.png'),
-      );
+      await matchesGolden(find.byType(VoiceOverlay), 'voice_$name${t.inMilliseconds}.png');
     }
   }
 
@@ -65,7 +69,7 @@ void main() {
     await tester.pumpWidget(_screen(leaving: true));
     for (final t in const [120, 300, 560]) {
       await tester.pump(const Duration(milliseconds: 120));
-      await expectLater(find.byType(VoiceOverlay), matchesGoldenFile('goldens/voice_back$t.png'));
+      await matchesGolden(find.byType(VoiceOverlay), 'voice_back$t.png');
     }
     // Дожити до кінця зворотного шляху, щоб не лишити таймер у повітрі.
     await tester.pump(const Duration(milliseconds: 400));

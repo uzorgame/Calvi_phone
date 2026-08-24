@@ -14,6 +14,8 @@ import 'package:calvi/screens/settings/panel_reminders.dart';
 import 'package:calvi/screens/settings/panels_account.dart';
 import 'package:calvi/screens/settings/panels_body.dart';
 
+import 'goldens.dart';
+
 /// Тема доходить до самого низу на кожній сторінці.
 ///
 /// Раніше не доходила: під головною кнопкою лягала смуга іншого тону, і вона
@@ -126,7 +128,11 @@ void main() {
        угорі, рівне поле внизу, підкладка під кнопкою невидима.
 
        Через еталонне зображення, а не через читання пікселів руками: `toImage`
-       у цьому оточенні рахується хвилинами, а порівняння з еталоном секунди. */
+       у цьому оточенні рахується хвилинами, а порівняння з еталоном секунди.
+
+       Знімок порівнюється тільки на своїй системі, див. `goldens.dart`. Решта
+       перевірок у цьому файлі дивиться на кольори у віджетах і працює скрізь,
+       тому смугу під кнопкою складальник упіймає і без пікселів. */
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -137,7 +143,7 @@ void main() {
       calviDarkTheme,
     );
 
-    await expectLater(find.byType(CalviGround), matchesGoldenFile('goldens/dark_theme_page.png'));
+    await matchesGolden(find.byType(CalviGround), 'dark_theme_page.png');
   });
 
   for (final (name, theme) in [('темній', calviDarkTheme), ('світлій', calviLightTheme)]) {
