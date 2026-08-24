@@ -55,6 +55,34 @@ workflows:
           # Проставляє профіль у проєкт Xcode, щоб не робити цього руками.
           xcode-project use-profiles
 
+          # Далі перевірка, що це справді сталось.
+          #
+          # Без неї крок мовчки проходить, а біда вилазить аж на збірці ipa,
+          # де Flutter каже, що не знайшов сертифіката розробника. Повідомлення
+          # про зовсім інше: сертифікат тут розповсюдження, і Flutter шукає
+          # свій лише тоді, коли не бачить у проєкті команди розробника. Тобто
+          # справжня причина лишається в цьому кроці, а видно її в наступному.
+          echo "--- підписи в ланцюжку ключів ---"
+          IDS=$(security find-identity -v -p codesigning || true)
+          echo "$IDS"
+          case "$IDS" in
+            *"0 valid identities found"*)
+              echo "Жодного підпису. Сертифікат не завантажився і не створився."
+              echo "Дивитись у бік ролі ключа App Store Connect: керувати"
+              echo "сертифікатами може не кожна роль."
+              exit 1
+              ;;
+          esac
+
+          echo "--- що прописалось у проєкт ---"
+          grep -E "DEVELOPMENT_TEAM|PROVISIONING_PROFILE_SPECIFIER|CODE_SIGN_STYLE|CODE_SIGN_IDENTITY" \
+            ios/Runner.xcodeproj/project.pbxproj || true
+          if ! grep -q "DEVELOPMENT_TEAM" ios/Runner.xcodeproj/project.pbxproj; then
+            echo "У проєкті немає DEVELOPMENT_TEAM: профіль нікуди не ліг."
+            echo "Значить use-profiles не знайшов цілі під $BUNDLE_ID."
+            exit 1
+          fi
+
       - name: Залежності
         script: flutter pub get
 
