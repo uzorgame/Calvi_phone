@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../l10n/data_lang.dart';
 
@@ -14,21 +15,42 @@ import '../../l10n/data_lang.dart';
 /// чесно відмовляє. Помилка з цим полем виглядає як «усе працює, але вхід не
 /// проходить», і шукається довго.
 class GoogleLogin {
-  GoogleLogin({required this.serverClientId});
+  GoogleLogin({required this.serverClientId, this.iosClientId = ''});
 
   /// Веб-клієнт із Google Cloud. Порожньо означає, що вхід ще не налаштований.
   final String serverClientId;
 
+  /* Клієнт типу iOS. На Android не потрібен і не передається: там застосунок
+     впізнають за назвою пакета і відбитком ключа підпису. На пристроях Apple
+     такої опори немає, і без цього ідентифікатора плагін не збирає
+     конфігурацію взагалі. Мовчки: помилки не буде, впаде вже сама спроба. */
+  final String iosClientId;
+
   bool _ready = false;
 
+  /// Чи цей пристрій вимагає власного ідентифікатора застосунку.
+  static bool get _apple =>
+      defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS;
+
   /// Чи можна взагалі показувати кнопку.
-  bool get available => serverClientId.isNotEmpty;
+  ///
+  /// На Apple мало веб-клієнта: без свого ідентифікатора кнопка відкриє вікно і
+  /// не зробить нічого. Кнопка, яка нічого не робить, гірша за її відсутність.
+  bool get available => serverClientId.isNotEmpty && (!_apple || iosClientId.isNotEmpty);
 
   /* Ініціалізація одна на весь запуск: повторний виклик нічого не ламає, але й
      нічого не дає, а перший займає помітний час на холодному старті. */
   Future<void> _init() async {
     if (_ready) return;
-    await GoogleSignIn.instance.initialize(serverClientId: serverClientId);
+    /* Обидва ідентифікатори разом, і на Apple це принципово. Плагін збирає
+       конфігурацію лише тоді, коли знає клієнта застосунку, а разом із нею
+       ставить і серверного. Передати самого серверного означає, що конфігурації
+       не буде зовсім, і адресатом токена стане сам застосунок: вікно згоди
+       відкриється, а сервер відмовить. */
+    await GoogleSignIn.instance.initialize(
+      clientId: _apple && iosClientId.isNotEmpty ? iosClientId : null,
+      serverClientId: serverClientId,
+    );
     _ready = true;
   }
 

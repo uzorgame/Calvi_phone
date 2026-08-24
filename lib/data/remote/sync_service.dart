@@ -62,7 +62,7 @@ class SyncService with WidgetsBindingObserver {
   late final LoginService login = LoginService(
     db: db,
     api: _api,
-    google: GoogleLogin(serverClientId: googleClientId),
+    google: GoogleLogin(serverClientId: googleClientId, iosClientId: googleIosClientId),
   );
 
   /// Вага, обрана дотиком. Без токена: страву вже розібрано.

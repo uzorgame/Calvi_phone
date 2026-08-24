@@ -104,6 +104,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.textContaining('Оновлено'), findsOneWidget, reason: 'документ не відкрився');
-    expect(find.text('Токени'), findsOneWidget, reason: 'у документі немає його розділів');
+    /* Медичне застереження, а не випадковий заголовок. Тут стояли «Токени»,
+       і перейменування розділу зняло перевірку разом із ним. */
+    expect(
+      find.text('Це не медичний застосунок'),
+      findsOneWidget,
+      reason: 'у документі немає медичного застереження',
+    );
   });
 }
