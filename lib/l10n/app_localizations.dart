@@ -1497,6 +1497,48 @@ abstract class L {
   /// **'{grams} g'**
   String gramsUnit(int grams);
 
+  /// No description provided for @helloDishBread.
+  ///
+  /// In en, this message translates to:
+  /// **'Rye bread'**
+  String get helloDishBread;
+
+  /// Launch splash «Note». There are 155 logical pixels for a dish title before it is cut with an ellipsis; «Two-egg omelette» measured 149 and sat flush against the edge, so the shorter name is deliberate.
+  ///
+  /// In en, this message translates to:
+  /// **'Scrambled eggs'**
+  String get helloDishEggs;
+
+  /// Launch splash «Note»: the spoken phrase above the card. Kept short on purpose, it sits in a chat bubble on a screen that lasts two seconds.
+  ///
+  /// In en, this message translates to:
+  /// **'two eggs and toast'**
+  String get helloSaid;
+
+  /// No description provided for @helloSlotSub.
+  ///
+  /// In en, this message translates to:
+  /// **'two items'**
+  String get helloSlotSub;
+
+  /// No description provided for @helloStepCount.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ll count the calories'**
+  String get helloStepCount;
+
+  /// No description provided for @helloStepLog.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ll log it in your day'**
+  String get helloStepLog;
+
+  /// Launch splash «Plain»: three short promises, one per row. The longest English row measures 205 of the 342 available pixels.
+  ///
+  /// In en, this message translates to:
+  /// **'Say what you ate'**
+  String get helloStepSay;
+
   /// No description provided for @heroBurned.
   ///
   /// In en, this message translates to:
@@ -3056,18 +3098,6 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Height'**
   String get startHeight;
-
-  /// No description provided for @startHelloAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Start'**
-  String get startHelloAction;
-
-  /// No description provided for @startHelloText.
-  ///
-  /// In en, this message translates to:
-  /// **'Everything on the table is already counted.'**
-  String get startHelloText;
 
   /// No description provided for @startLife.
   ///

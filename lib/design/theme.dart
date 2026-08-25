@@ -424,7 +424,10 @@ class _WashPainter extends CustomPainter {
     final center = Offset(at.dx * s.width, at.dy * s.height);
     final paint = Paint()
       ..shader = RadialGradient(
-        colors: [tone.withValues(alpha: a), tone.withValues(alpha: 0)],
+        colors: [
+          tone.withValues(alpha: a),
+          tone.withValues(alpha: 0),
+        ],
       ).createShader(Rect.fromCircle(center: center, radius: r * s.width));
     canvas.drawCircle(center, r * s.width, paint);
   }
@@ -443,8 +446,7 @@ class _WashPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_WashPainter old) =>
-      old.aqua != aqua || old.dawn != dawn || old.c != c;
+  bool shouldRepaint(_WashPainter old) => old.aqua != aqua || old.dawn != dawn || old.c != c;
 }
 
 /// Чорнило для чіпа, який стоїть на тонованій плашці свого ж кольору.

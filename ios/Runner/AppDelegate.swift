@@ -37,17 +37,24 @@ import UIKit
           result(FlutterMethodNotImplemented)
           return
         }
-        self?.play(named: name, in: controller)
-        result(nil)
+        self?.play(named: name, in: controller, done: result)
       }
     }
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
-  private func play(named name: String, in controller: FlutterViewController) {
+  /* Відповідь іде тоді, коли звук ДОГРАВ, а не коли почав.
+     Стартовий сигнал мусить закінчитись до відкриття мікрофона: щойно плагін
+     розпізнавання переводить аудіосесію в режим запису, системні звуки
+     глушаться, і сигнал, пущений після цього, не чує ніхто. Дартовий бік чекає
+     на цю відповідь перед стартом слухання, зі своєю межею по часу на випадок,
+     коли заглушений звук про завершення не скаже ніколи. */
+  private func play(named name: String, in controller: FlutterViewController, done: @escaping FlutterResult) {
     if let ready = sounds[name] {
-      AudioServicesPlaySystemSound(ready)
+      AudioServicesPlaySystemSoundWithCompletion(ready) {
+        DispatchQueue.main.async { done(nil) }
+      }
       return
     }
 
@@ -55,13 +62,21 @@ import UIKit
        зібраному застосунку не там, де в проєкті, і будь-який зашитий шлях
        розійшовся б із дійсністю на першій же зміні складання. */
     let key = controller.lookupKey(forAsset: "assets/sounds/\(name).wav")
-    guard let path = Bundle.main.path(forResource: key, ofType: nil) else { return }
+    guard let path = Bundle.main.path(forResource: key, ofType: nil) else {
+      done(nil)
+      return
+    }
 
     var id: SystemSoundID = 0
     let url = URL(fileURLWithPath: path) as CFURL
-    guard AudioServicesCreateSystemSoundID(url, &id) == kAudioServicesNoError else { return }
+    guard AudioServicesCreateSystemSoundID(url, &id) == kAudioServicesNoError else {
+      done(nil)
+      return
+    }
 
     sounds[name] = id
-    AudioServicesPlaySystemSound(id)
+    AudioServicesPlaySystemSoundWithCompletion(id) {
+      DispatchQueue.main.async { done(nil) }
+    }
   }
 }

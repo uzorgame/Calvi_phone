@@ -42,9 +42,6 @@
   "startNormNoraHint": "Пиши або кажи як зручно: «два яйця і тост», «випив 300 води». Решту, що знадобиться, спитаю в розмові.",
   "startNormNote": "Це розрахунок за формулою Міффліна-Сан Жеора, а не медична рекомендація. Якщо є захворювання, вагітність або призначена дієта, звіряйся з лікарем.",
 
-  "startHelloText": "Все, що на столі, вже пораховано.",
-  "startHelloAction": "Почати",
-
   "startDeviceFirstRun": "перший запуск",
   "startSignInFailed": "Не вдалось увійти. Спробуй ще раз або продовж без входу.",
   "startSignInFailedWhy": "Не вдалось увійти. {why}",
@@ -58,5 +55,14 @@
   "startAgreeHead": "Погоджуюсь з ",
   "startAgreeTerms": "умовами користування",
   "startAgreeAnd": " і ",
-  "startAgreePrivacy": "політикою приватності"
+  "startAgreePrivacy": "політикою приватності",
+
+  "helloSaid": "два яйця і тост",
+  "helloSlotSub": "дві страви",
+  "helloDishEggs": "Яєчня з двох яєць",
+  "helloDishBread": "Хліб житній",
+
+  "helloStepSay": "Скажи, що їв",
+  "helloStepCount": "Порахую калорії",
+  "helloStepLog": "Запишу в день"
 }

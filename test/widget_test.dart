@@ -10,10 +10,13 @@ void main() {
   testWidgets('застосунок відкривається першим запуском, а не днем', (tester) async {
     tester.platformDispatcher.localesTestValue = const [Locale('uk')];
     addTearDown(tester.platformDispatcher.clearLocalesTestValue);
-    await tester.pumpWidget(const CalviApp(storage: false));
+    await tester.pumpWidget(const CalviApp(storage: false, hello: false));
     await tester.pump(const Duration(seconds: 1));
 
-    expect(find.text('Почати'), findsOneWidget);
+    /* Перше, що бачить новий телефон, це перше питання «Старту». Вітання
+       звідси пішло в заставку, і першим екраном стало те, заради чого «Старт»
+       узагалі є. */
+    expect(find.text('Про тебе'), findsOneWidget);
     expect(find.text('Сніданок'), findsNothing, reason: 'день ще не заслужено');
   });
 
@@ -24,15 +27,12 @@ void main() {
     tester.platformDispatcher.localesTestValue = const [Locale('uk')];
     addTearDown(tester.platformDispatcher.clearLocalesTestValue);
 
-    await tester.pumpWidget(const CalviApp(storage: false));
+    await tester.pumpWidget(const CalviApp(storage: false, hello: false));
     await tester.pump(const Duration(seconds: 1));
 
-    await tester.tap(find.text('Почати'));
+    // Про тебе, Вага, Ціль, Темп, Спосіб життя, Норма.
     // Settle rather than a fixed pump: the switcher keeps the outgoing step in
     // the tree for the length of the slide, and two «Далі» is an ambiguous tap.
-    await tester.pumpAndSettle();
-
-    // Про тебе, Вага, Ціль, Темп, Спосіб життя, Норма.
     for (var i = 0; i < 6; i++) {
       await tester.tap(find.text('Далі'));
       await tester.pumpAndSettle();

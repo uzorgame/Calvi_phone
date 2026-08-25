@@ -106,7 +106,7 @@ void main() {
         locale: const Locale('uk'),
         theme: calviLightTheme,
         scrollBehavior: const CalviScroll(),
-        home: StartScreen(step: 3, onFinish: (d) {}),
+        home: StartScreen(step: 2, onFinish: (d) {}),
       ),
       () {
         final tape = tester.widget<CalviRuler>(find.byType(CalviRuler));

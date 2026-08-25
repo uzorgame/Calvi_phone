@@ -803,6 +803,27 @@ class LEn extends L {
   }
 
   @override
+  String get helloDishBread => 'Rye bread';
+
+  @override
+  String get helloDishEggs => 'Scrambled eggs';
+
+  @override
+  String get helloSaid => 'two eggs and toast';
+
+  @override
+  String get helloSlotSub => 'two items';
+
+  @override
+  String get helloStepCount => 'I\'ll count the calories';
+
+  @override
+  String get helloStepLog => 'I\'ll log it in your day';
+
+  @override
+  String get helloStepSay => 'Say what you ate';
+
+  @override
   String heroBurned(int kcal) {
     return '-$kcal kcal from training';
   }
@@ -1666,12 +1687,6 @@ class LEn extends L {
 
   @override
   String get startHeight => 'Height';
-
-  @override
-  String get startHelloAction => 'Start';
-
-  @override
-  String get startHelloText => 'Everything on the table is already counted.';
 
   @override
   String get startLife => 'Lifestyle';

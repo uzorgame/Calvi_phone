@@ -52,9 +52,6 @@
   "startNormNoraHint": "Write or say it however suits you: \"two eggs and toast\", \"drank 300 of water\". Whatever else I need, I will ask in the conversation.",
   "startNormNote": "This is the Mifflin-St Jeor formula, not medical advice. If you have a condition, are pregnant, or follow a prescribed diet, check with your doctor.",
 
-  "startHelloText": "Everything on the table is already counted.",
-  "startHelloAction": "Start",
-
   "startDeviceFirstRun": "first run",
   "startSignInFailed": "Could not sign in. Try again, or carry on without an account.",
   "startSignInFailedWhy": "Could not sign in. {why}",
@@ -74,5 +71,23 @@
   },
   "startAgreeTerms": "terms of use",
   "startAgreeAnd": " and the ",
-  "startAgreePrivacy": "privacy policy"
+  "startAgreePrivacy": "privacy policy",
+
+  "helloSaid": "two eggs and toast",
+  "@helloSaid": {
+    "description": "Launch splash «Note»: the spoken phrase above the card. Kept short on purpose, it sits in a chat bubble on a screen that lasts two seconds."
+  },
+  "helloSlotSub": "two items",
+  "helloDishEggs": "Scrambled eggs",
+  "@helloDishEggs": {
+    "description": "Launch splash «Note». There are 155 logical pixels for a dish title before it is cut with an ellipsis; «Two-egg omelette» measured 149 and sat flush against the edge, so the shorter name is deliberate."
+  },
+  "helloDishBread": "Rye bread",
+
+  "helloStepSay": "Say what you ate",
+  "@helloStepSay": {
+    "description": "Launch splash «Plain»: three short promises, one per row. The longest English row measures 205 of the 342 available pixels."
+  },
+  "helloStepCount": "I'll count the calories",
+  "helloStepLog": "I'll log it in your day"
 }

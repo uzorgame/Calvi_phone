@@ -54,12 +54,10 @@ void main() {
     tester.platformDispatcher.localesTestValue = const [Locale('uk')];
     addTearDown(tester.platformDispatcher.clearLocalesTestValue);
 
-    await tester.pumpWidget(const CalviApp(storage: false));
+    await tester.pumpWidget(const CalviApp(storage: false, hello: false));
     await tester.pump(const Duration(seconds: 1));
 
     // Straight through the first run to the day.
-    await tester.tap(find.text('Почати'));
-    await tester.pumpAndSettle();
     for (var i = 0; i < 6; i++) {
       await tester.tap(find.text('Далі'));
       await tester.pumpAndSettle();

@@ -132,6 +132,28 @@ workflows:
           echo "останній у TestFlight: $BUILD"
           echo "BUILD_NUMBER=$((BUILD + 1))" >> $CM_ENV
 
+      - name: Схема Google для входу
+        script: |
+          # Вікно Google повертається в застосунок за власною URL-схемою, і це
+          # перевернутий ідентифікатор клієнта. Вписувати його в Info.plist
+          # руками не можна: значення живе змінною групи calvi-ios, а зашите в
+          # репозиторій розійшлося б із нею першої ж заміни клієнта. Тому схема
+          # виводиться тут, зі змінної, на кожній збірці.
+          #
+          # Порожня змінна означає, що клієнта iOS у Google Cloud ще немає:
+          # кнопка входу тоді не показується, і схема не потрібна теж.
+          if [ -n "$CALVI_GOOGLE_IOS_CLIENT" ]; then
+            SCHEME="com.googleusercontent.apps.${CALVI_GOOGLE_IOS_CLIENT%%.apps.googleusercontent.com*}"
+            PLIST=ios/Runner/Info.plist
+            /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes array" "$PLIST" 2>/dev/null || true
+            /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes:0 dict" "$PLIST"
+            /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes:0:CFBundleURLSchemes array" "$PLIST"
+            /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes:0:CFBundleURLSchemes:0 string $SCHEME" "$PLIST"
+            echo "схема повернення: $SCHEME"
+          else
+            echo "CALVI_GOOGLE_IOS_CLIENT порожній: кнопки Google на iOS не буде"
+          fi
+
       - name: Зібрати ipa
         script: |
           # Ідентифікатор клієнта Google для iOS приходить змінною групи.

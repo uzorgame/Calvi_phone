@@ -14,11 +14,8 @@ void main() {
     tester.platformDispatcher.localesTestValue = const [Locale('uk')];
     addTearDown(tester.platformDispatcher.clearLocalesTestValue);
 
-    await tester.pumpWidget(const CalviApp(storage: false));
+    await tester.pumpWidget(const CalviApp(storage: false, hello: false));
     await tester.pump(const Duration(seconds: 1));
-
-    await tester.tap(find.text('Почати'));
-    await tester.pumpAndSettle();
 
     // Про тебе, Вага, Ціль, Темп, Спосіб життя, Норма.
     for (var i = 0; i < 6; i++) {

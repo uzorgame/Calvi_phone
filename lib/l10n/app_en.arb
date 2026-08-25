@@ -218,6 +218,15 @@
       }
     }
   },
+  "@helloDishEggs": {
+    "description": "Launch splash «Note». There are 155 logical pixels for a dish title before it is cut with an ellipsis; «Two-egg omelette» measured 149 and sat flush against the edge, so the shorter name is deliberate."
+  },
+  "@helloSaid": {
+    "description": "Launch splash «Note»: the spoken phrase above the card. Kept short on purpose, it sits in a chat bubble on a screen that lasts two seconds."
+  },
+  "@helloStepSay": {
+    "description": "Launch splash «Plain»: three short promises, one per row. The longest English row measures 205 of the 342 available pixels."
+  },
   "@heroBurned": {
     "placeholders": {
       "kcal": {
@@ -844,6 +853,13 @@
   "goalTarget": "Target weight",
   "goalWas": "Was",
   "gramsUnit": "{grams} g",
+  "helloDishBread": "Rye bread",
+  "helloDishEggs": "Scrambled eggs",
+  "helloSaid": "two eggs and toast",
+  "helloSlotSub": "two items",
+  "helloStepCount": "I'll count the calories",
+  "helloStepLog": "I'll log it in your day",
+  "helloStepSay": "Say what you ate",
   "heroBurned": "-{kcal} kcal from training",
   "heroDays": "days",
   "heroFrom": " of {kcal}",
@@ -1104,8 +1120,6 @@
   "startGoalLose": "Lose weight",
   "startGoalLoseHint": "a deficit at the pace you pick",
   "startHeight": "Height",
-  "startHelloAction": "Start",
-  "startHelloText": "Everything on the table is already counted.",
   "startLife": "Lifestyle",
   "startNorm": "Your norm",
   "startNormHold": "holding",

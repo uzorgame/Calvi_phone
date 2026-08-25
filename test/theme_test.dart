@@ -18,7 +18,7 @@ void main() {
     tester.platformDispatcher.localesTestValue = const [Locale('uk')];
     addTearDown(tester.platformDispatcher.clearLocalesTestValue);
 
-    await tester.pumpWidget(const CalviApp(storage: false));
+    await tester.pumpWidget(const CalviApp(storage: false, hello: false));
     await tester.pump();
 
     final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
@@ -28,7 +28,7 @@ void main() {
   testWidgets('вибір у налаштуваннях далі веде застосунок', (tester) async {
     tester.platformDispatcher.localesTestValue = const [Locale('uk')];
     addTearDown(tester.platformDispatcher.clearLocalesTestValue);
-    await tester.pumpWidget(const CalviApp(storage: false));
+    await tester.pumpWidget(const CalviApp(storage: false, hello: false));
     await tester.pump();
 
     // The three-way choice is still there; only the starting point changed.

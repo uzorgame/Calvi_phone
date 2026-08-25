@@ -27,6 +27,7 @@ import 'screens/settings/panel_reminders.dart';
 import 'screens/settings/panels_account.dart';
 import 'screens/settings/panels_body.dart';
 import 'screens/settings/settings_screen.dart';
+import 'screens/start/hello.dart';
 import 'screens/start/start_screen.dart';
 import 'screens/today/today_screen.dart';
 import 'data/meal.dart';
@@ -35,12 +36,19 @@ import 'l10n/data_lang.dart';
 void main() => runApp(const CalviApp());
 
 class CalviApp extends StatefulWidget {
-  const CalviApp({super.key, this.storage = true});
+  const CalviApp({super.key, this.storage = true, this.hello = true});
 
   /// Off in tests that are about a screen rather than about data: opening the
   /// database and starting a sync leaves timers running in a widget test, and a
   /// test of the theme has no business talking to a server.
   final bool storage;
+
+  /// Заставка «Стіл» при запуску.
+  ///
+  /// Вимикається в тестах, які дивляться на екран під нею: дві секунди
+  /// непрозорого шару, що ковтає дотики, це рівно те, що тесту про кнопку
+  /// заважає, і рівно те, чого людина при запуску хоче.
+  final bool hello;
 
   @override
   State<CalviApp> createState() => _CalviAppState();
@@ -598,7 +606,15 @@ class _CalviAppState extends State<CalviApp> {
         /* Ґрунт під усім, що малює застосунок. У темряві він градієнтний, а
            колір Scaffold градієнта не тримає, тому це окремий шар під деревом
            екранів. */
-        builder: (context, child) => CalviGround(child: child ?? const SizedBox()),
+        /* Заставка стоїть тут, над навігатором і під нічим.
+         *
+         * Це єдине місце в застосунку, яке обгортає геть усе: і день, і
+         * «Старт», і будь-який відкритий аркуш. Заставці саме це й потрібно, бо
+         * вона вітає із застосунком, а не з якимось із його екранів. */
+        builder: (context, child) {
+          final app = child ?? const SizedBox();
+          return CalviGround(child: widget.hello ? HelloOverlay(child: app) : app);
+        },
         home: Builder(
           builder: (context) {
             dataLang = Localizations.localeOf(context).languageCode;

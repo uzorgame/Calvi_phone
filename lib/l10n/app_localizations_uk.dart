@@ -811,6 +811,27 @@ class LUk extends L {
   }
 
   @override
+  String get helloDishBread => 'Хліб житній';
+
+  @override
+  String get helloDishEggs => 'Яєчня з двох яєць';
+
+  @override
+  String get helloSaid => 'два яйця і тост';
+
+  @override
+  String get helloSlotSub => 'дві страви';
+
+  @override
+  String get helloStepCount => 'Порахую калорії';
+
+  @override
+  String get helloStepLog => 'Запишу в день';
+
+  @override
+  String get helloStepSay => 'Скажи, що їв';
+
+  @override
   String heroBurned(int kcal) {
     return '-$kcal ккал за тренування';
   }
@@ -1682,12 +1703,6 @@ class LUk extends L {
 
   @override
   String get startHeight => 'Зріст';
-
-  @override
-  String get startHelloAction => 'Почати';
-
-  @override
-  String get startHelloText => 'Все, що на столі, вже пораховано.';
 
   @override
   String get startLife => 'Спосіб життя';

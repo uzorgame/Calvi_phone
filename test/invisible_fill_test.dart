@@ -141,7 +141,8 @@ void main() {
       expect(
         broken,
         isEmpty,
-        reason: 'підкладки, які зливаються з тим, на чому стоять:\n'
+        reason:
+            'підкладки, які зливаються з тим, на чому стоять:\n'
             '${broken.entries.map((e) => '${e.key}:\n  ${e.value.join('\n  ')}').join('\n')}',
       );
     });

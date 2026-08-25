@@ -30,8 +30,12 @@ import '../../format.dart';
  *
  * Стать, вік і зріст стояли трьома екранами на дві секунди роботи кожен.
  * Питання одного роду і одного призначення: всі три йдуть у формулу норми і
- * жодне з них не потребує роздумів. Разом вони коротші, ніж три «Далі». */
-const startSteps = 8;
+ * жодне з них не потребує роздумів. Разом вони коротші, ніж три «Далі».
+ *
+ * Вітання «Стіл» звідси пішло і стало заставкою при кожному запуску, див.
+ * `hello.dart`. Тут воно було екраном, який нічого не питав, і його доводилось
+ * закривати кнопкою: єдиний дотик за весь «Старт», який нічого не означав. */
+const startSteps = 7;
 
 /* Allergies asked at the start are only the common ones. The full reference is
    in settings; a first run is not the place to scroll thirty seven entries. */
@@ -202,18 +206,36 @@ class _StartScreenState extends State<StartScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Screen one has nothing to be a step of, so it carries no progress.
-            if (_step > 0)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 6, CalviSize.gutter, 22),
-                child: Row(
-                  children: [
-                    _Back(onTap: () => _go(_step - 1)),
-                    const SizedBox(width: 14),
-                    Expanded(child: _Progress(at: _step / (startSteps - 1))),
-                  ],
-                ),
+            /* Смуга стоїть завжди, з першого ж питання.
+             *
+             * Раніше її на першому екрані не було, бо першим екраном було
+             * вітання, яке кроком не рахувалось. Тепер перший екран це вже
+             * питання, і сховати від нього смугу означало б сказати «ти ще не
+             * почав» тому, хто вже відповідає.
+             *
+             * Безумовно, а не через `if`: шар, який то є, то немає, змінює
+             * форму дерева під собою і перебудовує все, що нижче. Тут це
+             * коштувало б втрати позиції барабанів на кожному переході. Тому
+             * кнопка «назад» на першому кроці ховається, а місце своє тримає. */
+            Padding(
+              padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 6, CalviSize.gutter, 22),
+              child: Row(
+                children: [
+                  Visibility(
+                    visible: _step > 0,
+                    maintainSize: true,
+                    maintainAnimation: true,
+                    maintainState: true,
+                    child: _Back(onTap: () => _go(_step - 1)),
+                  ),
+                  const SizedBox(width: 14),
+                  /* Крок плюс один: людина на першому питанні пройшла одну
+                     сьому, а не нічого. Порожня смуга на екрані, де вже щось
+                     роблять, читається як зламана. */
+                  Expanded(child: _Progress(at: (_step + 1) / startSteps)),
+                ],
               ),
+            ),
             /* No slide between steps. The demo keys its slide by screen, not by
                step, so the flow moves on one thing only: the bar filling. */
             Expanded(
@@ -226,13 +248,12 @@ class _StartScreenState extends State<StartScreen> {
   }
 
   Widget _body() => switch (_step) {
-    0 => _Hello(onNext: () => _go(1)),
-    1 => _aboutStep(),
-    2 => _weightStep(),
-    3 => _goalStep(),
-    4 => _paceStep(),
-    5 => _lifeStep(),
-    6 => _normStep(),
+    0 => _aboutStep(),
+    1 => _weightStep(),
+    2 => _goalStep(),
+    3 => _paceStep(),
+    4 => _lifeStep(),
+    5 => _normStep(),
     _ => _SignIn(onDone: _done),
   };
 
@@ -245,7 +266,7 @@ class _StartScreenState extends State<StartScreen> {
   Widget _aboutStep() => _Step(
     title: l.startAbout,
     cta: l.actionNext,
-    onNext: () => _go(2),
+    onNext: () => _go(1),
     children: [
       _Block(
         title: l.startSex,
@@ -295,7 +316,7 @@ class _StartScreenState extends State<StartScreen> {
   Widget _weightStep() => _Step(
     title: l.startWeightNow,
     cta: l.actionNext,
-    onNext: () => _go(3),
+    onNext: () => _go(2),
     middle: true,
     children: [
       CalviRuler(
@@ -312,7 +333,7 @@ class _StartScreenState extends State<StartScreen> {
     title: l.startGoal,
     cta: l.actionNext,
     // Holding weight needs no target and no pace, so the next step is skipped.
-    onNext: () => _go(_direction == Direction.keep ? 5 : 4),
+    onNext: () => _go(_direction == Direction.keep ? 4 : 3),
     children: [
       for (final g in _goals(l))
         CalviPick(
@@ -345,7 +366,7 @@ class _StartScreenState extends State<StartScreen> {
     return _Step(
       title: l.startPace,
       cta: l.actionNext,
-      onNext: () => _go(5),
+      onNext: () => _go(4),
       children: [
         Text.rich(
           TextSpan(
@@ -413,7 +434,7 @@ class _StartScreenState extends State<StartScreen> {
   Widget _lifeStep() => _Step(
     title: l.startLife,
     cta: l.actionNext,
-    onNext: () => _go(6),
+    onNext: () => _go(5),
     children: [
       for (final a in activityLevels)
         CalviPick(
@@ -457,7 +478,7 @@ class _StartScreenState extends State<StartScreen> {
     return _Step(
       title: l.startNorm,
       cta: l.actionNext,
-      onNext: () => _go(7),
+      onNext: () => _go(6),
       children: [
         Container(
           padding: const EdgeInsets.all(22),
@@ -871,122 +892,6 @@ class _Note extends StatelessWidget {
       style: context.t.bodyMedium?.copyWith(fontSize: CalviSize.fsMicro, height: 1.5),
     ),
   );
-}
-
-/* Screen one, «Стіл»: the set table.
- *
- * No account here: it asks nothing, because the first tap should cost nothing.
- * And no paragraph either. The old screen explained the app in thirty words,
- * and nobody reads thirty words on a first screen. Instead the food icon set
- * drifts slowly around the wordmark, one quiet sentence sits under it, and the
- * whole thing plays by itself: the person may never touch the screen, so
- * nothing here waits for a tap. Chosen from ten candidates on the demo panel. */
-class _Hello extends StatefulWidget {
-  const _Hello({required this.onNext});
-
-  final VoidCallback onNext;
-
-  @override
-  State<_Hello> createState() => _HelloState();
-}
-
-class _HelloState extends State<_Hello> with SingleTickerProviderStateMixin {
-  /* One lap in fifty-two seconds: motion you notice only when you look for it.
-     A wheel fast enough to watch is a wheel that competes with the button. */
-  late final AnimationController _spin = AnimationController(
-    vsync: this,
-    duration: const Duration(seconds: 52),
-  )..repeat();
-
-  /// The dishes on the table: the app's own food icon set, nothing drawn anew.
-  static const _table = ['egg', 'soup', 'bread', 'drink', 'fruit', 'meat'];
-
-  @override
-  void dispose() {
-    _spin.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.c;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: CalviSize.gutter),
-      child: Column(
-        children: [
-          Expanded(
-            child: Center(
-              /* Everything above the caption fades up once, as one piece. */
-              child: TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0, end: 1),
-                duration: const Duration(milliseconds: 900),
-                curve: CalviMotion.easeRise,
-                builder: (context, v, child) => Opacity(
-                  opacity: v,
-                  child: Transform.translate(offset: Offset(0, 10 * (1 - v)), child: child),
-                ),
-                child: SizedBox(
-                  width: 280,
-                  height: 280,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      AnimatedBuilder(
-                        animation: _spin,
-                        builder: (context, _) => Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            for (final (i, name) in _table.indexed)
-                              /* Plain polar placement: the position turns, the
-                                 dish itself never rotates, so every icon stays
-                                 upright without a counter-spin. */
-                              Transform.translate(
-                                offset: Offset.fromDirection(
-                                  _spin.value * 2 * math.pi + i * math.pi / 3,
-                                  118,
-                                ),
-                                child: Container(
-                                  width: 44,
-                                  height: 44,
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: c.card,
-                                    border: Border.all(color: c.cardBorder),
-                                    boxShadow: context.shadowCard,
-                                  ),
-                                  child: CalviIcon(name, size: 19, color: c.textSecondary),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                      Text(
-                        'Calvi',
-                        style: context.t.displayLarge?.copyWith(
-                          fontSize: 46,
-                          letterSpacing: 46 * -0.04,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Text(
-            L.of(context).startHelloText,
-            textAlign: TextAlign.center,
-            style: context.t.bodyMedium?.copyWith(fontSize: CalviSize.fsBody, height: 1.4),
-          ),
-          const SizedBox(height: 18),
-          CalviButton(label: L.of(context).startHelloAction, onTap: widget.onNext),
-          const SizedBox(height: 24),
-        ],
-      ),
-    );
-  }
 }
 
 /* The last screen. The norm is already on the table, so signing in keeps

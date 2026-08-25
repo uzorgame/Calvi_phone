@@ -61,29 +61,8 @@ class CalviScreen extends StatefulWidget {
 }
 
 class _CalviScreenState extends State<CalviScreen> {
-  final _scroll = ScrollController();
-
-  /// Whether there is more content than room. Read off the scroll metrics after
-  /// a layout that always keeps the action's space in the flow, so moving the
-  /// action out of the flow cannot change the answer and flip it back.
-  bool _over = false;
-
-  @override
-  void dispose() {
-    _scroll.dispose();
-    super.dispose();
-  }
-
-  void _measure() {
-    if (!_scroll.hasClients) return;
-    final over = _scroll.position.maxScrollExtent > 0.5;
-    if (over != _over) setState(() => _over = over);
-  }
-
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) => _measure());
-
     final foot = widget.foot == null
         ? null
         : Container(
@@ -118,7 +97,6 @@ class _CalviScreenState extends State<CalviScreen> {
           children: [
             ListView(
               key: widget.storageKey,
-              controller: _scroll,
               padding: widget.padding,
               children: [
                 // The header scrolls with the page, the way the day's does.
@@ -154,9 +132,12 @@ class _CalviScreenState extends State<CalviScreen> {
                     ),
                   ),
                 ...widget.children,
+                /* The action's space stays in the flow so a long page can
+                   scroll its last row clear of the button; the action itself
+                   is drawn once, below. */
                 if (foot != null)
                   Visibility(
-                    visible: !_over,
+                    visible: false,
                     maintainSize: true,
                     maintainAnimation: true,
                     maintainState: true,
@@ -164,7 +145,18 @@ class _CalviScreenState extends State<CalviScreen> {
                   ),
               ],
             ),
-            if (foot != null && _over) Positioned(left: 0, right: 0, bottom: 0, child: foot),
+            /* The action holds the bottom ALWAYS, short page or long.
+             *
+             * It used to follow the content when the screen had room, and that
+             * quietly broke the oldest promise in this design. The veil under
+             * the button dissolves into the flat page colour, and the whole
+             * "theme reaches the bottom" fix rests on the ground being flat
+             * where that veil lands. Pinned to the bottom, it lands in the
+             * flat zone on every theme; following a short page's content, it
+             * landed mid-screen, where coal is still a gradient and the new
+             * grounds have their clouds, and cut a flat band straight across
+             * both. On tall phones every short settings page showed it. */
+            if (foot != null) Positioned(left: 0, right: 0, bottom: 0, child: foot),
           ],
         ),
       ),

@@ -39,13 +39,16 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final list = tester.widget<ListView>(find.byType(ListView));
-    final before = list.controller!.offset;
+    /* Позиція зі стану самого скрола, а не з контролера: контролер у списку
+       був потрібен лише старому вимірюванню «чи вміст більший за екран» і
+       зник разом із ним. */
+    double at() => tester.state<ScrollableState>(find.byType(Scrollable).first).position.pixels;
+    final before = at();
 
     await tester.dragFrom(Offset(195, y), const Offset(0, -260));
     await tester.pumpAndSettle();
 
-    return list.controller!.offset - before;
+    return at() - before;
   }
 
   testWidgets('сторінка гортається, коли палець на порожньому місці', (tester) async {
@@ -92,17 +95,16 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final list = tester.widget<ListView>(find.byType(ListView));
-    final c = list.controller!;
+    final pos = tester.state<ScrollableState>(find.byType(Scrollable).first).position;
 
-    c.jumpTo(c.position.maxScrollExtent);
+    pos.jumpTo(pos.maxScrollExtent);
     await tester.pumpAndSettle();
-    final atBottom = c.offset;
+    final atBottom = pos.pixels;
 
     // Палець посередині екрана, рух донизу: сторінка має піти вгору.
     await tester.dragFrom(const Offset(195, 500), const Offset(0, 260));
     await tester.pumpAndSettle();
 
-    expect(atBottom - c.offset, greaterThan(100), reason: 'знизу вгору сторінка не піднімається');
+    expect(atBottom - pos.pixels, greaterThan(100), reason: 'знизу вгору сторінка не піднімається');
   });
 }

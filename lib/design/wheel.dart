@@ -138,26 +138,43 @@ class _CalviWheelColumnState extends State<CalviWheelColumn> {
   Widget _face(BuildContext context, CalviColors c, int i) {
     final v = widget.values[i];
     return Center(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.baseline,
-        textBaseline: TextBaseline.alphabetic,
-        children: [
-          Text(
-            widget.format?.call(v) ?? '$v',
-            style: context.t.headlineMedium?.copyWith(
-              fontSize: 22,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 22 * -0.02,
-              fontFeatures: const [FontFeature.tabularFigures()],
-              color: c.text,
+      /* Число з підписом стискається, коли перестає влазити.
+       *
+       * «178» і «см» стоять поруч у рядку сталої ширини, а системний шрифт
+       * може бути більшим за наш: на збільшеному рядок вилазив за барабан на
+       * двадцять чотири пікселі, тобто «см» просто зрізало. Видно це стало аж
+       * тепер, бо перевірка влізання дивилась на «Старт» через екран вітання,
+       * а він барабанів не мав.
+       *
+       * Саме `scaleDown`, а не перенесення і не трикрапка: барабан це одне
+       * число, і розрізати його ніде. При звичайному шрифті ця обгортка не
+       * робить нічого. */
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Text(
+              widget.format?.call(v) ?? '$v',
+              style: context.t.headlineMedium?.copyWith(
+                fontSize: 22,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 22 * -0.02,
+                fontFeatures: const [FontFeature.tabularFigures()],
+                color: c.text,
+              ),
             ),
-          ),
-          if (widget.suffix.isNotEmpty) ...[
-            const SizedBox(width: 3),
-            Text(widget.suffix, style: context.t.labelSmall?.copyWith(fontWeight: FontWeight.w400)),
+            if (widget.suffix.isNotEmpty) ...[
+              const SizedBox(width: 3),
+              Text(
+                widget.suffix,
+                style: context.t.labelSmall?.copyWith(fontWeight: FontWeight.w400),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
