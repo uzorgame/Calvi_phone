@@ -207,6 +207,25 @@ class SyncDao extends DatabaseAccessor<CalviDb> with _$SyncDaoMixin {
 
   Stream<TokenStateData?> watchTokens() => select(tokenState).watchSingleOrNull();
 
+  /* «Видалити дані»: місцева половина чистого аркуша.
+   *
+   * Щоденник і розмова йдуть, а все, що робить акаунт акаунтом, лишається:
+   * вхід, курсор, токени, профіль, алергії. Курсор не скидається навмисно:
+   * сервер погасив ті самі рядки з новими номерами, і наступний обмін просто
+   * привезе надгробки поверх уже порожнього. */
+  Future<void> clearDiary() async {
+    await transaction(() async {
+      await delete(meals).go();
+      await delete(waterLogs).go();
+      await delete(weights).go();
+      await delete(measurements).go();
+      await delete(workouts).go();
+      await delete(medicationTakes).go();
+      await delete(medications).go();
+      await delete(chatMessages).go();
+    });
+  }
+
   /// Everything this person wrote, gone. Used by «вийти» on a shared phone and
   /// by «видалити акаунт»: the local copy has to go with the account.
   Future<void> wipe() async {

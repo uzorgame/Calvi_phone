@@ -1,6 +1,41 @@
+import 'dart:async';
+
 import '../local/database.dart';
 import 'api.dart';
 import 'sync_mapping.dart';
+
+/* Одна черга на все, що чіпає обліковий запис і курсор.
+ *
+ * Фоновий обмін і вхід працюють над тими самими двома рядками: хто я і що я
+ * вже бачив. Обмін, що вилетів до входу і повернувся після, записував старий
+ * курсор поверх нового нуля, і новий акаунт замовкав назавжди: сервер шле лише
+ * те, що після курсора, а після восьмисот у свіжого акаунта немає нічого.
+ * Виглядало це як «увійшов, а даних немає», і не лікувалось часом.
+ *
+ * Замок нехитрий, бо суперників рівно два: черговий обмін і вхід. */
+class SyncGate {
+  bool _held = false;
+  final List<Completer<void>> _line = [];
+
+  /// Чи хтось усередині. Черговий такт при зайнятому замку просто пропускають:
+  /// обмін, який і так іде, довезе те саме.
+  bool get held => _held;
+
+  Future<T> run<T>(Future<T> Function() task) async {
+    while (_held) {
+      final turn = Completer<void>();
+      _line.add(turn);
+      await turn.future;
+    }
+    _held = true;
+    try {
+      return await task();
+    } finally {
+      _held = false;
+      if (_line.isNotEmpty) _line.removeAt(0).complete();
+    }
+  }
+}
 
 /// One round of syncing, and the rules about when it is safe to stop.
 ///

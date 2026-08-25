@@ -39,6 +39,7 @@ class BottomBar extends StatefulWidget {
     /* Обрана вага у відповідь на питання Нори. Один дотик замість набирання. */
     this.onWeigh,
     this.muteMic = false,
+    this.tokensLeft,
   });
 
   /// Card the next entry lands in.
@@ -63,6 +64,14 @@ class BottomBar extends StatefulWidget {
 
   /// While dictation is on, the small microphone steps aside for the big one.
   final bool muteMic;
+
+  /* Скільки токенів лишилось, за останнім словом сервера.
+   *
+   * Смуга не рахує нічого: єдиний калькулятор балансу живе на сервері, а сюди
+   * приходить готове число з локального дзеркала. Порожньо означає, що сервер
+   * ще ні разу не відповідав, і тоді таблетка не малюється зовсім: нуль на
+   * старті виглядав би як «токени скінчились», а це неправда. */
+  final int? tokensLeft;
 
   @override
   State<BottomBar> createState() => _BottomBarState();
@@ -327,6 +336,7 @@ class _BottomBarState extends State<BottomBar> {
                                 controller: _room,
                                 messages: widget.messages,
                                 onWeigh: widget.onWeigh,
+                                tokensLeft: widget.tokensLeft,
                               ),
                             ),
                           ),
@@ -359,11 +369,12 @@ class _BottomBarState extends State<BottomBar> {
 
 /// Where the messages live once the bar is raised.
 class _Room extends StatelessWidget {
-  const _Room({required this.controller, required this.messages, this.onWeigh});
+  const _Room({required this.controller, required this.messages, this.onWeigh, this.tokensLeft});
 
   final ScrollController controller;
   final List<Msg> messages;
   final void Function(String id, int grams)? onWeigh;
+  final int? tokensLeft;
 
   @override
   Widget build(BuildContext context) {
@@ -392,18 +403,21 @@ class _Room extends StatelessWidget {
                 Text(L.of(context).noraName, style: context.t.titleMedium),
                 const Spacer(),
                 /* The count is a fact, not a warning: it sits quiet in a pill
-                   until the number starts to matter. */
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: c.fillSecondary,
-                    borderRadius: BorderRadius.circular(CalviSize.rPill),
+                   until the number starts to matter. One number, no cap after
+                   the slash: the server's ceiling is its own business, and a
+                   figure like 19/30 kept demanding an explanation of the 30. */
+                if (tokensLeft case final left?)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: c.fillSecondary,
+                      borderRadius: BorderRadius.circular(CalviSize.rPill),
+                    ),
+                    child: Text(
+                      '$left',
+                      style: context.t.labelSmall?.copyWith(fontSize: CalviSize.fsMicro),
+                    ),
                   ),
-                  child: Text(
-                    '$tokensUsed/$tokensCap',
-                    style: context.t.labelSmall?.copyWith(fontSize: CalviSize.fsMicro),
-                  ),
-                ),
               ],
             ),
           ),

@@ -147,6 +147,7 @@
   "photoDish": "Dish",
   "loginNotConfigured": "sign-in is not configured in this build",
   "loginNoToken": "Google did not return a token",
+  "loginSlow": "Google did not answer in a minute. Try again",
   "loginServer": "server: {why}",
   "@loginServer": {"placeholders":{"why":{"type":"String"}}},
 

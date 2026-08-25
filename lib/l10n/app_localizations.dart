@@ -1257,6 +1257,66 @@ abstract class L {
   /// **'{count, plural, =0{no entries} =1{1 entry} other{{count} entries}}'**
   String entries(int count);
 
+  /// No description provided for @eraseAskBody1.
+  ///
+  /// In en, this message translates to:
+  /// **'The whole diary goes, for all time: meals, water, weight, measurements, workouts, medication and the talk with Nora. On every device, because the server copy is erased too.'**
+  String get eraseAskBody1;
+
+  /// No description provided for @eraseAskBody2.
+  ///
+  /// In en, this message translates to:
+  /// **'What stays: the account, the sign-in, the tokens with their balance and the profile settings. This is not signing out, it is a clean slate inside the same account.'**
+  String get eraseAskBody2;
+
+  /// No description provided for @eraseAskCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete everything'**
+  String get eraseAskCta;
+
+  /// No description provided for @eraseAskTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete every entry?'**
+  String get eraseAskTitle;
+
+  /// No description provided for @eraseDataTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete data'**
+  String get eraseDataTitle;
+
+  /// No description provided for @eraseDone.
+  ///
+  /// In en, this message translates to:
+  /// **'The diary is erased. A clean slate.'**
+  String get eraseDone;
+
+  /// No description provided for @eraseFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not erase: {why}'**
+  String eraseFailed(String why);
+
+  /// No description provided for @eraseSureBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This cannot be undone. The diary disappears forever, and neither you nor we can bring it back.'**
+  String get eraseSureBody;
+
+  /// No description provided for @eraseSureCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, delete forever'**
+  String get eraseSureCta;
+
+  /// No description provided for @eraseSureTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete for sure?'**
+  String get eraseSureTitle;
+
   /// No description provided for @eveningAnd.
   ///
   /// In en, this message translates to:
@@ -1640,6 +1700,12 @@ abstract class L {
   /// In en, this message translates to:
   /// **'server: {why}'**
   String loginServer(String why);
+
+  /// No description provided for @loginSlow.
+  ///
+  /// In en, this message translates to:
+  /// **'Google did not answer in a minute. Try again'**
+  String get loginSlow;
 
   /// No description provided for @macroCShort.
   ///

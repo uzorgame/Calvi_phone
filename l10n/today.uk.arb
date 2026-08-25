@@ -109,6 +109,7 @@
   "photoDish": "Страва",
   "loginNotConfigured": "вхід не налаштований у цій збірці",
   "loginNoToken": "Google не віддав токен",
+  "loginSlow": "Google не відповів за хвилину. Спробуй ще раз",
   "loginServer": "сервер: {why}",
 
   "workoutBurned": "−{kcal} ккал",

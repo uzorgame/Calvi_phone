@@ -249,5 +249,16 @@
   "assistantHint": "{name} keeps the diary with you and remembers what you told her about yourself.",
   "@assistantHint": {"placeholders":{"name":{"type":"String"}}},
   "assistantPinned": "{count}, {pinned} pinned",
-  "@assistantPinned": {"placeholders":{"count":{"type":"int"},"pinned":{"type":"int"}}}
+  "@assistantPinned": {"placeholders":{"count":{"type":"int"},"pinned":{"type":"int"}}},
+  "eraseDataTitle": "Delete data",
+  "eraseAskTitle": "Delete every entry?",
+  "eraseAskBody1": "The whole diary goes, for all time: meals, water, weight, measurements, workouts, medication and the talk with Nora. On every device, because the server copy is erased too.",
+  "eraseAskBody2": "What stays: the account, the sign-in, the tokens with their balance and the profile settings. This is not signing out, it is a clean slate inside the same account.",
+  "eraseAskCta": "Delete everything",
+  "eraseSureTitle": "Delete for sure?",
+  "eraseSureBody": "This cannot be undone. The diary disappears forever, and neither you nor we can bring it back.",
+  "eraseSureCta": "Yes, delete forever",
+  "eraseDone": "The diary is erased. A clean slate.",
+  "eraseFailed": "Could not erase: {why}",
+  "@eraseFailed": {"placeholders":{"why":{"type":"String"}}}
 }

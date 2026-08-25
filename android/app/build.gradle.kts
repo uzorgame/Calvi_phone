@@ -71,18 +71,26 @@ android {
 
     buildTypes {
         release {
-            /* Справжній ключ, якщо він є, і відлагоджувальний, якщо немає.
+            /* Release means the release key, or no build at all.
              *
-             * Магазин відлагоджувальний підпис відхиляє, і це правильно: ним
-             * може підписатись будь-хто. Але падати без ключа теж не варіант,
-             * бо тоді збірку неможливо перевірити на машині без нього.
+             * There used to be a fallback: no key.properties, sign with the
+             * debug key so the build still runs. That silence cost a real
+             * evening: a debug-signed "release" APK went out to people, and
+             * Google sign-in has every right to treat an unknown signature as
+             * a stranger. A build that stops with a message costs a minute;
+             * a build that lies about its signature costs testers.
              *
-             * Коли підписує Android Studio, тут не робиться нічого: підпис
-             * приходить від майстра. */
+             * When Android Studio's wizard signs, we stay out of the way: the
+             * keystore and passwords come from the wizard, not this file. */
             if (!studioSigns) {
-                signingConfig =
-                    if (keyFile.exists()) signingConfigs.getByName("release")
-                    else signingConfigs.getByName("debug")
+                check(keyFile.exists()) {
+                    "android/key.properties не знайдено. Release підписується " +
+                        "тільки релізним ключем; відлагоджувального запасного " +
+                        "більше немає, бо такий APK уже одного разу пішов людям. " +
+                        "Поклади key.properties поруч із цим файлом або збирай " +
+                        "через майстер Android Studio."
+                }
+                signingConfig = signingConfigs.getByName("release")
             }
         }
     }

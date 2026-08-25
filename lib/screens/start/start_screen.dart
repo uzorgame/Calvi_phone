@@ -934,9 +934,6 @@ class _SignInState extends State<_SignIn> {
       case LoginResult.done:
       case LoginResult.canceled:
         widget.onDone();
-      case LoginResult.needsChoice:
-        // На порожньому телефоні цього не буває, але мовчати теж не можна.
-        widget.onDone();
       case LoginResult.failed:
         // Причина в тексті: без неї збій виглядає як мовчання, а до сервера він
         // не доходить, тому в логах його теж немає.

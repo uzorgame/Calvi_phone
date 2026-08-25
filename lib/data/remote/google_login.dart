@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../l10n/data_lang.dart';
@@ -77,10 +79,21 @@ class GoogleLogin {
 
     try {
       await _init();
-      final account = await GoogleSignIn.instance.authenticate();
+      /* Хвилина, і не більше. Це єдине очікування в застосунку без межі:
+         кожен запит до сервера має свої двадцять секунд, а вікно Google могло
+         висіти вічно, і кнопка разом із ним. Вічний спінер це найгірша з
+         відповідей: він не каже нічого, і людина не може навіть повторити.
+         Хвилини вистачає і на вибір пошти, і на повільну мережу; хто справді
+         відійшов і повернувся, побачить не колесо, а пораду спробувати ще. */
+      final account = await GoogleSignIn.instance
+          .authenticate()
+          .timeout(const Duration(seconds: 60));
       final token = account.authentication.idToken;
       if (token == null) lastError = dataL.loginNoToken;
       return token;
+    } on TimeoutException {
+      lastError = dataL.loginSlow;
+      return null;
     } on GoogleSignInException catch (e) {
       if (e.code == GoogleSignInExceptionCode.canceled) return null;
       lastError = '${e.code.name}: ${e.description ?? ''}'.trim();

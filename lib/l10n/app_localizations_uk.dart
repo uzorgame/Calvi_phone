@@ -678,6 +678,41 @@ class LUk extends L {
   }
 
   @override
+  String get eraseAskBody1 =>
+      'Зникне весь щоденник за весь час: страви, вода, вага, заміри, тренування, препарати і розмова з Норою. На всіх пристроях, бо стирається і копія на сервері.';
+
+  @override
+  String get eraseAskBody2 =>
+      'Лишаться: обліковий запис, вхід, токени з балансом і налаштування профілю. Це не вихід з акаунта, це чистий аркуш у ньому.';
+
+  @override
+  String get eraseAskCta => 'Видалити все';
+
+  @override
+  String get eraseAskTitle => 'Видалити всі записи?';
+
+  @override
+  String get eraseDataTitle => 'Видалити дані';
+
+  @override
+  String get eraseDone => 'Щоденник стерто. Чистий аркуш.';
+
+  @override
+  String eraseFailed(String why) {
+    return 'Не вдалось стерти: $why';
+  }
+
+  @override
+  String get eraseSureBody =>
+      'Це незворотньо. Щоденник зникне назавжди, і повернути його не зможемо ні ти, ні ми.';
+
+  @override
+  String get eraseSureCta => 'Так, видалити назавжди';
+
+  @override
+  String get eraseSureTitle => 'Точно видалити?';
+
+  @override
   String get eveningAnd => ' і ';
 
   @override
@@ -895,6 +930,9 @@ class LUk extends L {
   String loginServer(String why) {
     return 'сервер: $why';
   }
+
+  @override
+  String get loginSlow => 'Google не відповів за хвилину. Спробуй ще раз';
 
   @override
   String macroCShort(int value) {

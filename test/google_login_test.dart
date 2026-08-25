@@ -9,13 +9,15 @@ import 'package:calvi/data/local/database.dart';
 import 'package:calvi/data/remote/api.dart';
 import 'package:calvi/data/remote/google_login.dart';
 import 'package:calvi/data/remote/login_service.dart';
+import 'package:calvi/data/remote/sync_repository.dart';
 
 /// Вхід через Google і доля місцевого щоденника.
 ///
 /// Найдорожчий випадок такий: людина три дні писала на новому телефоні, а тоді
-/// увійшла і виявилось, що в неї є старий акаунт із трьома місяцями. Викинути
-/// мовчки не можна ні той, ні той. Порожній місцевий забирається без питань, а
-/// непорожній стає питанням до людини, і саме це тут перевіряється.
+/// увійшла і виявилось, що в неї є старий акаунт із трьома місяцями. Питання з
+/// двома поганими відповідями більше немає: записи дотискаються на сервер до
+/// перемикання, сервер зливає безіменний акаунт у справжній, а телефон зʼїжджає
+/// обʼєднане. Тут перевіряється саме цей порядок, бо в ньому вся гарантія.
 
 /// Google, який завжди повертає той самий токен. Вікна на тестах немає.
 class _FakeGoogle extends GoogleLogin {
@@ -39,10 +41,52 @@ void main() {
   setUp(() => db = CalviDb(NativeDatabase.memory()));
   tearDown(() => db.close());
 
-  CalviApi answering(Map<String, dynamic> account) => CalviApi(
-    base: Uri.parse('https://x.test'),
-    client: MockClient((req) async => http.Response(jsonEncode(account), 200)),
-  );
+  /* Сервер із чотирьох маршрутів, і журналом того, що до нього доїхало.
+   *
+   * Вхід тепер сам ходить у синхронізацію, тому одна відповідь на все не
+   * годиться: кожен маршрут відповідає своїм, а тест дивиться в журнал, щоб
+   * перевірити не лише результат, а й порядок. */
+  CalviApi answering(Map<String, dynamic> account, {List<String>? log, List<Object?>? pushed}) =>
+      CalviApi(
+        base: Uri.parse('https://x.test'),
+        client: MockClient((req) async {
+          log?.add(req.url.path);
+          switch (req.url.path) {
+            case '/v1/auth/google':
+              return http.Response(jsonEncode(account), 200);
+            case '/v1/devices':
+              return http.Response(
+                jsonEncode({
+                  'user_id': 'device-user',
+                  'access_token': 'device-access',
+                  'refresh_token': 'device-refresh',
+                  'tokens': {'balance': 30},
+                }),
+                200,
+              );
+            case '/v1/sync':
+              final body = jsonDecode(req.body) as Map<String, dynamic>;
+              final changes = (body['changes'] as List<dynamic>);
+              pushed?.addAll(changes);
+              // Приймаємо все, що прислали: рядок отримує номер і стає чистим.
+              return http.Response(
+                jsonEncode({
+                  'cursor': 0,
+                  'accepted': [
+                    for (var i = 0; i < changes.length; i++)
+                      {'id': (changes[i] as Map<String, dynamic>)['id'], 'seq': i + 1},
+                  ],
+                  'changes': <Object?>[],
+                  'has_more': false,
+                }),
+                200,
+              );
+            case '/v1/profile':
+              return http.Response(jsonEncode({'profile': null}), 200);
+          }
+          return http.Response('{}', 200);
+        }),
+      );
 
   Map<String, dynamic> reply({
     required String userId,
@@ -79,60 +123,53 @@ void main() {
     expect((await db.select(db.meals).get()).length, 1, reason: 'щоденник зник при привʼязці');
   });
 
-  test('порожній телефон переходить у старий акаунт мовчки', () async {
-    final api = answering(reply(userId: 'old-account', previous: 'empty-device'));
-    final login = LoginService(db: db, api: api, google: _FakeGoogle());
-
-    expect(await login.signIn(), LoginResult.done, reason: 'спитали про порожній щоденник');
-
-    final state = await db.syncDao.state();
-    expect(state.userId, 'old-account');
-  });
-
-  test('непорожній телефон і чужий акаунт означають питання, а не втрату', () async {
+  test('інший акаунт: спершу все доїжджає нагору, і лише тоді перемикаємось', () async {
     await db.diaryDao.addMeal(slot: 'lunch', name: 'борщ', kcal: 300);
 
-    final api = answering(reply(userId: 'old-account', previous: 'local-device'));
+    final log = <String>[];
+    final pushed = <Object?>[];
+    final api = answering(
+      reply(userId: 'old-account', previous: 'local-device'),
+      log: log,
+      pushed: pushed,
+    );
     final login = LoginService(db: db, api: api, google: _FakeGoogle());
 
-    expect(await login.signIn(), LoginResult.needsChoice);
+    expect(await login.signIn(), LoginResult.done);
 
-    /* Найважливіше: до відповіді людини не змінилось нічого. Ні акаунт, ні
-       записи, бо будь-яка з двох дій тут незворотна. */
-    expect((await db.select(db.meals).get()).length, 1, reason: 'стерли до питання');
+    /* Порядок і є гарантія: борщ пішов на сервер ДО перемикання акаунта, тому
+       серверне злиття мало що зливати. Після перемикання місцева копія чиста
+       і зʼїжджає з нуля. */
+    final firstSync = log.indexOf('/v1/sync');
+    final auth = log.indexOf('/v1/auth/google');
+    expect(firstSync, isNot(-1));
+    expect(firstSync < auth, isTrue, reason: 'перемкнулись раніше, ніж дотисли записи');
     expect(
-      (await db.syncDao.state()).userId,
-      isNot('old-account'),
-      reason: 'перемкнули до питання',
+      pushed.map((c) => (c as Map<String, dynamic>)['data']).toString(),
+      contains('борщ'),
+      reason: 'борщ не доїхав на сервер до злиття',
+    );
+
+    expect((await db.syncDao.state()).userId, 'old-account');
+    expect(
+      await db.select(db.meals).get(),
+      isEmpty,
+      reason: 'після перемикання лишилась копія з чужими номерами черги',
     );
   });
 
-  test('обрали старий щоденник: місцевий стирається', () async {
+  test('без мережі вхід падає, а записи лишаються на місці', () async {
     await db.diaryDao.addMeal(slot: 'lunch', name: 'борщ', kcal: 300);
 
-    final api = answering(reply(userId: 'old-account', previous: 'local-device'));
+    final api = CalviApi(
+      base: Uri.parse('https://x.test'),
+      client: MockClient((req) async => throw Exception('no route to host')),
+    );
     final login = LoginService(db: db, api: api, google: _FakeGoogle());
-    await login.signIn();
 
-    await login.keepAccount();
-
-    expect((await db.select(db.meals).get()), isEmpty);
-    expect((await db.syncDao.state()).userId, 'old-account');
-  });
-
-  test('обрали місцевий: вхід скасовується, записи на місці', () async {
-    await db.diaryDao.addMeal(slot: 'lunch', name: 'борщ', kcal: 300);
-
-    final api = answering(reply(userId: 'old-account', previous: 'local-device'));
-    final google = _FakeGoogle();
-    final login = LoginService(db: db, api: api, google: google);
-    await login.signIn();
-
-    await login.keepLocal();
-
-    expect((await db.select(db.meals).get()).length, 1, reason: 'стерли те, що просили лишити');
-    expect((await db.syncDao.state()).userId, isNot('old-account'));
-    expect(google.forgotten, isTrue, reason: 'Google памʼятає вхід, якого не сталося');
+    expect(await login.signIn(), LoginResult.failed);
+    expect((await db.select(db.meals).get()).length, 1, reason: 'збій мережі стер щоденник');
+    expect((await db.syncDao.state()).userId, isNull, reason: 'перемкнулись без мережі');
   });
 
   test('людина закрила вікно Google, і нічого не сталось', () async {
@@ -141,5 +178,20 @@ void main() {
 
     expect(await login.signIn(), LoginResult.canceled);
     expect((await db.syncDao.state()).userId, isNull);
+  });
+
+  test('замок пропускає по одному і в порядку черги', () async {
+    final gate = SyncGate();
+    final trace = <String>[];
+
+    Future<void> job(String name) => gate.run(() async {
+      trace.add('$name почав');
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+      trace.add('$name скінчив');
+    });
+
+    await Future.wait([job('обмін'), job('вхід')]);
+
+    expect(trace, ['обмін почав', 'обмін скінчив', 'вхід почав', 'вхід скінчив']);
   });
 }

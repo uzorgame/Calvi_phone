@@ -669,6 +669,41 @@ class LEn extends L {
   }
 
   @override
+  String get eraseAskBody1 =>
+      'The whole diary goes, for all time: meals, water, weight, measurements, workouts, medication and the talk with Nora. On every device, because the server copy is erased too.';
+
+  @override
+  String get eraseAskBody2 =>
+      'What stays: the account, the sign-in, the tokens with their balance and the profile settings. This is not signing out, it is a clean slate inside the same account.';
+
+  @override
+  String get eraseAskCta => 'Delete everything';
+
+  @override
+  String get eraseAskTitle => 'Delete every entry?';
+
+  @override
+  String get eraseDataTitle => 'Delete data';
+
+  @override
+  String get eraseDone => 'The diary is erased. A clean slate.';
+
+  @override
+  String eraseFailed(String why) {
+    return 'Could not erase: $why';
+  }
+
+  @override
+  String get eraseSureBody =>
+      'This cannot be undone. The diary disappears forever, and neither you nor we can bring it back.';
+
+  @override
+  String get eraseSureCta => 'Yes, delete forever';
+
+  @override
+  String get eraseSureTitle => 'Delete for sure?';
+
+  @override
   String get eveningAnd => ' and ';
 
   @override
@@ -887,6 +922,9 @@ class LEn extends L {
   String loginServer(String why) {
     return 'server: $why';
   }
+
+  @override
+  String get loginSlow => 'Google did not answer in a minute. Try again';
 
   @override
   String macroCShort(int value) {

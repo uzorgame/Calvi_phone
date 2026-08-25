@@ -158,7 +158,3 @@ String get noraVoice => demoDish(
   'Записала: два яйця, тост і кава без цукру. Разом 384 ккал в обід.',
   'Logged: two eggs, toast and coffee without sugar. 384 kcal into lunch.',
 );
-
-/// Tokens left today, the same figure the chat header carries in the spec.
-const tokensUsed = 19;
-const tokensCap = 30;

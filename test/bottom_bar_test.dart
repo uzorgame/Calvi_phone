@@ -6,7 +6,12 @@ import 'package:calvi/design/theme.dart';
 import 'package:calvi/screens/today/bottom_bar.dart';
 import 'package:calvi/l10n/app_localizations.dart';
 
-Widget _wrap({required bool open, required ValueChanged<bool> onOpen, VoidCallback? onClose}) =>
+Widget _wrap({
+  required bool open,
+  required ValueChanged<bool> onOpen,
+  VoidCallback? onClose,
+  int? tokensLeft,
+}) =>
     MaterialApp(
       localizationsDelegates: L.localizationsDelegates,
       supportedLocales: L.supportedLocales,
@@ -19,6 +24,7 @@ Widget _wrap({required bool open, required ValueChanged<bool> onOpen, VoidCallba
             Positioned.fill(
               child: BottomBar(
                 slot: 'Обід',
+                tokensLeft: tokensLeft,
                 open: open,
                 onOpen: onOpen,
                 onClose: onClose ?? () {},
@@ -76,12 +82,21 @@ void main() {
   });
 
   testWidgets('відкрита кімната несе привітання Нори', (tester) async {
-    await tester.pumpWidget(_wrap(open: true, onOpen: (_) {}));
+    await tester.pumpWidget(_wrap(open: true, onOpen: (_) {}, tokensLeft: 19));
     await tester.pumpAndSettle();
 
     expect(find.text('Нора'), findsNWidgets(2), reason: 'заголовок кімнати і підказка поля');
     expect(find.text('Пиши як кажеш.'), findsOneWidget);
-    expect(find.text('$tokensUsed/$tokensCap'), findsOneWidget);
+    expect(find.text('19'), findsOneWidget, reason: 'залишок токенів, одне число без знаменника');
+  });
+
+  testWidgets('поки сервер не відповідав, числа немає зовсім', (tester) async {
+    await tester.pumpWidget(_wrap(open: true, onOpen: (_) {}));
+    await tester.pumpAndSettle();
+
+    /* Не нуль, а порожнє місце: нуль на старті читався б як «токени
+       скінчились», хоча насправді про баланс ще нічого не відомо. */
+    expect(find.text('0'), findsNothing);
   });
 
   testWidgets('тап поза чатом його згортає', (tester) async {

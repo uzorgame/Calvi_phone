@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../data/app_scope.dart';
 import '../../data/settings.dart';
 import '../../design/ruler.dart';
 import '../../design/shell.dart';
@@ -134,8 +135,89 @@ class ProfilePanel extends StatelessWidget {
               ),
           ],
         ),
+
+        /* Найнижче і в тому ж вбранні, що решта рядків: небезпеку каже колір
+           назви, а не крик плашки. Сюди мають доходити свідомо. */
+        CalviSection(
+          children: [
+            CalviRow(
+              icon: 'note',
+              first: true,
+              danger: true,
+              title: l.eraseDataTitle,
+              onTap: () => _askErase(context),
+            ),
+          ],
+        ),
       ],
     );
+  }
+
+  /* Стирання питається двічі, і це два окремі аркуші.
+   *
+   * Перший пояснює, що зникне і що лишиться: його читають. Другий існує рівно
+   * для одного речення про незворотність: його підтверджують. Одне натискання
+   * не має вміти стерти все, скільки б тексту над ним не стояло, бо текст
+   * читають не завжди, а палець промахується. */
+  void _askErase(BuildContext context) {
+    final l = L.of(context);
+    calviSheet<void>(
+      context,
+      title: l.eraseAskTitle,
+      doneLabel: l.eraseAskCta,
+      footDone: true,
+      danger: true,
+      onDone: () => _askSure(context),
+      builder: (sheet) => Padding(
+        padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 4, CalviSize.gutter, 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(l.eraseAskBody1, style: sheet.t.bodyMedium),
+            const SizedBox(height: 10),
+            Text(l.eraseAskBody2, style: sheet.t.bodyMedium),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _askSure(BuildContext context) {
+    final l = L.of(context);
+    calviSheet<void>(
+      context,
+      title: l.eraseSureTitle,
+      doneLabel: l.eraseSureCta,
+      footDone: true,
+      danger: true,
+      onDone: () => _erase(context),
+      builder: (sheet) => Padding(
+        padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 4, CalviSize.gutter, 0),
+        child: Text(l.eraseSureBody, style: sheet.t.bodyMedium),
+      ),
+    );
+  }
+
+  Future<void> _erase(BuildContext context) async {
+    final l = L.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final sync = AppScope.maybeOf(context)?.sync;
+
+    // Без синхронізації (демо-запуск без бази) стирати нема звідки.
+    if (sync == null) return;
+
+    try {
+      await sync.eraseDiary();
+      messenger.showSnackBar(SnackBar(content: Text(l.eraseDone)));
+    } catch (e) {
+      /* Причина в тексті: «спробуй ще раз» без неї це порада нічого не робити.
+         Найчастіша причина тут одна, немає мережі, і сервер без неї не погасить
+         щоденник на інших пристроях. */
+      messenger.showSnackBar(
+        SnackBar(content: Text(l.eraseFailed('$e')), duration: const Duration(seconds: 8)),
+      );
+    }
   }
 }
 

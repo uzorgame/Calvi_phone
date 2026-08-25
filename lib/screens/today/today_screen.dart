@@ -10,7 +10,7 @@ import '../../data/meal.dart';
 import '../../data/app_scope.dart';
 // Only the handle: the generated row classes carry names the screens already
 // use for their own models, and `Workout` is one of them.
-import '../../data/local/database.dart' show CalviDb;
+import '../../data/local/database.dart' show CalviDb, TokenStateData;
 import '../../data/local/chat_store.dart';
 import '../../data/local/day_reader.dart';
 import '../../data/remote/api.dart';
@@ -1095,23 +1095,32 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
           ),
 
           Positioned.fill(
-            child: BottomBar(
-              slot: _nextSlot(day),
-              open: _chatOpen,
-              /* Ховається тільки на час диктування, коли її закриває збільшена
+            /* Живий баланс токенів у шапці чату.
+               Потік із локального дзеркала: число туди кладе кожна відповідь
+               сервера, а сам розрахунок живе тільки на сервері. Поки той ще ні
+               разу не відповідав, число не показується зовсім: нуль на старті
+               читався б як «токени скінчились». */
+            child: StreamBuilder<TokenStateData?>(
+              stream: AppScope.maybeOf(context)?.db?.syncDao.watchTokens(),
+              builder: (context, snap) => BottomBar(
+                tokensLeft: snap.data?.syncedAt == null ? null : snap.data?.balance,
+                slot: _nextSlot(day),
+                open: _chatOpen,
+                /* Ховається тільки на час диктування, коли її закриває збільшена
                  кнопка. Поки Нора думає, вона лишається на місці: доти круг
                  зникав разом із питанням, і в рядку лишалась сама камера, ніби
                  сказати більше нічим. Думає Нора, а не людина. */
-              muteMic: _dictating != null,
-              onOpen: (_) => setState(() => _chatOpen = true),
-              onClose: () => setState(() => _chatOpen = false),
-              onWeigh: _pickWeight,
-              onSend: (text) =>
-                  _say(msg(from: MsgFrom.me, text: text), l.todayLoggedAskWeightShort),
-              onCamera: () => _openCamera(context),
-              onHold: _holdMic,
-              onLetGo: _letGoMic,
-              messages: _messages,
+                muteMic: _dictating != null,
+                onOpen: (_) => setState(() => _chatOpen = true),
+                onClose: () => setState(() => _chatOpen = false),
+                onWeigh: _pickWeight,
+                onSend: (text) =>
+                    _say(msg(from: MsgFrom.me, text: text), l.todayLoggedAskWeightShort),
+                onCamera: () => _openCamera(context),
+                onHold: _holdMic,
+                onLetGo: _letGoMic,
+                messages: _messages,
+              ),
             ),
           ),
 

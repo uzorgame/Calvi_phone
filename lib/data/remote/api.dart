@@ -306,6 +306,32 @@ class CalviApi {
     return jsonDecode(res.body) as Map<String, dynamic>;
   }
 
+  /// «Видалити дані» з налаштувань: сервер гасить щоденник на всіх пристроях.
+  ///
+  /// Відповідь несе список погашеного по таблицях: людині показується, що
+  /// зроблено, а не бадьоре «готово».
+  Future<Map<String, dynamic>> eraseDiary() async {
+    final http.Response res;
+    try {
+      res = await _client
+          .delete(
+            base.resolve('/v1/diary'),
+            headers: {..._client_, if (token != null) 'authorization': 'Bearer $token'},
+          )
+          .timeout(timeout);
+    } on TimeoutException {
+      throw const ApiFailure.slow();
+    } catch (e) {
+      throw const ApiFailure.offline();
+    }
+
+    if (res.statusCode >= 400) {
+      throw ApiFailure(code: _errorCode(res.body), status: res.statusCode);
+    }
+
+    return jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
+  }
+
   Future<Map<String, dynamic>> _put(String path, Map<String, dynamic> body) async {
     final http.Response res;
     try {

@@ -1057,6 +1057,11 @@ Future<T?> calviSheet<T>(
   /// Дрібним словом у кутку лишається те, що кутка й заслуговує: коліщатко
   /// годинника, з якого виходять одним дотиком.
   bool footDone = false,
+
+  /* Згода руйнівна: нижня кнопка червона, а скасування другою повною кнопкою
+     під нею, і кутове слово зникає. Два дрібні слова обабіч заголовка
+     зливаються з ним у рядок, а дві повні кнопки читаються без вгадування. */
+  bool danger = false,
 }) {
   /* 340 ms на кривій підйому, як у кожної іншої панелі, що приходить.
    *
@@ -1132,7 +1137,7 @@ Future<T?> calviSheet<T>(
                       children: [
                         SizedBox(
                           width: 84,
-                          child: info
+                          child: info || (footDone && danger)
                               ? null
                               : GestureDetector(
                                   onTap: () => Navigator.of(sheetContext).pop(),
@@ -1176,6 +1181,9 @@ Future<T?> calviSheet<T>(
                       padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 18, CalviSize.gutter, 4),
                       child: CalviButton(
                         label: doneLabel ?? L.of(sheetContext).actionDone,
+                        danger: danger,
+                        second: danger ? L.of(sheetContext).actionCancel : null,
+                        onSecond: danger ? () => Navigator.of(sheetContext).pop() : null,
                         onTap: () {
                           onDone?.call();
                           Navigator.of(sheetContext).pop();

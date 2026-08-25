@@ -75,8 +75,6 @@ class _AccountBlockState extends State<AccountBlock> {
       case LoginResult.done:
       case LoginResult.canceled:
         await _load();
-      case LoginResult.needsChoice:
-        await _ask(login);
       case LoginResult.failed:
         if (!mounted) return;
         /* Причина в тексті навмисно. «Спробуй ще раз» без неї це порада нічого
@@ -96,33 +94,10 @@ class _AccountBlockState extends State<AccountBlock> {
     }
   }
 
-  /* Два щоденники, і жоден не можна викинути мовчки.
-   *
-   * Людина увійшла в акаунт, у якому вже щось є, а на телефоні лежать її власні
-   * записи. Вибір тут необоротний в обидва боки, тому він словами, а не
-   * кнопкою «ОК». */
-  Future<void> _ask(LoginService login) async {
-    await calviSheet<void>(
-      context,
-      title: L.of(context).accountWhichDiary,
-      doneLabel: L.of(context).accountKeepCloud,
-      onDone: () async {
-        await login.keepAccount();
-        await _load();
-      },
-      builder: (sheet) => Padding(
-        padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 4, CalviSize.gutter, 12),
-        child: Text(L.of(sheet).accountWhichDiaryNote, style: sheet.t.bodyMedium),
-      ),
-    );
-
-    /* Аркуш закрили, не обравши: людина лишається там, де була, а вхід
-       скасовується. Мовчазний вхід «наполовину» був би найгіршим із варіантів. */
-    if (login.pending != null) {
-      await login.keepLocal();
-      if (mounted) await _load();
-    }
-  }
+  /* Питання «який щоденник лишити» тут більше немає, і це не спрощення екрана,
+     а зміна правди під ним: сервер зливає безіменний акаунт пристрою у
+     справжній прямо під час входу. Обидва щоденники однієї людини, і вибір
+     «який викинути» був хибним питанням. */
 
   Future<void> _signOut() async {
     final login = _login;

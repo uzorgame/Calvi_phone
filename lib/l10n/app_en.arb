@@ -171,6 +171,13 @@
       }
     }
   },
+  "@eraseFailed": {
+    "placeholders": {
+      "why": {
+        "type": "String"
+      }
+    }
+  },
   "@eveningLogged": {
     "description": "The evening question. The card name arrives already in the case the sentence needs, because Ukrainian declines it.",
     "placeholders": {
@@ -813,6 +820,16 @@
   "doseTabMany": "tablets",
   "doseTabOne": "tablet",
   "entries": "{count, plural, =0{no entries} =1{1 entry} other{{count} entries}}",
+  "eraseAskBody1": "The whole diary goes, for all time: meals, water, weight, measurements, workouts, medication and the talk with Nora. On every device, because the server copy is erased too.",
+  "eraseAskBody2": "What stays: the account, the sign-in, the tokens with their balance and the profile settings. This is not signing out, it is a clean slate inside the same account.",
+  "eraseAskCta": "Delete everything",
+  "eraseAskTitle": "Delete every entry?",
+  "eraseDataTitle": "Delete data",
+  "eraseDone": "The diary is erased. A clean slate.",
+  "eraseFailed": "Could not erase: {why}",
+  "eraseSureBody": "This cannot be undone. The diary disappears forever, and neither you nor we can bring it back.",
+  "eraseSureCta": "Yes, delete forever",
+  "eraseSureTitle": "Delete for sure?",
   "eveningAnd": " and ",
   "eveningBreakfastAcc": "breakfast",
   "eveningDinnerAcc": "dinner",
@@ -877,6 +894,7 @@
   "loginNoToken": "Google did not return a token",
   "loginNotConfigured": "sign-in is not configured in this build",
   "loginServer": "server: {why}",
+  "loginSlow": "Google did not answer in a minute. Try again",
   "macroCShort": "C {value}",
   "macroCarbs": "Carbs",
   "macroCarbsCaps": "CARBS",

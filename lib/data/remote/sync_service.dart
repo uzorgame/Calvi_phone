@@ -24,7 +24,9 @@ class SyncService with WidgetsBindingObserver {
   final CalviApi _api;
 
   Timer? _tick;
-  bool _busy = false;
+
+  /* Замок, спільний із входом: гонка курсора жила саме між ними двома. */
+  final SyncGate _gate = SyncGate();
 
   /// Often enough that a phone left open catches another device's writes, rare
   /// enough to be invisible on a battery.
@@ -63,6 +65,7 @@ class SyncService with WidgetsBindingObserver {
     db: db,
     api: _api,
     google: GoogleLogin(serverClientId: googleClientId, iosClientId: googleIosClientId),
+    gate: _gate,
   );
 
   /// Вага, обрана дотиком. Без токена: страву вже розібрано.
@@ -87,15 +90,27 @@ class SyncService with WidgetsBindingObserver {
     return foods.enrich(mealId, text);
   }
 
+  /* «Видалити дані» з налаштувань, від сервера до місцевої бази.
+   *
+   * Під тим самим замком, що обмін і вхід, і це не обережність про запас:
+   * обмін, що вилетів до стирання, довозив би свої рядки на сервер уже після
+   * нього, і вони воскресали б живими. Порядок усередині теж не довільний:
+   * спершу дотиснути своє нагору, щоб серверне гасіння накрило все, тоді
+   * погасити, тоді прибрати місцеве і зʼїхати надгробки. */
+  Future<void> eraseDiary() => _gate.run(() async {
+    await SyncRepository(db, _api).run();
+    await _api.eraseDiary();
+    await db.syncDao.clearDiary();
+    await SyncRepository(db, _api).run();
+  });
+
   /// One round, and never two at once: a second run while the first is in the
   /// air would push the same rows twice and fight over the cursor.
   Future<SyncOutcome> now() async {
-    if (_busy) return const SyncOutcome(pushed: 0, pulled: 0);
-    _busy = true;
-    try {
-      return await SyncRepository(db, _api).run();
-    } finally {
-      _busy = false;
-    }
+    /* Зайнято входом або іншим обміном: такт пропускається, а не стає в чергу.
+       Обмін, який і так іде, довезе те саме, а черга з тактів таймера була б
+       чергою однакової роботи. */
+    if (_gate.held) return const SyncOutcome(pushed: 0, pulled: 0);
+    return _gate.run(() => SyncRepository(db, _api).run());
   }
 }

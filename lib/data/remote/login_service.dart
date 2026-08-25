@@ -1,27 +1,29 @@
 import '../local/database.dart';
 import 'api.dart';
 import 'google_login.dart';
+import 'sync_repository.dart';
 import '../../l10n/data_lang.dart';
 
 /// Вхід через Google, від кнопки до готового акаунта.
 ///
 /// Обліковий запис у нас існує до входу: застосунок заводить його при першому
 /// запуску, разом із щоденником, бо їсти й записувати людина починає раніше, ніж
-/// думати про акаунт. Тому вхід робить одну з трьох речей, і найважливіше тут
-/// не вони, а те, що відбувається з місцевим щоденником.
+/// думати про акаунт.
 ///
-/// Найгірший випадок такий: людина три дні писала на новому телефоні, а тоді
-/// увійшла і виявилось, що в неї є старий акаунт із трьома місяцями. Тепер два
-/// щоденники, і жоден не можна викинути мовчки. Тому місцеві записи або
-/// забираються без питань, коли їх немає, або питання ставиться людині.
+/// Найдорожчий випадок такий: людина три дні писала на новому телефоні, а тоді
+/// увійшла і виявилось, що в неї є старий акаунт із трьома місяцями. Раніше це
+/// було питання з двома відповідями, і обидві погані: «взяти хмарний» стирало
+/// три дні, «лишити телефонний» скасовувало вхід. Тепер питання немає: сервер
+/// зливає безіменний акаунт пристрою у справжній прямо під час входу, і жоден
+/// із двох щоденників не втрачається.
+///
+/// Клієнту лишаються три кроки, і всі три під одним замком із фоновим обміном:
+/// дотиснути своє нагору, перемкнутись, зʼїхати обʼєднане вниз.
 
 /// Що вийшло зі спроби увійти.
 enum LoginResult {
-  /// Увійшли, і місцевий щоденник лишився при своєму власнику.
+  /// Увійшли. Обʼєднаний щоденник уже на телефоні.
   done,
-
-  /// Увійшли в інший акаунт, а на телефоні є чужі записи. Треба питати людину.
-  needsChoice,
 
   /// Людина закрила вікно Google. Не помилка, і казати про це нічого не треба.
   canceled,
@@ -31,14 +33,17 @@ enum LoginResult {
 }
 
 class LoginService {
-  LoginService({required this.db, required this.api, required this.google});
+  LoginService({required this.db, required this.api, required this.google, SyncGate? gate})
+    : gate = gate ?? SyncGate();
 
   final CalviDb db;
   final CalviApi api;
   final GoogleLogin google;
 
-  /// Акаунт, у який увійшли, поки триває питання про місцеві записи.
-  GoogleAccount? pending;
+  /* Черга, спільна з фоновим обміном. Своя за замовчуванням, щоб тести і
+     розʼєднані виклики працювали, але в застосунку сюди приходить замок самого
+     SyncService: гонка, від якої він захищає, живе саме між ними двома. */
+  final SyncGate gate;
 
   /// Чи взагалі показувати кнопку входу.
   bool get available => google.available;
@@ -49,6 +54,9 @@ class LoginService {
 
   Future<LoginResult> signIn({String? deviceName}) async {
     _apiError = null;
+
+    /* Вікно Google поза замком навмисно: людина може дивитись на нього хвилину,
+       і морозити на цей час фонову синхронізацію нема за що. */
     final idToken = await google.idToken();
 
     /* Порожній токен це або «передумав», або збій. Розрізняє їх саме
@@ -57,53 +65,39 @@ class LoginService {
       return google.lastError == null ? LoginResult.canceled : LoginResult.failed;
     }
 
-    final GoogleAccount account;
-    try {
-      account = await api.signInWithGoogle(idToken: idToken, device: deviceName);
-    } on ApiFailure catch (e) {
-      _apiError = dataL.loginServer('$e');
-      return LoginResult.failed;
-    } catch (e) {
-      _apiError = e.toString();
-      return LoginResult.failed;
-    }
+    return gate.run(() async {
+      try {
+        /* Крок перший: дотиснути нагору все місцеве, поки акаунт ще старий.
+           Сервер зливає те, що в нього доїхало, і рядок, який жив тільки в
+           телефоні, злиття б не пережив. Тому без мережі вхід чесно падає тут,
+           а не стирає недовезене. */
+        final up = await SyncRepository(db, api).run();
+        if (up.failure != null) {
+          _apiError = dataL.loginServer('${up.failure}');
+          return LoginResult.failed;
+        }
 
-    /* Акаунт той самий, у якому людина була: нічого не змінилось, крім того, що
-       тепер його можна повернути. Це найчастіший випадок. */
-    if (!account.switched) {
-      await _apply(account);
-      return LoginResult.done;
-    }
+        final account = await api.signInWithGoogle(idToken: idToken, device: deviceName);
 
-    /* Акаунт інший. Якщо на телефоні порожньо, забираємо мовчки: питати про
-       порожній щоденник означає лякати людину рівним місцем. */
-    if (!await _hasLocalDiary()) {
-      await db.syncDao.wipe();
-      await _apply(account);
-      return LoginResult.done;
-    }
+        /* Акаунт інший: сервер уже перевіз туди записи безіменного. Місцева
+           копія тепер чужа за номерами черги, тому чистий аркуш і повний
+           зʼїзд з нуля. */
+        if (account.switched) await db.syncDao.wipe();
+        await _apply(account);
 
-    pending = account;
-    return LoginResult.needsChoice;
-  }
-
-  /// Людина обрала старий щоденник: місцеві записи стираються.
-  Future<void> keepAccount() async {
-    final account = pending;
-    if (account == null) return;
-
-    await db.syncDao.wipe();
-    await _apply(account);
-    pending = null;
-  }
-
-  /// Людина обрала те, що на телефоні: вхід скасовується разом із ним.
-  ///
-  /// Акаунт на сервері нікуди не дівається, вона просто лишається в тому, у
-  /// якому була. Увійти можна буде наступного разу.
-  Future<void> keepLocal() async {
-    pending = null;
-    await google.forget();
+        /* Крок останній: зʼїхати все одразу, а не чекати таймера. Людина після
+           входу дивиться на екран, і хвилина порожнечі читалась як «дані
+           зникли», хоча вони просто ще не приїхали. */
+        await SyncRepository(db, api).run();
+        return LoginResult.done;
+      } on ApiFailure catch (e) {
+        _apiError = dataL.loginServer('$e');
+        return LoginResult.failed;
+      } catch (e) {
+        _apiError = e.toString();
+        return LoginResult.failed;
+      }
+    });
   }
 
   /// Вийти з акаунта, лишивши щоденник на телефоні.
@@ -112,7 +106,6 @@ class LoginService {
   /// стирання. Google теж забуває вибір, інакше наступний вхід мовчки зайшов би
   /// тим самим акаунтом, і кнопка виглядала б зламаною.
   Future<void> signOut() async {
-    pending = null;
     await google.forget();
     await db.syncDao.clearAccount();
     api.token = null;
@@ -128,13 +121,5 @@ class LoginService {
     );
     await db.syncDao.putTokens(balance: account.balance);
     api.token = account.accessToken;
-  }
-
-  /* Чи є на телефоні хоч щось, чого шкода. Тільки їжа: вода й тренування без
-     страв це майже завжди порожній день, у якому людина покрутила застосунок і
-     нічого не записала. */
-  Future<bool> _hasLocalDiary() async {
-    final rows = await db.select(db.meals).get();
-    return rows.isNotEmpty;
   }
 }
