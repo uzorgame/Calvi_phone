@@ -1106,7 +1106,7 @@ class LUk extends L {
   String get normCalculatedHead => 'Розрахункове значення ';
 
   @override
-  String get normCalculatedTail => '. Повернутись до нього можна вибором «Рахувати автоматично».';
+  String get normCalculatedTail => '. Повернутись до нього можна вибором «Автоматично».';
 
   @override
   String get normFitCarbs => 'Підігнати вуглеводи під норму';
@@ -1326,9 +1326,6 @@ class LUk extends L {
 
   @override
   String get profileSex => 'Стать';
-
-  @override
-  String get profileSexNote => 'Норма береться як середнє двох формул.';
 
   @override
   String get remAbout => 'Про що';
@@ -1690,8 +1687,7 @@ class LUk extends L {
   String get startHelloAction => 'Почати';
 
   @override
-  String get startHelloText =>
-      'Тут нічого не треба вести. Скажи Норі «два яйця і тост», і день порахований: ні пошуку в довідниках, ні грамів, ні таблиць. Далі вона сама.';
+  String get startHelloText => 'Все, що на столі, вже пораховано.';
 
   @override
   String get startLife => 'Спосіб життя';
@@ -1810,20 +1806,28 @@ class LUk extends L {
       'Не вдалось відкрити сховище. Записи на місці, але показати їх зараз нема чим.';
 
   @override
+  String get themeAquarelle => 'Акварель';
+
+  @override
+  String get themeAquarelleHint => 'світла, з пастельними хмарами на тлі';
+
+  @override
   String get themeDark => 'Темна';
 
   @override
   String get themeDarkHint => 'завжди темний інтерфейс';
 
   @override
+  String get themeDawn => 'Світанок';
+
+  @override
+  String get themeDawnHint => 'світла, з теплим світлом збоку';
+
+  @override
   String get themeLight => 'Світла';
 
   @override
   String get themeLightHint => 'завжди світлий інтерфейс';
-
-  @override
-  String get themeNote =>
-      'Темна тема тут нейтральна, без синього відтінку: чорнило застосунку в ній перевертається у світле, а не міняє колір.';
 
   @override
   String get themeSectionLook => 'Вигляд';

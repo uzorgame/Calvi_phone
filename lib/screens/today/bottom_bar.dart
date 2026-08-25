@@ -590,17 +590,27 @@ class _SlotChip extends StatelessWidget {
           children: [
             CalviIcon('utensils', size: 13, color: c.textSecondary),
             const SizedBox(width: 7),
-            Text.rich(
-              TextSpan(
-                text: L.of(context).barLogsInto,
-                children: [
-                  TextSpan(
-                    text: slot,
-                    style: TextStyle(color: c.text, fontWeight: FontWeight.w600),
-                  ),
-                ],
+            /* Гнучкий, бо назви карток різної довжини, а екрани різної ширини.
+               «Пізня вечеря» на найменшому телефоні не влазила рівно на шість
+               пікселів, і замість напису людина бачила жовто-чорну стрічку
+               переповнення. Саме вночі, коли ця назва й зʼявляється.
+
+               Перенос, а не трикрапка: рядок каже, у яку картку піде запис, і
+               обрізати його з кінця означає обрізати саме те, заради чого він
+               написаний. Хай краще пігулка стане на рядок вища. */
+            Flexible(
+              child: Text.rich(
+                TextSpan(
+                  text: L.of(context).barLogsInto,
+                  children: [
+                    TextSpan(
+                      text: slot,
+                      style: TextStyle(color: c.text, fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+                style: context.t.labelSmall?.copyWith(fontSize: CalviSize.fsMicro),
               ),
-              style: context.t.labelSmall?.copyWith(fontSize: CalviSize.fsMicro),
             ),
           ],
         ),

@@ -1098,8 +1098,7 @@ class LEn extends L {
   String get normCalculatedHead => 'The calculated value is ';
 
   @override
-  String get normCalculatedTail =>
-      '. You can go back to it by choosing \"Count it automatically\".';
+  String get normCalculatedTail => '. You can go back to it by choosing \"Automatic\".';
 
   @override
   String get normFitCarbs => 'Fit the carbs to the norm';
@@ -1319,9 +1318,6 @@ class LEn extends L {
 
   @override
   String get profileSex => 'Sex';
-
-  @override
-  String get profileSexNote => 'The norm is the average of two formulas.';
 
   @override
   String get remAbout => 'About what';
@@ -1675,8 +1671,7 @@ class LEn extends L {
   String get startHelloAction => 'Start';
 
   @override
-  String get startHelloText =>
-      'Nothing to keep here. Tell Nora \"two eggs and toast\" and the day is counted: no searching through references, no grams, no tables. She takes it from there.';
+  String get startHelloText => 'Everything on the table is already counted.';
 
   @override
   String get startLife => 'Lifestyle';
@@ -1793,20 +1788,28 @@ class LEn extends L {
       'Could not open the storage. Your entries are safe, but there is nothing to show them with right now.';
 
   @override
+  String get themeAquarelle => 'Watercolor';
+
+  @override
+  String get themeAquarelleHint => 'light, with pastel clouds on the ground';
+
+  @override
   String get themeDark => 'Dark';
 
   @override
   String get themeDarkHint => 'always the dark interface';
 
   @override
+  String get themeDawn => 'Dawn';
+
+  @override
+  String get themeDawnHint => 'light, with warm light from the side';
+
+  @override
   String get themeLight => 'Light';
 
   @override
   String get themeLightHint => 'always the light interface';
-
-  @override
-  String get themeNote =>
-      'The dark theme here is neutral, with no blue cast: the app\'s ink turns light rather than changing colour.';
 
   @override
   String get themeSectionLook => 'Appearance';

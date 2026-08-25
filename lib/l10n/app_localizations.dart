@@ -2004,7 +2004,7 @@ abstract class L {
   /// No description provided for @normCalculatedTail.
   ///
   /// In en, this message translates to:
-  /// **'. You can go back to it by choosing \"Count it automatically\".'**
+  /// **'. You can go back to it by choosing \"Automatic\".'**
   String get normCalculatedTail;
 
   /// No description provided for @normFitCarbs.
@@ -2408,12 +2408,6 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Sex'**
   String get profileSex;
-
-  /// No description provided for @profileSexNote.
-  ///
-  /// In en, this message translates to:
-  /// **'The norm is the average of two formulas.'**
-  String get profileSexNote;
 
   /// No description provided for @remAbout.
   ///
@@ -3072,7 +3066,7 @@ abstract class L {
   /// No description provided for @startHelloText.
   ///
   /// In en, this message translates to:
-  /// **'Nothing to keep here. Tell Nora \"two eggs and toast\" and the day is counted: no searching through references, no grams, no tables. She takes it from there.'**
+  /// **'Everything on the table is already counted.'**
   String get startHelloText;
 
   /// No description provided for @startLife.
@@ -3273,6 +3267,18 @@ abstract class L {
   /// **'Could not open the storage. Your entries are safe, but there is nothing to show them with right now.'**
   String get storageBroken;
 
+  /// No description provided for @themeAquarelle.
+  ///
+  /// In en, this message translates to:
+  /// **'Watercolor'**
+  String get themeAquarelle;
+
+  /// No description provided for @themeAquarelleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'light, with pastel clouds on the ground'**
+  String get themeAquarelleHint;
+
   /// No description provided for @themeDark.
   ///
   /// In en, this message translates to:
@@ -3285,6 +3291,18 @@ abstract class L {
   /// **'always the dark interface'**
   String get themeDarkHint;
 
+  /// No description provided for @themeDawn.
+  ///
+  /// In en, this message translates to:
+  /// **'Dawn'**
+  String get themeDawn;
+
+  /// No description provided for @themeDawnHint.
+  ///
+  /// In en, this message translates to:
+  /// **'light, with warm light from the side'**
+  String get themeDawnHint;
+
   /// No description provided for @themeLight.
   ///
   /// In en, this message translates to:
@@ -3296,12 +3314,6 @@ abstract class L {
   /// In en, this message translates to:
   /// **'always the light interface'**
   String get themeLightHint;
-
-  /// No description provided for @themeNote.
-  ///
-  /// In en, this message translates to:
-  /// **'The dark theme here is neutral, with no blue cast: the app\'s ink turns light rather than changing colour.'**
-  String get themeNote;
 
   /// No description provided for @themeSectionLook.
   ///

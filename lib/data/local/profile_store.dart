@@ -246,6 +246,8 @@ List<Reminder> _remindersOf(String raw) {
 }
 
 AppTheme _themeOf(String v) => switch (v) {
+  'aquarelle' => AppTheme.aquarelle,
+  'dawn' => AppTheme.dawn,
   'dark' => AppTheme.dark,
   'system' => AppTheme.system,
   _ => AppTheme.light,

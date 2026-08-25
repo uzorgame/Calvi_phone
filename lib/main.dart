@@ -522,9 +522,18 @@ class _CalviAppState extends State<CalviApp> {
       a.times.map((t) => t.at).join(',') == b.times.map((t) => t.at).join(',');
 
   ThemeMode get _mode => switch (_s.theme) {
-    AppTheme.light => ThemeMode.light,
+    AppTheme.light || AppTheme.aquarelle || AppTheme.dawn => ThemeMode.light,
     AppTheme.dark => ThemeMode.dark,
     AppTheme.system => ThemeMode.system,
+  };
+
+  /* Which light theme that is. The decorated grounds are light themes with
+     weather on the page, so the split lives here and not in ThemeMode: the
+     system setting still flips them into the same dark theme at night. */
+  ThemeData get _light => switch (_s.theme) {
+    AppTheme.aquarelle => calviAquaTheme,
+    AppTheme.dawn => calviDawnTheme,
+    _ => calviLightTheme,
   };
 
   @override
@@ -557,7 +566,7 @@ class _CalviAppState extends State<CalviApp> {
         title: 'Calvi',
         debugShowCheckedModeBanner: false,
         scrollBehavior: const CalviScroll(),
-        theme: calviLightTheme,
+        theme: _light,
         darkTheme: calviDarkTheme,
         themeMode: _mode,
 

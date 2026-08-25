@@ -16,6 +16,10 @@
 
   "themeLight": "Світла",
   "themeLightHint": "завжди світлий інтерфейс",
+  "themeAquarelle": "Акварель",
+  "themeAquarelleHint": "світла, з пастельними хмарами на тлі",
+  "themeDawn": "Світанок",
+  "themeDawnHint": "світла, з теплим світлом збоку",
   "themeDark": "Темна",
   "themeDarkHint": "завжди темний інтерфейс",
   "themeSystem": "Тема пристрою",

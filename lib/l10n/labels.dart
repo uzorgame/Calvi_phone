@@ -103,6 +103,8 @@ String themeTitle(BuildContext context, AppTheme t) {
   final l = L.of(context);
   return switch (t) {
     AppTheme.light => l.themeLight,
+    AppTheme.aquarelle => l.themeAquarelle,
+    AppTheme.dawn => l.themeDawn,
     AppTheme.dark => l.themeDark,
     AppTheme.system => l.themeSystem,
   };
@@ -112,6 +114,8 @@ String themeHint(BuildContext context, AppTheme t) {
   final l = L.of(context);
   return switch (t) {
     AppTheme.light => l.themeLightHint,
+    AppTheme.aquarelle => l.themeAquarelleHint,
+    AppTheme.dawn => l.themeDawnHint,
     AppTheme.dark => l.themeDarkHint,
     AppTheme.system => l.themeSystemHint,
   };

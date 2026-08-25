@@ -19,6 +19,10 @@
 
   "themeLight": "Light",
   "themeLightHint": "always the light interface",
+  "themeAquarelle": "Watercolor",
+  "themeAquarelleHint": "light, with pastel clouds on the ground",
+  "themeDawn": "Dawn",
+  "themeDawnHint": "light, with warm light from the side",
   "themeDark": "Dark",
   "themeDarkHint": "always the dark interface",
   "themeSystem": "Device theme",

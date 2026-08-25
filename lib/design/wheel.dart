@@ -323,9 +323,15 @@ class CalviStepper extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+      /* A card, like the demo's. It had the border and the corners but no fill
+         and no shadow, so the page ground showed straight through it and the
+         two keys, which are a shade meant to sit on white, dissolved into that
+         ground: the minus and the plus were left standing on nothing. */
       decoration: BoxDecoration(
+        color: context.c.card,
         border: Border.all(color: context.c.cardBorder),
         borderRadius: BorderRadius.circular(CalviSize.rLarge),
+        boxShadow: context.shadowCard,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -523,7 +529,12 @@ class _CalviSliderState extends State<CalviSlider> {
                     Container(
                       height: 8,
                       decoration: BoxDecoration(
-                        color: c.fillSecondary,
+                        /* `track`, not `fillSecondary`. The unfilled part lies
+                           straight on the page ground, and the secondary fill is
+                           one step of 255 away from it: past the handle the
+                           track vanished, so the range had no visible end and
+                           the handle floated on nothing. */
+                        color: c.track,
                         borderRadius: BorderRadius.circular(CalviSize.rPill),
                       ),
                     ),

@@ -835,7 +835,14 @@ class _Chip extends StatelessWidget {
         duration: CalviMotion.fast,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
         decoration: BoxDecoration(
-          color: on ? c.button : c.fillSecondary,
+          /* Unpicked does not mean unavailable.
+             These sat on `fillSecondary` over the page ground, one step of 255
+             apart, so the chip had no shape at all, and `textSecondary` on it
+             came to 2.99:1 where small text needs 4.5:1. Next to the activity
+             options, which are white cards with dark titles, the one thing on
+             the screen you have to tap looked like the one thing you could
+             not. Ground it reads on, and ink you can read. */
+          color: on ? c.button : c.track,
           borderRadius: BorderRadius.circular(CalviSize.rPill),
         ),
         child: Text(
@@ -843,7 +850,7 @@ class _Chip extends StatelessWidget {
           style: context.t.labelSmall?.copyWith(
             fontSize: CalviSize.fsMicro,
             fontWeight: on ? FontWeight.w600 : FontWeight.w400,
-            color: on ? c.buttonText : c.textSecondary,
+            color: on ? c.buttonText : c.text,
           ),
         ),
       ),
@@ -866,37 +873,117 @@ class _Note extends StatelessWidget {
   );
 }
 
-/* Screen one. No account here: it asks nothing and promises the short version of
-   what the app is, because the first tap should cost nothing. */
-class _Hello extends StatelessWidget {
+/* Screen one, «Стіл»: the set table.
+ *
+ * No account here: it asks nothing, because the first tap should cost nothing.
+ * And no paragraph either. The old screen explained the app in thirty words,
+ * and nobody reads thirty words on a first screen. Instead the food icon set
+ * drifts slowly around the wordmark, one quiet sentence sits under it, and the
+ * whole thing plays by itself: the person may never touch the screen, so
+ * nothing here waits for a tap. Chosen from ten candidates on the demo panel. */
+class _Hello extends StatefulWidget {
   const _Hello({required this.onNext});
 
   final VoidCallback onNext;
 
   @override
+  State<_Hello> createState() => _HelloState();
+}
+
+class _HelloState extends State<_Hello> with SingleTickerProviderStateMixin {
+  /* One lap in fifty-two seconds: motion you notice only when you look for it.
+     A wheel fast enough to watch is a wheel that competes with the button. */
+  late final AnimationController _spin = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 52),
+  )..repeat();
+
+  /// The dishes on the table: the app's own food icon set, nothing drawn anew.
+  static const _table = ['egg', 'soup', 'bread', 'drink', 'fruit', 'meat'];
+
+  @override
+  void dispose() {
+    _spin.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, box) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: CalviSize.gutter),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: box.maxHeight * 0.12),
-            Text(
-              'Calvi',
-              style: context.t.displayLarge?.copyWith(fontSize: 40, letterSpacing: 40 * -0.04),
+    final c = context.c;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: CalviSize.gutter),
+      child: Column(
+        children: [
+          Expanded(
+            child: Center(
+              /* Everything above the caption fades up once, as one piece. */
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 900),
+                curve: CalviMotion.easeRise,
+                builder: (context, v, child) => Opacity(
+                  opacity: v,
+                  child: Transform.translate(offset: Offset(0, 10 * (1 - v)), child: child),
+                ),
+                child: SizedBox(
+                  width: 280,
+                  height: 280,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      AnimatedBuilder(
+                        animation: _spin,
+                        builder: (context, _) => Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            for (final (i, name) in _table.indexed)
+                              /* Plain polar placement: the position turns, the
+                                 dish itself never rotates, so every icon stays
+                                 upright without a counter-spin. */
+                              Transform.translate(
+                                offset: Offset.fromDirection(
+                                  _spin.value * 2 * math.pi + i * math.pi / 3,
+                                  118,
+                                ),
+                                child: Container(
+                                  width: 44,
+                                  height: 44,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: c.card,
+                                    border: Border.all(color: c.cardBorder),
+                                    boxShadow: context.shadowCard,
+                                  ),
+                                  child: CalviIcon(name, size: 19, color: c.textSecondary),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        'Calvi',
+                        style: context.t.displayLarge?.copyWith(
+                          fontSize: 46,
+                          letterSpacing: 46 * -0.04,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
-            const SizedBox(height: 12),
-            Text(
-              L.of(context).startHelloText,
-              style: context.t.bodyMedium?.copyWith(fontSize: CalviSize.fsBody, height: 1.45),
-            ),
-            const Spacer(),
-            CalviButton(label: L.of(context).startHelloAction, onTap: onNext),
-            // A CSS percentage margin measures the width, not the height.
-            SizedBox(height: box.maxWidth * 0.18),
-          ],
-        ),
+          ),
+          Text(
+            L.of(context).startHelloText,
+            textAlign: TextAlign.center,
+            style: context.t.bodyMedium?.copyWith(fontSize: CalviSize.fsBody, height: 1.4),
+          ),
+          const SizedBox(height: 18),
+          CalviButton(label: L.of(context).startHelloAction, onTap: widget.onNext),
+          const SizedBox(height: 24),
+        ],
       ),
     );
   }

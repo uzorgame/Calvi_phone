@@ -43,7 +43,6 @@
   "setFreeTierTelegram": "Write on Telegram",
 
   "profileSex": "Sex",
-  "profileSexNote": "The norm is the average of two formulas.",
   "profileAge": "Age",
   "profileHeight": "Height",
   "profileActivity": "Activity",
@@ -87,7 +86,7 @@
   "normByHand": "Set it by hand",
   "normByHandHint": "analytics will count against this figure",
   "normCalculatedHead": "The calculated value is ",
-  "normCalculatedTail": ". You can go back to it by choosing \"Count it automatically\".",
+  "normCalculatedTail": ". You can go back to it by choosing \"Automatic\".",
   "normMacros": "Macros",
   "normFitCarbs": "Fit the carbs to the norm",
   "normWater": "Water",
@@ -99,7 +98,6 @@
   "normWaterTail": " per kilogram of weight. The usual rough range is 30-40 ml, but it depends on heat and training, so the figure here is not rigid.",
 
   "themeSectionLook": "Appearance",
-  "themeNote": "The dark theme here is neutral, with no blue cast: the app's ink turns light rather than changing colour.",
   "langSection": "Interface language",
 
   "planTitle": "Subscription",

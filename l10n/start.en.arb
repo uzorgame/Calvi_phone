@@ -52,7 +52,7 @@
   "startNormNoraHint": "Write or say it however suits you: \"two eggs and toast\", \"drank 300 of water\". Whatever else I need, I will ask in the conversation.",
   "startNormNote": "This is the Mifflin-St Jeor formula, not medical advice. If you have a condition, are pregnant, or follow a prescribed diet, check with your doctor.",
 
-  "startHelloText": "Nothing to keep here. Tell Nora \"two eggs and toast\" and the day is counted: no searching through references, no grams, no tables. She takes it from there.",
+  "startHelloText": "Everything on the table is already counted.",
   "startHelloAction": "Start",
 
   "startDeviceFirstRun": "first run",

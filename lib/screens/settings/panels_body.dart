@@ -68,13 +68,11 @@ class ProfilePanel extends StatelessWidget {
         const AccountBlock(),
 
         /* Три слова без пояснень не варті трьох рядків із іконками: у ряд вони
-           займають висоту одного і читаються так само. Пояснення лишилось у
-           «Інше», єдиного варіанта, який його потребує. */
+           займають висоту одного і читаються так само. */
         CalviSection(
           title: l.profileSex,
           bare: true,
           trail: 0,
-          note: s.sex == Sex.x ? l.profileSexNote : null,
           children: [
             CalviSegments(
               labels: [l.startSexMale, l.startSexFemale, l.startSexOther],
@@ -578,6 +576,11 @@ class NormPanel extends StatelessWidget {
                 lead: 12,
               ),
             if (manual) ...[
+              /* Проміжок, бо інакше перемикач і поле з числом злипаються в одну
+                 фігуру: «Автоматично / Вручну» перестає читатись як вибір, а
+                 число під ним як його наслідок. Водяний степер стоїть у своєму
+                 блоці першим і відступу не має, як і в демці. */
+              const SizedBox(height: CalviSize.gapCard),
               CalviStepper(
                 value: s.kcalManual ?? auto,
                 step: 50,

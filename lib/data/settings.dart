@@ -9,7 +9,11 @@ import 'fixtures.dart';
 
 enum Sex { m, f, x }
 
-enum AppTheme { light, dark, system }
+/* `aquarelle` and `dawn` are the light theme with weather on the ground: same
+   ink, same cards, only the page behind everything changes. They were picked
+   off the welcome screen candidates, where the two grounds looked too good to
+   throw away with the rest. */
+enum AppTheme { light, aquarelle, dawn, dark, system }
 
 /// Мова інтерфейсу.
 ///
@@ -376,6 +380,8 @@ class ThemeOption {
 
 const themeOptions = <ThemeOption>[
   ThemeOption(id: AppTheme.light, icon: 'sun'),
+  ThemeOption(id: AppTheme.aquarelle, icon: 'water'),
+  ThemeOption(id: AppTheme.dawn, icon: 'sunrise'),
   ThemeOption(id: AppTheme.dark, icon: 'moon'),
   ThemeOption(id: AppTheme.system, icon: 'settings'),
 ];

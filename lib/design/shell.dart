@@ -22,10 +22,24 @@ class CalviScreen extends StatefulWidget {
     this.hint,
     this.foot,
     this.padding = const EdgeInsets.only(bottom: 16),
+    this.storageKey,
   });
 
   final String title;
   final List<Widget> children;
+
+  /* Памʼять про те, де цей список був прогорнутий.
+   *
+   * Потрібна там, де екран зникає з дерева і повертається: налаштування
+   * підміняють список панеллю, і список при цьому знищується разом зі своїм
+   * контролером прокрутки. Без ключа Flutter не зберігає положення взагалі,
+   * бо `PageStorage` пише тільки за `PageStorageKey`, і повернення щоразу
+   * приземляло на початок.
+   *
+   * Не всім екранам це потрібно і не всім корисно: сторінка, відкрита наново,
+   * має починатись згори, інакше документ відкривається посеред третього
+   * абзацу. Тому за умовчанням памʼяті немає, і її просять окремо. */
+  final PageStorageKey<String>? storageKey;
 
   /// Null pops the navigator, which is what almost every screen wants.
   final VoidCallback? onBack;
@@ -103,6 +117,7 @@ class _CalviScreenState extends State<CalviScreen> {
         child: Stack(
           children: [
             ListView(
+              key: widget.storageKey,
               controller: _scroll,
               padding: widget.padding,
               children: [
@@ -1229,7 +1244,11 @@ class CalviSegments extends StatelessWidget {
               Positioned.fill(
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: c.fillSecondary,
+                    /* The groove the thumb runs in, so the three options read as
+                       one control. It was `fillSecondary` on the page ground,
+                       one step of 255 apart, so only the thumb was ever visible
+                       and the unchosen options sat on bare page. */
+                    color: c.track,
                     borderRadius: BorderRadius.circular(CalviSize.rPill),
                   ),
                 ),

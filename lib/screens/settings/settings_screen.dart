@@ -150,6 +150,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ? _panelFor(_panel!, s, set)
           : CalviScreen(
               title: l.setTitle,
+              /* Список довгий, а «Тема» лежить у ньому далеко внизу. Повернення
+                 з панелі має приземляти туди, звідки пішов, а не на початок:
+                 інакше кожен вибір коштує ще одного гортання наосліп. */
+              storageKey: const PageStorageKey('settings-list'),
               children: [
                 CalviSection(
                   title: l.setGroupAbout,

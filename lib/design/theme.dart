@@ -11,12 +11,23 @@ import 'tokens.dart';
 /// that there is no reason to reach past it.
 @immutable
 class CalviTheme extends ThemeExtension<CalviTheme> {
-  const CalviTheme(this.c);
+  const CalviTheme(this.c, {this.aqua = 0, this.dawn = 0});
 
   final CalviColors c;
 
+  /* How much of a decorated ground this theme carries, each 0..1.
+   *
+   * Doubles rather than an enum on purpose, the same trick `nightOf` plays:
+   * themes cross-fade for a quarter of a second, and a flag would flip the
+   * whole wash in one frame in the middle of that glide. A fraction rides the
+   * theme animation for free, so the watercolor clouds breathe in and out of
+   * existence together with everything else. */
+  final double aqua;
+  final double dawn;
+
   @override
-  CalviTheme copyWith({CalviColors? c}) => CalviTheme(c ?? this.c);
+  CalviTheme copyWith({CalviColors? c, double? aqua, double? dawn}) =>
+      CalviTheme(c ?? this.c, aqua: aqua ?? this.aqua, dawn: dawn ?? this.dawn);
 
   /// Themes cross-fade on a switch, so the colours have to be able to meet in
   /// the middle rather than jump.
@@ -26,6 +37,8 @@ class CalviTheme extends ThemeExtension<CalviTheme> {
     Color mix(Color a, Color b) => Color.lerp(a, b, t)!;
     final o = other.c;
     return CalviTheme(
+      aqua: aqua + (other.aqua - aqua) * t,
+      dawn: dawn + (other.dawn - dawn) * t,
       CalviColors(
         bg: mix(c.bg, o.bg),
         card: mix(c.card, o.card),
@@ -224,7 +237,7 @@ TextTheme _type(Color text, Color secondary) {
   );
 }
 
-ThemeData _theme(CalviColors c, Brightness b) {
+ThemeData _theme(CalviColors c, Brightness b, {double aqua = 0, double dawn = 0}) {
   final type = _type(c.text, c.textSecondary);
   return ThemeData(
     useMaterial3: true,
@@ -240,12 +253,19 @@ ThemeData _theme(CalviColors c, Brightness b) {
     textTheme: type,
     splashFactory: NoSplash.splashFactory,
     highlightColor: Colors.transparent,
-    extensions: [CalviTheme(c)],
+    extensions: [CalviTheme(c, aqua: aqua, dawn: dawn)],
   );
 }
 
 ThemeData get calviLightTheme => _theme(calviLight, Brightness.light);
 ThemeData get calviDarkTheme => _theme(calviDark, Brightness.dark);
+
+/* The two decorated light themes, picked off the welcome screen candidates.
+   Same ink, same cards, same buttons as the light theme: only the ground under
+   everything changes, which is why they are one flag on the same palette and
+   not palettes of their own. */
+ThemeData get calviAquaTheme => _theme(calviLight, Brightness.light, aqua: 1);
+ThemeData get calviDawnTheme => _theme(calviLight, Brightness.light, dawn: 1);
 
 /// How every list in this app behaves at its ends.
 ///
@@ -332,29 +352,99 @@ class CalviGround extends StatelessWidget {
   Widget build(BuildContext context) {
     final night = nightOf(context);
 
+    /* Відблиск окремим шаром, бо коробка вміє тільки один градієнт. Коштує це
+       другої заливки прямокутника і жодного шару: обидва градієнти малюються
+       прямо на полотно.
+
+       Шар стоїть **завжди**, і в темряві, і на світлі, а на світлі просто нічого
+       не малює. Раніше він зʼявлявся лише в темряві, і на порозі темряви форма
+       дерева над усім застосунком мінялась. Flutter зіставляє елементи за місцем
+       у дереві, тож вставлена коробка означала, що все під нею, разом із
+       `Navigator`, станами екранів і положеннями прокруток, знищується і
+       будується наново. Зовні це виглядало так: людина міняє тему в
+       налаштуваннях і опиняється на початку списку налаштувань, викинута з
+       панелі, у якій щойно обирала. Порожня декорація не малює нічого. */
+    final ext = Theme.of(context).extension<CalviTheme>();
+
     return DecoratedBox(
       decoration: of(context),
-      child: night < 0.01
-          ? child
-          /* Відблиск окремим шаром, бо коробка вміє тільки один градієнт.
-             Коштує це другої заливки прямокутника і жодного шару: обидва
-             градієнти малюються прямо на полотно. */
-          : DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: const Alignment(-0.48, -0.72),
-                  radius: 1.4,
-                  colors: [
-                    Color.lerp(const Color(0x0033333A), const Color(0xFF33333A), night)!,
-                    const Color(0x0033333A),
-                  ],
-                  stops: const [0, 0.68],
+      /* The decorated grounds, painted over the base and under the glare.
+         The painter stands in the tree ALWAYS and simply paints nothing when
+         both fractions are zero: a layer that appeared only on those themes
+         would change the tree's shape on a switch, and that is the exact bug
+         that once rebuilt the whole app when darkness crossed its threshold. */
+      child: CustomPaint(
+        painter: ext == null || (ext.aqua == 0 && ext.dawn == 0)
+            ? null
+            : _WashPainter(aqua: ext.aqua, dawn: ext.dawn, c: ext.c),
+        child: DecoratedBox(
+          decoration: night < 0.01
+              ? const BoxDecoration()
+              : BoxDecoration(
+                  gradient: RadialGradient(
+                    center: const Alignment(-0.48, -0.72),
+                    radius: 1.4,
+                    colors: [
+                      Color.lerp(const Color(0x0033333A), const Color(0xFF33333A), night)!,
+                      const Color(0x0033333A),
+                    ],
+                    stops: const [0, 0.68],
+                  ),
                 ),
-              ),
-              child: child,
-            ),
+          child: child,
+        ),
+      ),
     );
   }
+}
+
+/* The decorated grounds: «Акварель» and «Світанок».
+ *
+ * Both are the light theme with weather on the ground. Watercolor is the three
+ * macro pastels blurred into soft clouds; dawn is warm sun from one corner and
+ * cool shade in the other. The colours are the palette's own accents, so the
+ * ground can never disagree with the charts drawn on top of it.
+ *
+ * Soft radial gradients rather than blurred circles: a real blur costs a
+ * saveLayer per blob on every frame of every scroll, and a radial falloff to
+ * transparent reads the same at a fraction of the price.
+ *
+ * Every blob stays out of the bottom fifth of the screen. The main button's
+ * veil down there dissolves into the flat page colour, and a cloud behind it
+ * would get cut by that veil into a visible band. */
+class _WashPainter extends CustomPainter {
+  const _WashPainter({required this.aqua, required this.dawn, required this.c});
+
+  final double aqua;
+  final double dawn;
+  final CalviColors c;
+
+  void _blob(Canvas canvas, Size s, Color tone, double a, Offset at, double r) {
+    if (a <= 0) return;
+    final center = Offset(at.dx * s.width, at.dy * s.height);
+    final paint = Paint()
+      ..shader = RadialGradient(
+        colors: [tone.withValues(alpha: a), tone.withValues(alpha: 0)],
+      ).createShader(Rect.fromCircle(center: center, radius: r * s.width));
+    canvas.drawCircle(center, r * s.width, paint);
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (aqua > 0) {
+      _blob(canvas, size, c.protein, 0.30 * aqua, const Offset(0.28, 0.20), 0.62);
+      _blob(canvas, size, c.fats, 0.26 * aqua, const Offset(0.90, 0.38), 0.55);
+      _blob(canvas, size, c.carbs, 0.30 * aqua, const Offset(0.32, 0.66), 0.50);
+    }
+    if (dawn > 0) {
+      _blob(canvas, size, c.carbs, 0.34 * dawn, const Offset(0.14, 0.02), 0.95);
+      _blob(canvas, size, c.fats, 0.20 * dawn, const Offset(0.92, 0.68), 0.80);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_WashPainter old) =>
+      old.aqua != aqua || old.dawn != dawn || old.c != c;
 }
 
 /// Чорнило для чіпа, який стоїть на тонованій плашці свого ж кольору.

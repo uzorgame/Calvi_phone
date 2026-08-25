@@ -48,7 +48,6 @@ class ThemePanel extends StatelessWidget {
               ),
           ],
         ),
-        CalviNote(l.themeNote),
       ],
     );
   }

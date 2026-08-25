@@ -373,25 +373,40 @@ class _MedsScreenState extends State<MedsScreen> {
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () => setState(() => _showPast = !_showPast),
-            child: Row(
-              children: [
-                Text(l.medsPast, style: context.t.titleMedium?.copyWith(fontSize: 15)),
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: c.fillSecondary,
-                    borderRadius: BorderRadius.circular(CalviSize.rPill),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+              /* Картка, як рядки в налаштуваннях. Рядок стояв просто на ґрунті,
+                 без тла і без рамки, тож єдина дорога до історії курсів
+                 виглядала підписом, а не тим, у що можна зайти. */
+              decoration: BoxDecoration(
+                color: c.card,
+                border: Border.all(color: c.cardBorder),
+                borderRadius: BorderRadius.circular(CalviSize.rLarge),
+                boxShadow: context.shadowCard,
+              ),
+              child: Row(
+                children: [
+                  Text(l.medsPast, style: context.t.titleMedium?.copyWith(fontSize: 15)),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: c.fillSecondary,
+                      borderRadius: BorderRadius.circular(CalviSize.rPill),
+                    ),
+                    child: Text('${past.length}', style: context.t.labelSmall),
                   ),
-                  child: Text('${past.length}', style: context.t.labelSmall),
-                ),
-                const Spacer(),
-                AnimatedRotation(
-                  turns: _showPast ? 0.5 : 0,
-                  duration: CalviMotion.fast,
-                  child: CalviIcon('chevron', size: 16, color: c.textSecondary),
-                ),
-              ],
+                  const Spacer(),
+                  /* Чверть оберта, як у демці: закрита дивиться вправо, як усі
+                     стрілки рядків, розкрита вниз. Тут стояла півоберта, а вона
+                     робить зі стрілки вказівку вліво, тобто «назад». */
+                  AnimatedRotation(
+                    turns: _showPast ? 0.25 : 0,
+                    duration: CalviMotion.fast,
+                    child: CalviIcon('chevron', size: 16, color: c.textSecondary),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
