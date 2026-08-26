@@ -1,6 +1,6 @@
 // GENERATED FILE. Не правити руками.
 //
-// Джерело: Demo_Flutter/src/data/legal.ts
+// Джерело: Demo_Flutter_001/src/data/legal.ts
 // Оновити: node tools/legal.mjs
 
 library;

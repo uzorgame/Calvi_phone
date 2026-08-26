@@ -336,6 +336,13 @@ class LocalSink implements NotificationSink {
     await _plugin.initialize(
       settings: const InitializationSettings(
         android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+        /* Без цих `false` iOS питає дозвіл прямо при першому запуску, а він
+           питається на першому нагадуванні, коли людина розуміє навіщо. */
+        iOS: DarwinInitializationSettings(
+          requestAlertPermission: false,
+          requestSoundPermission: false,
+          requestBadgePermission: false,
+        ),
       ),
       onDidReceiveNotificationResponse: (response) {
         final from = response.payload;
@@ -355,7 +362,11 @@ class LocalSink implements NotificationSink {
     await ready();
     final android = _plugin
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
-    return await android?.areNotificationsEnabled() ?? false;
+    if (android != null) return await android.areNotificationsEnabled() ?? false;
+
+    final ios = _plugin
+        .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
+    return (await ios?.checkPermissions())?.isEnabled ?? false;
   }
 
   @override
@@ -363,12 +374,19 @@ class LocalSink implements NotificationSink {
     await ready();
     final android = _plugin
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+    if (android != null) {
+      final allowed = await android.requestNotificationsPermission() ?? false;
+      // Точний будильник це окремий дозвіл: без нього система має право зсунути
+      // показ на десятки хвилин.
+      await android.requestExactAlarmsPermission();
+      return allowed;
+    }
 
-    final allowed = await android?.requestNotificationsPermission() ?? false;
-    // Точний будильник це окремий дозвіл: без нього система має право зсунути
-    // показ на десятки хвилин.
-    await android?.requestExactAlarmsPermission();
-    return allowed;
+    final ios = _plugin
+        .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
+    // Бейдж теж: системне вікно iOS показується один раз за життя встановлення,
+    // і те, чого не спитали зараз, потім можна ввімкнути лише в налаштуваннях.
+    return await ios?.requestPermissions(alert: true, sound: true, badge: true) ?? false;
   }
 
   @override

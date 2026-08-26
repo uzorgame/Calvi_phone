@@ -17,6 +17,11 @@ import UIKit
   ) -> Bool {
     GeneratedPluginRegistrant.register(with: self)
 
+    /* flutter_local_notifications вимагає віддати себе делегатом центру
+       сповіщень: без цього дотик по нагадуванню не доходить до Dart, і
+       сповіщення у відкритому застосунку не показуються взагалі. */
+    UNUserNotificationCenter.current().delegate = self as? UNUserNotificationCenterDelegate
+
     /* Службові звуки початку і кінця запису голосу.
      *
      * Тільки тут, бо на Android їх грає сама система розпізнавання, а на iOS
