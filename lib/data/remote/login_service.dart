@@ -67,13 +67,28 @@ class LoginService {
 
     return gate.run(() async {
       try {
-        /* Крок перший: дотиснути нагору все місцеве, поки акаунт ще старий.
+        /* Крок перший: дотиснути нагору ВСЕ місцеве, поки акаунт ще старий.
            Сервер зливає те, що в нього доїхало, і рядок, який жив тільки в
            телефоні, злиття б не пережив. Тому без мережі вхід чесно падає тут,
-           а не стирає недовезене. */
-        final up = await SyncRepository(db, api).run();
-        if (up.failure != null) {
-          _apiError = dataL.loginServer('${up.failure}');
+           а не стирає недовезене.
+
+           Циклом, а не одним обміном. Обмін відвозить до сотні рядків на
+           таблицю і зупиняється, розраховуючи на наступний такт таймера. Для
+           фонової синхронізації це правильно, а тут «майже все доїхало» не
+           відрізняється від «нічого»: тиждень життя без входу може важити
+           більше за одну порцію, і стирати можна лише порожню чергу. */
+        for (var round = 0; round < 30; round++) {
+          final up = await SyncRepository(db, api).run();
+          if (up.failure != null) {
+            _apiError = dataL.loginServer('${up.failure}');
+            return LoginResult.failed;
+          }
+          if (!await db.syncDao.hasDirty()) break;
+        }
+        if (await db.syncDao.hasDirty()) {
+          /* Сервер живий, але якийсь рядок не приймає. Входити далі означало б
+             стерти його при перемиканні; чесніше зупинитись і сказати. */
+          _apiError = dataL.loginNotSynced;
           return LoginResult.failed;
         }
 

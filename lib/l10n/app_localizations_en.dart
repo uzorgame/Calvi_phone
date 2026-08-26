@@ -28,6 +28,9 @@ class LEn extends L {
   String get aboutWrite => 'Write to us';
 
   @override
+  String get accountAppleSoon => 'Apple sign-in is on its way. Google for now.';
+
+  @override
   String get accountBusy => 'Signing in…';
 
   @override
@@ -917,6 +920,10 @@ class LEn extends L {
 
   @override
   String get loginNotConfigured => 'sign-in is not configured in this build';
+
+  @override
+  String get loginNotSynced =>
+      'Not every entry has reached the server yet. Try again in a minute: signing in erases nothing until everything is saved';
 
   @override
   String loginServer(String why) {

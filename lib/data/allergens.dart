@@ -1,6 +1,6 @@
 // GENERATED FILE. Не правити руками.
 //
-// Джерело: Demo_Flutter/src/data/allergens.ts
+// Джерело: Demo_Flutter_001/src/data/allergens.ts
 // Оновити: node tools/allergens.mjs
 
 /// Allergen reference.
@@ -133,13 +133,31 @@ const allergens = <Allergen>[
     akaEn: [],
   ),
   Allergen(
+    id: 'pinenut',
+    nameUk: 'Кедровий горіх',
+    nameEn: 'Pine nut',
+    groupUk: 'Горіхи',
+    groupEn: 'Nuts',
+    akaUk: ['песто'],
+    akaEn: ['pesto', 'pignoli'],
+  ),
+  Allergen(
+    id: 'coconut',
+    nameUk: 'Кокос',
+    nameEn: 'Coconut',
+    groupUk: 'Горіхи',
+    groupEn: 'Nuts',
+    akaUk: ['кокосове молоко', 'кокосова стружка'],
+    akaEn: ['coconut milk', 'desiccated coconut'],
+  ),
+  Allergen(
     id: 'milk',
     nameUk: 'Молоко',
     nameEn: 'Milk',
     groupUk: 'Молочне',
     groupEn: 'Dairy',
-    akaUk: ['вершки', 'сметана', 'сир', 'масло'],
-    akaEn: ['cream', 'sour cream', 'cheese', 'butter'],
+    akaUk: ['вершки', 'сметана', 'сир', 'масло', 'сироватка'],
+    akaEn: ['cream', 'sour cream', 'cheese', 'butter', 'whey'],
   ),
   Allergen(
     id: 'lactose',
@@ -157,7 +175,7 @@ const allergens = <Allergen>[
     groupUk: 'Молочне',
     groupEn: 'Dairy',
     akaUk: ['казеїнат'],
-    akaEn: ['caseinate', 'whey'],
+    akaEn: ['caseinate'],
   ),
   Allergen(
     id: 'gluten',
@@ -205,6 +223,24 @@ const allergens = <Allergen>[
     akaEn: ['oatmeal', 'oat flour'],
   ),
   Allergen(
+    id: 'buckwheat',
+    nameUk: 'Гречка',
+    nameEn: 'Buckwheat',
+    groupUk: 'Злаки',
+    groupEn: 'Grains',
+    akaUk: ['гречане борошно', 'соба'],
+    akaEn: ['buckwheat flour', 'soba'],
+  ),
+  Allergen(
+    id: 'corn',
+    nameUk: 'Кукурудза',
+    nameEn: 'Corn',
+    groupUk: 'Злаки',
+    groupEn: 'Grains',
+    akaUk: ['кукурудзяний крохмаль', 'попкорн', 'полента'],
+    akaEn: ['corn starch', 'popcorn', 'polenta', 'maize'],
+  ),
+  Allergen(
     id: 'egg',
     nameUk: 'Яйця',
     nameEn: 'Egg',
@@ -248,6 +284,15 @@ const allergens = <Allergen>[
     groupEn: 'Animal',
     akaUk: ['прополіс'],
     akaEn: ['propolis'],
+  ),
+  Allergen(
+    id: 'gelatin',
+    nameUk: 'Желатин',
+    nameEn: 'Gelatin',
+    groupUk: 'Тваринні',
+    groupEn: 'Animal',
+    akaUk: ['желе', 'маршмелоу'],
+    akaEn: ['jelly', 'marshmallow', 'gelatine'],
   ),
   Allergen(
     id: 'soy',
@@ -331,13 +376,67 @@ const allergens = <Allergen>[
     akaEn: [],
   ),
   Allergen(
+    id: 'apple',
+    nameUk: 'Яблуко',
+    nameEn: 'Apple',
+    groupUk: 'Рослинні',
+    groupEn: 'Plants',
+    akaUk: ['яблучний сік', 'пюре'],
+    akaEn: ['apple juice', 'cider'],
+  ),
+  Allergen(
+    id: 'banana',
+    nameUk: 'Банан',
+    nameEn: 'Banana',
+    groupUk: 'Рослинні',
+    groupEn: 'Plants',
+    akaUk: [],
+    akaEn: ['plantain'],
+  ),
+  Allergen(
+    id: 'avocado',
+    nameUk: 'Авокадо',
+    nameEn: 'Avocado',
+    groupUk: 'Рослинні',
+    groupEn: 'Plants',
+    akaUk: ['гуакамоле'],
+    akaEn: ['guacamole'],
+  ),
+  Allergen(
     id: 'peach',
     nameUk: 'Персик',
     nameEn: 'Peach',
     groupUk: 'Рослинні',
     groupEn: 'Plants',
-    akaUk: ['нектарин', 'абрикос'],
-    akaEn: ['nectarine', 'apricot'],
+    akaUk: ['нектарин'],
+    akaEn: ['nectarine'],
+  ),
+  Allergen(
+    id: 'apricot',
+    nameUk: 'Абрикос',
+    nameEn: 'Apricot',
+    groupUk: 'Рослинні',
+    groupEn: 'Plants',
+    akaUk: ['курага', 'урюк'],
+    akaEn: ['dried apricot'],
+  ),
+  Allergen(
+    id: 'plum',
+    nameUk: 'Слива',
+    nameEn: 'Plum',
+    groupUk: 'Рослинні',
+    groupEn: 'Plants',
+    akaUk: ['чорнослив', 'алича'],
+    akaEn: ['prune'],
+  ),
+  Allergen(
+    id: 'cherry',
+    nameUk: 'Вишня',
+    nameEn: 'Cherry',
+    groupUk: 'Рослинні',
+    groupEn: 'Plants',
+    akaUk: ['черешня'],
+    akaEn: ['sweet cherry'],
   ),
   Allergen(
     id: 'tomato',
@@ -383,6 +482,15 @@ const allergens = <Allergen>[
     groupEn: 'Additives',
     akaUk: ['E210', 'E211'],
     akaEn: ['E210', 'E211'],
+  ),
+  Allergen(
+    id: 'tartrazine',
+    nameUk: 'Тартразин',
+    nameEn: 'Tartrazine',
+    groupUk: 'Додатки',
+    groupEn: 'Additives',
+    akaUk: ['E102', 'жовтий барвник'],
+    akaEn: ['E102', 'yellow 5'],
   ),
 ];
 

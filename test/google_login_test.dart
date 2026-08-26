@@ -158,6 +158,38 @@ void main() {
     );
   });
 
+  test('тиждень без входу: усі 250 записів доїжджають до перемикання', () async {
+    /* Один обмін відвозить до сотні рядків на таблицю. Тиждень щедрого життя
+       без входу це більше за сотню, і вхід зобовʼязаний дотиснути ВСЕ до того,
+       як зітре місцеву копію: рядок, що лишився тільки в телефоні, злиття на
+       сервері не пережив би. */
+    for (var i = 0; i < 250; i++) {
+      await db.diaryDao.addMeal(slot: 'lunch', name: 'страва $i', kcal: 100);
+    }
+
+    final log = <String>[];
+    final pushed = <Object?>[];
+    final api = answering(
+      reply(userId: 'old-account', previous: 'local-device'),
+      log: log,
+      pushed: pushed,
+    );
+    final login = LoginService(db: db, api: api, google: _FakeGoogle());
+
+    expect(await login.signIn(), LoginResult.done);
+
+    final auth = log.indexOf('/v1/auth/google');
+    final pushedBeforeAuth = pushed.length;
+    expect(
+      pushedBeforeAuth,
+      greaterThanOrEqualTo(250),
+      reason: 'перемкнулись, довізши лише $pushedBeforeAuth рядків із 250',
+    );
+    expect(log.take(auth).where((p) => p == '/v1/sync').length, greaterThanOrEqualTo(3),
+        reason: 'сотня на обмін означає щонайменше три обміни до входу');
+    expect((await db.syncDao.state()).userId, 'old-account');
+  });
+
   test('без мережі вхід падає, а записи лишаються на місці', () async {
     await db.diaryDao.addMeal(slot: 'lunch', name: 'борщ', kcal: 300);
 

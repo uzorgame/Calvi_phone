@@ -64,6 +64,21 @@ class GoogleLogin {
   /// приходила: запит до сервера в такому разі не доходить узагалі.
   String? lastError;
 
+  /* Слід у logcat, і в release теж.
+   *
+   * Нативний аркуш Android уміє репортувати свої внутрішні провали як
+   * «скасування»: у коді плагіна GetCredentialCancellationException чесно
+   * перекладається в canceled, і збій виглядає точнісінько як людина, що
+   * передумала. Єдиний спосіб їх розрізнити: записати все, що віддав плагін,
+   * дослівно. Рядки збираються так:
+   *
+   *     adb logcat | grep CalviAuth
+   */
+  static void _note(String what) {
+    // ignore: avoid_print
+    print('CalviAuth: $what');
+  }
+
   /// Показує вікно Google і повертає `id_token`, або нічого, якщо передумали.
   ///
   /// Відмова людини це не помилка: вона натиснула «скасувати», і застосунок має
@@ -72,13 +87,18 @@ class GoogleLogin {
   Future<String?> idToken() async {
     if (!available) {
       lastError = dataL.loginNotConfigured;
+      _note('кнопка недоступна: serverClientId=${serverClientId.isNotEmpty}, '
+          'iosClientId=${iosClientId.isNotEmpty}, apple=$_apple');
       return null;
     }
 
     lastError = null;
+    _note('старт: platform=$defaultTargetPlatform, '
+        'server=...${serverClientId.substring(serverClientId.length - 26)}');
 
     try {
       await _init();
+      _note('initialize пройшов');
       /* Хвилина, і не більше. Це єдине очікування в застосунку без межі:
          кожен запит до сервера має свої двадцять секунд, а вікно Google могло
          висіти вічно, і кнопка разом із ним. Вічний спінер це найгірша з
@@ -89,18 +109,25 @@ class GoogleLogin {
           .authenticate()
           .timeout(const Duration(seconds: 60));
       final token = account.authentication.idToken;
+      _note('успіх: ${account.email}, токен=${token == null ? 'НЕМАЄ' : '${token.length} символів'}');
       if (token == null) lastError = dataL.loginNoToken;
       return token;
     } on TimeoutException {
+      _note('таймаут: 60 секунд без відповіді від аркуша');
       lastError = dataL.loginSlow;
       return null;
     } on GoogleSignInException catch (e) {
+      /* Кожне поле окремо і дослівно: code, description, details. Саме тут
+         живе відповідь, чому аркуш закрився. */
+      _note('GoogleSignInException: code=${e.code.name} | '
+          'description=${e.description} | details=${e.details}');
       if (e.code == GoogleSignInExceptionCode.canceled) return null;
       lastError = '${e.code.name}: ${e.description ?? ''}'.trim();
       return null;
-    } catch (e) {
+    } catch (e, st) {
       /* Ловимо все. Плагін уміє кидати не лише свій виняток, а на цьому шляху
          будь-який неспійманий виняток означає для людини порожню кнопку. */
+      _note('несподіване: ${e.runtimeType}: $e\n$st');
       lastError = e.toString();
       return null;
     }

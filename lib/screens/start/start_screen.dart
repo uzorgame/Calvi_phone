@@ -1008,13 +1008,13 @@ class _SignInState extends State<_SignIn> {
                    a way in that cannot be walked is worse than one less way in. */
                 if (defaultTargetPlatform == TargetPlatform.iOS ||
                     defaultTargetPlatform == TargetPlatform.macOS) ...[
-                  _Ghost(label: l.startSignInApple, onTap: widget.onDone),
+                  CalviGhost(label: l.startSignInApple, onTap: widget.onDone),
                   const SizedBox(height: 10),
                 ],
 
                 /* Далі без входу. Раніше тут стояла кнопка «Продовжити з
                    поштою», за якою не було нічого: ні маршруту, ні планів. */
-                _Ghost(label: l.startSignInSkip, onTap: widget.onDone),
+                CalviGhost(label: l.startSignInSkip, onTap: widget.onDone),
               ],
             ),
           ),
@@ -1072,49 +1072,6 @@ class _SignInState extends State<_SignIn> {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _Ghost extends StatefulWidget {
-  const _Ghost({required this.label, required this.onTap});
-
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  State<_Ghost> createState() => _GhostState();
-}
-
-class _GhostState extends State<_Ghost> {
-  bool _down = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.c;
-    return GestureDetector(
-      onTap: widget.onTap,
-      onTapDown: (_) => setState(() => _down = true),
-      onTapUp: (_) => setState(() => _down = false),
-      onTapCancel: () => setState(() => _down = false),
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedScale(
-        scale: _down ? 0.98 : 1,
-        duration: CalviMotion.fast,
-        curve: CalviMotion.ease,
-        child: Container(
-          height: CalviSize.buttonH,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(CalviSize.rPill),
-            border: Border.all(color: c.hairline),
-          ),
-          child: Text(
-            widget.label,
-            style: context.t.titleMedium?.copyWith(fontSize: CalviSize.fsBody, color: c.text),
-          ),
-        ),
-      ),
     );
   }
 }

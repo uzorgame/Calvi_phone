@@ -1206,6 +1206,56 @@ Future<T?> calviSheet<T>(
 /// One widget for two options and for four: the choice is one thing moving, not
 /// several things toggling, and three hand-rolled copies of that idea drift into
 /// three slightly different animations.
+/// Тиха кнопка на зріст звичайної: контур замість заливки.
+///
+/// Другорядна дія поруч із головною. Дві залиті кнопки сперечаються за один
+/// погляд; контурна стоїть поруч і не перебиває. Народилась на екрані
+/// знайомства («Продовжити з Apple», «Поки без входу») і переїхала сюди, щойно
+/// знадобилась удруге: дві приватні копії однієї кнопки розходяться з першою ж
+/// правкою однієї з них.
+class CalviGhost extends StatefulWidget {
+  const CalviGhost({super.key, required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  State<CalviGhost> createState() => _CalviGhostState();
+}
+
+class _CalviGhostState extends State<CalviGhost> {
+  bool _down = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+    return GestureDetector(
+      onTap: widget.onTap,
+      onTapDown: (_) => setState(() => _down = true),
+      onTapUp: (_) => setState(() => _down = false),
+      onTapCancel: () => setState(() => _down = false),
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedScale(
+        scale: _down ? 0.98 : 1,
+        duration: CalviMotion.fast,
+        curve: CalviMotion.ease,
+        child: Container(
+          height: CalviSize.buttonH,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(CalviSize.rPill),
+            border: Border.all(color: c.hairline),
+          ),
+          child: Text(
+            widget.label,
+            style: context.t.titleMedium?.copyWith(fontSize: CalviSize.fsBody, color: c.text),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class CalviSegments extends StatelessWidget {
   const CalviSegments({
     super.key,

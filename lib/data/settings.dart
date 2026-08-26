@@ -289,13 +289,19 @@ SettingsState initialSettings() => SettingsState(
   reminders: const [],
   analytics: true,
   crash: true,
-  /* Light on a first run, whatever the phone is set to.
+  /* Dawn on a first run, whatever the phone is set to.
      A first run is the one moment the app has no idea who it is talking to, and
      it should look the way it was designed rather than the way the device
      happens to be set. Following the system here means half the people who open
-     it see a theme nobody chose for them. The three-way choice, «Тема пристрою»
-     included, sits in settings from the first minute. */
-  theme: AppTheme.light,
+     it see a theme nobody chose for them.
+
+     Саме «Світанок», а не рівний світлий: це той самий ґрунт, яким застосунок
+     показується на calvi.uk, і перше відкриття має впізнаватись як та сама річ
+     з сайту, а не її блідіша сестра. Тепле світло живе лише на ґрунті сторінки,
+     картки і текст лишаються тими ж, тож ціни в читабельності це не має.
+     Обраної теми це не чіпає: вибір зберігається в профілі і переживає
+     перезапуск, замовчування працює рівно до першого рішення людини. */
+  theme: AppTheme.dawn,
   lang: Lang.system,
 );
 

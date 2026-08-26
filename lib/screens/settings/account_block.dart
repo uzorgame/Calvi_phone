@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform;
 import 'package:flutter/material.dart';
 
 import '../../data/app_scope.dart';
@@ -277,6 +278,24 @@ class _SignedOut extends StatelessWidget {
               label: busy ? L.of(context).accountBusy : L.of(context).accountGoogle,
               onTap: busy ? () {} : onTap,
             ),
+          ],
+
+          /* Apple там, де Apple, як і на екрані знайомства: на Android цей
+             шлях нікуди не веде, і вхід, яким не можна пройти, гірший за один
+             шлях менше. Поки що заглушка, чесна на дотик: каже, що скоро, а не
+             мовчить. Справжній вхід стане на це саме місце. */
+          if (defaultTargetPlatform == TargetPlatform.iOS ||
+              defaultTargetPlatform == TargetPlatform.macOS) ...[
+            const SizedBox(height: 10),
+            CalviGhost(
+              label: L.of(context).startSignInApple,
+              onTap: () => ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(L.of(context).accountAppleSoon))),
+            ),
+          ],
+
+          if (can) ...[
             const SizedBox(height: 12),
             Text(
               L.of(context).accountScopeNote,

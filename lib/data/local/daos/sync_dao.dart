@@ -153,6 +153,29 @@ class SyncDao extends DatabaseAccessor<CalviDb> with _$SyncDaoMixin {
             ..limit(limit))
           .get();
 
+  /* Чи лишилось хоч щось невідправлене.
+   *
+   * Питання ставить вхід перед перемиканням акаунта: стерти місцеву копію
+   * можна лише тоді, коли кожен рядок уже доїхав на сервер, інакше стирання
+   * зʼїло б те, чого більше ніде немає. Один обмін відвозить до сотні рядків
+   * на таблицю і зупиняється, тому «обмін пройшов» ще не означає «все нагорі»,
+   * і перевіряється саме залишок. */
+  Future<bool> hasDirty() async {
+    for (final rows in [
+      await pendingMeals(limit: 1),
+      await pendingWater(limit: 1),
+      await pendingWeights(limit: 1),
+      await pendingMeasures(limit: 1),
+      await pendingWorkouts(limit: 1),
+      await pendingMeds(limit: 1),
+      await pendingTakes(limit: 1),
+      await pendingAllergies(limit: 1),
+    ]) {
+      if (rows.isNotEmpty) return true;
+    }
+    return false;
+  }
+
   /// Таблиці, які їздять, за іменем на дроті.
   ///
   /// Потрібні там, де таблиця відома лише рядком: у прийманні відповіді сервера

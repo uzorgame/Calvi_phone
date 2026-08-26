@@ -148,6 +148,27 @@ class _Card extends StatelessWidget {
   /// Only the fourth card leads anywhere; the three macros are figures.
   final VoidCallback? onTap;
 
+  /// Рядок «число / ціль». Будується двічі: видимим і невидимим двійником.
+  Widget _line(BuildContext context) => Text.rich(
+    TextSpan(
+      text: value,
+      children: [
+        TextSpan(
+          text: of,
+          style: context.t.labelSmall?.copyWith(
+            fontSize: tight ? 10 : CalviSize.fsMicro,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+      ],
+    ),
+    maxLines: 1,
+    style: context.t.headlineMedium?.copyWith(
+      fontSize: tight ? 16 : 19,
+      fontWeight: FontWeight.w700,
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     final c = context.c;
@@ -165,24 +186,25 @@ class _Card extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Text.rich(
-              TextSpan(
-                text: value,
-                children: [
-                  TextSpan(
-                    text: of,
-                    style: context.t.labelSmall?.copyWith(
-                      fontSize: tight ? 10 : CalviSize.fsMicro,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ],
-              ),
-              maxLines: 1,
-              style: context.t.headlineMedium?.copyWith(
-                fontSize: tight ? 16 : 19,
-                fontWeight: FontWeight.w700,
-              ),
+            /* Стискається, а не ріжеться, і не міняє висоти.
+             *
+             * `maxLines: 1` без явного overflow означає мовчазний clip, і на
+             * екрані, вужчому на кілька пунктів (iPhone 16 це 393 проти 402 у
+             * Pro), хвіст «/ 135г» просто зникав: людина бачила поточний білок
+             * і не бачила цілі. FittedBox нічого не міняє там, де рядок влазить,
+             * а в тісноті зменшує його на ті кілька відсотків, яких бракувало.
+             *
+             * Невидимий двійник повного розміру тримає висоту рядка. Без нього
+             * стиснутий рядок ставав нижчим, і картка разом із ним: білок
+             * стиснувся, жири ні, і три картки в ряду виходили різного зросту.
+             * Двійник ріжеться по ширині, як різався оригінал, але його ніхто
+             * не бачить: від нього потрібна лише висота. */
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Opacity(opacity: 0, child: _line(context)),
+                FittedBox(fit: BoxFit.scaleDown, child: _line(context)),
+              ],
             ),
             const SizedBox(height: 10),
             CalviRing(

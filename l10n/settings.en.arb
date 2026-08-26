@@ -260,5 +260,6 @@
   "eraseSureCta": "Yes, delete forever",
   "eraseDone": "The diary is erased. A clean slate.",
   "eraseFailed": "Could not erase: {why}",
-  "@eraseFailed": {"placeholders":{"why":{"type":"String"}}}
+  "@eraseFailed": {"placeholders":{"why":{"type":"String"}}},
+  "accountAppleSoon": "Apple sign-in is on its way. Google for now."
 }

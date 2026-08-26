@@ -129,6 +129,12 @@ abstract class L {
   /// **'Write to us'**
   String get aboutWrite;
 
+  /// No description provided for @accountAppleSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Apple sign-in is on its way. Google for now.'**
+  String get accountAppleSoon;
+
   /// No description provided for @accountBusy.
   ///
   /// In en, this message translates to:
@@ -1694,6 +1700,12 @@ abstract class L {
   /// In en, this message translates to:
   /// **'sign-in is not configured in this build'**
   String get loginNotConfigured;
+
+  /// No description provided for @loginNotSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Not every entry has reached the server yet. Try again in a minute: signing in erases nothing until everything is saved'**
+  String get loginNotSynced;
 
   /// No description provided for @loginServer.
   ///
