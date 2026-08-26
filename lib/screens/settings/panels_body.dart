@@ -165,7 +165,6 @@ class ProfilePanel extends StatelessWidget {
       context,
       title: l.eraseAskTitle,
       doneLabel: l.eraseAskCta,
-      footDone: true,
       danger: true,
       onDone: () => _askSure(context),
       builder: (sheet) => Padding(
@@ -189,7 +188,6 @@ class ProfilePanel extends StatelessWidget {
       context,
       title: l.eraseSureTitle,
       doneLabel: l.eraseSureCta,
-      footDone: true,
       danger: true,
       onDone: () => _erase(context),
       builder: (sheet) => Padding(

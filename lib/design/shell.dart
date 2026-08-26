@@ -1005,9 +1005,21 @@ class _CalviButtonState extends State<CalviButton> {
                   ]
                 : null,
           ),
-          child: Text(
-            widget.label,
-            style: context.t.titleMedium?.copyWith(fontSize: CalviSize.fsBody, color: c.buttonText),
+          /* Довгий напис стискається, а не ріжеться: у рядку з двох кнопок
+             половина ширини дістається кожній, і «Так, видалити назавжди» має
+             лишитись одним рядком, а не трикрапкою. */
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                widget.label,
+                style: context.t.titleMedium?.copyWith(
+                  fontSize: CalviSize.fsBody,
+                  color: c.buttonText,
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -1047,20 +1059,13 @@ Future<T?> calviSheet<T>(
 
   /// Напис на кнопці згоди. Порожньо означає «Готово» мовою застосунку.
   String? doneLabel,
+
+  /// Аркуш нічого не питає, а розповідає: скасовувати тут нема чого, тому
+  /// внизу лишається одна кнопка виходу замість двох.
   bool info = false,
   VoidCallback? onDone,
 
-  /// Кнопка згоди стоїть унизу на всю ширину, а не словом у кутку.
-  ///
-  /// Для форм, які людина заповнює зверху вниз: рішення приймається в кінці
-  /// шляху, і саме там на нього має чекати кнопка, під великим пальцем.
-  /// Дрібним словом у кутку лишається те, що кутка й заслуговує: коліщатко
-  /// годинника, з якого виходять одним дотиком.
-  bool footDone = false,
-
-  /* Згода руйнівна: нижня кнопка червона, а скасування другою повною кнопкою
-     під нею, і кутове слово зникає. Два дрібні слова обабіч заголовка
-     зливаються з ним у рядок, а дві повні кнопки читаються без вгадування. */
+  /// Згода руйнівна: нижня кнопка червона, щоб рука знала, що робить.
   bool danger = false,
 }) {
   /* 340 ms на кривій підйому, як у кожної іншої панелі, що приходить.
@@ -1131,66 +1136,68 @@ Future<T?> calviSheet<T>(
                       ),
                     ),
                   ),
+                  /* У шапці тільки назва, по центру.
+                   *
+                   * Дрібні слова обабіч заголовка зливалися з ним в один рядок,
+                   * і не було видно, що з трьох написів натискаються два; до
+                   * того ж кожен аркуш розставляв їх по-своєму. Усі дії тепер
+                   * унизу, однаково в кожному аркуші. */
                   Padding(
                     padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
+                    child: Text(
+                      title,
+                      textAlign: TextAlign.center,
+                      style: sheetContext.t.titleMedium,
+                    ),
+                  ),
+                  Flexible(child: builder(sheetContext)),
+                  /* Дві кнопки в один рядок: скасування ліворуч, згода праворуч,
+                     як у системних діалогах. Одна над одною вони читались як
+                     список, а не як вибір із двох. Скасування тихою заливкою:
+                     обидві відповіді виглядають як відповіді, але за погляд не
+                     сперечаються. Інформаційний аркуш тримає одну кнопку на всю
+                     ширину: скасовувати там нема чого. */
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 18, CalviSize.gutter, 12),
                     child: Row(
                       children: [
-                        SizedBox(
-                          width: 84,
-                          child: info || (footDone && danger)
-                              ? null
-                              : GestureDetector(
-                                  onTap: () => Navigator.of(sheetContext).pop(),
-                                  behavior: HitTestBehavior.opaque,
-                                  child: Text(
-                                    L.of(context).actionCancel,
-                                    style: sheetContext.t.labelSmall?.copyWith(fontSize: 14),
+                        if (!info) ...[
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => Navigator.of(sheetContext).pop(),
+                              behavior: HitTestBehavior.opaque,
+                              child: Container(
+                                height: CalviSize.buttonH,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: c.fillSecondary,
+                                  borderRadius: BorderRadius.circular(CalviSize.rPill),
+                                ),
+                                child: Text(
+                                  L.of(sheetContext).actionCancel,
+                                  style: sheetContext.t.titleMedium?.copyWith(
+                                    fontSize: CalviSize.fsBody,
+                                    color: c.text,
                                   ),
                                 ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            title,
-                            textAlign: TextAlign.center,
-                            style: sheetContext.t.titleMedium,
+                              ),
+                            ),
                           ),
-                        ),
-                        SizedBox(
-                          width: 84,
-                          child: footDone
-                              ? null
-                              : GestureDetector(
-                                  onTap: () {
-                                    onDone?.call();
-                                    Navigator.of(sheetContext).pop();
-                                  },
-                                  behavior: HitTestBehavior.opaque,
-                                  child: Text(
-                                    doneLabel ?? L.of(sheetContext).actionDone,
-                                    textAlign: TextAlign.right,
-                                    style: sheetContext.t.titleMedium?.copyWith(fontSize: 14),
-                                  ),
-                                ),
+                          const SizedBox(width: 10),
+                        ],
+                        Expanded(
+                          child: CalviButton(
+                            label: doneLabel ?? L.of(sheetContext).actionDone,
+                            danger: danger,
+                            onTap: () {
+                              onDone?.call();
+                              Navigator.of(sheetContext).pop();
+                            },
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  Flexible(child: builder(sheetContext)),
-                  if (footDone)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 18, CalviSize.gutter, 4),
-                      child: CalviButton(
-                        label: doneLabel ?? L.of(sheetContext).actionDone,
-                        danger: danger,
-                        second: danger ? L.of(sheetContext).actionCancel : null,
-                        onSecond: danger ? () => Navigator.of(sheetContext).pop() : null,
-                        onTap: () {
-                          onDone?.call();
-                          Navigator.of(sheetContext).pop();
-                        },
-                      ),
-                    ),
-                  const SizedBox(height: 8),
                 ],
               ),
             ),

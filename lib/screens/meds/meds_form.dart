@@ -87,7 +87,6 @@ void openMedSheet(
     title: med == null ? L.of(context).medsNew : L.of(context).medsOne,
     doneLabel: L.of(context).actionSave,
     onDone: save,
-    footDone: true,
     builder: (sheetContext) => StatefulBuilder(
       builder: (context, redraw) {
         final c = context.c;

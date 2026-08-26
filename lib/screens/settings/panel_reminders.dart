@@ -143,7 +143,6 @@ class _RemindersPanelState extends State<RemindersPanel> {
       title: id == null ? L.of(context).remNew : L.of(context).remEdit,
       doneLabel: L.of(context).actionSave,
       onDone: () => _save(id),
-      footDone: true,
       builder: (sheetContext) => StatefulBuilder(
         builder: (context, redraw) {
           final c = context.c;
