@@ -26,8 +26,15 @@ enum LoginResult {
   /// Увійшли. Обʼєднаний щоденник уже на телефоні.
   done,
 
-  /// Людина закрила вікно Google. Не помилка, і казати про це нічого не треба.
+  /// Людина закрила вікно провайдера. Не помилка, і казати про це нічого не треба.
   canceled,
+
+  /// Увійшли, але щоденник цього разу не доїхав повністю.
+  ///
+  /// Акаунт на телефоні вже є, і повторювати вхід не треба: записи забере
+  /// наступний обмін. Окремо від [failed] саме тому, що людині тут не можна
+  /// казати «не вдалось»: вдалось, і кнопка більше не потрібна.
+  partial,
 
   /// Мережі немає або сервер відмовив.
   failed,
@@ -60,8 +67,13 @@ class LoginService {
   bool get appleAvailable => apple.available;
 
   /// Що саме пішло не так, якщо результат `failed`. Порожньо, якщо все гаразд.
-  String? get error => google.lastError ?? apple.lastError ?? _apiError;
-  String? _apiError;
+  ///
+  /// Одне поле на обидва входи, і кладе його той, ким щойно заходили. Раніше
+  /// тут стояло `google.lastError ?? apple.lastError`, і помилка одного
+  /// провайдера переживала спробу входу іншим: людина тиснула Apple, а бачила
+  /// стару причину від Google. Діагностика йшла хибним слідом.
+  String? get error => _lastError;
+  String? _lastError;
 
   Future<LoginResult> signIn({String? deviceName}) => _signIn(
     window: google.idToken,
@@ -86,7 +98,7 @@ class LoginService {
     required String? Function() windowError,
     required Future<GoogleAccount> Function(String idToken) exchange,
   }) async {
-    _apiError = null;
+    _lastError = null;
 
     /* Вікно провайдера поза замком навмисно: людина може дивитись на нього
        хвилину, і морозити на цей час фонову синхронізацію нема за що. */
@@ -95,7 +107,8 @@ class LoginService {
     /* Порожній токен це або «передумав», або збій. Розрізняє їх саме
        `lastError`: відмова людини його не лишає. */
     if (idToken == null) {
-      return windowError() == null ? LoginResult.canceled : LoginResult.failed;
+      _lastError = windowError();
+      return _lastError == null ? LoginResult.canceled : LoginResult.failed;
     }
 
     return gate.run(() async {
@@ -113,7 +126,7 @@ class LoginService {
         for (var round = 0; round < 30; round++) {
           final up = await SyncRepository(db, api).run();
           if (up.failure != null) {
-            _apiError = dataL.loginServer('${up.failure}');
+            _lastError = dataL.loginServer('${up.failure}');
             return LoginResult.failed;
           }
           if (!await db.syncDao.hasDirty()) break;
@@ -121,7 +134,7 @@ class LoginService {
         if (await db.syncDao.hasDirty()) {
           /* Сервер живий, але якийсь рядок не приймає. Входити далі означало б
              стерти його при перемиканні; чесніше зупинитись і сказати. */
-          _apiError = dataL.loginNotSynced;
+          _lastError = dataL.loginNotSynced;
           return LoginResult.failed;
         }
 
@@ -135,14 +148,25 @@ class LoginService {
 
         /* Крок останній: зʼїхати все одразу, а не чекати таймера. Людина після
            входу дивиться на екран, і хвилина порожнечі читалась як «дані
-           зникли», хоча вони просто ще не приїхали. */
-        await SyncRepository(db, api).run();
+           зникли», хоча вони просто ще не приїхали.
+
+           Але вхід уже відбувся, і невдача ТУТ його не скасовує. Один зіпсований
+           рядок у відповіді валив увесь вхід: акаунт уже лежав на телефоні, а
+           людина бачила «Не вдалось увійти» і тиснула кнопку знову, отримуючи
+           те саме. Записи доїдуть наступним обміном, а сказати про це можна
+           тихо. */
+        try {
+          await SyncRepository(db, api).run();
+        } catch (e) {
+          _lastError = dataL.loginServer('$e');
+          return LoginResult.partial;
+        }
         return LoginResult.done;
       } on ApiFailure catch (e) {
-        _apiError = dataL.loginServer('$e');
+        _lastError = dataL.loginServer('$e');
         return LoginResult.failed;
       } catch (e) {
-        _apiError = e.toString();
+        _lastError = e.toString();
         return LoginResult.failed;
       }
     });
@@ -167,6 +191,7 @@ class LoginService {
       refreshToken: account.refreshToken,
       email: account.email,
       joinedAt: account.joinedAt,
+      provider: account.provider,
     );
     await db.syncDao.putTokens(balance: account.balance);
     api.token = account.accessToken;

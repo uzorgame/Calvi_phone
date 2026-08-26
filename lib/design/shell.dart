@@ -1221,10 +1221,17 @@ Future<T?> calviSheet<T>(
 /// знадобилась удруге: дві приватні копії однієї кнопки розходяться з першою ж
 /// правкою однієї з них.
 class CalviGhost extends StatefulWidget {
-  const CalviGhost({super.key, required this.label, required this.onTap});
+  const CalviGhost({super.key, required this.label, required this.onTap, this.enabled = true});
 
   final String label;
   final VoidCallback onTap;
+
+  /* Вимкнена кнопка мовчить і не втискається під пальцем.
+   *
+   * Доти зайняту кнопку «вимикали» порожнім обробником: вона й далі гралася
+   * натиском, тобто відповідала на дотик, не роблячи нічого. Це читається як
+   * поломка, а не як «зачекай». */
+  final bool enabled;
 
   @override
   State<CalviGhost> createState() => _CalviGhostState();
@@ -1236,14 +1243,15 @@ class _CalviGhostState extends State<CalviGhost> {
   @override
   Widget build(BuildContext context) {
     final c = context.c;
+    final on = widget.enabled;
     return GestureDetector(
-      onTap: widget.onTap,
-      onTapDown: (_) => setState(() => _down = true),
-      onTapUp: (_) => setState(() => _down = false),
-      onTapCancel: () => setState(() => _down = false),
+      onTap: on ? widget.onTap : null,
+      onTapDown: on ? (_) => setState(() => _down = true) : null,
+      onTapUp: on ? (_) => setState(() => _down = false) : null,
+      onTapCancel: on ? () => setState(() => _down = false) : null,
       behavior: HitTestBehavior.opaque,
       child: AnimatedScale(
-        scale: _down ? 0.98 : 1,
+        scale: _down && on ? 0.98 : 1,
         duration: CalviMotion.fast,
         curve: CalviMotion.ease,
         child: Container(
@@ -1255,7 +1263,10 @@ class _CalviGhostState extends State<CalviGhost> {
           ),
           child: Text(
             widget.label,
-            style: context.t.titleMedium?.copyWith(fontSize: CalviSize.fsBody, color: c.text),
+            style: context.t.titleMedium?.copyWith(
+              fontSize: CalviSize.fsBody,
+              color: on ? c.text : c.textSecondary,
+            ),
           ),
         ),
       ),

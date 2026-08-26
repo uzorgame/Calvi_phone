@@ -66,6 +66,7 @@ class SyncDao extends DatabaseAccessor<CalviDb> with _$SyncDaoMixin {
     required String refreshToken,
     String? email,
     DateTime? joinedAt,
+    String? provider,
   }) => (update(syncMeta)..where((s) => s.id.equals(1))).write(
     SyncMetaCompanion(
       userId: Value(userId),
@@ -73,6 +74,7 @@ class SyncDao extends DatabaseAccessor<CalviDb> with _$SyncDaoMixin {
       refreshToken: Value(refreshToken),
       email: Value(email),
       joinedAt: Value(joinedAt),
+      provider: Value(provider),
     ),
   );
 
@@ -91,6 +93,7 @@ class SyncDao extends DatabaseAccessor<CalviDb> with _$SyncDaoMixin {
       refreshToken: Value(null),
       email: Value(null),
       joinedAt: Value(null),
+      provider: Value(null),
     ),
   );
 

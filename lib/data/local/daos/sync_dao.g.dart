@@ -22,7 +22,8 @@ mixin _$SyncDaoMixin on DatabaseAccessor<CalviDb> {
 class SyncDaoManager {
   final _$SyncDaoMixin _db;
   SyncDaoManager(this._db);
-  $$MealsTableTableManager get meals => $$MealsTableTableManager(_db.attachedDatabase, _db.meals);
+  $$MealsTableTableManager get meals =>
+      $$MealsTableTableManager(_db.attachedDatabase, _db.meals);
   $$WaterLogsTableTableManager get waterLogs =>
       $$WaterLogsTableTableManager(_db.attachedDatabase, _db.waterLogs);
   $$WeightsTableTableManager get weights =>
@@ -34,7 +35,10 @@ class SyncDaoManager {
   $$MedicationsTableTableManager get medications =>
       $$MedicationsTableTableManager(_db.attachedDatabase, _db.medications);
   $$MedicationTakesTableTableManager get medicationTakes =>
-      $$MedicationTakesTableTableManager(_db.attachedDatabase, _db.medicationTakes);
+      $$MedicationTakesTableTableManager(
+        _db.attachedDatabase,
+        _db.medicationTakes,
+      );
   $$AllergiesTableTableManager get allergies =>
       $$AllergiesTableTableManager(_db.attachedDatabase, _db.allergies);
   $$ProfileTableTableManager get profile =>

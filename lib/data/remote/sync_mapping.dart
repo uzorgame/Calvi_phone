@@ -75,22 +75,22 @@ MealsCompanion mealFromChange(Map<String, dynamic> c) {
     id: Value(c['id'] as String),
     updatedAt: Value(_time(c['updated_at'])!),
     deletedAt: Value(_time(c['deleted_at'])),
-    seq: Value(c['seq'] as int),
+    seq: Value(_int(c['seq'])!),
     dirty: const Value(false),
     day: Value(_day(d['day'])),
     at: Value(_time(d['at'])!),
-    tzOffsetMin: Value((d['tz_offset_min'] as num?)?.toInt() ?? 0),
+    tzOffsetMin: Value(_int(d['tz_offset_min']) ?? 0),
     slot: Value(d['slot'] as String),
     name: Value(d['name'] as String),
-    canonicalName: Value(d['canonical_name'] as String?),
-    icon: Value(d['icon'] as String? ?? 'plate'),
-    grams: Value((d['grams'] as num?)?.toDouble()),
-    kcal: Value((d['kcal'] as num).toInt()),
-    proteinG: Value((d['protein_g'] as num?)?.toDouble() ?? 0),
-    fatG: Value((d['fat_g'] as num?)?.toDouble() ?? 0),
-    carbsG: Value((d['carbs_g'] as num?)?.toDouble() ?? 0),
-    source: Value(d['source'] as String? ?? 'manual'),
-    note: Value(d['note'] as String?),
+    canonicalName: Value(_text(d['canonical_name'])),
+    icon: Value(_text(d['icon']) ?? 'plate'),
+    grams: Value(_dec(d['grams'])),
+    kcal: Value(_int(d['kcal'])!),
+    proteinG: Value(_dec(d['protein_g']) ?? 0),
+    fatG: Value(_dec(d['fat_g']) ?? 0),
+    carbsG: Value(_dec(d['carbs_g']) ?? 0),
+    source: Value(_text(d['source']) ?? 'manual'),
+    note: Value(_text(d['note'])),
   );
 }
 
@@ -100,11 +100,11 @@ WaterLogsCompanion waterFromChange(Map<String, dynamic> c) {
     id: Value(c['id'] as String),
     updatedAt: Value(_time(c['updated_at'])!),
     deletedAt: Value(_time(c['deleted_at'])),
-    seq: Value(c['seq'] as int),
+    seq: Value(_int(c['seq'])!),
     dirty: const Value(false),
     day: Value(_day(d['day'])),
     at: Value(_time(d['at'])!),
-    ml: Value((d['ml'] as num).toInt()),
+    ml: Value(_int(d['ml'])!),
   );
 }
 
@@ -114,17 +114,44 @@ WeightsCompanion weightFromChange(Map<String, dynamic> c) {
     id: Value(c['id'] as String),
     updatedAt: Value(_time(c['updated_at'])!),
     deletedAt: Value(_time(c['deleted_at'])),
-    seq: Value(c['seq'] as int),
+    seq: Value(_int(c['seq'])!),
     dirty: const Value(false),
     day: Value(_day(d['day'])),
     at: Value(_time(d['at'])!),
-    kg: Value((d['kg'] as num).toDouble()),
+    kg: Value(_dec(d['kg'])!),
   );
 }
 
 /// Times come back as UTC text and are stored as local, because that is what
 /// every screen reads them as.
 DateTime? _time(Object? value) => value is String ? DateTime.parse(value).toLocal() : null;
+
+/// Текстове поле з дроту, яким би воно не приїхало.
+///
+/// Жорстке приведення `as String?` коштувало найдорожче з усього. Сервер колись
+/// перетворював текстові колонки на числа, якщо значення було схоже на число, і
+/// доза препарату «2.0» приїжджала числом 2. Застосунок падав на ній щоразу
+/// після входу, бо після входу щоденник завантажується з нуля, і винний рядок
+/// приходив у кожній спробі: вхід через Google не міг завершитись жодного разу.
+///
+/// Сервер полагоджено, але цей шар лишається назавжди. Чужий тип у полі має
+/// коштувати одне зіпсоване значення, а не втрачений акаунт.
+String? _text(Object? value) => value?.toString();
+
+/// Ціле число з дроту, яким би воно не приїхало. Та сама причина, що й у [_text].
+int? _int(Object? value) => switch (value) {
+  final int v => v,
+  final num v => v.toInt(),
+  final String v => int.tryParse(v) ?? double.tryParse(v)?.toInt(),
+  _ => null,
+};
+
+/// Дробове число з дроту. Та сама причина, що й у [_text].
+double? _dec(Object? value) => switch (value) {
+  final num v => v.toDouble(),
+  final String v => double.tryParse(v),
+  _ => null,
+};
 
 /// Календарний день, як його зберігає телефон: рівно десять символів.
 ///
@@ -219,12 +246,12 @@ MeasurementsCompanion measureFromChange(Map<String, dynamic> c) {
     id: Value(c['id'] as String),
     updatedAt: Value(_time(c['updated_at'])!),
     deletedAt: Value(_time(c['deleted_at'])),
-    seq: Value(c['seq'] as int),
+    seq: Value(_int(c['seq'])!),
     dirty: const Value(false),
     day: Value(_day(d['day'])),
     at: Value(_time(d['at'])!),
     part: Value(d['part'] as String),
-    cm: Value((d['cm'] as num).toDouble()),
+    cm: Value(_dec(d['cm'])!),
   );
 }
 
@@ -234,13 +261,13 @@ WorkoutsCompanion workoutFromChange(Map<String, dynamic> c) {
     id: Value(c['id'] as String),
     updatedAt: Value(_time(c['updated_at'])!),
     deletedAt: Value(_time(c['deleted_at'])),
-    seq: Value(c['seq'] as int),
+    seq: Value(_int(c['seq'])!),
     dirty: const Value(false),
     day: Value(_day(d['day'])),
     at: Value(_time(d['at'])!),
     kind: Value(d['kind'] as String),
-    minutes: Value((d['minutes'] as num).toInt()),
-    kcal: Value((d['kcal'] as num?)?.toInt() ?? 0),
+    minutes: Value(_int(d['minutes'])!),
+    kcal: Value(_int(d['kcal']) ?? 0),
   );
 }
 
@@ -250,14 +277,14 @@ MedicationsCompanion medFromChange(Map<String, dynamic> c) {
     id: Value(c['id'] as String),
     updatedAt: Value(_time(c['updated_at'])!),
     deletedAt: Value(_time(c['deleted_at'])),
-    seq: Value(c['seq'] as int),
+    seq: Value(_int(c['seq'])!),
     dirty: const Value(false),
     name: Value(d['name'] as String),
-    amount: Value(d['amount'] as String?),
-    note: Value(d['note'] as String?),
+    amount: Value(_text(d['amount'])),
+    note: Value(_text(d['note'])),
     times: Value(joinTimes(d['times'])),
-    schedule: Value(d['schedule'] as String? ?? ''),
-    form: Value(d['form'] as String? ?? 'tab'),
+    schedule: Value(_text(d['schedule']) ?? ''),
+    form: Value(_text(d['form']) ?? 'tab'),
     startDay: Value(_day(d['start_day'])),
     endDay: Value(d['end_day'] == null ? null : _day(d['end_day'])),
     remind: Value(d['remind'] as bool? ?? true),
@@ -270,12 +297,12 @@ MedicationTakesCompanion takeFromChange(Map<String, dynamic> c) {
     id: Value(c['id'] as String),
     updatedAt: Value(_time(c['updated_at'])!),
     deletedAt: Value(_time(c['deleted_at'])),
-    seq: Value(c['seq'] as int),
+    seq: Value(_int(c['seq'])!),
     dirty: const Value(false),
     medicationId: Value(d['medication_id'] as String),
     day: Value(_day(d['day'])),
     at: Value(_time(d['at'])!),
-    plannedTime: Value(d['planned_time'] as String?),
+    plannedTime: Value(_text(d['planned_time'])),
   );
 }
 
@@ -285,7 +312,7 @@ AllergiesCompanion allergyFromChange(Map<String, dynamic> c) {
     id: Value(c['id'] as String),
     updatedAt: Value(_time(c['updated_at'])!),
     deletedAt: Value(_time(c['deleted_at'])),
-    seq: Value(c['seq'] as int),
+    seq: Value(_int(c['seq'])!),
     dirty: const Value(false),
     allergenId: Value(d['allergen_id'] as String),
     severe: Value(d['severe'] as bool? ?? false),
@@ -344,21 +371,21 @@ ProfileCompanion profileFromWire(Map<String, dynamic> p, {required String id}) =
   deletedAt: const Value(null),
   dirty: const Value(false),
   sex: Value(p['sex'] as String),
-  birthYear: Value(p['birth_year'] as int?),
-  heightCm: Value(p['height_cm'] as int?),
+  birthYear: Value(_int(p['birth_year'])),
+  heightCm: Value(_int(p['height_cm'])),
   goalStartKg: Value(_real(p['goal_start_kg'])),
   targetKg: Value(_real(p['target_kg'])),
   direction: Value(p['direction'] as String),
   pace: Value(_real(p['pace'])!),
   activity: Value(_real(p['activity'])!),
-  kcalManual: Value(p['kcal_manual'] as int?),
-  proteinG: Value(p['protein_g'] as int?),
-  fatG: Value(p['fat_g'] as int?),
-  carbsG: Value(p['carbs_g'] as int?),
-  waterMl: Value(p['water_ml'] as int),
+  kcalManual: Value(_int(p['kcal_manual'])),
+  proteinG: Value(_int(p['protein_g'])),
+  fatG: Value(_int(p['fat_g'])),
+  carbsG: Value(_int(p['carbs_g'])),
+  waterMl: Value(_int(p['water_ml'])!),
   theme: Value(p['theme'] as String),
-  addressAs: Value(p['address_as'] as String?),
-  tracked: Value(p['tracked'] as String? ?? ''),
+  addressAs: Value(_text(p['address_as'])),
+  tracked: Value(_text(p['tracked']) ?? ''),
   memory: Value(jsonEncode(p['memory'] ?? const [])),
 );
 

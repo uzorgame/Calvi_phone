@@ -76,7 +76,7 @@ class CalviDb extends _$CalviDb {
   );
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -176,6 +176,13 @@ class CalviDb extends _$CalviDb {
          аудиторії на українських телефонах нічого не змінюється. */
       if (from < 9) {
         await m.addColumn(profile, profile.lang);
+      }
+
+      /* Ким увійшли. Порожньо для тих, хто вже всередині: сервер віддає це при
+         вході, тому заповниться наступним. Доти картка показує пошту без значка
+         провайдера, а не вигадує його. */
+      if (from < 10) {
+        await m.addColumn(syncMeta, syncMeta.provider);
       }
     },
     beforeOpen: (details) async {

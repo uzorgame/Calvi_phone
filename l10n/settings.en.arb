@@ -164,6 +164,7 @@
   "accountSignOutNote": "The entries stay on this phone: signing out does not wipe the diary. What stops is the rest, syncing with other devices and the ability to get the data back if the phone is lost.",
   "accountSignOutBack": "You can sign back in with the same account any time, right here.",
   "accountVia": "Signed in with Google",
+  "accountViaApple": "Signed in with Apple",
   "accountSince": "With Calvi since",
   "accountSignOutAction": "Sign out",
   "accountNoAccountNote": "The diary lives only on this phone. Change the phone or remove the app and there is nothing to bring the entries back with: we do not know whose they are.",

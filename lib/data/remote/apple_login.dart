@@ -60,12 +60,18 @@ class AppleLogin {
       lastError = dataL.loginSlow;
       return null;
     } on SignInWithAppleAuthorizationException catch (e) {
-      /* Відмова людини не лишає помилки: аркуш закрили, і це нормальна
-         відповідь. Усе інше лишає, бо «нічого не сталось» після дотику
-         читається як зламана кнопка. */
+      /* Код відмови видно на екрані, а не лише в журналі пристрою.
+       *
+       * Тут стояло мовчання на `canceled`, і це коштувало вечора: аркуш
+       * піднімався, сам опускався, і застосунок не казав нічого, бо вважав, що
+       * людина передумала. Система називає скасуванням і власну відмову теж,
+       * наприклад коли збірка підписана без права на вхід через Apple. Мовчати
+       * можна лише тоді, коли аркуш закрили без жодного коду.
+       *
+       * Ціна цього рішення відома: людина, яка справді передумала, побачить
+       * коротке повідомлення. Це дешевше за поломку, яку неможливо побачити. */
       _note('AuthorizationException: code=${e.code.name} | ${e.message}');
-      if (e.code == AuthorizationErrorCode.canceled) return null;
-      lastError = dataL.loginServer(e.code.name);
+      lastError = dataL.loginServer('apple: ${e.code.name}');
       return null;
     } catch (e, stack) {
       _note('несподіване: $e\n$stack');

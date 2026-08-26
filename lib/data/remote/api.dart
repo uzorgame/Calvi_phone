@@ -157,6 +157,7 @@ class CalviApi {
       accessToken: body['access_token'] as String,
       refreshToken: body['refresh_token'] as String,
       outcome: body['outcome'] as String? ?? 'returned',
+      provider: body['provider'] as String?,
       previousUserId: body['previous_user_id'] as String?,
       email: body['email'] as String?,
       joinedAt: DateTime.tryParse(body['created_at'] as String? ?? '')?.toLocal(),
@@ -453,6 +454,7 @@ class GoogleAccount {
     required this.refreshToken,
     required this.outcome,
     required this.balance,
+    this.provider,
     this.previousUserId,
     this.email,
     this.joinedAt,
@@ -466,6 +468,9 @@ class GoogleAccount {
      наявного щоденника, `returned` це повернення до старого. Застосунок питає
      про місцеві записи тільки в третьому випадку. */
   final String outcome;
+
+  /// Ким увійшли: 'google' або 'apple'. Порожньо на старому сервері.
+  final String? provider;
 
   /// Запис, який був на цьому пристрої до входу, якщо він інший.
   final String? previousUserId;

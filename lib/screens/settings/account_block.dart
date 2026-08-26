@@ -6,6 +6,7 @@ import '../../data/app_scope.dart';
 import '../../data/day.dart';
 import '../../data/local/database.dart';
 import '../../data/remote/login_service.dart';
+import '../../design/brand_marks.dart';
 import '../../design/icons.dart';
 import '../../design/shell.dart';
 import '../../design/theme.dart';
@@ -35,8 +36,12 @@ class _AccountBlockState extends State<AccountBlock> {
      відповіла, і це кадр або два. */
   SyncMetaData? _meta;
 
-  /// Поки триває обмін із Google. Другий тап дав би другий вхід.
-  bool _busy = false;
+  /* Хто саме зараз заходить, а не просто «хтось заходить».
+   *
+   * Тут стояв один прапорець на дві кнопки, і напис «Заходимо» зʼявлявся на
+   * кнопці Google, коли людина тиснула Apple. Зайнятість має знати, чия вона:
+   * інакше екран показує роботу не в тому місці, де вона йде. */
+  String? _busyWith;
 
   /// Чи вже питали базу. Залежності можуть змінитись не раз, а акаунт один.
   bool _asked = false;
@@ -62,27 +67,40 @@ class _AccountBlockState extends State<AccountBlock> {
 
   LoginService? get _login => AppScope.maybeOf(context)?.sync?.login;
 
-  Future<void> _signIn() => _enter((login, device) => login.signIn(deviceName: device));
+  Future<void> _signIn() =>
+      _enter('google', (login, device) => login.signIn(deviceName: device));
 
-  Future<void> _signInApple() => _enter((login, device) => login.signInApple(deviceName: device));
+  Future<void> _signInApple() =>
+      _enter('apple', (login, device) => login.signInApple(deviceName: device));
 
-  /* Обидва входи проходять одним шляхом навмисно: показ зайнятості, оновлення
-     картки і текст помилки не мають залежати від того, якою кнопкою людина
-     скористалась. */
+  /* Обидва входи проходять одним шляхом навмисно: оновлення картки і текст
+     помилки не мають залежати від того, якою кнопкою людина скористалась.
+     Різниця лише в тому, чия кнопка показує зайнятість. */
   Future<void> _enter(
+    String who,
     Future<LoginResult> Function(LoginService login, String device) go,
   ) async {
     final login = _login;
     if (login == null) return;
 
-    setState(() => _busy = true);
-    final result = await go(login, L.of(context).accountSettingsDevice);
+    setState(() => _busyWith = who);
+    final LoginResult result;
+    try {
+      result = await go(login, L.of(context).accountSettingsDevice);
+    } finally {
+      /* У `finally`, бо між підняттям і опусканням стоїть чекання: один виняток
+         лишав екран входу зайнятим назавжди, до перезаходу в застосунок. */
+      if (mounted) setState(() => _busyWith = null);
+    }
     if (!mounted) return;
-    setState(() => _busy = false);
 
     switch (result) {
       case LoginResult.done:
       case LoginResult.canceled:
+        await _load();
+      case LoginResult.partial:
+        /* Вхід відбувся, просто щоденник цього разу не доїхав. Картку
+           оновлюємо, кнопку не пропонуємо вдруге. */
         await _load();
       case LoginResult.failed:
         if (!mounted) return;
@@ -145,8 +163,13 @@ class _AccountBlockState extends State<AccountBlock> {
       trail: 0,
       children: [
         email == null
-            ? _SignedOut(busy: _busy, onTap: _signIn, onApple: _signInApple)
-            : _SignedIn(email: email, joinedAt: _meta?.joinedAt, onOut: _signOut),
+            ? _SignedOut(busyWith: _busyWith, onTap: _signIn, onApple: _signInApple)
+            : _SignedIn(
+                email: email,
+                joinedAt: _meta?.joinedAt,
+                provider: _meta?.provider,
+                onOut: _signOut,
+              ),
       ],
     );
   }
@@ -154,10 +177,18 @@ class _AccountBlockState extends State<AccountBlock> {
 
 /// Картка того, хто увійшов: пошта, спосіб входу, дата і вихід.
 class _SignedIn extends StatelessWidget {
-  const _SignedIn({required this.email, required this.joinedAt, required this.onOut});
+  const _SignedIn({
+    required this.email,
+    required this.joinedAt,
+    required this.provider,
+    required this.onOut,
+  });
 
   final String email;
   final DateTime? joinedAt;
+
+  /// Ким увійшли: 'google', 'apple', або порожньо на акаунтах до цього оновлення.
+  final String? provider;
   final VoidCallback onOut;
 
   @override
@@ -176,15 +207,27 @@ class _SignedIn extends StatelessWidget {
         children: [
           Row(
             children: [
+              /* Знак того, ким увійшли, а не перша літера пошти.
+               *
+               * Літера тут стояла з часів, коли вхід був один. Пошта-ретранслятор
+               * Apple починається з випадкових символів, і людина, яка зайшла
+               * через Apple, бачила в кружечку «G» і підпис «Вхід через Google»:
+               * обидва неправда. Провайдера тепер каже сервер, а не здогад по
+               * пошті, бо здогад тут неможливий: Apple вміє віддавати і
+               * справжню адресу. */
               Container(
                 width: 40,
                 height: 40,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(shape: BoxShape.circle, color: c.fillSecondary),
-                child: Text(
-                  email.substring(0, 1).toUpperCase(),
-                  style: context.t.titleMedium?.copyWith(color: c.textSecondary),
-                ),
+                child: switch (provider) {
+                  'apple' => AppleMark(size: 21, color: c.text),
+                  'google' => const GoogleMark(size: 19),
+                  _ => Text(
+                    email.substring(0, 1).toUpperCase(),
+                    style: context.t.titleMedium?.copyWith(color: c.textSecondary),
+                  ),
+                },
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -198,7 +241,12 @@ class _SignedIn extends StatelessWidget {
                       style: context.t.titleMedium,
                     ),
                     const SizedBox(height: 3),
-                    Text(L.of(context).accountVia, style: context.t.labelSmall),
+                    Text(
+                      provider == 'apple'
+                          ? L.of(context).accountViaApple
+                          : L.of(context).accountVia,
+                      style: context.t.labelSmall,
+                    ),
                   ],
                 ),
               ),
@@ -254,9 +302,11 @@ class _SignedIn extends StatelessWidget {
 
 /// Картка того, хто не входив: чому це варто зробити, і кнопка.
 class _SignedOut extends StatelessWidget {
-  const _SignedOut({required this.busy, required this.onTap, required this.onApple});
+  const _SignedOut({required this.busyWith, required this.onTap, required this.onApple});
 
-  final bool busy;
+  /// Чия саме кнопка зараз працює: 'google', 'apple' або порожньо.
+  final String? busyWith;
+  bool get busy => busyWith != null;
   final VoidCallback onTap;
   final VoidCallback onApple;
 
@@ -286,8 +336,11 @@ class _SignedOut extends StatelessWidget {
           if (can) ...[
             const SizedBox(height: 14),
             CalviButton(
-              label: busy ? L.of(context).accountBusy : L.of(context).accountGoogle,
-              onTap: busy ? () {} : onTap,
+              label: busyWith == 'google'
+                  ? L.of(context).accountBusy
+                  : L.of(context).accountGoogle,
+              enabled: !busy,
+              onTap: onTap,
             ),
           ],
 
@@ -296,8 +349,11 @@ class _SignedOut extends StatelessWidget {
           if (canApple) ...[
             const SizedBox(height: 10),
             CalviGhost(
-              label: L.of(context).startSignInApple,
-              onTap: busy ? () {} : onApple,
+              label: busyWith == 'apple'
+                  ? L.of(context).accountBusy
+                  : L.of(context).startSignInApple,
+              enabled: !busy,
+              onTap: onApple,
             ),
           ],
 

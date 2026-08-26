@@ -291,6 +291,73 @@ void main() {
     expect(login.error, contains('changes.1.id'), reason: 'поле з відповіді загубилось');
   });
 
+  test('чужий тип у полі не валить вхід, який уже відбувся', () async {
+    /* Рівно та поломка, через яку вхід не проходив жодного разу на iPhone.
+       Сервер віддавав дозу препарату «2.0» числом 2, застосунок читав її як
+       текст і падав. Падіння сталося ПІСЛЯ того, як сервер уже віддав акаунт,
+       але людині показувалось «Не вдалось увійти», і вона тиснула кнопку знову.
+
+       Тепер перевіряються обидві половини: чуже число більше не кидає виняток,
+       а якби кинуло, вхід усе одно лишається дійсним. */
+    final api = CalviApi(
+      base: Uri.parse('https://x.test'),
+      client: MockClient((req) async {
+        switch (req.url.path) {
+          case '/v1/auth/google':
+            return http.Response(jsonEncode(reply(userId: 'u1', outcome: 'linked')), 200);
+          case '/v1/devices':
+            return http.Response(
+              jsonEncode({
+                'user_id': 'device-user',
+                'access_token': 'device-access',
+                'refresh_token': 'device-refresh',
+                'tokens': {'balance': 30},
+              }),
+              200,
+            );
+          case '/v1/sync':
+            return http.Response(
+              jsonEncode({
+                'cursor': 7,
+                'accepted': <Object?>[],
+                'changes': [
+                  {
+                    'table': 'medications',
+                    'id': '11111111-1111-4111-8111-111111111111',
+                    'updated_at': DateTime.now().toUtc().toIso8601String(),
+                    'seq': 7,
+                    // Ось воно: доза числом там, де застосунок чекає текст.
+                    'data': {
+                      'name': 'Магній',
+                      'amount': 2,
+                      'times': ['08:00'],
+                      'schedule': '',
+                      'form': 'tab',
+                      'start_day': '2026-08-26',
+                      'remind': true,
+                    },
+                  },
+                ],
+                'has_more': false,
+              }),
+              200,
+              headers: {'content-type': 'application/json; charset=utf-8'},
+            );
+          case '/v1/profile':
+            return http.Response(jsonEncode({'profile': null}), 200);
+        }
+        return http.Response('{}', 200);
+      }),
+    );
+    final login = LoginService(db: db, api: api, google: _FakeGoogle());
+
+    expect(await login.signIn(), LoginResult.done, reason: 'чуже число зупинило вхід');
+
+    final med = (await db.select(db.medications).get()).single;
+    expect(med.amount, '2', reason: 'доза не пережила чужого типу');
+    expect((await db.syncDao.state()).userId, 'u1', reason: 'акаунт не зберігся');
+  });
+
   test('зіпсований ідентифікатор лікується, і вхід проходить', () async {
     /* Рівно той випадок, що поклав вхід у людини: один рядок із не-UUID
        ідентифікатором, сервер відкидає кожен пуш, черга стоїть вічно. Тепер

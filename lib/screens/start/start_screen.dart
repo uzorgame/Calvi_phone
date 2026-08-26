@@ -908,9 +908,12 @@ class _SignIn extends StatefulWidget {
 class _SignInState extends State<_SignIn> {
   bool _agree = true;
 
-  /// Поки триває обмін із Google і нашим сервером. Другий тап тут дав би другий
-  /// вхід, а не швидший перший.
-  bool _busy = false;
+  /* Хто саме зараз заходить, а не просто «хтось заходить».
+   *
+   * Один прапорець на дві кнопки показував напис «Заходимо» на кнопці Google,
+   * коли людина тиснула Apple: екран малював роботу не там, де вона йшла. */
+  String? _busyWith;
+  bool get _busy => _busyWith != null;
 
   /* Вхід і його три кінці.
    *
@@ -920,26 +923,36 @@ class _SignInState extends State<_SignIn> {
    *
    * Питання про два щоденники тут не ставиться навмисно: на першому запуску
    * місцевих записів ще немає, і сама ситуація неможлива. */
-  Future<void> _google() => _enter((login, device) => login.signIn(deviceName: device));
+  Future<void> _google() =>
+      _enter('google', (login, device) => login.signIn(deviceName: device));
 
-  Future<void> _apple() => _enter((login, device) => login.signInApple(deviceName: device));
+  Future<void> _apple() =>
+      _enter('apple', (login, device) => login.signInApple(deviceName: device));
 
-  /* Обидва провайдери одним шляхом: три кінці входу і текст помилки однакові,
-     якою кнопкою людина б не скористалась. */
+  /* Обидва провайдери одним шляхом: кінці входу і текст помилки однакові, якою
+     кнопкою людина б не скористалась. Різниця лише в тому, чия кнопка зайнята. */
   Future<void> _enter(
+    String who,
     Future<LoginResult> Function(LoginService login, String device) go,
   ) async {
     final sync = AppScope.maybeOf(context)?.sync;
     if (sync == null) return widget.onDone();
 
-    setState(() => _busy = true);
-    final result = await go(sync.login, L.of(context).startDeviceFirstRun);
+    setState(() => _busyWith = who);
+    final LoginResult result;
+    try {
+      result = await go(sync.login, L.of(context).startDeviceFirstRun);
+    } finally {
+      // У `finally`: інакше один виняток лишає екран зайнятим до перезаходу.
+      if (mounted) setState(() => _busyWith = null);
+    }
     if (!mounted) return;
-    setState(() => _busy = false);
 
     switch (result) {
       case LoginResult.done:
       case LoginResult.canceled:
+      case LoginResult.partial:
+        // Вхід відбувся; недовезений щоденник забере наступний обмін.
         widget.onDone();
       case LoginResult.failed:
         // Причина в тексті: без неї збій виглядає як мовчання, а до сервера він
@@ -1005,8 +1018,9 @@ class _SignInState extends State<_SignIn> {
                  * і застосунок виглядає зламаним, а не незавершеним. */
                 if (AppScope.maybeOf(context)?.sync?.login.available ?? false) ...[
                   CalviButton(
-                    label: _busy ? l.startSignInBusy : l.startSignInGoogle,
-                    onTap: _busy ? () {} : () => unawaited(_google()),
+                    label: _busyWith == 'google' ? l.startSignInBusy : l.startSignInGoogle,
+                    enabled: !_busy,
+                    onTap: () => unawaited(_google()),
                   ),
                   const SizedBox(height: 10),
                 ],
@@ -1015,15 +1029,22 @@ class _SignInState extends State<_SignIn> {
                    a way in that cannot be walked is worse than one less way in. */
                 if (AppScope.maybeOf(context)?.sync?.login.appleAvailable ?? false) ...[
                   CalviGhost(
-                    label: l.startSignInApple,
-                    onTap: _busy ? () {} : () => unawaited(_apple()),
+                    label: _busyWith == 'apple' ? l.startSignInBusy : l.startSignInApple,
+                    enabled: !_busy,
+                    onTap: () => unawaited(_apple()),
                   ),
                   const SizedBox(height: 10),
                 ],
 
                 /* Далі без входу. Раніше тут стояла кнопка «Продовжити з
-                   поштою», за якою не було нічого: ні маршруту, ні планів. */
-                CalviGhost(label: l.startSignInSkip, onTap: widget.onDone),
+                   поштою», за якою не було нічого: ні маршруту, ні планів.
+                   Поки триває вхід, вона теж мовчить: піти звідси на пів дорозі
+                   означає лишити акаунт у стані, якого ніхто не чекав. */
+                CalviGhost(
+                  label: l.startSignInSkip,
+                  enabled: !_busy,
+                  onTap: widget.onDone,
+                ),
               ],
             ),
           ),

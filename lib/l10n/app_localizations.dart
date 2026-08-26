@@ -225,6 +225,12 @@ abstract class L {
   /// **'Signed in with Google'**
   String get accountVia;
 
+  /// No description provided for @accountViaApple.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in with Apple'**
+  String get accountViaApple;
+
   /// No description provided for @accountWhichDiary.
   ///
   /// In en, this message translates to:
