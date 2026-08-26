@@ -189,49 +189,35 @@ class _Drum extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = context.c;
+    /* Смуги вибору під обраним значенням більше немає.
+     *
+     * Сірий прямокутник читався як окрема поверхня поверх теми, а на екрані з
+     * двома барабанами перетворював його на дві смуги. Обране значення й так
+     * видно: воно темне, велике і стоїть рівно посередині, а сусіди бліді й
+     * відвернуті перспективою. Фон тут один, і він у теми. Так само в демці. */
     return SizedBox(
       height: height,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // The band stays put and the values move under it, so the drum has a
-          // place to stop at rather than a number that happens to be halfway up.
-          IgnorePointer(
-            child: Container(
-              height: _row,
-              decoration: BoxDecoration(
-                color: c.fillSecondary,
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
-          Row(mainAxisAlignment: MainAxisAlignment.center, children: children),
-          /* Values dissolve at the ends of the drum rather than being cut off by
-             it. Two veils rather than a mask: a mask means a layer saved and
-             blended on every frame of a scroll.
-
-             Пелена бере колір того, на чому барабан лежить, а не сторінки.
-             Барабан майже завжди в аркуші, і в темряві аркуш світліший за
-             сторінку: пелена кольору сторінки лягала на його кінці видимою
-             темною смугою замість того, щоб зникнути. */
-          for (final top in const [true, false])
-            IgnorePointer(
-              child: Align(
-                alignment: top ? Alignment.topCenter : Alignment.bottomCenter,
-                child: Container(
-                  height: height * 0.34,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: top ? Alignment.topCenter : Alignment.bottomCenter,
-                      end: top ? Alignment.bottomCenter : Alignment.topCenter,
-                      colors: [context.on, context.on.withValues(alpha: 0)],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-        ],
+      /* Краї згасають маскою, а не фарбою.
+       *
+       * Доти кінці барабана накривали двома пеленами кольору тієї поверхні, на
+       * якій він лежить. Це працює, поки під ним рівна фарба, але наші ґрунти
+       * градієнтні: на «Світанку» пелени лягали блідими плямами поверх
+       * переходу. Маска нічого не малює, вона робить пікселі прозорими, тому
+       * під барабаном лишається сам ґрунт, яким би він не був. */
+      child: ShaderMask(
+        shaderCallback: (rect) => const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0x00000000),
+            Color(0xFF000000),
+            Color(0xFF000000),
+            Color(0x00000000),
+          ],
+          stops: [0, 0.34, 0.66, 1],
+        ).createShader(rect),
+        blendMode: BlendMode.dstIn,
+        child: Row(mainAxisAlignment: MainAxisAlignment.center, children: children),
       ),
     );
   }

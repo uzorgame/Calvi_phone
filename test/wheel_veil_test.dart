@@ -6,31 +6,38 @@ import 'package:calvi/design/theme.dart';
 import 'package:calvi/design/tokens.dart';
 import 'package:calvi/design/wheel.dart';
 
-/// Пелена на кінцях барабана бере колір того, на чому барабан лежить.
+/// Барабан нічого не малює під собою і нічим не замальовує свої краї.
 ///
-/// Довго брала колір сторінки завжди. Барабан стоїть переважно в аркуші, а
-/// аркуш у темряві світліший за сторінку: замість того щоб зникнути, пелена
-/// лягала на кінці барабана видимою темною смугою. Те саме в світлій темі,
-/// тільки тихіше: сірий на білому.
+/// Раніше тут було два малювання, і обидва пішли. Під обраним значенням лежала
+/// сіра смуга: вона читалась як окрема поверхня поверх теми, а на екрані з
+/// двома барабанами робила з нього дві смуги. А кінці барабана накривали двома
+/// пеленами кольору тієї поверхні, на якій він лежить: це працює, поки під ним
+/// рівна фарба, але наші ґрунти градієнтні, і на «Світанку» пелени лягали
+/// блідими плямами поверх переходу.
+///
+/// Тепер краї згасають маскою, тобто справжньою прозорістю, а фоном лишається
+/// сам ґрунт, яким би він не був. Ці тести стережуть, щоб фарба не повернулась.
 void main() {
-  Widget wheel({Color? on}) {
+  Widget wheel({Color? on, ThemeData? theme}) {
     final drum = CalviWheel(values: const [1, 2, 3], value: 2, suffix: 'кг', onPick: (_) {});
     return MaterialApp(
-      theme: calviDarkTheme,
-      home: Scaffold(
-        body: on == null ? drum : CalviOn(color: on, child: drum),
-      ),
+      theme: theme ?? calviDarkTheme,
+      home: Scaffold(body: on == null ? drum : CalviOn(color: on, child: drum)),
     );
   }
 
-  /// Непрозорі кінці всіх пелен на екрані.
-  List<Color> veils(WidgetTester tester) {
+  /// Непрозорі заливки й градієнти всередині барабана.
+  List<Color> paint(WidgetTester tester) {
     final out = <Color>[];
     void walk(RenderObject node) {
       if (node is RenderDecoratedBox) {
         final d = node.decoration;
-        final g = d is BoxDecoration ? d.gradient : null;
-        if (g is LinearGradient) out.addAll(g.colors.where((x) => x.a == 1));
+        if (d is BoxDecoration) {
+          final g = d.gradient;
+          if (g is LinearGradient) out.addAll(g.colors.where((x) => x.a > 0));
+          final fill = d.color;
+          if (fill != null && fill.a > 0) out.add(fill);
+        }
       }
       node.visitChildren(walk);
     }
@@ -39,21 +46,38 @@ void main() {
     return out;
   }
 
-  testWidgets('без позначки пелена кольору сторінки', (tester) async {
+  testWidgets('під обраним значенням немає смуги', (tester) async {
     await tester.pumpWidget(wheel());
     await tester.pumpAndSettle();
-    expect(veils(tester), everyElement(calviDark.bg));
+
+    expect(
+      paint(tester),
+      isNot(contains(calviDark.fillSecondary)),
+      reason: 'сіра смуга під обраним значенням повернулась',
+    );
   });
 
-  testWidgets('в аркуші пелена кольору аркуша', (tester) async {
+  testWidgets('краї не замальовуються, а згасають маскою', (tester) async {
     await tester.pumpWidget(wheel(on: calviDark.card));
     await tester.pumpAndSettle();
 
-    expect(veils(tester), isNotEmpty, reason: 'пелени не знайшлись, перевіряти нічого');
     expect(
-      veils(tester),
-      everyElement(calviDark.card),
-      reason: 'барабан в аркуші й далі згасає в колір сторінки',
+      paint(tester),
+      isEmpty,
+      reason: 'барабан знову щось малює замість того, щоб бути прозорим',
     );
+    expect(
+      find.byType(ShaderMask),
+      findsOneWidget,
+      reason: 'маска зникла, тобто краї більше не згасають',
+    );
+  });
+
+  testWidgets('те саме у світлій темі', (tester) async {
+    await tester.pumpWidget(wheel(theme: calviLightTheme));
+    await tester.pumpAndSettle();
+
+    expect(paint(tester), isEmpty);
+    expect(find.byType(ShaderMask), findsOneWidget);
   });
 }
