@@ -88,6 +88,11 @@ class SyncRepository {
   Future<SyncOutcome> run() async {
     if (!await ensureAccount()) return const SyncOutcome.offline();
 
+    /* Спершу ліки, потім пуш. Рядок із неправильним ідентифікатором отруює всю
+       чергу: сервер відкидає кожен запит із ним, синхронізація стоїть, і вхід
+       неможливий. Лікування дешеве і майже завжди нічого не знаходить. */
+    await db.syncDao.repairIds();
+
     var pushed = 0;
     var pulled = 0;
 
@@ -182,7 +187,7 @@ class SyncRepository {
     /* Порядок не випадковий: препарат має дістатись сервера раніше за прийом,
        бо прийом посилається на нього зовнішнім ключем. Решта таблиць одна від
        одної не залежить. */
-    return [
+    final all = [
       for (final row in await db.syncDao.pendingMeals(limit: perTable)) mealToChange(row),
       for (final row in await db.syncDao.pendingWater(limit: perTable)) waterToChange(row),
       for (final row in await db.syncDao.pendingWeights(limit: perTable)) weightToChange(row),
@@ -192,6 +197,11 @@ class SyncRepository {
       for (final row in await db.syncDao.pendingTakes(limit: perTable)) takeToChange(row),
       for (final row in await db.syncDao.pendingAllergies(limit: perTable)) allergyToChange(row),
     ];
+    /* Сервер приймає щонайбільше 500 змін за запит, а вісім таблиць по сто
+       рядків це до восьмисот: телефон із великою чергою отримував відмову на
+       кожен пуш і не міг вивантажитись ніколи. Зайве не губиться, його забере
+       наступне коло цього ж циклу. */
+    return all.length <= 500 ? all : all.sublist(0, 500);
   }
 
   /// Розкладає прийняте по таблицях, під якими воно відправлялось.

@@ -1,5 +1,6 @@
 import '../local/database.dart';
 import 'api.dart';
+import 'apple_login.dart';
 import 'google_login.dart';
 import 'sync_repository.dart';
 import '../../l10n/data_lang.dart';
@@ -33,12 +34,19 @@ enum LoginResult {
 }
 
 class LoginService {
-  LoginService({required this.db, required this.api, required this.google, SyncGate? gate})
-    : gate = gate ?? SyncGate();
+  LoginService({
+    required this.db,
+    required this.api,
+    required this.google,
+    AppleLogin? apple,
+    SyncGate? gate,
+  }) : apple = apple ?? AppleLogin(),
+       gate = gate ?? SyncGate();
 
   final CalviDb db;
   final CalviApi api;
   final GoogleLogin google;
+  final AppleLogin apple;
 
   /* Черга, спільна з фоновим обміном. Своя за замовчуванням, щоб тести і
      розʼєднані виклики працювали, але в застосунку сюди приходить замок самого
@@ -48,21 +56,46 @@ class LoginService {
   /// Чи взагалі показувати кнопку входу.
   bool get available => google.available;
 
+  /// Чи показувати кнопку Apple. Окремо від Google: вона живе лише на iOS.
+  bool get appleAvailable => apple.available;
+
   /// Що саме пішло не так, якщо результат `failed`. Порожньо, якщо все гаразд.
-  String? get error => google.lastError ?? _apiError;
+  String? get error => google.lastError ?? apple.lastError ?? _apiError;
   String? _apiError;
 
-  Future<LoginResult> signIn({String? deviceName}) async {
+  Future<LoginResult> signIn({String? deviceName}) => _signIn(
+    window: google.idToken,
+    windowError: () => google.lastError,
+    exchange: (idToken) => api.signInWithGoogle(idToken: idToken, device: deviceName),
+  );
+
+  /// Вхід через Apple: інше вікно, той самий конвеєр.
+  ///
+  /// Спільний шлях не з економії, а з обережності: усі гарантії про «спершу
+  /// дотиснути все нагору» і «стирати лише порожню чергу» живуть в одному
+  /// місці, і другий вхід зі своєю копією цих правил розійшовся б із першим
+  /// на першій же правці.
+  Future<LoginResult> signInApple({String? deviceName}) => _signIn(
+    window: apple.identityToken,
+    windowError: () => apple.lastError,
+    exchange: (idToken) => api.signInWithApple(idToken: idToken, device: deviceName),
+  );
+
+  Future<LoginResult> _signIn({
+    required Future<String?> Function() window,
+    required String? Function() windowError,
+    required Future<GoogleAccount> Function(String idToken) exchange,
+  }) async {
     _apiError = null;
 
-    /* Вікно Google поза замком навмисно: людина може дивитись на нього хвилину,
-       і морозити на цей час фонову синхронізацію нема за що. */
-    final idToken = await google.idToken();
+    /* Вікно провайдера поза замком навмисно: людина може дивитись на нього
+       хвилину, і морозити на цей час фонову синхронізацію нема за що. */
+    final idToken = await window();
 
     /* Порожній токен це або «передумав», або збій. Розрізняє їх саме
        `lastError`: відмова людини його не лишає. */
     if (idToken == null) {
-      return google.lastError == null ? LoginResult.canceled : LoginResult.failed;
+      return windowError() == null ? LoginResult.canceled : LoginResult.failed;
     }
 
     return gate.run(() async {
@@ -92,7 +125,7 @@ class LoginService {
           return LoginResult.failed;
         }
 
-        final account = await api.signInWithGoogle(idToken: idToken, device: deviceName);
+        final account = await exchange(idToken);
 
         /* Акаунт інший: сервер уже перевіз туди записи безіменного. Місцева
            копія тепер чужа за номерами черги, тому чистий аркуш і повний
@@ -122,6 +155,7 @@ class LoginService {
   /// тим самим акаунтом, і кнопка виглядала б зламаною.
   Future<void> signOut() async {
     await google.forget();
+    await apple.forget();
     await db.syncDao.clearAccount();
     api.token = null;
   }

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform;
 import 'package:flutter/gestures.dart' show TapGestureRecognizer;
 import 'package:flutter/material.dart';
 
@@ -921,12 +920,20 @@ class _SignInState extends State<_SignIn> {
    *
    * Питання про два щоденники тут не ставиться навмисно: на першому запуску
    * місцевих записів ще немає, і сама ситуація неможлива. */
-  Future<void> _google() async {
+  Future<void> _google() => _enter((login, device) => login.signIn(deviceName: device));
+
+  Future<void> _apple() => _enter((login, device) => login.signInApple(deviceName: device));
+
+  /* Обидва провайдери одним шляхом: три кінці входу і текст помилки однакові,
+     якою кнопкою людина б не скористалась. */
+  Future<void> _enter(
+    Future<LoginResult> Function(LoginService login, String device) go,
+  ) async {
     final sync = AppScope.maybeOf(context)?.sync;
     if (sync == null) return widget.onDone();
 
     setState(() => _busy = true);
-    final result = await sync.login.signIn(deviceName: L.of(context).startDeviceFirstRun);
+    final result = await go(sync.login, L.of(context).startDeviceFirstRun);
     if (!mounted) return;
     setState(() => _busy = false);
 
@@ -1006,9 +1013,11 @@ class _SignInState extends State<_SignIn> {
 
                 /* Apple where Apple is. On Android the button leads nowhere, and
                    a way in that cannot be walked is worse than one less way in. */
-                if (defaultTargetPlatform == TargetPlatform.iOS ||
-                    defaultTargetPlatform == TargetPlatform.macOS) ...[
-                  CalviGhost(label: l.startSignInApple, onTap: widget.onDone),
+                if (AppScope.maybeOf(context)?.sync?.login.appleAvailable ?? false) ...[
+                  CalviGhost(
+                    label: l.startSignInApple,
+                    onTap: _busy ? () {} : () => unawaited(_apple()),
+                  ),
                   const SizedBox(height: 10),
                 ],
 

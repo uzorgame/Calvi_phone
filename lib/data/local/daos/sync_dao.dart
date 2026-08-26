@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:uuid/uuid.dart';
 
 import '../database.dart';
 import '../tables/allergies.dart';
@@ -160,6 +161,70 @@ class SyncDao extends DatabaseAccessor<CalviDb> with _$SyncDaoMixin {
    * зʼїло б те, чого більше ніде немає. Один обмін відвозить до сотні рядків
    * на таблицю і зупиняється, тому «обмін пройшов» ще не означає «все нагорі»,
    * і перевіряється саме залишок. */
+  /// Лікує брудні рядки, чий ідентифікатор не є UUID.
+  ///
+  /// Сервер приймає лише UUID, і один такий рядок отруює всю чергу: кожен пуш
+  /// повертається з відмовою, синхронізація стоїть, вхід неможливий, і людина
+  /// бачить це як «сервер зламався». Звідки береться зіпсований ідентифікатор,
+  /// байдуже: стара збірка, обірваний запис, майбутня помилка. Ліки одні й ті
+  /// самі: видати рядку новий UUID. Це безпечно рівно тому, що сервер такий
+  /// рядок ніколи не приймав, тобто під старим імʼям його ніде немає.
+  ///
+  /// Повертає, скільки рядків вилікувано.
+  Future<int> repairIds() async {
+    final uuidLike = RegExp(
+      r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+    );
+    var healed = 0;
+
+    Future<void> heal<T extends Table, R>(
+      TableInfo<T, R> table,
+      Column<String> Function(T t) idOf,
+      String Function(R row) idFrom, {
+      Future<void> Function(String from, String to)? also,
+    }) async {
+      final rows = await select(table).get();
+      for (final row in rows) {
+        final id = idFrom(row);
+        if (uuidLike.hasMatch(id)) continue;
+
+        final fresh = const Uuid().v4();
+        await (update(table)..where((t) => idOf(t).equals(id))).write(
+          RawValuesInsertable({'id': Variable<String>(fresh), 'dirty': const Variable<bool>(true)}),
+        );
+        if (also != null) await also(id, fresh);
+        healed++;
+      }
+    }
+
+    await transaction(() async {
+      await heal<Meals, MealRow>(meals, (t) => t.id, (r) => r.id);
+      await heal<WaterLogs, WaterLog>(waterLogs, (t) => t.id, (r) => r.id);
+      await heal<Weights, Weight>(weights, (t) => t.id, (r) => r.id);
+      await heal<Measurements, Measurement>(measurements, (t) => t.id, (r) => r.id);
+      await heal<Workouts, WorkoutRow>(workouts, (t) => t.id, (r) => r.id);
+      /* Препарат тягне за собою прийоми: вони тримаються за його ідентифікатор,
+         і залишити їх зі старим означає відірвати історію від курсу. */
+      await heal<Medications, Medication>(
+        medications,
+        (t) => t.id,
+        (r) => r.id,
+        also: (from, to) async {
+          await (update(medicationTakes)..where((t) => t.medicationId.equals(from))).write(
+            RawValuesInsertable({
+              'medication_id': Variable<String>(to),
+              'dirty': const Variable<bool>(true),
+            }),
+          );
+        },
+      );
+      await heal<MedicationTakes, MedicationTake>(medicationTakes, (t) => t.id, (r) => r.id);
+      await heal<Allergies, Allergy>(allergies, (t) => t.id, (r) => r.id);
+    });
+
+    return healed;
+  }
+
   Future<bool> hasDirty() async {
     for (final rows in [
       await pendingMeals(limit: 1),

@@ -28,9 +28,6 @@ class LUk extends L {
   String get aboutWrite => 'Написати нам';
 
   @override
-  String get accountAppleSoon => 'Вхід через Apple ось-ось зʼявиться. Поки що Google.';
-
-  @override
   String get accountBusy => 'Заходимо…';
 
   @override

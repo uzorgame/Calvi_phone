@@ -129,12 +129,6 @@ abstract class L {
   /// **'Write to us'**
   String get aboutWrite;
 
-  /// No description provided for @accountAppleSoon.
-  ///
-  /// In en, this message translates to:
-  /// **'Apple sign-in is on its way. Google for now.'**
-  String get accountAppleSoon;
-
   /// No description provided for @accountBusy.
   ///
   /// In en, this message translates to:

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform;
 import 'package:flutter/material.dart';
 
 import '../../data/app_scope.dart';
@@ -63,12 +62,21 @@ class _AccountBlockState extends State<AccountBlock> {
 
   LoginService? get _login => AppScope.maybeOf(context)?.sync?.login;
 
-  Future<void> _signIn() async {
+  Future<void> _signIn() => _enter((login, device) => login.signIn(deviceName: device));
+
+  Future<void> _signInApple() => _enter((login, device) => login.signInApple(deviceName: device));
+
+  /* Обидва входи проходять одним шляхом навмисно: показ зайнятості, оновлення
+     картки і текст помилки не мають залежати від того, якою кнопкою людина
+     скористалась. */
+  Future<void> _enter(
+    Future<LoginResult> Function(LoginService login, String device) go,
+  ) async {
     final login = _login;
     if (login == null) return;
 
     setState(() => _busy = true);
-    final result = await login.signIn(deviceName: L.of(context).accountSettingsDevice);
+    final result = await go(login, L.of(context).accountSettingsDevice);
     if (!mounted) return;
     setState(() => _busy = false);
 
@@ -137,7 +145,7 @@ class _AccountBlockState extends State<AccountBlock> {
       trail: 0,
       children: [
         email == null
-            ? _SignedOut(busy: _busy, onTap: _signIn)
+            ? _SignedOut(busy: _busy, onTap: _signIn, onApple: _signInApple)
             : _SignedIn(email: email, joinedAt: _meta?.joinedAt, onOut: _signOut),
       ],
     );
@@ -246,15 +254,18 @@ class _SignedIn extends StatelessWidget {
 
 /// Картка того, хто не входив: чому це варто зробити, і кнопка.
 class _SignedOut extends StatelessWidget {
-  const _SignedOut({required this.busy, required this.onTap});
+  const _SignedOut({required this.busy, required this.onTap, required this.onApple});
 
   final bool busy;
   final VoidCallback onTap;
+  final VoidCallback onApple;
 
   @override
   Widget build(BuildContext context) {
     final c = context.c;
-    final can = AppScope.maybeOf(context)?.sync?.login.available ?? false;
+    final login = AppScope.maybeOf(context)?.sync?.login;
+    final can = login?.available ?? false;
+    final canApple = login?.appleAvailable ?? false;
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -280,18 +291,13 @@ class _SignedOut extends StatelessWidget {
             ),
           ],
 
-          /* Apple там, де Apple, як і на екрані знайомства: на Android цей
-             шлях нікуди не веде, і вхід, яким не можна пройти, гірший за один
-             шлях менше. Поки що заглушка, чесна на дотик: каже, що скоро, а не
-             мовчить. Справжній вхід стане на це саме місце. */
-          if (defaultTargetPlatform == TargetPlatform.iOS ||
-              defaultTargetPlatform == TargetPlatform.macOS) ...[
+          /* Apple там, де Apple: на Android цей шлях нікуди не веде, і вхід,
+             яким не можна пройти, гірший за один шлях менше. */
+          if (canApple) ...[
             const SizedBox(height: 10),
             CalviGhost(
               label: L.of(context).startSignInApple,
-              onTap: () => ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(L.of(context).accountAppleSoon))),
+              onTap: busy ? () {} : onApple,
             ),
           ],
 

@@ -138,8 +138,15 @@ class CalviApi {
   /// формальність: саме за ним сервер розуміє, що людина приходить зі своїм
   /// пристроєм, і підписує наявний щоденник її іменем, а не заводить другий
   /// порожній.
-  Future<GoogleAccount> signInWithGoogle({required String idToken, String? device}) async {
-    final body = await _post('/v1/auth/google', {
+  Future<GoogleAccount> signInWithGoogle({required String idToken, String? device}) =>
+      _signIn('/v1/auth/google', idToken: idToken, device: device);
+
+  /// Той самий обмін, що і з Google: токен від Apple на наш акаунт.
+  Future<GoogleAccount> signInWithApple({required String idToken, String? device}) =>
+      _signIn('/v1/auth/apple', idToken: idToken, device: device);
+
+  Future<GoogleAccount> _signIn(String path, {required String idToken, String? device}) async {
+    final body = await _post(path, {
       'id_token': idToken,
       'tz': DateTime.now().timeZoneName,
       if (device != null) 'device': device,
@@ -362,7 +369,21 @@ class CalviApi {
   String _errorCode(String body) {
     try {
       final json = jsonDecode(body) as Map<String, dynamic>;
-      return (json['error'] as Map<String, dynamic>)['code'] as String? ?? 'unknown';
+      final error = json['error'] as Map<String, dynamic>;
+      final code = error['code'] as String? ?? 'unknown';
+      /* Перша деталь перевірки їде разом із кодом: «bad_request» сам по собі
+         не каже, яке поле не сподобалось серверу, і кожен такий випадок
+         перетворювався на розслідування з логами на сервері. */
+      final details = error['details'];
+      if (details is List && details.isNotEmpty) {
+        final first = details.first;
+        if (first is Map<String, dynamic>) {
+          final where = first['path'] ?? '';
+          final what = first['message'] ?? '';
+          return '$code: $where $what';
+        }
+      }
+      return code;
     } catch (_) {
       return 'unknown';
     }

@@ -28,9 +28,6 @@ class LEn extends L {
   String get aboutWrite => 'Write to us';
 
   @override
-  String get accountAppleSoon => 'Apple sign-in is on its way. Google for now.';
-
-  @override
   String get accountBusy => 'Signing in…';
 
   @override
