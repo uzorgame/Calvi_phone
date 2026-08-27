@@ -4,6 +4,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import 'package:calvi/data/local/database.dart';
 import 'package:calvi/data/remote/api.dart';
@@ -406,6 +407,35 @@ void main() {
 
     expect(await login.signIn(), LoginResult.canceled);
     expect((await db.syncDao.state()).userId, isNull);
+  });
+
+  group('відмова Google', () {
+    /* Найдорожчий баг цього екрана виглядав як тиша: аркуш піднімався, сам
+       опускався, і застосунок не казав нічого. Насправді система відмовляла
+       сама, і казала чому, але тільки в журнал пристрою. */
+    test('порожнє скасування лишається мовчазним', () {
+      expect(GoogleLogin.refusal(GoogleSignInExceptionCode.canceled, null), isNull);
+      expect(GoogleLogin.refusal(GoogleSignInExceptionCode.canceled, '   '), isNull);
+    });
+
+    test('скасування з поясненням називається вголос', () {
+      expect(
+        GoogleLogin.refusal(GoogleSignInExceptionCode.canceled, '[16] Account reauth failed'),
+        'canceled: [16] Account reauth failed',
+        reason: 'відмова системи знову виглядає як передумана людина',
+      );
+    });
+
+    test('решта кодів називається завжди, навіть без пояснення', () {
+      expect(
+        GoogleLogin.refusal(GoogleSignInExceptionCode.clientConfigurationError, null),
+        'clientConfigurationError',
+      );
+      expect(
+        GoogleLogin.refusal(GoogleSignInExceptionCode.providerConfigurationError, 'немає клієнта'),
+        'providerConfigurationError: немає клієнта',
+      );
+    });
   });
 
   test('замок пропускає по одному і в порядку черги', () async {

@@ -64,6 +64,25 @@ class GoogleLogin {
   /// приходила: запит до сервера в такому разі не доходить узагалі.
   String? lastError;
 
+  /// Що сказати людині про цю відмову. `null` означає «мовчати».
+  ///
+  /// Скасуванням система називає і власну відмову теж, і це вже коштувало нам
+  /// вечора: аркуш Google піднімався, сам опускався, а застосунок мовчав, бо
+  /// вважав, що людина передумала. Насправді збірку підписали ключем, під який
+  /// не заведено клієнта, і система сказала про це словами «[16] Account reauth
+  /// failed», але сказала їх лише в журнал пристрою. Те саме рішення вже
+  /// прийнято для входу через Apple, і з тієї ж причини.
+  ///
+  /// Тому мовчимо лише тоді, коли аркуш закрили без жодного пояснення: порожній
+  /// опис і є тим, як виглядає людина, яка справді передумала. Ціна відома, хтось
+  /// із них усе ж побачить короткий рядок, і вона дешевша за поломку, якої не
+  /// видно.
+  static String? refusal(GoogleSignInExceptionCode code, String? description) {
+    final why = description?.trim() ?? '';
+    if (code == GoogleSignInExceptionCode.canceled && why.isEmpty) return null;
+    return why.isEmpty ? code.name : '${code.name}: $why';
+  }
+
   /* Слід у logcat, і в release теж.
    *
    * Нативний аркуш Android уміє репортувати свої внутрішні провали як
@@ -121,8 +140,8 @@ class GoogleLogin {
          живе відповідь, чому аркуш закрився. */
       _note('GoogleSignInException: code=${e.code.name} | '
           'description=${e.description} | details=${e.details}');
-      if (e.code == GoogleSignInExceptionCode.canceled) return null;
-      lastError = '${e.code.name}: ${e.description ?? ''}'.trim();
+
+      lastError = refusal(e.code, e.description);
       return null;
     } catch (e, st) {
       /* Ловимо все. Плагін уміє кидати не лише свій виняток, а на цьому шляху
