@@ -152,47 +152,94 @@ class _SlotCardState extends State<SlotCard> with SingleTickerProviderStateMixin
             behavior: HitTestBehavior.opaque,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              child: Row(
-                children: [
-                  Container(
-                    width: 42,
-                    height: 42,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(shape: BoxShape.circle, color: c.iconCircle),
-                    child: CalviIcon(widget.icon, size: 19),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(widget.title, style: context.t.titleMedium),
-                        const SizedBox(height: 2),
-                        Text(widget.sub, style: context.t.labelSmall),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: c.fillSecondary,
-                      borderRadius: BorderRadius.circular(CalviSize.rPill),
-                    ),
-                    child: Text(
-                      widget.badge,
-                      style: context.t.titleMedium?.copyWith(fontSize: CalviSize.fsMicro),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  /* Down when shut, up when open: the arrow says which way a
-                     tap will move the fold, not where the content went. */
-                  AnimatedRotation(
-                    turns: open ? -0.25 : 0.25,
-                    duration: CalviMotion.normal,
-                    curve: CalviMotion.ease,
-                    child: CalviIcon('chevron', size: 16, color: c.textSecondary),
-                  ),
-                ],
+              child: LayoutBuilder(
+                builder: (context, box) {
+                  final titleStyle = context.t.titleMedium;
+                  final badgeStyle = context.t.titleMedium?.copyWith(
+                    fontSize: CalviSize.fsMicro,
+                  );
+
+                  /* Назва не переноситься і не обрізається.
+                   *
+                   * На вузькому телефоні «Вимірювання» ламалось посеред слова, а
+                   * англійське «Measurements» лишало на другому рядку саму літеру
+                   * «s». Назва картки це її імʼя, і зламане навпіл імʼя гірше за
+                   * будь-який інший вихід.
+                   *
+                   * Тому місце ділиться міркою, а не порівну: назва бере рівно
+                   * стільки, скільки їй треба, але не більше двох третин, щоб
+                   * значку лишалась хоч третина. Далі обидва зменшуються замість
+                   * того, щоб ламатись або ховати хвіст під трикрапку: слово, яке
+                   * стало на пів пункту дрібнішим, читається, а «ще ніч…» ні. */
+                  final room = box.maxWidth - 42 - 12 - 8 - 16;
+                  double wide(String text, TextStyle? style) => (TextPainter(
+                    text: TextSpan(text: text, style: style),
+                    textDirection: TextDirection.ltr,
+                    maxLines: 1,
+                  )..layout()).width;
+
+                  final forTitle = math.min(wide(widget.title, titleStyle), room * 0.62);
+
+                  return Row(
+                    children: [
+                      Container(
+                        width: 42,
+                        height: 42,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(shape: BoxShape.circle, color: c.iconCircle),
+                        child: CalviIcon(widget.icon, size: 19),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
+                                child: Text(widget.title, maxLines: 1, style: titleStyle),
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            // Найтихіший рядок здається першим: він єдиний тут,
+                            // чий хвіст можна вгадати, не читаючи.
+                            Text(
+                              widget.sub,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: context.t.labelSmall,
+                            ),
+                          ],
+                        ),
+                      ),
+                      ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: math.max(room - forTitle, 0)),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: c.fillSecondary,
+                            borderRadius: BorderRadius.circular(CalviSize.rPill),
+                          ),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(widget.badge, maxLines: 1, style: badgeStyle),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      /* Down when shut, up when open: the arrow says which way a
+                         tap will move the fold, not where the content went. */
+                      AnimatedRotation(
+                        turns: open ? -0.25 : 0.25,
+                        duration: CalviMotion.normal,
+                        curve: CalviMotion.ease,
+                        child: CalviIcon('chevron', size: 16, color: c.textSecondary),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ),
@@ -262,7 +309,7 @@ class AddRow extends StatelessWidget {
                 height: 34,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(shape: BoxShape.circle, color: c.iconCircle),
-                child: CalviIcon(open ? 'minus' : 'plus', size: 17, color: c.text),
+                child: CalviIcon(open ? 'minus' : 'plus', size: 19, color: c.text),
               ),
               const SizedBox(width: 13),
               /* Гнучкий, бо напис буває довгим: «Додати до пізньої вечері» на
