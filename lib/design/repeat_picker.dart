@@ -14,18 +14,17 @@ import '../l10n/app_localizations.dart';
 ///
 /// «Щодня» стоїть першим і вибране за замовчуванням: більшість режимів саме
 /// такі, і людині, якій нічого складного не треба, не доводиться нічого чіпати.
+///
+/// «Через день» означає рівно через день і нічого під собою не розкриває. Під ним
+/// стояли ще три кнопки, серед них «раз на тиждень», і вибір усередині вкладки
+/// суперечив назві самої вкладки: людина натискала «через день» і бачила
+/// пропозицію пити раз на тиждень. Рідші інтервали, якщо колись знадобляться,
+/// будуть окремою вкладкою з власною назвою, а не прихованими під чужою.
 class RepeatPicker extends StatelessWidget {
   const RepeatPicker({super.key, required this.value, required this.onChange});
 
   final Repeat value;
   final ValueChanged<Repeat> onChange;
-
-  /// Інтервали, які люди справді називають. Решта це вже календар, а не режим.
-  /// Три звичні інтервали. Підпис береться з того самого місця, що й у списку
-  /// нагадувань: два описи одного розкладу неминуче розійшлись би.
-  static List<(int, String)> _every() => [
-    for (final n in [2, 3, 7]) (n, repeatLabel(IntervalRepeat(every: n, from: todayKey()))),
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -135,37 +134,6 @@ class RepeatPicker extends StatelessWidget {
 
         if (value is IntervalRepeat) ...[
           const SizedBox(height: 14),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final (n, label) in _every())
-                GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () =>
-                      onChange(IntervalRepeat(every: n, from: (value as IntervalRepeat).from)),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-                    decoration: BoxDecoration(
-                      color: (value as IntervalRepeat).every == n ? c.button : Colors.transparent,
-                      borderRadius: BorderRadius.circular(CalviSize.rPill),
-                      border: Border.all(
-                        color: (value as IntervalRepeat).every == n ? c.button : c.cardBorder,
-                      ),
-                    ),
-                    child: Text(
-                      label,
-                      style: context.t.labelSmall?.copyWith(
-                        color: (value as IntervalRepeat).every == n
-                            ? c.buttonText
-                            : c.textSecondary,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 10),
           // Відлік має від чого починатись, інакше «через день» не означає
           // нічого: важливо не тільки раз на скільки, а й від якого дня.
           Text(

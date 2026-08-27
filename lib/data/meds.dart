@@ -100,6 +100,7 @@ class Med {
     required this.times,
     this.repeat = const DailyRepeat(),
     this.startDay = '',
+    this.startTime = '',
     this.endDay,
     this.note,
   });
@@ -134,6 +135,18 @@ class Med {
   final String startDay;
   final String? endDay;
 
+  /* Година, з якої курс рахується в день початку. «HH:MM» або порожньо.
+   *
+   * Самого дня не досить. Людина заводить о 14:00 ліки на 09:00 і 21:00:
+   * ранкова доза сьогодні вже позаду, і курс не має починатися з боргу, а
+   * вечірню вона ще питиме. Без цієї години кожен курс, заведений після своєї
+   * першої години, відкривався пропущеним прийомом, якого ніхто не пропускав.
+   *
+   * Настінний час, як і години прийому, тому порівнюються вони прямо рядками і
+   * часових поясів тут немає взагалі. Порожня година означає «не записана» і
+   * лишає старим курсам рівно ту поведінку, яка в них була. */
+  final String startTime;
+
   /// Чи триває курс: останній день або не стоїть, або ще попереду.
   bool stillRunning({DateTime? on}) =>
       endDay == null || endDay!.compareTo(dayKeyOf(on ?? DateTime.now())) > 0;
@@ -165,6 +178,7 @@ class Med {
     List<MedTime>? times,
     Repeat? repeat,
     String? startDay,
+    String? startTime,
     String? endDay,
     bool clearEndDay = false,
     String? note,
@@ -177,6 +191,7 @@ class Med {
     times: times ?? this.times,
     repeat: repeat ?? this.repeat,
     startDay: startDay ?? this.startDay,
+    startTime: startTime ?? this.startTime,
     endDay: clearEndDay ? null : (endDay ?? this.endDay),
     note: note ?? this.note,
   );
@@ -205,6 +220,68 @@ final demoMeds = <Med>[
     note: demoDish('Разом зі сніданком', 'With breakfast'),
   ),
 ];
+
+/// Дози препарату, які належать названому дню.
+///
+/// Правило одне на весь застосунок, і воно з двох пунктів:
+///
+/// 1. Позначена доза належить дню завжди. Хоч курс уже закінчено, хоч розклад
+///    змінили після того: галочка це запис про те, що сталось, а записи не
+///    переписуються заднім числом.
+/// 2. Непозначена доза належить дню, якщо курс на цей день триває і її година не
+///    раніша за годину початку курсу.
+///
+/// Другий пункт і є тим, заради чого існує [Med.startTime]. Людина заводить о
+/// 14:00 ліки на 09:00 і 21:00: ранкова доза сьогодні вже позаду і в сьогодні їй
+/// нема чого робити, а вечірню людина ще питиме. Тому день початку рахується не
+/// цілком, а від години заведення.
+///
+/// День закінчення курсу проходить тільки за першим пунктом. Майбутні дози там
+/// уже не потрібні, а докоряти червоною за курс, який щойно закрили, нема за що.
+///
+/// [marked] відповідає, чи стоїть галочка саме на цій годині саме цього дня.
+/// Галочка належить дню, а не препарату, і питати про неї треба з того місця,
+/// яке знає день: інакше кожна дата показувала б сьогоднішні галочки.
+List<MedTime> dosesOn(Med m, DateTime day, {required bool Function(String at) marked}) {
+  final key = dayKeyOf(day);
+  final ended = m.endDay != null && key.compareTo(m.endDay!) >= 0;
+  final planned = !ended && m.activeOn(day);
+  final started = key != m.startDay || m.startTime.isEmpty;
+
+  return [
+    for (final t in m.times)
+      if (marked(t.at) || (planned && (started || t.at.compareTo(m.startTime) >= 0)))
+        MedTime(at: t.at, taken: marked(t.at)),
+  ];
+}
+
+/// Коли перший прийом курсу, якщо сьогодні його вже не буде.
+///
+/// Повертає null, поки сьогодні лишилась хоч одна доза: тоді курс почався
+/// сьогодні, і казати людині нема чого. А коли всі сьогоднішні години вже
+/// позаду, вона має почути це одразу після «Зберегти», інакше єдине, що вона
+/// побачить, це порожній день і власний препарат, якого в ньому немає.
+///
+/// Шукається рік уперед і не далі: розклад, який не спрацьовує за рік, це вже не
+/// розклад, і чекати на нього нема сенсу.
+({DateTime day, String at})? firstDoseAhead(Med m, DateTime now) {
+  bool never(String at) => false;
+  if (dosesOn(m, now, marked: never).isNotEmpty) return null;
+
+  for (var i = 1; i <= 366; i++) {
+    final day = DateTime(now.year, now.month, now.day + i);
+    final doses = dosesOn(m, day, marked: never);
+    if (doses.isEmpty) continue;
+    final hours = [for (final t in doses) t.at]..sort();
+    return (day: day, at: hours.first);
+  }
+  return null;
+}
+
+/// «09:05» з будь-якої дати. Дві цифри завжди, бо години стоять у колонку і
+/// порівнюються рядками.
+String hhmm(DateTime at) =>
+    '${at.hour.toString().padLeft(2, '0')}:${at.minute.toString().padLeft(2, '0')}';
 
 /// День як ключ бази: «РРРР-ММ-ДД».
 String dayKeyOf(DateTime at) =>
@@ -249,26 +326,43 @@ List<Med> reviveCourse(List<Med> meds, String id) => [
     if (m.id == id) m.copyWith(clearEndDay: true) else m,
 ];
 
-/// Препарати, яким належить цей день.
+/// Препарати, яким належить цей день, з дозами саме цього дня.
 ///
-/// Не те саме, що [medsOn]. Курс задає, які дні його, але день, у якому доза
-/// відмічена, теж його, навіть якщо розклад каже інакше: людина могла випити
-/// таблетку не за графіком, могла змінити розклад посеред курсу, могла
-/// закінчити курс і мати сьогоднішню випиту дозу. Картка дня має стояти на
-/// кожному такому дні й показувати, що саме тоді було, і стояти вона має
-/// назавжди: закінчення курсу закриває майбутнє, а не переписує минуле.
+/// Курс задає, які дні його, але день, у якому доза відмічена, теж його, навіть
+/// якщо розклад каже інакше: людина могла випити таблетку не за графіком, могла
+/// змінити розклад посеред курсу, могла закінчити курс і мати сьогоднішню випиту
+/// дозу. Картка дня має стояти на кожному такому дні й показувати, що саме тоді
+/// було, і стояти вона має назавжди: закінчення курсу закриває майбутнє, а не
+/// переписує минуле.
+///
+/// Дози звужуються тут же, через [dosesOn]. «Чи належить препарат дню» і «які
+/// його дози належать дню» це одне питання, і розвести їх по різних місцях
+/// означає рано чи пізно відповісти на них по-різному.
+///
+/// Галочки приходять окремим набором «препарат|година». Коли вони вже лежать у
+/// самих дозах, питати треба [medsOn].
 List<Med> medsOnDay(List<Med> meds, DateTime day, Set<String> takes) {
-  final touched = {for (final k in takes) k.split('|').first};
-  return [
-    for (final m in meds)
-      if (m.activeOn(day) || touched.contains(m.id)) m,
-  ];
+  final out = <Med>[];
+  for (final m in meds) {
+    final doses = dosesOn(m, day, marked: (at) => takes.contains('${m.id}|$at'));
+    if (doses.isNotEmpty) out.add(m.copyWith(times: doses));
+  }
+  return out;
 }
 
-List<Med> medsOn(List<Med> meds, DateTime day) => [
-  for (final m in meds)
-    if (m.activeOn(day)) m,
-];
+/// Те саме, коли галочки вже стоять у самих дозах.
+///
+/// Екран препаратів отримує препарати з галочками показаного дня, тож питати про
+/// них ще й набором нема чого.
+List<Med> medsOn(List<Med> meds, DateTime day) {
+  final out = <Med>[];
+  for (final m in meds) {
+    final flags = {for (final t in m.times) t.at: t.taken};
+    final doses = dosesOn(m, day, marked: (at) => flags[at] ?? false);
+    if (doses.isNotEmpty) out.add(m.copyWith(times: doses));
+  }
+  return out;
+}
 
 /// Скільки доз цього дня прийнято, за галочками самого дня.
 ///
@@ -298,14 +392,29 @@ List<Med> medsOn(List<Med> meds, DateTime day) => [
   return (done: done, total: total, ratio: total == 0 ? 0 : done / total);
 }
 
-/// The next time still outstanding today, for the card subtitle.
-({String at, String name})? nextDue(List<Med> meds) {
+/// Найближчий прийом, який ще попереду, для підпису на картці.
+///
+/// Година обовʼязкова. Без неї «далі» означало просто «перший непозначений за
+/// списком», і о пів на дванадцяту ночі картка писала «Далі о 13:00» про дозу,
+/// пропущену десять годин тому.
+({String at, String name})? nextDue(List<Med> meds, String now) {
   ({String at, String name})? best;
   for (final m in meds) {
     for (final t in m.times) {
-      if (t.taken) continue;
+      if (t.taken || t.at.compareTo(now) < 0) continue;
       if (best == null || t.at.compareTo(best.at) < 0) best = (at: t.at, name: m.name);
     }
   }
   return best;
+}
+
+/// Скільки сьогоднішніх прийомів минуло без позначки. Сказано, не докорено.
+int unmarked(List<Med> meds, String now) {
+  var n = 0;
+  for (final m in meds) {
+    for (final t in m.times) {
+      if (!t.taken && t.at.compareTo(now) < 0) n++;
+    }
+  }
+  return n;
 }

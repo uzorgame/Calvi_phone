@@ -1064,6 +1064,11 @@ class LEn extends L {
   String get medsFinish => 'End the course';
 
   @override
+  String medsFirstDose(String name, String day, String at) {
+    return '$name, first dose $day at $at';
+  }
+
+  @override
   String get medsHours => 'Hours';
 
   @override
@@ -1128,6 +1133,12 @@ class LEn extends L {
 
   @override
   String get medsTitle => 'Medications';
+
+  @override
+  String get medsTomorrow => 'tomorrow';
+
+  @override
+  String get medsUnmarked => 'Not marked yet: ';
 
   @override
   String medsUntil(String date) {

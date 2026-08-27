@@ -3346,6 +3346,18 @@ class $MedicationsTable extends Medications
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _startTimeMeta = const VerificationMeta(
+    'startTime',
+  );
+  @override
+  late final GeneratedColumn<String> startTime = GeneratedColumn<String>(
+    'start_time',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -3362,6 +3374,7 @@ class $MedicationsTable extends Medications
     form,
     startDay,
     endDay,
+    startTime,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3462,6 +3475,12 @@ class $MedicationsTable extends Medications
         endDay.isAcceptableOrUnknown(data['end_day']!, _endDayMeta),
       );
     }
+    if (data.containsKey('start_time')) {
+      context.handle(
+        _startTimeMeta,
+        startTime.isAcceptableOrUnknown(data['start_time']!, _startTimeMeta),
+      );
+    }
     return context;
   }
 
@@ -3527,6 +3546,10 @@ class $MedicationsTable extends Medications
         DriftSqlType.string,
         data['${effectivePrefix}end_day'],
       ),
+      startTime: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}start_time'],
+      )!,
     );
   }
 
@@ -3563,6 +3586,7 @@ class Medication extends DataClass implements Insertable<Medication> {
   final String form;
   final String startDay;
   final String? endDay;
+  final String startTime;
   const Medication({
     required this.id,
     required this.updatedAt,
@@ -3578,6 +3602,7 @@ class Medication extends DataClass implements Insertable<Medication> {
     required this.form,
     required this.startDay,
     this.endDay,
+    required this.startTime,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3606,6 +3631,7 @@ class Medication extends DataClass implements Insertable<Medication> {
     if (!nullToAbsent || endDay != null) {
       map['end_day'] = Variable<String>(endDay);
     }
+    map['start_time'] = Variable<String>(startTime);
     return map;
   }
 
@@ -3631,6 +3657,7 @@ class Medication extends DataClass implements Insertable<Medication> {
       endDay: endDay == null && nullToAbsent
           ? const Value.absent()
           : Value(endDay),
+      startTime: Value(startTime),
     );
   }
 
@@ -3654,6 +3681,7 @@ class Medication extends DataClass implements Insertable<Medication> {
       form: serializer.fromJson<String>(json['form']),
       startDay: serializer.fromJson<String>(json['startDay']),
       endDay: serializer.fromJson<String?>(json['endDay']),
+      startTime: serializer.fromJson<String>(json['startTime']),
     );
   }
   @override
@@ -3674,6 +3702,7 @@ class Medication extends DataClass implements Insertable<Medication> {
       'form': serializer.toJson<String>(form),
       'startDay': serializer.toJson<String>(startDay),
       'endDay': serializer.toJson<String?>(endDay),
+      'startTime': serializer.toJson<String>(startTime),
     };
   }
 
@@ -3692,6 +3721,7 @@ class Medication extends DataClass implements Insertable<Medication> {
     String? form,
     String? startDay,
     Value<String?> endDay = const Value.absent(),
+    String? startTime,
   }) => Medication(
     id: id ?? this.id,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -3707,6 +3737,7 @@ class Medication extends DataClass implements Insertable<Medication> {
     form: form ?? this.form,
     startDay: startDay ?? this.startDay,
     endDay: endDay.present ? endDay.value : this.endDay,
+    startTime: startTime ?? this.startTime,
   );
   Medication copyWithCompanion(MedicationsCompanion data) {
     return Medication(
@@ -3724,6 +3755,7 @@ class Medication extends DataClass implements Insertable<Medication> {
       form: data.form.present ? data.form.value : this.form,
       startDay: data.startDay.present ? data.startDay.value : this.startDay,
       endDay: data.endDay.present ? data.endDay.value : this.endDay,
+      startTime: data.startTime.present ? data.startTime.value : this.startTime,
     );
   }
 
@@ -3743,7 +3775,8 @@ class Medication extends DataClass implements Insertable<Medication> {
           ..write('schedule: $schedule, ')
           ..write('form: $form, ')
           ..write('startDay: $startDay, ')
-          ..write('endDay: $endDay')
+          ..write('endDay: $endDay, ')
+          ..write('startTime: $startTime')
           ..write(')'))
         .toString();
   }
@@ -3764,6 +3797,7 @@ class Medication extends DataClass implements Insertable<Medication> {
     form,
     startDay,
     endDay,
+    startTime,
   );
   @override
   bool operator ==(Object other) =>
@@ -3782,7 +3816,8 @@ class Medication extends DataClass implements Insertable<Medication> {
           other.schedule == this.schedule &&
           other.form == this.form &&
           other.startDay == this.startDay &&
-          other.endDay == this.endDay);
+          other.endDay == this.endDay &&
+          other.startTime == this.startTime);
 }
 
 class MedicationsCompanion extends UpdateCompanion<Medication> {
@@ -3800,6 +3835,7 @@ class MedicationsCompanion extends UpdateCompanion<Medication> {
   final Value<String> form;
   final Value<String> startDay;
   final Value<String?> endDay;
+  final Value<String> startTime;
   final Value<int> rowid;
   const MedicationsCompanion({
     this.id = const Value.absent(),
@@ -3816,6 +3852,7 @@ class MedicationsCompanion extends UpdateCompanion<Medication> {
     this.form = const Value.absent(),
     this.startDay = const Value.absent(),
     this.endDay = const Value.absent(),
+    this.startTime = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   MedicationsCompanion.insert({
@@ -3833,6 +3870,7 @@ class MedicationsCompanion extends UpdateCompanion<Medication> {
     this.form = const Value.absent(),
     this.startDay = const Value.absent(),
     this.endDay = const Value.absent(),
+    this.startTime = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        updatedAt = Value(updatedAt),
@@ -3852,6 +3890,7 @@ class MedicationsCompanion extends UpdateCompanion<Medication> {
     Expression<String>? form,
     Expression<String>? startDay,
     Expression<String>? endDay,
+    Expression<String>? startTime,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -3869,6 +3908,7 @@ class MedicationsCompanion extends UpdateCompanion<Medication> {
       if (form != null) 'form': form,
       if (startDay != null) 'start_day': startDay,
       if (endDay != null) 'end_day': endDay,
+      if (startTime != null) 'start_time': startTime,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3888,6 +3928,7 @@ class MedicationsCompanion extends UpdateCompanion<Medication> {
     Value<String>? form,
     Value<String>? startDay,
     Value<String?>? endDay,
+    Value<String>? startTime,
     Value<int>? rowid,
   }) {
     return MedicationsCompanion(
@@ -3905,6 +3946,7 @@ class MedicationsCompanion extends UpdateCompanion<Medication> {
       form: form ?? this.form,
       startDay: startDay ?? this.startDay,
       endDay: endDay ?? this.endDay,
+      startTime: startTime ?? this.startTime,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3954,6 +3996,9 @@ class MedicationsCompanion extends UpdateCompanion<Medication> {
     if (endDay.present) {
       map['end_day'] = Variable<String>(endDay.value);
     }
+    if (startTime.present) {
+      map['start_time'] = Variable<String>(startTime.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -3977,6 +4022,7 @@ class MedicationsCompanion extends UpdateCompanion<Medication> {
           ..write('form: $form, ')
           ..write('startDay: $startDay, ')
           ..write('endDay: $endDay, ')
+          ..write('startTime: $startTime, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -9298,6 +9344,7 @@ typedef $$MedicationsTableCreateCompanionBuilder =
       Value<String> form,
       Value<String> startDay,
       Value<String?> endDay,
+      Value<String> startTime,
       Value<int> rowid,
     });
 typedef $$MedicationsTableUpdateCompanionBuilder =
@@ -9316,6 +9363,7 @@ typedef $$MedicationsTableUpdateCompanionBuilder =
       Value<String> form,
       Value<String> startDay,
       Value<String?> endDay,
+      Value<String> startTime,
       Value<int> rowid,
     });
 
@@ -9395,6 +9443,11 @@ class $$MedicationsTableFilterComposer
 
   ColumnFilters<String> get endDay => $composableBuilder(
     column: $table.endDay,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get startTime => $composableBuilder(
+    column: $table.startTime,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -9477,6 +9530,11 @@ class $$MedicationsTableOrderingComposer
     column: $table.endDay,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get startTime => $composableBuilder(
+    column: $table.startTime,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$MedicationsTableAnnotationComposer
@@ -9529,6 +9587,9 @@ class $$MedicationsTableAnnotationComposer
 
   GeneratedColumn<String> get endDay =>
       $composableBuilder(column: $table.endDay, builder: (column) => column);
+
+  GeneratedColumn<String> get startTime =>
+      $composableBuilder(column: $table.startTime, builder: (column) => column);
 }
 
 class $$MedicationsTableTableManager
@@ -9576,6 +9637,7 @@ class $$MedicationsTableTableManager
                 Value<String> form = const Value.absent(),
                 Value<String> startDay = const Value.absent(),
                 Value<String?> endDay = const Value.absent(),
+                Value<String> startTime = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => MedicationsCompanion(
                 id: id,
@@ -9592,6 +9654,7 @@ class $$MedicationsTableTableManager
                 form: form,
                 startDay: startDay,
                 endDay: endDay,
+                startTime: startTime,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -9610,6 +9673,7 @@ class $$MedicationsTableTableManager
                 Value<String> form = const Value.absent(),
                 Value<String> startDay = const Value.absent(),
                 Value<String?> endDay = const Value.absent(),
+                Value<String> startTime = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => MedicationsCompanion.insert(
                 id: id,
@@ -9626,6 +9690,7 @@ class $$MedicationsTableTableManager
                 form: form,
                 startDay: startDay,
                 endDay: endDay,
+                startTime: startTime,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

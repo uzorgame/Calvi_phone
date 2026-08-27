@@ -18,6 +18,13 @@ import 'package:calvi/l10n/app_localizations.dart';
 /// пила, ставали такими, ніби вона не пила його ніколи. Тепер курс отримує
 /// останній день, зникає з головного екрана і зі сповіщень, і лишається в
 /// «Минулих» разом з усіма галочками.
+/* Крапка «зараз» пульсує весь час, поки екран відкритий, тож pumpAndSettle на
+   ньому не завершиться ніколи. Кадри тут відлічуються руками. */
+Future<void> settle(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 400));
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -80,10 +87,16 @@ void main() {
   group('день', () {
     final done = magnesium(end: dayKeyOf(today));
 
-    test('картка зникає назавтра, а сьогодні і в минулому лишається', () {
-      /* Сьогодні це останній день курсу: дози, відмічені зранку, не мають
-         зникати ввечері разом із натисканням кнопки. */
-      expect(medsOn([done], today), hasLength(1), reason: 'останній день курсу пропав');
+    test('останній день курсу лишає рівно те, що позначено', () {
+      /* Сьогодні це останній день курсу, і він проходить тільки за галочками.
+         Доза, відмічена зранку, лишається: це запис про те, що сталось, а записи
+         не переписуються заднім числом. Невідмічена зникає разом із курсом:
+         докоряти червоною за курс, який людина щойно закрила, нема за що. */
+      expect(medsOn([done], today), isEmpty, reason: 'непозначена доза пережила закінчення курсу');
+
+      final ticked = done.copyWith(times: const [MedTime(at: '08:00', taken: true)]);
+      expect(medsOn([ticked], today), hasLength(1), reason: 'випита зранку доза зникла ввечері');
+
       expect(medsOn([done], yesterday), hasLength(1), reason: 'вчорашній день втратив препарат');
       expect(medsOn([done], week), hasLength(1), reason: 'минулий день втратив препарат');
       expect(medsOn([done], tomorrow), isEmpty, reason: 'картка лишилась назавтра');
@@ -105,7 +118,7 @@ void main() {
       final course = magnesium().copyWith(startDay: dayKeyOf(start));
       final closed = finishCourse([course], 'm1');
 
-      for (var i = 0; i < 20; i++) {
+      for (var i = 0; i < 19; i++) {
         final at = start.add(Duration(days: i));
         expect(
           medsOnDay(closed, at, const {}),
@@ -113,6 +126,17 @@ void main() {
           reason: 'день ${dayKeyOf(at)} втратив картку',
         );
       }
+
+      /* Двадцятий день, він же останній, тримається на галочці, а не на
+         розкладі: курс на нього вже не поширюється, а те, що людина зранку
+         випила, нікуди не дівається. */
+      expect(medsOnDay(closed, today, const {}), isEmpty);
+      expect(
+        medsOnDay(closed, today, const {'m1|08:00'}),
+        hasLength(1),
+        reason: 'втрачено дозу останнього дня курсу',
+      );
+
       expect(medsOnDay(closed, tomorrow, const {}), isEmpty, reason: 'картка лишилась назавтра');
       expect(medsOnDay(closed, start.subtract(const Duration(days: 1)), const {}), isEmpty);
     });
@@ -202,23 +226,30 @@ void main() {
       final weekly = magnesium().copyWith(repeat: WeekdayRepeat(days: [wrongDay]));
 
       await open(tester, [weekly]);
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       expect(find.text('Тут порожньо. Додай препарат, і я нагадаю в потрібний час.'), findsNothing);
-      expect(find.text('Магній B6'), findsWidgets, reason: 'курс зник з екрана');
       expect(find.text('Сьогодні прийомів немає'), findsOneWidget);
+
+      /* Список курсів згорнутий, тому спершу курс видно лічильником, а назву він
+         показує, коли розділ розгорнути. Головне тут те, чого немає: екран не
+         каже «порожньо» про день, у якому цей курс просто не приймається. */
+      expect(find.text('Мої препарати'), findsOneWidget, reason: 'розділ курсів зник з екрана');
+      await tester.tap(find.text('Мої препарати'));
+      await settle(tester);
+      expect(find.text('Магній B6'), findsWidgets, reason: 'курс зник зі списку');
     });
 
     testWidgets('закінчений курс лежить у «Минулих» і відкривається', (tester) async {
       await open(tester, [magnesium(end: dayKeyOf(today))]);
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       expect(find.text('Магній B6'), findsNothing, reason: 'закритий курс серед активних');
 
       await tester.tap(find.text('Минулі'));
-      await tester.pumpAndSettle();
+      await settle(tester);
       await tester.tap(find.text('Магній B6'));
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       expect(find.text('Відновити курс'), findsOneWidget);
     });
@@ -226,14 +257,14 @@ void main() {
     testWidgets('«Відновити курс» доповідає нагору', (tester) async {
       final revived = <String>[];
       await open(tester, [magnesium(end: dayKeyOf(today))], revive: revived.add);
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       await tester.tap(find.text('Минулі'));
-      await tester.pumpAndSettle();
+      await settle(tester);
       await tester.tap(find.text('Магній B6'));
-      await tester.pumpAndSettle();
+      await settle(tester);
       await tester.tap(find.text('Відновити курс'));
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       expect(revived, ['m1']);
     });

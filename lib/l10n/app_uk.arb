@@ -35,6 +35,19 @@
       }
     }
   },
+  "@medsFirstDose": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "day": {
+        "type": "String"
+      },
+      "at": {
+        "type": "String"
+      }
+    }
+  },
   "@normOffBy": {
     "placeholders": {
       "sum": {
@@ -359,6 +372,7 @@
   "medsEmpty": "Тут порожньо. Додай препарат, і я нагадаю в потрібний час.",
   "medsEmptyHint": "Веду журнал прийомів, дозування не рахую",
   "medsFinish": "Закінчити курс",
+  "medsFirstDose": "{name}, перший прийом {day} о {at}",
   "medsHours": "Години",
   "medsHowOften": "Як часто",
   "medsMine": "Мої препарати",
@@ -380,6 +394,8 @@
   "medsSince": "з {date}",
   "medsTime": "Час",
   "medsTitle": "Препарати",
+  "medsTomorrow": "завтра",
+  "medsUnmarked": "Ще не позначено: ",
   "medsUntil": "до {date}",
   "noraName": "Нора",
   "normAuto": "Рахувати автоматично",

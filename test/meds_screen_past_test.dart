@@ -8,6 +8,13 @@ import 'package:calvi/design/theme.dart';
 import 'package:calvi/l10n/app_localizations.dart';
 
 /// Розділ «Минулі» стоїть на екрані навіть тоді, коли минулих курсів ще немає.
+/* Крапка «зараз» пульсує весь час, поки екран відкритий, тож pumpAndSettle на
+   ньому не завершиться ніколи. Кадри тут відлічуються руками. */
+Future<void> settle(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 400));
+}
+
 void main() {
   Future<void> open(WidgetTester tester, List<Med> meds) => tester.pumpWidget(
     MaterialApp(
@@ -53,7 +60,7 @@ void main() {
 
   testWidgets('кнопка стоїть і без жодного минулого курсу', (tester) async {
     await open(tester, [live]);
-    await tester.pumpAndSettle();
+    await settle(tester);
 
     expect(find.text('Минулі'), findsOneWidget);
     expect(find.text('0'), findsWidgets);
@@ -61,12 +68,12 @@ void main() {
 
   testWidgets('закінчений курс лежить у «Минулих», а не серед активних', (tester) async {
     await open(tester, [live, finished]);
-    await tester.pumpAndSettle();
+    await settle(tester);
 
     expect(find.text('Вітамін D3'), findsNothing, reason: 'закінчений курс серед активних');
 
     await tester.tap(find.text('Минулі'));
-    await tester.pumpAndSettle();
+    await settle(tester);
 
     expect(find.text('Вітамін D3'), findsOneWidget, reason: 'курс не знайшовся в історії');
     expect(find.text('Магній B6'), findsWidgets, reason: 'активний курс зник');

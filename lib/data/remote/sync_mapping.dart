@@ -215,6 +215,8 @@ Map<String, dynamic> medToChange(Medication r) => envelope(
     /* Межі курсу. Без них препарат, заведений сьогодні, зʼявлявся в кожному
        минулому дні, а закінчений курс стирав власну історію. */
     'start_day': r.startDay,
+    /* Година початку: день початку рахується від неї, а не цілком. */
+    'start_time': r.startTime,
     'end_day': r.endDay,
   },
 );
@@ -286,6 +288,7 @@ MedicationsCompanion medFromChange(Map<String, dynamic> c) {
     schedule: Value(_text(d['schedule']) ?? ''),
     form: Value(_text(d['form']) ?? 'tab'),
     startDay: Value(_day(d['start_day'])),
+    startTime: Value(_text(d['start_time']) ?? ''),
     endDay: Value(d['end_day'] == null ? null : _day(d['end_day'])),
     remind: Value(d['remind'] as bool? ?? true),
   );

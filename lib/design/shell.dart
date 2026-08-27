@@ -452,6 +452,89 @@ class _CalviBackState extends State<CalviBack> with SingleTickerProviderStateMix
   }
 }
 
+/// Додати, у шапці навпроти «Назад».
+///
+/// Та сама біла таблетка сорока пікселів, тільки приходить зі свого боку: ліва
+/// кнопка виїжджає зліва, ця справа, і дві однакові кнопки не читаються як одна,
+/// що роздвоїлась. Кільця тут немає навмисно: воно обводить екран, у який щойно
+/// зайшли, а ця кнопка нікуди не веде, вона щось відкриває.
+///
+/// Напис читається вголос і на екрані його немає: у шапці стоїть плюс, і поруч
+/// із назвою екрана слово було б зайвим.
+class CalviAdd extends StatefulWidget {
+  const CalviAdd({super.key, required this.onTap, required this.label});
+
+  final VoidCallback onTap;
+  final String label;
+
+  @override
+  State<CalviAdd> createState() => _CalviAddState();
+}
+
+class _CalviAddState extends State<CalviAdd> with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: _inMs),
+  )..forward();
+
+  bool _down = false;
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+
+    return Semantics(
+      button: true,
+      label: widget.label,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        onTapDown: (_) => setState(() => _down = true),
+        onTapUp: (_) => setState(() => _down = false),
+        onTapCancel: () => setState(() => _down = false),
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedBuilder(
+          animation: _c,
+          builder: (context, child) {
+            final arrive = CalviMotion.ease.transform(_c.value);
+            return Opacity(
+              opacity: arrive,
+              child: Transform.translate(
+                offset: Offset(10 * (1 - arrive), 0),
+                child: Transform.scale(scale: 0.86 + 0.14 * arrive, child: child),
+              ),
+            );
+          },
+          child: AnimatedScale(
+            duration: CalviMotion.fast,
+            curve: CalviMotion.ease,
+            scale: _down ? 0.92 : 1,
+            child: AnimatedContainer(
+              duration: CalviMotion.fast,
+              curve: CalviMotion.ease,
+              width: 40,
+              height: 40,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: _down ? c.hover : c.card,
+                border: Border.all(color: c.cardBorder),
+                boxShadow: context.shadowCard,
+              ),
+              child: const CalviIcon('plus', size: 20),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// 16.13: the ring closes over 720 ms after a 120 ms wait, then fades.
 const _ringMs = 720;
 const _ringDelay = 120;
@@ -1065,6 +1148,13 @@ Future<T?> calviSheet<T>(
   bool info = false,
   VoidCallback? onDone,
 
+  /* Тиха кнопка ліворуч. За умовчанням це «Скасувати», яке просто закриває
+     аркуш, але місце те саме і тоді, коли ліворуч стоїть друга дія: аркуш
+     закінченого курсу пропонує звідти відновити його. Дія лишається тихою
+     кнопкою навмисно: гучна тут одна, і це вихід. */
+  String? cancelLabel,
+  VoidCallback? onCancel,
+
   /// Згода руйнівна: нижня кнопка червона, щоб рука знала, що робить.
   bool danger = false,
 }) {
@@ -1164,7 +1254,10 @@ Future<T?> calviSheet<T>(
                         if (!info) ...[
                           Expanded(
                             child: GestureDetector(
-                              onTap: () => Navigator.of(sheetContext).pop(),
+                              onTap: () {
+                                onCancel?.call();
+                                Navigator.of(sheetContext).pop();
+                              },
                               behavior: HitTestBehavior.opaque,
                               child: Container(
                                 height: CalviSize.buttonH,
@@ -1173,11 +1266,14 @@ Future<T?> calviSheet<T>(
                                   color: c.fillSecondary,
                                   borderRadius: BorderRadius.circular(CalviSize.rPill),
                                 ),
-                                child: Text(
-                                  L.of(sheetContext).actionCancel,
-                                  style: sheetContext.t.titleMedium?.copyWith(
-                                    fontSize: CalviSize.fsBody,
-                                    color: c.text,
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    cancelLabel ?? L.of(sheetContext).actionCancel,
+                                    style: sheetContext.t.titleMedium?.copyWith(
+                                      fontSize: CalviSize.fsBody,
+                                      color: c.text,
+                                    ),
                                   ),
                                 ),
                               ),

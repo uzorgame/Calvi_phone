@@ -337,6 +337,19 @@
       }
     }
   },
+  "@medsFirstDose": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "day": {
+        "type": "String"
+      },
+      "at": {
+        "type": "String"
+      }
+    }
+  },
   "@medsSince": {
     "placeholders": {
       "date": {
@@ -933,6 +946,7 @@
   "medsEmpty": "Nothing here yet. Add a medication and I will remind you at the right time.",
   "medsEmptyHint": "I keep the log of doses taken, I do not work out the dosage",
   "medsFinish": "End the course",
+  "medsFirstDose": "{name}, first dose {day} at {at}",
   "medsHours": "Hours",
   "medsHowOften": "How often",
   "medsMine": "My medications",
@@ -954,6 +968,8 @@
   "medsSince": "since {date}",
   "medsTime": "Time",
   "medsTitle": "Medications",
+  "medsTomorrow": "tomorrow",
+  "medsUnmarked": "Not marked yet: ",
   "medsUntil": "until {date}",
   "noraName": "Nora",
   "normAuto": "Count it automatically",

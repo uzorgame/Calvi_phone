@@ -21,14 +21,14 @@ class MedsRoute extends StatelessWidget {
     final scope = AppScope.of(context);
     return MedsScreen(
       meds: scope.meds,
-      onToggle: (id, index) => scope.setMeds(
+      onToggle: (id, at) => scope.setMeds(
         (list) => [
           for (final m in list)
             if (m.id == id)
               m.copyWith(
                 times: [
-                  for (final (i, t) in m.times.indexed)
-                    if (i == index) t.copyWith(taken: !t.taken) else t,
+                  for (final t in m.times)
+                    if (t.at == at) t.copyWith(taken: !t.taken) else t,
                 ],
               )
             else

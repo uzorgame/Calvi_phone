@@ -1072,6 +1072,11 @@ class LUk extends L {
   String get medsFinish => 'Закінчити курс';
 
   @override
+  String medsFirstDose(String name, String day, String at) {
+    return '$name, перший прийом $day о $at';
+  }
+
+  @override
   String get medsHours => 'Години';
 
   @override
@@ -1136,6 +1141,12 @@ class LUk extends L {
 
   @override
   String get medsTitle => 'Препарати';
+
+  @override
+  String get medsTomorrow => 'завтра';
+
+  @override
+  String get medsUnmarked => 'Ще не позначено: ';
 
   @override
   String medsUntil(String date) {

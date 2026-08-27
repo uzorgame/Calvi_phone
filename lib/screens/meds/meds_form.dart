@@ -60,6 +60,11 @@ void openMedSheet(
          * в минулих днях: людина ставила «по понеділках» і бачила його в
          * позаминулий понеділок. */
         startDay: med?.startDay.isNotEmpty == true ? med!.startDay : dayKeyOf(DateTime.now()),
+        /* Година заведення разом із днем. Дня самого по собі не досить: людина
+           заводить о 14:00 ліки на 09:00 і 21:00, ранкова доза сьогодні вже
+           позаду, а вечірню вона ще питиме. Правлений курс своєї години не
+           міняє, інакше кожне виправлення назви пересувало б початок. */
+        startTime: med?.startDay.isNotEmpty == true ? med!.startTime : hhmm(DateTime.now()),
         endDay: med?.endDay,
         note: med?.note,
         times: [

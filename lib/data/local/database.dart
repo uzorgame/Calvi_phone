@@ -76,7 +76,7 @@ class CalviDb extends _$CalviDb {
   );
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -183,6 +183,14 @@ class CalviDb extends _$CalviDb {
          провайдера, а не вигадує його. */
       if (from < 10) {
         await m.addColumn(syncMeta, syncMeta.provider);
+      }
+
+      /* Година початку курсу. Порожня для вже заведених препаратів, і це
+         правильна відповідь: коли саме їх завели, ми не знаємо, а порожня
+         година означає «день початку рахується цілком», тобто рівно те, як вони
+         й поводились досі. */
+      if (from < 11) {
+        await m.addColumn(medications, medications.startTime);
       }
     },
     beforeOpen: (details) async {

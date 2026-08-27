@@ -13,6 +13,12 @@
   "@medsSince": {
     "placeholders": { "date": { "type": "String" } }
   },
+  "medsUnmarked": "Not marked yet: ",
+  "medsFirstDose": "{name}, first dose {day} at {at}",
+  "@medsFirstDose": {
+    "placeholders": { "name": { "type": "String" }, "day": { "type": "String" }, "at": { "type": "String" } }
+  },
+  "medsTomorrow": "tomorrow",
   "medsNow": "NOW",
 
   "medsDose": "Dose",

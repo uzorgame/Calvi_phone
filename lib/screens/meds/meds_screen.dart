@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
@@ -14,9 +15,6 @@ import '../today/slot_card.dart';
 import 'meds_form.dart';
 import '../../l10n/app_localizations.dart';
 import '../../data/day.dart';
-
-/// Demo clock, same value the status bar shows.
-const _now = '12:39';
 
 /// Medication journal, laid out as the day itself.
 ///
@@ -40,7 +38,13 @@ class MedsScreen extends StatefulWidget {
   });
 
   final List<Med> meds;
-  final void Function(String medId, int index) onToggle;
+  /* Доза називається годиною, а не номером у списку.
+   *
+   * Номер працював, поки список годин був цілим. Тепер день бере з нього тільки
+   * свої дози, і третя за списком година може стояти в дні першою: за номером
+   * галочка лягла б на чужий прийом. Година це те саме, чим доза записана в
+   * базі, тож і питати треба нею. */
+  final void Function(String medId, String at) onToggle;
   final ValueChanged<Med> onSave;
 
   /// Закінчити курс: препарат переїжджає в «Минулі», історія лишається.
@@ -54,8 +58,68 @@ class MedsScreen extends StatefulWidget {
 }
 
 class _MedsScreenState extends State<MedsScreen> {
+  /* Чи розгорнутий список курсів. Згорнуто, як і минулі: рейка вище вже назвала
+     все, що приймають сьогодні, а сюди заходять правити назву чи години. */
+  bool _showMine = false;
+
   /// Чи розгорнуті минулі курси. Згорнуто за замовчуванням: це довідка.
   bool _showPast = false;
+
+  /* Година пристрою. Саме вона ділить рейку на те, що вже минуло, і те, що
+     попереду, тож зашите тут число робило неправильним не підпис, а весь екран.
+     Перемальовується на межі хвилини, а не раз на секунду: поки цифра та сама,
+     рахувати нема чого. */
+  late String _now = hhmm(DateTime.now());
+  Timer? _beat;
+
+  /* Курс, який починається не сьогодні, сказаний уголос.
+   *
+   * Людина заводить о 14:00 ліки на 09:00, зберігає і бачить день без них. Без
+   * цього рядка єдиний висновок, який вона може зробити, це що застосунок не
+   * зберіг препарат. */
+  String? _hint;
+
+  @override
+  void initState() {
+    super.initState();
+    _schedule();
+  }
+
+  @override
+  void dispose() {
+    _beat?.cancel();
+    super.dispose();
+  }
+
+  void _schedule() {
+    final at = DateTime.now();
+    /* До початку наступної хвилини, плюс півсекунди на дрейф таймера: без запасу
+       він інколи прокидається за мить до межі, і хвилина стоїть на місці. */
+    _beat = Timer(Duration(milliseconds: 60500 - at.second * 1000 - at.millisecond), () {
+      setState(() => _now = hhmm(DateTime.now()));
+      _schedule();
+    });
+  }
+
+  /* Збереження проходить через екран, а не повз нього: тільки тут видно, чи
+     дістався курс сьогоднішнього дня, і тільки звідси можна про це сказати. */
+  void _save(Med m) {
+    widget.onSave(m);
+    final ahead = firstDoseAhead(m, DateTime.now());
+    setState(() {
+      _hint = ahead == null ? null : _firstDose(m, ahead.day, ahead.at);
+    });
+  }
+
+  /// «Магній B6, перший прийом завтра о 09:00».
+  String _firstDose(Med m, DateTime day, String at) {
+    final l = L.of(context);
+    final tomorrow = DateTime.now().add(const Duration(days: 1));
+    final word = dayKeyOf(day) == dayKeyOf(tomorrow)
+        ? l.medsTomorrow
+        : '${day.day} ${monthShort(day.month)}';
+    return l.medsFirstDose(m.name, word, at);
+  }
 
   /* Стану форми тут більше немає: вона живе в аркуші, який сам знає, що
      редагує. Раніше цей рядок вирішував, який блок розгорнути в списку. */
@@ -88,8 +152,12 @@ class _MedsScreenState extends State<MedsScreen> {
     calviSheet<void>(
       context,
       title: m.name,
-      info: true,
       doneLabel: L.of(context).actionClose,
+      /* Відновити курс стоїть у ряду з виходом, а не блідою кнопкою всередині
+         тексту: промах по «Закінчити курс» має відкочуватись там, де людина
+         шукає кнопки, тобто внизу. */
+      cancelLabel: L.of(context).medsResume,
+      onCancel: () => widget.onRevive(m.id),
       builder: (sheetContext) {
         final c = sheetContext.c;
         final t = sheetContext.t;
@@ -120,23 +188,6 @@ class _MedsScreenState extends State<MedsScreen> {
               line(L.of(sheetContext).medsCourse, _span(m)),
               if (m.note?.trim().isNotEmpty ?? false)
                 line(L.of(sheetContext).medsNote, m.note!.trim()),
-              const SizedBox(height: 8),
-              GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  widget.onRevive(m.id);
-                  Navigator.of(sheetContext).pop();
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: c.fillSecondary,
-                    borderRadius: BorderRadius.circular(CalviSize.rPill),
-                  ),
-                  child: Text(L.of(sheetContext).medsResume, style: t.labelSmall),
-                ),
-              ),
             ],
           ),
         );
@@ -144,11 +195,11 @@ class _MedsScreenState extends State<MedsScreen> {
     );
   }
 
-  List<({String at, List<({Med med, int index})> items})> get _groups {
-    final map = <String, List<({Med med, int index})>>{};
+  List<({String at, List<({Med med, bool taken})> items})> get _groups {
+    final map = <String, List<({Med med, bool taken})>>{};
     for (final m in _today) {
-      for (final (i, t) in m.times.indexed) {
-        map.putIfAbsent(t.at, () => []).add((med: m, index: i));
+      for (final t in m.times) {
+        map.putIfAbsent(t.at, () => []).add((med: m, taken: t.taken));
       }
     }
     final keys = map.keys.toList()..sort();
@@ -169,16 +220,44 @@ class _MedsScreenState extends State<MedsScreen> {
     // Смуга годин і кільце говорять про сьогодні, список нижче про весь курс.
     final today = _today;
     final total = medProgress(today);
-    final due = nextDue(today);
+    final due = nextDue(today, _now);
+    final late = unmarked(today, _now);
     final groups = _groups;
     final nowAt = groups.indexWhere((g) => g.at.compareTo(_now) > 0);
 
     return CalviScreen(
       title: l.medsTitle,
+      /* Додати препарат стоїть у шапці, навпроти «Назад», щойно список перестає
+         бути порожнім. Рядком під списком ця кнопка з кожним новим курсом
+         відходила далі вниз, а дія над списком не має мандрувати. Поки
+         препаратів немає, вона лишається рядком під карткою Нори: на порожньому
+         екрані вона єдина річ, заради якої на нього зайшли, і ховати її в кут
+         сорока пікселями було б знущанням. */
+      trailing: meds.isEmpty
+          ? null
+          : CalviAdd(
+              label: l.medsAdd,
+              onTap: () => openMedSheet(
+                context,
+                now: DateTime.now().millisecondsSinceEpoch,
+                onSave: _save,
+              ),
+            ),
       children: [
+        if (_hint != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 0, CalviSize.gutter, 16),
+            child: CalviNora(text: _hint!),
+          ),
+
         if (meds.isEmpty)
           Padding(
-            padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 4, CalviSize.gutter, 12),
+            padding: const EdgeInsets.fromLTRB(
+              CalviSize.gutter,
+              0,
+              CalviSize.gutter,
+              CalviSize.gapSection,
+            ),
             child: CalviNora(text: l.medsEmpty, hint: l.medsEmptyHint),
           )
         else ...[
@@ -245,16 +324,18 @@ class _MedsScreenState extends State<MedsScreen> {
                               ),
                               const SizedBox(height: 8),
                               Text.rich(
-                                /* Порожній день і закритий день це різні речі.
+                                /* Порожній день, день попереду, день позаду і
+                                 * закритий день це чотири різні речі.
                                  *
                                  * «Все прийнято» на курсі «по понеділках» у
                                  * середу читалось би як похвала за те, чого
-                                 * людина не робила. */
+                                 * людина не робила, а під чотирма
+                                 * непозначеними дозами о пів на дванадцяту
+                                 * ночі це була б просто неправда. */
                                 total.total == 0
                                     ? TextSpan(text: l.medsNoneToday)
-                                    : due == null
-                                    ? TextSpan(text: l.medsAllTaken)
-                                    : TextSpan(
+                                    : due != null
+                                    ? TextSpan(
                                         text: l.medsNextAt,
                                         children: [
                                           TextSpan(
@@ -266,7 +347,21 @@ class _MedsScreenState extends State<MedsScreen> {
                                           ),
                                           TextSpan(text: ', ${due.name}'),
                                         ],
-                                      ),
+                                      )
+                                    : late > 0
+                                    ? TextSpan(
+                                        text: l.medsUnmarked,
+                                        children: [
+                                          TextSpan(
+                                            text: '$late',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                              color: c.buttonText,
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    : TextSpan(text: l.medsAllTaken),
                                 style: context.t.bodyMedium?.copyWith(
                                   fontSize: CalviSize.fsMicro,
                                   color: c.buttonText.withValues(alpha: 0.62),
@@ -298,7 +393,7 @@ class _MedsScreenState extends State<MedsScreen> {
           ),
 
           for (final (gi, g) in groups.indexed) ...[
-            if (gi == nowAt) const RepaintBoundary(child: _NowLine()),
+            if (gi == nowAt) RepaintBoundary(child: _NowLine(now: _now)),
             _Arrive(
               rank: gi,
               child: _RailRow(
@@ -311,51 +406,68 @@ class _MedsScreenState extends State<MedsScreen> {
             ),
           ],
 
-          /* The rail answers what is next; this answers what is in the list at
-             all, and it is the only place a name can be corrected or an entry
-             dropped. */
-          if (meds.isNotEmpty)
-            CalviSection(
+          /* Мітка стоїть перед першою годиною, яка ще попереду, а коли попереду
+             вже нічого, то під усім днем: інакше ввечері вона зникала цілком, і
+             екран переставав казати, котра година, саме тоді, коли пропущену
+             дозу видно найкраще. */
+          if (nowAt < 0 && groups.isNotEmpty) RepaintBoundary(child: _NowLine(now: _now)),
+
+          /* Рейка відповідає, що далі; це відповідає, що взагалі в списку, і це
+             єдине місце, де назву можна виправити, а курс закінчити.
+             Заголовок і список тут та сама пара, що в минулих курсах: рядок
+             картки, лічильник і стрілка. Розділ стояв підписом над великою
+             карткою, і поруч із охайним рядком «Минулі» читався як недороблений. */
+          if (meds.isNotEmpty) ...[
+            _Group(
               title: l.medsMine,
-              children: [
-                for (final (i, m) in meds.indexed)
-                  CalviRow(
-                    icon: 'pill',
-                    title: m.name,
-                    first: i == 0,
-                    value:
-                        /* Розклад поруч із годинами: «08:00» щодня і «08:00»
-                         через день це два різні курси. Щоденне не підписується:
-                         воно і так найчастіше, і підпис до кожного рядка
-                         перетворився б на шум. */
-                        '${doseLabel(m.dose, m.form)} · ${m.times.map((t) => t.at).join(', ')}'
-                        '${m.repeat is DailyRepeat ? '' : ' · ${repeatLabel(m.repeat)}'}',
-                    onTap: () => openMedSheet(
-                      context,
-                      med: m,
-                      now: DateTime.now().millisecondsSinceEpoch,
-                      onSave: widget.onSave,
-                      onFinish: widget.onFinish,
+              count: meds.length,
+              open: _showMine,
+              onTap: () => setState(() => _showMine = !_showMine),
+              child: Column(
+                children: [
+                  for (final (i, m) in meds.indexed)
+                    CalviRow(
+                      icon: 'pill',
+                      title: m.name,
+                      first: i == 0,
+                      value:
+                          /* Розклад поруч із годинами: «08:00» щодня і «08:00»
+                           через день це два різні курси. Щоденне не
+                           підписується: воно і так найчастіше, і підпис до
+                           кожного рядка перетворився б на шум. */
+                          '${doseLabel(m.dose, m.form)} · ${m.times.map((t) => t.at).join(', ')}'
+                          '${m.repeat is DailyRepeat ? '' : ' · ${repeatLabel(m.repeat)}'}',
+                      onTap: () => openMedSheet(
+                        context,
+                        med: m,
+                        now: DateTime.now().millisecondsSinceEpoch,
+                        onSave: _save,
+                        onFinish: widget.onFinish,
+                      ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
+            const SizedBox(height: CalviSize.gapSection),
+          ],
         ],
 
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: CalviSize.gutter),
-          /* Аркуш, а не розгорнутий блок у списку: форма більше не штовхає
-             список униз і не змушує гортати те, що щойно відкрили. */
-          child: AddRow(
-            label: l.medsAdd,
-            open: false,
-            onTap: () => openMedSheet(
-              context,
-              now: DateTime.now().millisecondsSinceEpoch,
-              onSave: widget.onSave,
+        /* Порожній екран: кнопка стоїть рядком одразу під карткою Нори, бо тут
+           вона єдина дія на екрані. Щойно зʼявляється перший курс, вона
+           переїжджає в шапку. */
+        if (meds.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: CalviSize.gutter),
+            child: AddRow(
+              label: l.medsAdd,
+              open: false,
+              onTap: () => openMedSheet(
+                context,
+                now: DateTime.now().millisecondsSinceEpoch,
+                onSave: _save,
+              ),
             ),
           ),
-        ),
 
         /* Минулі курси.
          *
@@ -368,69 +480,35 @@ class _MedsScreenState extends State<MedsScreen> {
          * здавалось охайним, а на ділі людина, яка шукає історію, не знаходила
          * навіть натяку на те, що історія десь є. */
         const SizedBox(height: CalviSize.gapCard),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: CalviSize.gutter),
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () => setState(() => _showPast = !_showPast),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-              /* Картка, як рядки в налаштуваннях. Рядок стояв просто на ґрунті,
-                 без тла і без рамки, тож єдина дорога до історії курсів
-                 виглядала підписом, а не тим, у що можна зайти. */
-              decoration: BoxDecoration(
-                color: c.card,
-                border: Border.all(color: c.cardBorder),
-                borderRadius: BorderRadius.circular(CalviSize.rLarge),
-                boxShadow: context.shadowCard,
-              ),
-              child: Row(
-                children: [
-                  Text(l.medsPast, style: context.t.titleMedium?.copyWith(fontSize: 15)),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: c.fillSecondary,
-                      borderRadius: BorderRadius.circular(CalviSize.rPill),
+        _Group(
+          title: l.medsPast,
+          count: past.length,
+          open: _showPast,
+          onTap: () => setState(() => _showPast = !_showPast),
+          child: past.isEmpty
+              ? Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 2, 14, 14),
+                  child: Text(
+                    l.medsPastEmpty,
+                    style: context.t.labelSmall?.copyWith(
+                      fontWeight: FontWeight.w400,
+                      height: 1.45,
                     ),
-                    child: Text('${past.length}', style: context.t.labelSmall),
                   ),
-                  const Spacer(),
-                  /* Чверть оберта, як у демці: закрита дивиться вправо, як усі
-                     стрілки рядків, розкрита вниз. Тут стояла півоберта, а вона
-                     робить зі стрілки вказівку вліво, тобто «назад». */
-                  AnimatedRotation(
-                    turns: _showPast ? 0.25 : 0,
-                    duration: CalviMotion.fast,
-                    child: CalviIcon('chevron', size: 16, color: c.textSecondary),
-                  ),
-                ],
-              ),
-            ),
-          ),
+                )
+              : Column(
+                  children: [
+                    for (final (i, m) in past.indexed)
+                      CalviRow(
+                        icon: 'pill',
+                        title: m.name,
+                        first: i == 0,
+                        value: '${doseLabel(m.dose, m.form)} · ${_span(m)}',
+                        onTap: () => _openPast(m),
+                      ),
+                  ],
+                ),
         ),
-
-        if (_showPast)
-          if (past.isEmpty)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 10, CalviSize.gutter, 0),
-              child: Text(l.medsPastEmpty, style: context.t.bodyMedium),
-            )
-          else
-            CalviSection(
-              title: '',
-              children: [
-                for (final (i, m) in past.indexed)
-                  CalviRow(
-                    icon: 'pill',
-                    title: m.name,
-                    first: i == 0,
-                    value: '${doseLabel(m.dose, m.form)} · ${_span(m)}',
-                    onTap: () => _openPast(m),
-                  ),
-              ],
-            ),
       ],
     );
   }
@@ -451,9 +529,201 @@ class _MedsScreenState extends State<MedsScreen> {
   }
 }
 
+/// Група курсів: заголовок і список однією карткою.
+///
+/// Заголовок і список стояли двома окремими таблетками з проміжком, і звʼязок
+/// між ними доводилось добудовувати в голові: стрілка вниз указувала на щось, що
+/// виглядало сусідом, а не вмістом. Зрощення двох таблеток вимагало б міняти їм
+/// заокруглення назустріч одна одній, а скільки не підбирай моменту такої заміни,
+/// вона лишається заміною: кути стрибають з рівних на круглі.
+///
+/// Тому картка тут одна від початку. Тло, рамку, заокруглення й тінь тримає
+/// сама група, а всередині свого не малює ніхто. Заокруглення не міняється
+/// взагалі: міняється тільки висота, і низ із тими самими двадцятьма чотирма
+/// їде вгору разом із нею. Обрізає теж вона, по цих же круглих кутах, тож
+/// обрізати квадратом уже нема чому.
+class _Group extends StatefulWidget {
+  const _Group({
+    required this.title,
+    required this.count,
+    required this.open,
+    required this.onTap,
+    required this.child,
+  });
+
+  final String title;
+  final int count;
+  final bool open;
+  final VoidCallback onTap;
+  final Widget child;
+
+  @override
+  State<_Group> createState() => _GroupState();
+}
+
+class _GroupState extends State<_Group> with SingleTickerProviderStateMixin {
+  /* Розгортається повільно й мʼяко, згортається швидко й рівно, як картки дня.
+   *
+   * Розділ, що закривається так само ліниво, як відкривався, читається так, ніби
+   * застосунок над цим думає. Тому дві різні тривалості і дві різні криві, і
+   * саме тому тут лічильник у мілісекундах, а не одна крива на весь хід: вміст
+   * піднімається на такт пізніше за висоту і встигає ще трохи після неї.
+   *
+   * Розгортання триває 480, хоч висота доїжджає за 440: останні сорок це
+   * дотягування вмісту, коли картка вже стоїть на повний зріст. */
+  static const _openMs = 480.0;
+  static const _shutMs = 220.0;
+
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 480),
+    reverseDuration: const Duration(milliseconds: 220),
+    value: widget.open ? 1 : 0,
+  );
+
+  @override
+  void didUpdateWidget(_Group old) {
+    super.didUpdateWidget(old);
+    if (widget.open != old.open) {
+      widget.open ? _c.forward() : _c.reverse();
+    }
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: CalviSize.gutter),
+      child: Container(
+        decoration: BoxDecoration(
+          color: c.card,
+          border: Border.all(color: c.cardBorder),
+          borderRadius: BorderRadius.circular(CalviSize.rLarge),
+          boxShadow: context.shadowCard,
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: AnimatedBuilder(
+          animation: _c,
+          builder: (context, child) {
+            final opening = widget.open;
+            // Скільки минуло від початку саме цього ходу, у мілісекундах.
+            final ms = opening ? _c.value * _openMs : (1 - _c.value) * _shutMs;
+
+            double leg(double from, double to, Curve curve) =>
+                curve.transform(((ms - from) / (to - from)).clamp(0.0, 1.0));
+
+            final t = opening
+                ? leg(0, 440, CalviMotion.easeRise)
+                : 1 - leg(0, _shutMs, CalviMotion.easeIn);
+            final fade = opening ? leg(90, 350, Curves.linear) : 1 - leg(0, 140, Curves.linear);
+            final lift = opening
+                ? leg(60, _openMs, CalviMotion.easeRise)
+                : 1 - leg(0, 180, CalviMotion.easeIn);
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: widget.onTap,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+                    /* Лінія розділу зʼявляється разом зі списком і згасає разом
+                       із ним. Знята ривком, вона лишалась висіти під заголовком,
+                       поки список іще їхав угору. Прозора рамка замість знятої
+                       тримає висоту незмінною, тож заголовок не сіпається на
+                       піксель туди-сюди. */
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: c.cardBorder.withValues(alpha: opening ? 1 : t),
+                        ),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          widget.title,
+                          style: context.t.titleMedium?.copyWith(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 15 * -0.02,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: c.fillSecondary,
+                            borderRadius: BorderRadius.circular(CalviSize.rPill),
+                          ),
+                          child: Text(
+                            '${widget.count}',
+                            style: context.t.labelSmall?.copyWith(fontWeight: FontWeight.w400),
+                          ),
+                        ),
+                        const Spacer(),
+                        /* Чверть оберта: закрита стрілка дивиться вправо, як усі
+                           стрілки рядків, розкрита вниз. Півоберта робила б із
+                           неї вказівку вліво, тобто «назад».
+                           Крутиться своїм ходом, а не разом із висотою: у картках
+                           дня стрілка теж має власні 240 мс, і привʼязана до
+                           складання вона поверталася б то за 440, то за 220. */
+                        AnimatedRotation(
+                          turns: widget.open ? 0.25 : 0,
+                          duration: CalviMotion.normal,
+                          curve: CalviMotion.ease,
+                          child: CalviIcon('chevron', size: 16, color: c.textSecondary),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                /* Висота дробом від власної висоти списку, а не числом: рядків
+                   може бути один, а може десять, і будь-яка стеля або обрізала б
+                   довгий список, або лишала б короткому порожній хід.
+                   Згорнутого списку в дереві немає взагалі: невидимий рядок усе
+                   одно лишається рядком для пошуку і для читалки з екрана, тобто
+                   закінчений курс знаходився б серед активних. */
+                if (_c.value > 0)
+                  ClipRect(
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      heightFactor: t,
+                      /* Вміст піднімається на такт пізніше за висоту, тож розділ
+                         розгортається, а не просто стає вищим. */
+                      child: Opacity(
+                        opacity: fade,
+                        child: Transform.translate(
+                          offset: Offset(0, -10 * (1 - lift)),
+                          child: child,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
+          child: widget.child,
+        ),
+      ),
+    );
+  }
+}
+
 /// Where the current hour cuts across the rail.
 class _NowLine extends StatefulWidget {
-  const _NowLine();
+  const _NowLine({required this.now});
+
+  /// Година пристрою. Приходить згори, бо ділить вона не тільки цей рядок.
+  final String now;
 
   @override
   State<_NowLine> createState() => _NowLineState();
@@ -483,12 +753,13 @@ class _NowLineState extends State<_NowLine> with SingleTickerProviderStateMixin 
         padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 4, CalviSize.gutter, 12),
         child: Row(
           children: [
-            // The same 44 the hours above it stand in, so the mark lines up.
+            /* Ті самі 46 і 26, у яких стоять години й вузли рейки. Тут було 44 і
+               24 з проміжками по десять, тобто інша сітка, і крапка «зараз»
+               лягала на сім пікселів праворуч від самої рейки. */
             SizedBox(
-              width: 44,
+              width: 46,
               child: Text(
                 L.of(context).medsNow,
-                textAlign: TextAlign.right,
                 style: context.t.labelSmall?.copyWith(
                   fontSize: 10,
                   fontWeight: FontWeight.w600,
@@ -497,9 +768,8 @@ class _NowLineState extends State<_NowLine> with SingleTickerProviderStateMixin 
                 ),
               ),
             ),
-            const SizedBox(width: 10),
             SizedBox(
-              width: 24,
+              width: 26,
               child: Center(
                 /* One slow pulse, and only here. The current hour is the only
                    thing on this screen that moves on its own, so it needs no
@@ -523,9 +793,8 @@ class _NowLineState extends State<_NowLine> with SingleTickerProviderStateMixin 
                 ),
               ),
             ),
-            const SizedBox(width: 10),
             Text(
-              _now,
+              widget.now,
               style: context.t.labelSmall?.copyWith(
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
@@ -556,17 +825,17 @@ class _RailRow extends StatelessWidget {
   });
 
   final String at;
-  final List<({Med med, int index})> items;
+  final List<({Med med, bool taken})> items;
   final bool last;
 
   /// The hour is behind the clock: anything untaken here is late, not upcoming.
   final bool passed;
-  final void Function(String, int) onToggle;
+  final void Function(String, String) onToggle;
 
   @override
   Widget build(BuildContext context) {
     final c = context.c;
-    final done = items.every((it) => it.med.times[it.index].taken);
+    final done = items.every((it) => it.taken);
     final late = !done && passed;
 
     return Padding(
@@ -627,8 +896,8 @@ class _RailRow extends StatelessWidget {
                     for (final it in items)
                       _Dose(
                         med: it.med,
-                        taken: it.med.times[it.index].taken,
-                        onTap: () => onToggle(it.med.id, it.index),
+                        taken: it.taken,
+                        onTap: () => onToggle(it.med.id, at),
                       ),
                   ],
                 ),

@@ -1935,6 +1935,12 @@ abstract class L {
   /// **'End the course'**
   String get medsFinish;
 
+  /// No description provided for @medsFirstDose.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, first dose {day} at {at}'**
+  String medsFirstDose(String name, String day, String at);
+
   /// No description provided for @medsHours.
   ///
   /// In en, this message translates to:
@@ -2060,6 +2066,18 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Medications'**
   String get medsTitle;
+
+  /// No description provided for @medsTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'tomorrow'**
+  String get medsTomorrow;
+
+  /// No description provided for @medsUnmarked.
+  ///
+  /// In en, this message translates to:
+  /// **'Not marked yet: '**
+  String get medsUnmarked;
 
   /// No description provided for @medsUntil.
   ///

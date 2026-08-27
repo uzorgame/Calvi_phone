@@ -55,6 +55,7 @@ class MedsStore {
            * заведений сьогодні магній світився в минулому понеділку. Дата
            * запису це найближче до правди, що тут іще можна дізнатись. */
           startDay: r.startDay.isNotEmpty ? r.startDay : _dayKey(r.updatedAt),
+          startTime: r.startTime,
           endDay: r.endDay,
           note: r.note,
           times: [
@@ -91,6 +92,7 @@ class MedsStore {
             note: Value(m.note),
             form: Value(m.form.name),
             startDay: Value(m.startDay.isEmpty ? _dayKey(DateTime.now()) : m.startDay),
+            startTime: Value(m.startTime),
             endDay: Value(m.endDay),
             times: Value(m.times.map((t) => t.at).join(',')),
             schedule: Value(repeatToJson(m.repeat)),

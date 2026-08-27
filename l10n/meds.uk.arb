@@ -10,6 +10,12 @@
   "medsPast": "Минулі",
   "medsPastEmpty": "Тут будуть курси, які ти вже не приймаєш. Препарат, прибраний зі списку, лишається в днях, коли ти його пив.",
   "medsSince": "з {date}",
+  "medsUnmarked": "Ще не позначено: ",
+  "medsFirstDose": "{name}, перший прийом {day} о {at}",
+  "@medsFirstDose": {
+    "placeholders": { "name": { "type": "String" }, "day": { "type": "String" }, "at": { "type": "String" } }
+  },
+  "medsTomorrow": "завтра",
   "medsNow": "ЗАРАЗ",
 
   "medsDose": "Доза",
