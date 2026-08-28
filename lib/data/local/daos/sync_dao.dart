@@ -287,11 +287,17 @@ class SyncDao extends DatabaseAccessor<CalviDb> with _$SyncDaoMixin {
   }
 
   /// The balance as the server last reported it. Mirrored, never sent up.
-  Future<void> putTokens({required int balance, DateTime? nextGrantAt}) =>
+  ///
+  /// [unlimited] порожнє означає «сервер про це не сказав»: старіший бекенд не
+  /// шле такого поля, і тоді збережене значення лишається як було. Записувати
+  /// туди `false` за замовчуванням означало б знімати підписку з людини щоразу,
+  /// коли відповідь прийшла зі старого маршруту.
+  Future<void> putTokens({required int balance, DateTime? nextGrantAt, bool? unlimited}) =>
       (update(tokenState)..where((t) => t.id.equals(1))).write(
         TokenStateCompanion(
           balance: Value(balance),
           nextGrantAt: Value(nextGrantAt),
+          unlimited: unlimited == null ? const Value.absent() : Value(unlimited),
           syncedAt: Value(DateTime.now()),
         ),
       );

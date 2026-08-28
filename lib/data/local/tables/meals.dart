@@ -36,4 +36,12 @@ class Meals extends Table with Synced {
   /// manual, chat, photo, barcode, copy. Decides whether it cost a token.
   TextColumn get source => text().withDefault(const Constant('manual'))();
   TextColumn get note => text().nullable()();
+
+  /* Номер питання Нори про вагу, на яке чекає ця чернетка.
+   *
+   * Місцева закладка, а не дані про їжу: коли людина відповість і запис
+   * станеться, чернетку треба прибрати. Закладка жила в памʼяті екрана і
+   * губилась із перезапуском, тому відповідь після перезапуску записувала
+   * страву, а її вічно зайнятий двійник лишався в картці назавжди. */
+  TextColumn get askId => text().nullable()();
 }

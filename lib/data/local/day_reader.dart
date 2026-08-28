@@ -199,6 +199,22 @@ class DayReader {
     fat: row.fatG.round(),
     carbs: row.carbsG.round(),
     auto: row.source != 'manual',
+    /* Про запис не відомо нічого: ні калорій, ні макросів, ні ваги. Отже, його
+       ще не порахували, і показувати впевнений нуль було б брехнею. Картка
+       намалює «Нора рахує…» замість числа.
+     *
+     * Виводиться, а не зберігається окремою колонкою: «нічого не відомо» це не
+       властивість запису, а спостереження про його числа, і тримати про це
+       прапорець означало б мати два джерела однієї правди, які колись
+       розійдуться. Страви, у якої справді нуль усього і без ваги, не існує:
+       навіть трав'яний чай має свої два кілокалорії, а порожній рядок це рядок,
+       який ще чекає. */
+    pending:
+        row.kcal == 0 &&
+        row.proteinG == 0 &&
+        row.fatG == 0 &&
+        row.carbsG == 0 &&
+        (row.grams ?? 0) == 0,
   );
 
   Workout _toWorkout(WorkoutRow row) => Workout(
@@ -223,4 +239,29 @@ class DayReader {
   /// reference has answered.
   Future<String> addTyped({required String slotId, required String text}) =>
       db.diaryDao.addMeal(slot: slotId, name: text.trim(), kcal: 0);
+
+  /// Страва з числами, які вписала людина.
+  ///
+  /// Ні мережі, ні токенів, ні очікування: числа вже є, і додавати до них нема
+  /// чого. Саме цим ручний запис відрізняється від [addTyped], після якого
+  /// рядок ще чекає, поки довідник або Нора його наповнять.
+  Future<String> addManual({
+    required String slotId,
+    required String title,
+    required int kcal,
+    required int grams,
+    required int protein,
+    required int fat,
+    required int carbs,
+  }) => db.diaryDao.addMeal(
+    slot: slotId,
+    name: title.trim(),
+    kcal: kcal,
+    // Нуль грамів це «не сказали», а не «нічого не важило»: у сховищі вага
+    // необовʼязкова саме для таких записів.
+    grams: grams > 0 ? grams.toDouble() : null,
+    protein: protein.toDouble(),
+    fat: fat.toDouble(),
+    carbs: carbs.toDouble(),
+  );
 }

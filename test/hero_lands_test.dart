@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:calvi/data/app_scope.dart';
 import 'package:calvi/data/fixtures.dart';
 import 'package:calvi/data/settings.dart';
+import 'package:calvi/data/day_stats.dart';
+import 'package:calvi/data/week.dart';
 import 'package:calvi/design/theme.dart';
 import 'package:calvi/l10n/app_localizations.dart';
 import 'package:calvi/screens/today/hero_card.dart';
@@ -49,7 +51,13 @@ void main() {
               alignment: Alignment.topCenter,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: HeroCard(day: dayFor(0), burned: 0, goal: goalOf(initialSettings())),
+                child: HeroCard(
+                  day: dayFor(0),
+                  burned: 0,
+                  goal: goalOf(initialSettings()),
+                  week: _week,
+                  onWeek: () {},
+                ),
               ),
             ),
           ),
@@ -238,3 +246,6 @@ void main() {
     });
   });
 }
+
+/// Показовий тиждень для картки: сторона тижня читає готове зведення.
+final _week = weekSummary(DayStats.demo(), initialSettings());

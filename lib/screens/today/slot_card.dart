@@ -1,13 +1,16 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import '../../design/fold.dart';
 import '../../design/icons.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import '../../l10n/app_localizations.dart';
+import 'manual_form.dart';
 
 /// The shell every card of the day wears.
 ///
@@ -155,9 +158,7 @@ class _SlotCardState extends State<SlotCard> with SingleTickerProviderStateMixin
               child: LayoutBuilder(
                 builder: (context, box) {
                   final titleStyle = context.t.titleMedium;
-                  final badgeStyle = context.t.titleMedium?.copyWith(
-                    fontSize: CalviSize.fsMicro,
-                  );
+                  final badgeStyle = context.t.titleMedium?.copyWith(fontSize: CalviSize.fsMicro);
 
                   /* Назва не переноситься і не обрізається.
                    *
@@ -244,32 +245,12 @@ class _SlotCardState extends State<SlotCard> with SingleTickerProviderStateMixin
             ),
           ),
 
-          /* Opening takes longer than closing: opening is an invitation, closing
-             is a decision already made, and a slow one reads as stuck. */
-          ClipRect(
-            child: AnimatedAlign(
-              alignment: Alignment.topCenter,
-              heightFactor: open ? 1 : 0,
-              duration: open ? _openMs : const Duration(milliseconds: 220),
-              curve: open ? CalviMotion.easeRise : CalviMotion.easeIn,
-              /* The contents lift into place a beat behind the height, so the
-                 card unfolds instead of simply becoming taller, and they stay in
-                 the tree the whole time so closing clips them rather than
-                 yanking them out from under the height. */
-              child: AnimatedSlide(
-                offset: open ? Offset.zero : const Offset(0, -0.08),
-                duration: Duration(milliseconds: open ? 420 : 180),
-                curve: open ? CalviMotion.easeRise : CalviMotion.easeIn,
-                child: AnimatedOpacity(
-                  opacity: open ? 1 : 0,
-                  duration: Duration(milliseconds: open ? 260 : 140),
-                  curve: Curves.linear,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                    child: SizedBox(key: _inside, width: double.infinity, child: widget.child),
-                  ),
-                ),
-              ),
+          // Сам рух спільний на застосунок, див. [CalviFold].
+          CalviFold(
+            open: open,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              child: SizedBox(key: _inside, width: double.infinity, child: widget.child),
             ),
           ),
         ],
@@ -363,39 +344,253 @@ class _DashedEdge extends CustomPainter {
 /// The bar at the bottom of the screen is the main one and it already knows the
 /// card; this field exists for the moment you are looking straight at the card
 /// you mean, and it saves the step of saying which one.
+/// **Хто рахує числа, вирішується тут, і правило одне.** За замовчуванням рахує
+/// Нора: більшість записів це «борщ 500 грам», і вони мають коштувати один
+/// дотик. Форма з полями відкривається рівно там, де Норі нічим платити: токени
+/// скінчились, підписки немає. Плюс, який то рахує сам, то просить порахувати
+/// тебе, був би кнопкою з двома значеннями, а вгадувати, яке з них зараз,
+/// людина не мусить.
+///
+/// Другий вхід у форму це «Ввести числа самому» під полем: для тих випадків,
+/// коли упаковка в руці й точні числа відомі краще за будь-який довідник. Він
+/// зʼявляється тільки коли в полі щось є, тому порожня картка лишається
+/// порожньою.
 class SlotInput extends StatefulWidget {
-  const SlotInput({super.key, required this.onSend});
+  const SlotInput({
+    super.key,
+    required this.onSend,
+    required this.onManual,
+    required this.noraCan,
+    this.open = true,
+    this.onWriting,
+  });
 
+  /// Нора рахує сама: швидкий шлях, один дотик.
   final ValueChanged<String> onSend;
+
+  /// Числа вписала людина.
+  final ValueChanged<ManualEntry> onManual;
+
+  /// Чи Норі є чим платити. Рішення живе вище, бо залежить від балансу і
+  /// підписки, про які поле вводу не знає.
+  final bool noraCan;
+
+  /* Чи картка розгорнута. Поле мусить це знати, бо згорнута картка не
+     прибирає своїх дітей з дерева: форма, залишена відкритою, тримала б
+     сигнал «пишу» вічно, і нижня панель не поверталась би ніколи. */
+  final bool open;
+
+  /* Людина пише сюди, а не в чат. Екран за цим сигналом опускає нижню панель:
+     вона разом із клавіатурою накривала саме те, що людина в цю мить заповнює.
+     `true` тримається, поки живе набирання: фокус у полі або відкрита форма. */
+  final ValueChanged<bool>? onWriting;
 
   @override
   State<SlotInput> createState() => _SlotInputState();
 }
 
-class _SlotInputState extends State<SlotInput> {
+class _SlotInputState extends State<SlotInput> with WidgetsBindingObserver {
   final _text = TextEditingController();
+  final _focus = FocusNode();
+
+  /// Чи форма розгорнута.
+  bool _filling = false;
+
+  /* Назва, яку форма зараз показує. Не гаситься на закритті: поки складка
+     згортається, вміст усередині ще видно, і порожній заголовок мигнув би на
+     самому початку руху. */
+  String _naming = '';
+
+  /* Лічильник відкриттів. Форма лишається в дереві, поки згортається, тому сама
+     вона свої поля не чистить: без цього ключа наступна страва відкривалась би
+     з чужими числами. */
+  int _round = 0;
+
+  /* Останнє, що сказали екрану. Сигнал шлеться на зміну, а не на кожен рух
+     фокуса: слухач нагорі робить setState, і смикати його однаковими
+     значеннями означало б перебудовувати екран на кожен блимок каретки. */
+  bool _told = false;
+
+  void _tell() {
+    final writing = _focus.hasFocus || _filling;
+    if (writing == _told) return;
+    _told = writing;
+    widget.onWriting?.call(writing);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _focus.addListener(_tell);
+    _focus.addListener(_peek);
+    // Щоб почути, як клавіатуру закрили повз нас: жестом «назад» або системою.
+    WidgetsBinding.instance.addObserver(this);
+    _kb = _insetNow;
+  }
 
   @override
   void dispose() {
+    /* Картка йде з екрана разом із днем, який гортнули. Панель, яку забули
+       підняти, лишилась би внизу назавжди. */
+    if (_told) widget.onWriting?.call(false);
+    WidgetsBinding.instance.removeObserver(this);
+    _reveal?.cancel();
+    _focus
+      ..removeListener(_peek)
+      ..removeListener(_tell)
+      ..dispose();
     _text.dispose();
     super.dispose();
+  }
+
+  /* Згорнута картка закриває і свою форму.
+   *
+   * Складка не прибирає вміст із дерева, тому форма, залишена відкритою в
+   * згорнутій картці, жила далі невидимою: сигнал «пишу» тримався вічно, і
+   * нижня панель не поверталась до перезапуску застосунку. */
+  @override
+  void didUpdateWidget(SlotInput old) {
+    super.didUpdateWidget(old);
+    if (old.open && !widget.open && _filling) {
+      setState(() => _filling = false);
+      _tell();
+    }
+  }
+
+  /// Висота клавіатури минулого разу, коли ми дивились.
+  double _kb = 0;
+
+  double get _insetNow {
+    final view = WidgetsBinding.instance.platformDispatcher.implicitView;
+    if (view == null) return 0;
+    return view.viewInsets.bottom / view.devicePixelRatio;
+  }
+
+  /* Клавіатуру закрили ззовні: жестом «назад», шторкою, самою системою.
+   *
+   * Android у такому разі ховає клавіатуру, але фокус лишається в полі, а
+   * панель повертається саме за сигналом «фокус пішов». Сигнал не приходив
+   * ніколи, і панель зникала до перезапуску. Тому за зникненням клавіатури
+   * поле відпускає фокус саме: писати без клавіатури однаково не можна. */
+  @override
+  void didChangeMetrics() {
+    final was = _kb;
+    _kb = _insetNow;
+    if (was > 0 && _kb <= 0 && _focus.hasFocus) _focus.unfocus();
+  }
+
+  /* Поле доїжджає у видиму зону, коли клавіатура встала.
+   *
+   * Прокрутка сама цього не робить: вікно не стискається під клавіатуру
+   * (панель їздить над нею), тож для системи поле «видиме», хоч і лежить під
+   * клавіатурою. Пауза дає клавіатурі виїхати, а запасу знизу вирости. */
+  Timer? _reveal;
+
+  void _peek() {
+    _reveal?.cancel();
+    if (!_focus.hasFocus) return;
+    _reveal = Timer(const Duration(milliseconds: 380), _intoView);
+  }
+
+  void _intoView() {
+    if (!mounted || !_focus.hasFocus) return;
+    final box = context.findRenderObject() as RenderBox?;
+    final scroll = Scrollable.maybeOf(context)?.position;
+    if (box == null || !box.attached || scroll == null) return;
+
+    final kb = MediaQuery.viewInsetsOf(context).bottom;
+    if (kb <= 0) return;
+
+    // Низ усього блока вводу проти верху клавіатури, з малим повітрям між ними.
+    final bottom = box.localToGlobal(Offset(0, box.size.height)).dy;
+    final over = bottom + 12 - (MediaQuery.sizeOf(context).height - kb);
+    if (over <= 0) return;
+
+    scroll.animateTo(
+      (scroll.pixels + over).clamp(scroll.minScrollExtent, scroll.maxScrollExtent),
+      duration: const Duration(milliseconds: 300),
+      curve: CalviMotion.easeRise,
+    );
+  }
+
+  void _open(String name) {
+    HapticFeedback.selectionClick();
+    setState(() {
+      _naming = name;
+      _round++;
+      _filling = true;
+      _text.clear();
+    });
+    /* Клавіатура ховається вся, а не лише з нашого поля: далі людина спершу
+       вибирає очима, куди вписувати, і клавіатура текстового поля їй у цьому
+       тільки затуляла форму. Панель при цьому лишається внизу: форма це теж
+       набирання, просто по пʼяти полях. */
+    _focus.unfocus();
+    FocusManager.instance.primaryFocus?.unfocus();
+    _tell();
+  }
+
+  /// Набирання скінчилось: каретка додолу, панель повертається.
+  void _done() {
+    _focus.unfocus();
+    FocusManager.instance.primaryFocus?.unfocus();
+    _tell();
   }
 
   void _send() {
     final t = _text.text.trim();
     if (t.isEmpty) return;
+    if (!widget.noraCan) return _open(t);
+
     HapticFeedback.selectionClick();
     widget.onSend(t);
     _text.clear();
     setState(() {});
+    /* «Плюс» це кінець запису, а не кома в ньому: клавіатура ховається, панель
+       піднімається назад. Наступну страву почнуть новим дотиком. */
+    _done();
   }
 
   @override
   Widget build(BuildContext context) {
+    /* Обидві половини згортаються тим самим рухом, що й картки дня: поле вводу
+       складається, форма розкладається. Одна зникає рівно так, як зʼявляється
+       друга, тому підміна читається як один рух, а не як дві незалежні появи. */
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CalviFold(open: !_filling, child: _writing(context)),
+
+        /* Форма зʼявляється в дереві з першим відкриттям і лишається в ньому
+           далі, щоб закриття було чим анімувати. До того її немає зовсім: пʼять
+           полів вводу на кожній картці кожного дня це і зайва робота на кожен
+           кадр, і три кольорові крапки БЖВ, яких на екрані ніхто не просив. */
+        if (_round > 0)
+          CalviFold(
+            open: _filling,
+            child: ManualForm(
+              key: ValueKey(_round),
+              title: _naming,
+              onCancel: () {
+                setState(() => _filling = false);
+                _done();
+              },
+              onSave: (entry) {
+                setState(() => _filling = false);
+                widget.onManual(entry);
+                _done();
+              },
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _writing(BuildContext context) {
     final c = context.c;
     final ready = _text.text.trim().isNotEmpty;
 
-    return Padding(
+    final row = Padding(
       padding: const EdgeInsets.only(top: 8),
       child: Row(
         children: [
@@ -412,6 +607,7 @@ class _SlotInputState extends State<SlotInput> {
               child: TextField(
                 textAlignVertical: TextAlignVertical.center,
                 controller: _text,
+                focusNode: _focus,
                 onChanged: (_) => setState(() {}),
                 onSubmitted: (_) => _send(),
                 textInputAction: TextInputAction.send,
@@ -459,6 +655,39 @@ class _SlotInputState extends State<SlotInput> {
           ),
         ],
       ),
+    );
+
+    /* Другий вхід у форму. Зʼявляється тільки коли в полі щось є: порожня
+       картка має лишатись порожньою, а не пропонувати дію, якій нема над чим
+       працювати. */
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        row,
+        CalviFold(
+          /* Притиснутий ліворуч рукою: складка центрує вузьких дітей, бо міряє
+             висоту через Align. Лінк вужчий за картку, і без цього стояв
+             посередині. */
+          open: ready,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: GestureDetector(
+              onTap: () => _open(_text.text.trim()),
+              behavior: HitTestBehavior.opaque,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8, bottom: 2),
+                child: Text(
+                  L.of(context).slotByHand,
+                  style: context.t.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

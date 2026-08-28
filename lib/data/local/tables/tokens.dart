@@ -11,8 +11,14 @@ class TokenState extends Table {
 
   IntColumn get balance => integer().withDefault(const Constant(0))();
 
-  /// When the next two arrive. The countdown on screen is drawn from this, but
-  /// the grant itself is the server's to make.
+  /// Платний доступ: лічильника немає взагалі.
+  ///
+  /// Не більше число, а відсутність числа. Людина, яка заплатила, не має
+  /// рахувати репліки і не має бачити нагадування про те, що колись рахувала.
+  BoolColumn get unlimited => boolean().withDefault(const Constant(false))();
+
+  /// Коли прийдуть наступні сорок. Дата, а не зворотний відлік годин: тепер це
+  /// число реєстрації, і воно те саме щомісяця.
   DateTimeColumn get nextGrantAt => dateTime().nullable()();
   DateTimeColumn get syncedAt => dateTime().nullable()();
 

@@ -76,7 +76,7 @@ class CalviDb extends _$CalviDb {
   );
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -191,6 +191,20 @@ class CalviDb extends _$CalviDb {
          й поводились досі. */
       if (from < 11) {
         await m.addColumn(medications, medications.startTime);
+      }
+
+      /* Платний доступ. Порожньо, тобто «ні», для всіх, хто вже живе: підписки
+         на той момент ще не існувало, і вигадувати її нікому не треба. Справжнє
+         значення приїде з першою ж відповіддю сервера. */
+      if (from < 12) {
+        await m.addColumn(tokenState, tokenState.unlimited);
+      }
+
+      /* Закладка «чернетка чекає на це питання про вагу». Порожня для всіх
+         наявних рядків: старі чернетки свого питання вже не памʼятають, і
+         вигадати звʼязок заднім числом не можна. */
+      if (from < 13) {
+        await m.addColumn(meals, meals.askId);
       }
     },
     beforeOpen: (details) async {

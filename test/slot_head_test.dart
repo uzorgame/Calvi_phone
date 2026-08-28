@@ -54,9 +54,11 @@ void main() {
   /// Скільки рядків намалював цей напис насправді.
   int lines(WidgetTester tester, String text) {
     final box = tester.renderObject<RenderParagraph>(find.text(text));
-    return box.getBoxesForSelection(
-      TextSelection(baseOffset: 0, extentOffset: text.length),
-    ).map((b) => b.top.round()).toSet().length;
+    return box
+        .getBoxesForSelection(TextSelection(baseOffset: 0, extentOffset: text.length))
+        .map((b) => b.top.round())
+        .toSet()
+        .length;
   }
 
   for (final (lang, title, sub, badge) in [

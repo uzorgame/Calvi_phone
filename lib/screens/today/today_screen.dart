@@ -18,6 +18,7 @@ import '../../data/remote/sync_service.dart';
 import '../../data/measure.dart';
 import '../../data/meds.dart';
 import '../../data/settings.dart';
+import '../../data/week.dart';
 import '../../data/workout.dart';
 import '../../design/icons.dart';
 import '../../design/theme.dart';
@@ -28,11 +29,13 @@ import '../../l10n/labels.dart';
 import '../../design/slide.dart';
 import '../analytics/analytics_screen.dart';
 import '../camera/camera_screen.dart';
+import '../week/week_screen.dart';
 import '../voice/dictation.dart';
 import '../voice/voice_overlay.dart';
 import 'bottom_bar.dart';
 import 'hero_card.dart';
 import 'macro_cards.dart';
+import 'manual_form.dart';
 import 'meal_card.dart';
 import 'measure_card.dart';
 import 'slot_card.dart';
@@ -311,13 +314,30 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
     ),
   );
 
-  void _toggle(String id) => setState(() => _openCard = _openCard == id ? null : id);
+  /* Тією ж дорогою, що й аналітика: сторінка тижня приїжджає тим самим рухом,
+     бо це та сама подія, «розгорнути те, на що я щойно дивився». */
+  void _openWeek(BuildContext context, WeekSummary week) => Navigator.of(
+    context,
+  ).push(slideRoute(WeekScreen(summary: week, onSettings: widget.onSettings)));
+
+  void _toggle(String id) {
+    /* Згорнута картка це кінець набирання: каретка додолу, клавіатура за нею,
+       і нижня панель повертається сама, бо поле втрачає фокус. */
+    if (_openCard == id) FocusManager.instance.primaryFocus?.unfocus();
+    setState(() => _openCard = _openCard == id ? null : id);
+  }
 
   /* One place where anything said to Nora arrives, whatever said it: the field,
-     the camera or dictation. Three call sites that each append their own pair of
-     messages is three chances for the chat to answer itself differently. */
-  void _say(Msg mine, String reply) {
-    final waiting = _wait(mine);
+     the camera, dictation or the card's own input. Call sites that each append
+     their own pair of messages is that many chances for the chat to answer
+     itself differently.
+   *
+   * `raise` вирішує єдине: чи піднімається штора чату. Написане в поле картки
+   * їде тим самим маршрутом і лягає в ту саму розмову, але людина писала в
+   * картку, і відповідь має прийти в картку. Штора підніметься сама тільки
+   * тоді, коли Норі є що спитати. */
+  void _say(Msg mine, String reply, {bool raise = true, String? slotId, String? draft}) {
+    final waiting = _wait(mine, raise: raise);
 
     /* Real data means a real answer: the message goes to our server, which
        spends the token, calls the model and writes what it recognised. The
@@ -329,7 +349,9 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
        отримував показову відповідь. */
     final typed = mine.kind == MsgKind.text || mine.kind == MsgKind.voice;
     if (scope.real && sync != null && typed) {
-      unawaited(_askNora(sync, mine.text, waiting: waiting));
+      unawaited(
+        _askNora(sync, mine.text, waiting: waiting, slotId: slotId, draft: draft, quiet: !raise),
+      );
       return;
     }
 
@@ -350,19 +372,27 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
     if (store) unawaited(_chat?.save(m) ?? Future.value());
   }
 
-  Msg _wait(Msg mine) {
+  Msg _wait(Msg mine, {bool raise = true}) {
     final waiting = msg(from: MsgFrom.nora, text: '', pending: true);
     setState(() {
       _keep(mine);
       // Кільце на диск не йде: це стан екрана, а не рядок розмови.
       _keep(waiting, store: false);
-      _chatOpen = true;
+      /* Тихий режим штору не опускає, а лише не піднімає: якщо чат уже був
+         відкритий, розмова триває в ньому. */
+      _chatOpen = _chatOpen || raise;
     });
     return waiting;
   }
 
   /// Кладе відповідь на місце кільця, не додаючи нової бульбашки.
-  void _answer(Msg waiting, String text, {MealPlate? plate, List<int> weights = const []}) {
+  void _answer(
+    Msg waiting,
+    String text, {
+    MealPlate? plate,
+    List<int> weights = const [],
+    List<String> options = const [],
+  }) {
     if (!mounted) return;
     final at = _messages.indexWhere((m) => m.id == waiting.id);
     if (at < 0) return;
@@ -376,9 +406,22 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
       /* Три ваги живуть на самому питанні, а не поруч із ним: коли людина
          відповість, вони мають зникнути разом із ним, а не висіти в розмові. */
       weights: weights,
+      // Так само і варіанти вибору: відповіли, і кнопки зникли.
+      options: options,
     );
     setState(() => _messages[at] = said);
     unawaited(_chat?.save(said) ?? Future.value());
+  }
+
+  /* Дотик по варіанту відповіді: він стає звичайним повідомленням.
+   *
+   * Кнопки це не окремий механізм, а готові слова: «Звичка змінилась» під
+   * пальцем замість набирання. Тому дотик іде тим самим маршрутом, що й
+   * набране, і коштує стільки ж: розмова триває, просто швидше. */
+  void _choose(String id, String option) {
+    final at = _messages.indexWhere((m) => m.id == id);
+    if (at >= 0) setState(() => _messages[at] = _messages[at].chose(option));
+    _say(msg(from: MsgFrom.me, text: option), l.todayLoggedAskWeightShort);
   }
 
   /* Обрана вага: один дотик замість набирання.
@@ -420,6 +463,21 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
       );
       setState(() => _messages.add(said));
       unawaited(_chat?.save(said) ?? Future.value());
+
+      /* Питання прийшло з ручного запису в картку: там і досі стоїть чернетка
+         «Нора рахує…». Запис щойно стався, тож чернетка своє відслужила, і без
+         цього рядка поруч зі стравою висів би її вічно зайнятий двійник. */
+      final db = scope.db;
+      var draft = askId == null ? null : _askRow.remove(askId);
+      /* Памʼять екрана порожніє з перезапуском, закладка в базі ні. Саме нею
+         відповідь, дана наступного ранку, знаходить свою чернетку. */
+      if (draft == null && askId != null && db != null) {
+        draft = await db.diaryDao.draftForAsk(askId);
+      }
+      if (draft != null && answer.logged.isNotEmpty && db != null) {
+        unawaited(db.diaryDao.removeMeal(draft));
+      }
+
       unawaited(sync.now());
     } on ApiFailure catch (e) {
       if (!mounted) return;
@@ -521,9 +579,13 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
       name: food.name,
       kcal: plate.kcal,
       grams: plate.grams,
-      protein: plate.protein,
-      fat: plate.fat,
-      carbs: plate.carbs,
+      /* Сюди доходить тільки повний рядок: сканер не віддає продукт із
+         невідомим макросом, він веде людину знімати етикетку. Нулі тут це
+         остання страховка на випадок, якщо колись зайде інший шлях, а не
+         звичний стан справ. */
+      protein: plate.protein ?? 0,
+      fat: plate.fat ?? 0,
+      carbs: plate.carbs ?? 0,
       icon: food.icon,
       canonicalName: food.canonicalName,
       source: 'barcode',
@@ -600,22 +662,94 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
     return out.reversed.toList();
   }
 
-  Future<void> _askNora(SyncService sync, String text, {Shot? image, required Msg waiting}) async {
+  /* `slotId` називає картку, у чиє поле писали: чат вгадує прийом за годиною, а
+     людина, яка пише у «Вечерю», вже сказала, куди це.
+
+     `draft` це рядок-чернетка тієї картки, який стоїть «Нора рахує…». Коли Нора
+     записує своє, чернетка своє відслужила; коли вона питає про вагу, чернетка
+     лишається чекати і прибирається разом із відповіддю.
+
+     `quiet` означає, що штора чату закрита і сама не піднімалась. Але тиша
+     чесна лише доти, доки все вийшло: питання, відмова або помилка, залишені в
+     закритому чаті, це «рахує вічно» очима людини. Тому будь-який результат,
+     окрім чистого запису, підіймає штору: Нора має що сказати, і сказане мусить
+     бути видно. */
+  Future<void> _askNora(
+    SyncService sync,
+    String text, {
+    Shot? image,
+    required Msg waiting,
+    String? slotId,
+    String? draft,
+    bool quiet = false,
+  }) async {
     try {
+      // База береться до `await`: після нього контекст може вже не жити.
+      final db = AppScope.maybeOf(context)?.db;
       final answer = await sync.ask(
         text: text,
-        slot: _nextSlotId(_dayNow(AppScope.of(context))),
+        slot: slotId ?? _nextSlotId(_dayNow(AppScope.of(context))),
         image: image,
         history: _recent(waiting),
       );
+
+      /* Чернетка прибирається до перевірки `mounted`: записане на сервері вже
+         їде в базу, і залишити поруч із ним вічно зайнятого двійника через те,
+         що людина встигла піти з екрана, було б помилкою в даних, а не в
+         інтерфейсі. */
+      if (draft != null && answer.logged.isNotEmpty && db != null) {
+        unawaited(db.diaryDao.removeMeal(draft));
+      }
+
+      /* Питання, закриті цією відповіддю: вагу назвали в чат словами, а не
+         кнопкою. Сервер записав страву і закрив питання, а тут прибираються
+         чернетки, які на ті питання чекали. Теж до перевірки `mounted` і з
+         обох сховищ: закладка в памʼяті живе до перезапуску, у базі далі. */
+      if (db != null) {
+        for (final closed in answer.closedAsks) {
+          final row = _askRow.remove(closed) ?? await db.diaryDao.draftForAsk(closed);
+          if (row != null) unawaited(db.diaryDao.removeMeal(row));
+        }
+      }
+
       if (!mounted) return;
+
+      if (draft != null) {
+        for (final ask in answer.asks) {
+          _askRow[ask.id] = draft;
+          /* І в базу теж: закладка в памʼяті не переживає перезапуску, і
+             відповідь на вагу завтра вранці не знала б, кого прибрати. */
+          if (db != null) unawaited(db.diaryDao.bindAsk(draft, ask.id));
+        }
+      }
+
+      if (quiet && answer.logged.isEmpty) {
+        /* Клавіатура додолу разом із підняттям штори: питання про вагу має
+           стояти перед очима, а не за клавіатурою поля, з якого все почалось. */
+        FocusManager.instance.primaryFocus?.unfocus();
+        setState(() => _chatOpen = true);
+      }
 
       final line = [
         if (answer.warning != null) answer.warning!,
         if (answer.text.isNotEmpty) answer.text,
       ].join(' ');
 
-      _answer(waiting, line.isEmpty ? l.todayDone : line, plate: _plateOf(answer.logged));
+      /* Смужка з числами: із записаного, а коли записувати не було чого, з
+         прочитаної пачки.
+       *
+       * Етикетка нічого не пише в щоденник, і доти числа з неї лишались тільки
+       * в словах Нори. Смужка ж і є тим місцем, де в застосунку живуть калорії
+       * і БЖВ: показати їх реченням, а не нею, означало б для однієї відповіді
+       * говорити іншою мовою, ніж для всіх інших. */
+      _answer(
+        waiting,
+        line.isEmpty ? l.todayDone : line,
+        plate: _plateOf(answer.logged) ?? _plateOfLabel(answer.label),
+        /* Питання з кнопками їде на самій відповіді: варіанти стоять під
+           реченням Нори, а дотик по варіанту шле його текст у чат. */
+        options: answer.choice?.options ?? const [],
+      );
 
       /* Питання про вагу окремими бульбашками, по одній на страву.
        *
@@ -680,6 +814,16 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
       // Whatever was written on the server arrives as an ordinary row.
       unawaited(sync.now());
     } on ApiFailure catch (e) {
+      if (!mounted) return;
+
+      /* Невдача в тихому режимі теж підіймає штору: інакше пояснення лягло б у
+         закритий чат, а рядок у картці «рахував» би вічно без жодної причини на
+         видноті. */
+      if (quiet) {
+        FocusManager.instance.primaryFocus?.unfocus();
+        setState(() => _chatOpen = true);
+      }
+
       _answer(waiting, switch (e.code) {
         'no_tokens' => l.todayOutOfTokens,
         'offline' => l.todayOfflineSaved,
@@ -699,6 +843,22 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
    * Грами додаються тільки якщо їх знають про кожну страву. Інакше «за 210 г»
    * під сумою двох страв, з яких одну зважили, а другу ні, це число, яке ні про
    * що не говорить. */
+  /// Числа прочитаної пачки тією ж смужкою, що й записана страва.
+  ///
+  /// Вага стоїть сто грамів, і це не заглушка: етикетка саме на них і написана.
+  /// Скільки з пачки зʼїли, ще невідомо, і підставити сюди хоч якесь число
+  /// означало б вирішити це за людину.
+  MealPlate? _plateOfLabel(LabelFacts? label) => label == null
+      ? null
+      : MealPlate(
+          name: label.name,
+          grams: 100,
+          kcal: label.kcal,
+          protein: (label.protein ?? 0).round(),
+          fat: (label.fat ?? 0).round(),
+          carbs: (label.carbs ?? 0).round(),
+        );
+
   MealPlate? _plateOf(List<LoggedMeal> logged) {
     if (logged.isEmpty) return null;
 
@@ -722,13 +882,146 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
   /// diary never depends on the signal. Then the food reference is asked, which
   /// costs no tokens: if it knows the dish, the entry stops being «0 ккал» by
   /// itself, and the day's figures move under the person's eyes.
+  /* Баланс токенів, як його бачить телефон. Порожньо означає «сервер ще не
+     відповідав»: там нуль на старті читався б як «токени скінчились». */
+  TokenStateData? _tokens;
+  StreamSubscription<TokenStateData?>? _tokenFeed;
+
+  /// Чи Норі є чим платити.
+  ///
+  /// **Причина відмови рівно одна: платити нічим.** Токени скінчились, підписки
+  /// немає, і на цьому стоїть безкоштовний тариф: після пробника людині
+  /// лишається ручний запис, тому він мусить бути повноцінним, а не покаранням.
+  ///
+  /// Незнайома страва причиною не є, і це важливо. Нора це модель, а не
+  /// довідник: вона впорається з будь-якою назвою або перепитає про вагу.
+  /// Відсилати людину заповнювати поля тому, що рядка немає в таблиці, означало
+  /// б перекладати на неї нашу неповноту.
+  ///
+  /// Поки сервер мовчить, Нора вважається доступною: людина, яка щойно
+  /// поставила застосунок, не має побачити форму замість помічника через те, що
+  /// перша відповідь ще в дорозі.
+  bool get _noraCan {
+    final t = _tokens;
+    if (t == null || t.syncedAt == null) return true;
+    return t.unlimited || t.balance > 0;
+  }
+
+  /// Страва з числами, які вписала людина: ні мережі, ні токенів, ні чекання.
+  Future<void> _byHand(CalviDb db, SyncService? sync, String slotId, ManualEntry entry) async {
+    await DayReader(db).addManual(
+      slotId: slotId,
+      title: entry.title,
+      kcal: entry.kcal,
+      grams: entry.grams,
+      protein: entry.protein,
+      fat: entry.fat,
+      carbs: entry.carbs,
+    );
+    // Запис уже наш і повний, тож серверу лишається тільки про нього почути.
+    unawaited(sync?.now() ?? Future<void>.value());
+  }
+
+  /// Набране в картку, коли Норі є чим платити.
+  ///
+  /// Спершу довідник: він безкоштовний і відповідає одразу, і на знайомій страві
+  /// цим усе й закінчується. Рядок тим часом уже стоїть у дні без чисел і сам
+  /// каже, що його рахують.
+  ///
+  /// **Якщо довідник не знає страви, за неї береться Нора, і це не запасний
+  /// шлях, а обіцянка.** Доти рядок просто лишався з нулем калорій і мовчав про
+  /// це: денний підсумок виходив заниженим, а людина бачила впевнене число і
+  /// вірила йому.
+  ///
+  /// **Рядок при цьому нікуди не зникає, і чат не піднімається.** Перша версія
+  /// цієї обіцянки робила рівно навпаки: видаляла рядок і відкривала чат із тим
+  /// самим текстом. Людина писала в картку, а її кидало в розмову, і на очах
+  /// зникав щойно зроблений запис. А при обриві мережі довідник мовчки відповідав
+  /// «не знаю», рядок видалявся, чат теж не додзвонювався, і запис пропадав
+  /// зовсім. Тепер рядок стоїть як «Нора рахує…», доки хтось не наповнить його
+  /// числами, і переживає будь-яку мережу.
   Future<void> _typed(CalviDb db, SyncService? sync, String slotId, String text) async {
     final id = await DayReader(db).addTyped(slotId: slotId, text: text);
     if (sync == null) return;
 
-    await sync.enrich(id, text);
-    // The corrected row is ours now, so the server should hear about it.
-    unawaited(sync.now());
+    if (await sync.enrich(id, text)) {
+      // The corrected row is ours now, so the server should hear about it.
+      unawaited(sync.now());
+      return;
+    }
+
+    /* Той самий шлях, що й чат, один в один: та сама `_say`, той самий
+       `_askNora`, ті самі кільце очікування, питання про вагу і повідомлення
+       про помилки. Різниця рівно одна: штора чату не піднімається, поки все
+       йде добре. Поруч жила спрощена копія цього шляху, і вона мовчки ковтала
+       і питання Нори, і будь-яку помилку: рядок «рахував» вічно, а причини не
+       бачив ніхто. Копія системи, яка вже працює бездоганно, завжди гірша за
+       саму систему. */
+    if (!mounted) return;
+    _say(
+      msg(from: MsgFrom.me, text: text),
+      l.todayLoggedAskWeightShort,
+      raise: false,
+      slotId: slotId,
+      draft: id,
+    );
+  }
+
+  /* Який рядок картки чекає на відповідь про вагу.
+   *
+   * Нора, спитавши «скільки грамів?», ще нічого не записала, і наш рядок стоїть
+   * у картці далі. Коли людина відповість у чаті і запис нарешті станеться, цей
+   * рядок треба прибрати, інакше поруч із записаною стравою висітиме її двійник,
+   * який вічно «рахує». */
+  final _askRow = <String, String>{};
+
+  /* Хто зараз пише в поле своєї картки. Множина, а не прапорець: фокус,
+     переходячи з картки в картку, спершу приходить у нову і лише потім іде зі
+     старої, і одиночний прапорець на цьому перетині блимав би панеллю. */
+  final _writing = <String>{};
+
+  /* Зависла чернетка йде з рук людини, довгим натисканням і через питання.
+   *
+   * Це запасний вихід, а не звичайна дорога: чернетку зазвичай прибирає сама
+   * відповідь Нори. Але чернетки з часів, коли закладка питання жила тільки в
+   * памʼяті, вже нічия відповідь не знайде, а іншого способу прибрати рядок у
+   * картці не існує. Порахованих записів це не стосується зовсім. */
+  void _eraseDraft(AppScope scope, Meal meal) {
+    final db = scope.db;
+    if (db == null) return;
+
+    calviSheet<void>(
+      context,
+      title: l.slotEraseTitle,
+      doneLabel: l.slotEraseDo,
+      danger: true,
+      onDone: () {
+        unawaited(db.diaryDao.removeMeal(meal.id).then((_) => scope.sync?.now()));
+      },
+      builder: (sheetContext) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: CalviSize.gutter),
+        child: Text(
+          l.slotEraseBody(meal.title),
+          textAlign: TextAlign.center,
+          style: sheetContext.t.bodyMedium?.copyWith(height: 1.45),
+        ),
+      ),
+    );
+  }
+
+  void _setWriting(String slotId, bool on) {
+    final was = _writing.isNotEmpty;
+    on ? _writing.add(slotId) : _writing.remove(slotId);
+    if (_writing.isNotEmpty == was) return;
+
+    /* Наступним кадром, і це не обережність про запас. Сигнал приходить із
+       слухача фокуса і з dispose поля: перший уміє спрацювати посеред побудови
+       кадру, другий посеред розбирання дерева, коли день гортнули. setState
+       звідти це виняток, який у релізі не падає червоним екраном, а псує кадр
+       мовчки: панель застигає, дотики глухнуть, і все «трохи підлагує». */
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
   }
 
   /// The day as it is stored, while the switch says «мої». Null until the first
@@ -761,6 +1054,13 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
 
     _feed = DayReader(db).watch(calendarDay(_date)).listen((day) {
       if (mounted) setState(() => _stored = day);
+    });
+
+    /* Баланс потрібен самому екрану, а не лише смузі внизу: від нього залежить,
+       кому рахувати числа наступного запису. */
+    _tokenFeed?.cancel();
+    _tokenFeed = db.syncDao.watchTokens().listen((t) {
+      if (mounted) setState(() => _tokens = t);
     });
   }
 
@@ -898,6 +1198,11 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
     final meds = medsOnDay(scope.meds, calendarDay(_date), day.medTakes);
     final goal = goalOf(scope.s);
 
+    /* Тиждень зводиться раз і віддається обом читачам: третій стороні картки і
+       сторінці, яку вона відкриває. Два підрахунки одного тижня розійшлись би
+       на першому ж дні, і повірити не можна було б жодному. */
+    final week = weekSummary(scope.stats, scope.s);
+
     return Scaffold(
       /* Прозорий навмисно: під сторінкою лежить ґрунт, а суцільне тло
          Scaffold накрило б його рівним кольором і від «Вугілля» лишився б
@@ -921,9 +1226,20 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
                difference, and a page sitting at that end is dragged with it.
                That was the jerk after opening a card from the far end. */
               child: SingleChildScrollView(
-                // Room for the bar, which floats over the day rather than pushing it.
+                /* Room for the bar, which floats over the day rather than
+                   pushing it, і для клавіатури.
+                 *
+                 * Каркас навмисно не стискається під клавіатуру (панель їздить
+                 * над нею сама), але сторінка дня про клавіатуру не знала
+                 * зовсім: поля в нижніх картках вона накривала, а прокрутити
+                 * день вище не було куди, бо запасу знизу не існувало. Людина
+                 * бачила форму, зрізану клавіатурою, і екран, який «не реагує»:
+                 * він реагував, йому просто не було куди їхати. */
                 padding: EdgeInsets.only(
-                  bottom: CalviSize.barRoom + MediaQuery.paddingOf(context).bottom,
+                  bottom:
+                      CalviSize.barRoom +
+                      MediaQuery.paddingOf(context).bottom +
+                      MediaQuery.viewInsetsOf(context).bottom,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -933,19 +1249,21 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
                       child: Row(
                         children: [
                           /* Гнучкий замість назви й розпірки окремо: на вузькому
-                             телефоні з великим системним шрифтом назва, значок
-                             джерела і дві кнопки разом ширші за екран, а ряд без
-                             жодного гнучкого учасника не поступається нікому. */
+                             телефоні з великим системним шрифтом назва і дві
+                             кнопки разом ширші за екран, а ряд без жодного
+                             гнучкого учасника не поступається нікому.
+                           *
+                           * Перемикача «Демо / Мої» тут більше немає. Він був
+                           * інструментом розробки, який приїхав на головний
+                           * екран людини: вона бачила кнопку, тиснула її і
+                           * потрапляла у вигаданий день із чужим борщем. У
+                           * демці на 5300 його не було ніколи. */
                           Expanded(
                             child: Text(
                               'Calvi',
                               style: context.t.headlineLarge?.copyWith(fontSize: 23),
                             ),
                           ),
-                          Flexible(
-                            child: _Source(real: real, onTap: () => scope.setReal(!scope.real)),
-                          ),
-                          const SizedBox(width: 8),
                           // Square and dark: this one leaves the screen, while the round
                           // one beside it only opens a drawer of the same app.
                           _Square(icon: 'chart', onTap: () => _openAnalytics(context)),
@@ -990,6 +1308,12 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
                                 day: day,
                                 burned: workouts.fold<int>(0, (s, w) => s + w.kcal),
                                 goal: goal,
+                                /* Зведення рахується тут і віддається обом:
+                                   картці і сторінці, яку вона відкриває. Два
+                                   підрахунки одного тижня розійшлись би, і
+                                   повірити не можна було б жодному. */
+                                week: week,
+                                onWeek: () => _openWeek(context, week),
                               ),
                             ),
                             const SizedBox(height: CalviSize.gapCard),
@@ -1022,6 +1346,15 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
                                       meals: day.inSlot(slot.id),
                                       open: _openCard == slot.id,
                                       onToggle: () => _toggle(slot.id),
+                                      noraCan: _noraCan,
+                                      onWriting: (on) => _setWriting(slot.id, on),
+                                      onErase: (meal) => _eraseDraft(scope, meal),
+                                      onManual: (entry) {
+                                        final db = scope.db;
+                                        if (real && db != null) {
+                                          unawaited(_byHand(db, scope.sync, slot.id, entry));
+                                        }
+                                      },
                                       onAdd: (text) {
                                         final db = scope.db;
                                         if (real && db != null) {
@@ -1103,7 +1436,14 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
             child: StreamBuilder<TokenStateData?>(
               stream: AppScope.maybeOf(context)?.db?.syncDao.watchTokens(),
               builder: (context, snap) => BottomBar(
-                tokensLeft: snap.data?.syncedAt == null ? null : snap.data?.balance,
+                /* Платний доступ прибирає лічильник, а не піднімає число.
+                 *
+                 * Людина, яка заплатила, не має рахувати репліки і не має
+                 * бачити нагадування про те, що колись рахувала. Тому тут
+                 * `null`, тобто пілюлі з числом не існує зовсім. */
+                tokensLeft: snap.data?.syncedAt == null || snap.data?.unlimited == true
+                    ? null
+                    : snap.data?.balance,
                 slot: _nextSlot(day),
                 open: _chatOpen,
                 /* Ховається тільки на час диктування, коли її закриває збільшена
@@ -1111,9 +1451,15 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
                  зникав разом із питанням, і в рядку лишалась сама камера, ніби
                  сказати більше нічим. Думає Нора, а не людина. */
                 muteMic: _dictating != null,
+                /* Відкритий чат завжди сильніший за відхід: розмова, яку
+                   підняли за краєм екрана, це «Нора рахує вічно» очима людини.
+                   Панель страхує це саме правило і в себе, але рішення живе
+                   тут, де сходяться обидва прапорці. */
+                away: _writing.isNotEmpty && !_chatOpen,
                 onOpen: (_) => setState(() => _chatOpen = true),
                 onClose: () => setState(() => _chatOpen = false),
                 onWeigh: _pickWeight,
+                onChoose: _choose,
                 onSend: (text) =>
                     _say(msg(from: MsgFrom.me, text: text), l.todayLoggedAskWeightShort),
                 onCamera: () => _openCamera(context),
@@ -1272,52 +1618,6 @@ class _Square extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
           child: CalviIcon(icon, size: 19, color: c.buttonText),
-        ),
-      ),
-    );
-  }
-}
-
-/// Demo day or stored day, and which one is showing.
-///
-/// A word rather than an icon: there is no picture that says «the data you
-/// actually wrote», and a guessed pictogram here would be worse than a label.
-class _Source extends StatelessWidget {
-  const _Source({required this.real, required this.onTap});
-
-  final bool real;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.c;
-    return Semantics(
-      button: true,
-      label: real ? L.of(context).todayShowingMine : L.of(context).todayShowingDemo,
-      child: CalviPress(
-        onTap: onTap,
-        builder: (context, down) => AnimatedScale(
-          scale: down ? 0.94 : 1,
-          duration: CalviMotion.fast,
-          curve: CalviMotion.ease,
-          child: AnimatedContainer(
-            duration: CalviMotion.normal,
-            curve: CalviMotion.ease,
-            height: 40,
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: real ? c.button : c.fillSecondary,
-              borderRadius: BorderRadius.circular(CalviSize.rPill),
-            ),
-            child: Text(
-              real ? L.of(context).todayMine : L.of(context).todayDemo,
-              style: context.t.labelSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: real ? c.buttonText : c.textSecondary,
-              ),
-            ),
-          ),
         ),
       ),
     );

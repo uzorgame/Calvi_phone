@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:calvi/data/fixtures.dart';
 import 'package:calvi/data/app_scope.dart';
 import 'package:calvi/data/settings.dart';
+import 'package:calvi/data/day_stats.dart';
+import 'package:calvi/data/week.dart';
 import 'package:calvi/design/theme.dart';
 import 'package:calvi/screens/today/hero_card.dart';
 import 'package:calvi/l10n/app_localizations.dart';
@@ -27,7 +29,15 @@ Widget _wrap(Widget child) => AppScope(
 void main() {
   testWidgets('картка стоїть на боці калорій і має висоту', (tester) async {
     await tester.pumpWidget(
-      _wrap(HeroCard(day: dayFor(0), burned: dayFor(0).burned, goal: goalOf(initialSettings()))),
+      _wrap(
+        HeroCard(
+          day: dayFor(0),
+          burned: dayFor(0).burned,
+          goal: goalOf(initialSettings()),
+          week: _week,
+          onWeek: () {},
+        ),
+      ),
     );
     await tester.pump();
     /* Великим числом стоїть зʼїдене, залишок рядком під ним.
@@ -60,7 +70,15 @@ void main() {
 
   testWidgets('змах угору перевертає картку на вагу', (tester) async {
     await tester.pumpWidget(
-      _wrap(HeroCard(day: dayFor(0), burned: dayFor(0).burned, goal: goalOf(initialSettings()))),
+      _wrap(
+        HeroCard(
+          day: dayFor(0),
+          burned: dayFor(0).burned,
+          goal: goalOf(initialSettings()),
+          week: _week,
+          onWeek: () {},
+        ),
+      ),
     );
     await tester.pump();
 
@@ -80,3 +98,6 @@ void main() {
     expect(faded, contains(closeTo(0, 0.01)), reason: 'бік калорій не згас');
   });
 }
+
+/// Показовий тиждень для картки: сторона тижня читає готове зведення.
+final _week = weekSummary(DayStats.demo(), initialSettings());

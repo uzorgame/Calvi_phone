@@ -6,6 +6,7 @@ import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/labels.dart';
+import 'manual_form.dart';
 import 'slot_card.dart';
 
 /// A day's meals under one card.
@@ -21,6 +22,10 @@ class MealCard extends StatelessWidget {
     required this.open,
     required this.onToggle,
     required this.onAdd,
+    required this.onManual,
+    required this.noraCan,
+    this.onWriting,
+    this.onErase,
   });
 
   final SlotDef slot;
@@ -30,6 +35,18 @@ class MealCard extends StatelessWidget {
 
   /// What was written straight into this card, in the person's own words.
   final ValueChanged<String> onAdd;
+
+  /// Числа вписала людина.
+  final ValueChanged<ManualEntry> onManual;
+
+  /// Чи Норі є чим платити.
+  final bool noraCan;
+
+  /// Людина пише в поле цієї картки: екран за цим опускає нижню панель.
+  final ValueChanged<bool>? onWriting;
+
+  /// Довге натискання по чернетці: людина хоче її прибрати.
+  final ValueChanged<Meal>? onErase;
 
   @override
   Widget build(BuildContext context) {
@@ -76,8 +93,15 @@ class MealCard extends StatelessWidget {
                 ],
               ),
             ),
-          for (final m in meals) MealRow(meal: m),
-          SlotInput(onSend: onAdd),
+          for (final m in meals)
+            MealRow(meal: m, onErase: onErase == null ? null : () => onErase!(m)),
+          SlotInput(
+            onSend: onAdd,
+            onManual: onManual,
+            noraCan: noraCan,
+            open: open,
+            onWriting: onWriting,
+          ),
         ],
       ),
     );
@@ -85,13 +109,23 @@ class MealCard extends StatelessWidget {
 }
 
 class MealRow extends StatelessWidget {
-  const MealRow({super.key, required this.meal});
+  const MealRow({super.key, required this.meal, this.onErase});
 
   final Meal meal;
+
+  /* Прибирання, і тільки для чернетки. Порахований запис їжі це дані, які
+     людина вже має за правду, і зносити їх довгим натисканням без меню було б
+     надто легко. Чернетка ж це рядок без жодного числа: якщо вона зависла, у
+     неї немає іншого способу піти. */
+  final VoidCallback? onErase;
 
   @override
   Widget build(BuildContext context) {
     final c = context.c;
+    return GestureDetector(onLongPress: meal.pending ? onErase : null, child: _row(context, c));
+  }
+
+  Widget _row(BuildContext context, CalviColors c) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),

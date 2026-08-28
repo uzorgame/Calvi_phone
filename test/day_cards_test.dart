@@ -148,6 +148,8 @@ void main() {
           open: true,
           onToggle: () {},
           onAdd: (_) {},
+          onManual: (_) {},
+          noraCan: true,
         ),
       ),
     );
@@ -178,6 +180,8 @@ void main() {
           open: true,
           onToggle: () {},
           onAdd: (_) {},
+          onManual: (_) {},
+          noraCan: true,
         ),
       ),
     );
@@ -210,6 +214,8 @@ void _sendMark() {
                 open: true,
                 onToggle: () {},
                 onAdd: (_) {},
+                onManual: (_) {},
+                noraCan: true,
               ),
             ],
           ),

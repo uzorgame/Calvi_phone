@@ -11,34 +11,33 @@ Widget _wrap({
   required ValueChanged<bool> onOpen,
   VoidCallback? onClose,
   int? tokensLeft,
-}) =>
-    MaterialApp(
-      localizationsDelegates: L.localizationsDelegates,
-      supportedLocales: L.supportedLocales,
-      locale: const Locale('uk'),
-      theme: calviLightTheme,
-      home: Scaffold(
-        body: Stack(
-          children: [
-            const Positioned.fill(child: ColoredBox(color: Color(0xFFEEEEEE))),
-            Positioned.fill(
-              child: BottomBar(
-                slot: 'Обід',
-                tokensLeft: tokensLeft,
-                open: open,
-                onOpen: onOpen,
-                onClose: onClose ?? () {},
-                onSend: (_) {},
-                onCamera: () {},
-                onHold: (_, _) {},
-                onLetGo: () {},
-                messages: const [],
-              ),
-            ),
-          ],
+}) => MaterialApp(
+  localizationsDelegates: L.localizationsDelegates,
+  supportedLocales: L.supportedLocales,
+  locale: const Locale('uk'),
+  theme: calviLightTheme,
+  home: Scaffold(
+    body: Stack(
+      children: [
+        const Positioned.fill(child: ColoredBox(color: Color(0xFFEEEEEE))),
+        Positioned.fill(
+          child: BottomBar(
+            slot: 'Обід',
+            tokensLeft: tokensLeft,
+            open: open,
+            onOpen: onOpen,
+            onClose: onClose ?? () {},
+            onSend: (_) {},
+            onCamera: () {},
+            onHold: (_, _) {},
+            onLetGo: () {},
+            messages: const [],
+          ),
         ),
-      ),
-    );
+      ],
+    ),
+  ),
+);
 
 void main() {
   testWidgets('тап по смузі підіймає кімнату без клавіатури', (tester) async {

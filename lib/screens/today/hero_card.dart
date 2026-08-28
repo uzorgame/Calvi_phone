@@ -6,6 +6,7 @@ import '../../data/day.dart';
 import '../../format.dart';
 import '../../data/app_scope.dart';
 import '../../data/settings.dart';
+import '../../data/week.dart';
 import '../../design/ring.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
@@ -27,7 +28,14 @@ import '../../l10n/app_localizations.dart';
 /// The motion is driven frame by frame from one continuous position, so a card
 /// thrown by hand and a card that turned by itself move identically.
 class HeroCard extends StatefulWidget {
-  const HeroCard({super.key, required this.day, required this.burned, required this.goal});
+  const HeroCard({
+    super.key,
+    required this.day,
+    required this.burned,
+    required this.goal,
+    required this.week,
+    required this.onWeek,
+  });
 
   final DayModel day;
 
@@ -38,14 +46,22 @@ class HeroCard extends StatefulWidget {
   /// session is not in the fixture the day was built from.
   final int burned;
 
+  /// Зведений тиждень для третьої сторони. Приходить готовим, бо його ж читає
+  /// сторінка тижня: два підрахунки одного тижня розійшлись би.
+  final WeekSummary week;
+
+  /// Дотик по стороні тижня. Відкриває сторінку тижневої аналітики.
+  final VoidCallback onWeek;
+
   @override
   State<HeroCard> createState() => _HeroCardState();
 }
 
-/// Calories hold the card; weight takes it for a moment now and then. Long
-/// enough that the card is never mid-turn when the eye arrives.
-const _kcalHold = Duration(seconds: 16);
-const _weightHold = Duration(seconds: 7);
+/// Calories hold the card; weight and the week take it for a moment now and
+/// then. Long enough that the card is never mid-turn when the eye arrives: a
+/// figure that swaps while it is being read is a figure that has to be read
+/// twice.
+const _holds = [Duration(seconds: 16), Duration(seconds: 7), Duration(seconds: 7)];
 
 /// How far a side travels while it leaves or arrives.
 const _lift = 26.0;
@@ -53,8 +69,12 @@ const _lift = 26.0;
 /// A drag has to cross this much of a step before the release finishes it.
 const _throw = 0.18;
 
-/// How far a drag can carry the card into the next side.
-const _reach = 0.46;
+/// Нижче цього палець не крутив, а натиснув.
+const _tap = 0.03;
+
+/* Скільки сторін у колоди: калорії, вага, тиждень. Уся арифметика повороту
+   рахується від цього числа, а не від двійки в десятку місць. */
+const _sides = 3;
 
 class _HeroCardState extends State<HeroCard>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
@@ -82,7 +102,11 @@ class _HeroCardState extends State<HeroCard>
   double _held = 0;
   double? _from;
 
-  int get _side => _pos.round() % 2 == 0 ? 0 : 1;
+  /// Звідки палець почав крутити: місце колоди на початку жесту, а не остання
+  /// сторона спокою. Після перерваного дольоту це різні числа.
+  double _base = 0;
+
+  int get _side => _pos.round() % _sides;
 
   @override
   void initState() {
@@ -116,7 +140,7 @@ class _HeroCardState extends State<HeroCard>
       _from = null;
       _held = 0;
 
-      final side = _turn.value.round() % 2 == 0 ? 0.0 : 1.0;
+      final side = (_turn.value.round() % _sides).toDouble();
       if (side != _pos) setState(() => _pos = side);
       _turn.value = side;
     }
@@ -132,7 +156,7 @@ class _HeroCardState extends State<HeroCard>
   Timer? _clock;
   void _wait() {
     _clock?.cancel();
-    _clock = Timer(_side == 1 ? _weightHold : _kcalHold, () {
+    _clock = Timer(_holds[_side], () {
       if (!mounted) return;
       /* Палець на картці: поворот чекає, але годинник заводиться на нове коло.
          Доти цей вихід нічого не заводив, і якщо шторку сповіщень смикнули
@@ -183,7 +207,7 @@ class _HeroCardState extends State<HeroCard>
   void _landed(AnimationStatus s) {
     if (s != AnimationStatus.completed) return;
     // Folded back so the counter cannot grow without bound.
-    setState(() => _pos = _target % 2 == 0 ? 0 : 1);
+    setState(() => _pos = (_target % _sides + _sides) % _sides);
     _turn.value = _pos;
     _wait();
   }
@@ -197,15 +221,24 @@ class _HeroCardState extends State<HeroCard>
     super.dispose();
   }
 
-  /// Where the two sides sit at any point of the turn.
-  ({Offset shift, double scale, double opacity}) _face(bool front, double pos) {
-    final d = pos % 2 < 0 ? pos % 2 + 2 : pos % 2;
-    final off = front ? (d < 2 - d ? d : 2 - d) : (d - 1).abs();
-    // Second leg: the sides trade which one is leaving.
-    final second = d >= 1;
-    final sign = front ? (second ? 1.0 : -1.0) : (second ? -1.0 : 1.0);
+  /// Where a given side sits at any point of the turn.
+  ///
+  /// Обраний з галереї демки «Стос», перенесений формулою один в один:
+  /// прогорнута сторона йде вгору і тане, наступна піднімається знизу їй услід.
+  ///
+  /// Рахується відстань від місця колоди до цієї сторони, по колу і в
+  /// найкоротший бік. Знак виходить із неї сам: сторона, яку вже пройшли,
+  /// поїхала вгору, а та, до якої йдемо, чекає знизу. Стара версія тримала
+  /// по окремому виразу на кожну сторону, і вони домовлялись міняти напрямок
+  /// посередині кроку; третю сторону в таку домовленість не вставиш, а сюди
+  /// вона додасться самою константою [_sides].
+  ({Offset shift, double scale, double opacity}) _face(int index, double pos) {
+    var rel = (pos - index) % _sides;
+    if (rel > _sides / 2) rel -= _sides;
+
+    final off = rel.abs().clamp(0.0, 1.0);
     return (
-      shift: Offset(0, sign * _lift * off),
+      shift: Offset(0, -_lift * rel),
       scale: 1 - 0.14 * off,
       opacity: (1 - off).clamp(0.0, 1.0),
     );
@@ -213,17 +246,37 @@ class _HeroCardState extends State<HeroCard>
 
   /// Puts the deck back on a whole side, whether the finger let go or the page
   /// pulled the gesture out from under it.
+  ///
+  /// Приземлення рахується від того місця, де колода реально є, а не від
+  /// останньої сторони спокою: після перерваного дольоту вони розходяться.
+  /// Кидок у межах кроку доводить розпочатий крок до кінця; рух через кілька
+  /// сторін сідає на найближчу попереду.
   void _settle() {
     if (_from == null) return;
     final over = _held;
-    _pos += over;
+    final p = _turn.value;
     _from = null;
     _held = 0;
-    _turn.value = _pos;
+    _pos = p;
+
+    /* Дотик без руху це не поворот, а натискання.
+     *
+     * Сторона береться з місця колоди, а не зі стану спокою: після перерваного
+     * дольоту вони можуть розходитись, і тоді відкривався б тиждень із
+     * картки, на якій стоять калорії. */
+    if (over.abs() < _tap) {
+      final showing = (p.round() % _sides + _sides) % _sides;
+      _glide(p.roundToDouble());
+      if (showing == 2) widget.onWeek();
+      return;
+    }
+
     _glide(
-      over.abs() > _throw
-          ? (_pos - over).roundToDouble() + (over > 0 ? 1 : -1)
-          : (_pos - over).roundToDouble(),
+      over > _throw
+          ? (p - 0.000001).ceilToDouble()
+          : over < -_throw
+          ? (p + 0.000001).floorToDouble()
+          : p.roundToDouble(),
     );
   }
 
@@ -232,30 +285,55 @@ class _HeroCardState extends State<HeroCard>
     /* Built once per real change and handed to the builder below as a child, so
        the faces are the same widgets from frame to frame and the framework skips
        their subtrees entirely while the deck turns. */
-    final kcal = _Kcal(day: widget.day, burned: widget.burned, goal: widget.goal);
-    const weight = _Weight();
+    final faces = <Widget>[
+      _Kcal(day: widget.day, burned: widget.burned, goal: widget.goal),
+      const _Weight(),
+      _Week(summary: widget.week, onOpen: widget.onWeek),
+    ];
 
-    /* The two faces share one box, and a system font scale the phone sets can
+    /* The faces share one box, and a system font scale the phone sets can
        push the taller of them past it: what spills is clipped, and a clipped
        card reads as a card that vanished. The figures here are already large,
        so the scale is allowed a little room and no more. */
     return MediaQuery.withClampedTextScaling(
       maxScaleFactor: 1.15,
       child: GestureDetector(
+        /* Чистий тап це окремий жест, і двері тижня відчиняє саме він.
+         *
+         * Розпізнавач перетягування відпускає палець, який нікуди не рушив, і
+         * не шле жодного зворотного виклику. Гілка «майже не посунув» у
+         * _settle ловить лише палець, що зрушив колоду і повернув, тож тап по
+         * пілюлі «Тижнева аналітика» не робив нічого. */
+        onTap: () {
+          if ((_turn.value.round() % _sides + _sides) % _sides == 2) widget.onWeek();
+        },
         // The card takes the vertical drag itself. It is a small target on a long
         // page, so the scroll it costs is cheap.
         onVerticalDragStart: (d) {
           _c.stop();
           _clock?.cancel();
           _from = d.localPosition.dy;
+          /* Жест підхоплює колоду там, де вона є, як рука підхоплює барабан,
+             що ще крутиться.
+
+             Тут ховалась причина «кручу і викидає назад». Малювалось від
+             `_pos`, останньої сторони спокою, а `_c.stop()` заморожував колоду
+             посеред дольоту: доліт стояв десь на 1.7, а палець продовжував від
+             одиниці, і картка стрибала назад на цілий крок. Кожен швидкий рух
+             з'їдав попередній. */
+          _base = _turn.value;
           _held = 0;
         },
         onVerticalDragUpdate: (d) {
           if (_from == null) return;
-          // Up carries the far side away, the way a deck shuffles under a thumb.
-          final raw = (_from! - d.localPosition.dy) * 1.1 / 180;
-          _held = raw.clamp(-_reach, _reach);
-          _turn.value = _pos + _held;
+          /* Up carries the far side away, the way a deck shuffles under a thumb.
+
+             Без обмеження дальності: тут стояв затиск на пів кроку, і далі
+             однієї сторони за один рух прокрутити було не можна, колода
+             впиралась у невидиму стіну. Один довгий рух тепер веде через
+             скільки завгодно сторін. */
+          _held = (_from! - d.localPosition.dy) * 1.1 / 180;
+          _turn.value = _base + _held;
         },
         onVerticalDragEnd: (_) => _settle(),
         /* The page can take the gesture away mid-drag, and when it does there is
@@ -264,23 +342,24 @@ class _HeroCardState extends State<HeroCard>
         onVerticalDragCancel: _settle,
         child: ValueListenableBuilder<double>(
           valueListenable: _turn,
-          builder: (context, pos, _) {
-            final front = _face(true, pos);
-            final back = _face(false, pos);
-            return Stack(
-              children: [
-                _Side(shift: front.shift, scale: front.scale, opacity: front.opacity, child: kcal),
+          /* Калорії в потоці, решта розтягнуті по них: висоту колоди задає
+             найвища сторона, і поки вона на місці, картка не може схлопнутись
+             до нуля посеред повороту.
+
+             Найвища саме вона, і не випадково: у неї найдовший рядок під
+             числом і чіп тренування на додачу. Тиждень зумисне нижчий, бо його
+             головне це шкала, а не цифра. Якщо колись інша сторона переросте
+             калорії, її обріже, і смугастий попереджувач скаже про це першим
+             же прогоном тестів: мовчки це не станеться. */
+          builder: (context, pos, _) => Stack(
+            children: [
+              _Side(face: _face(0, pos), child: faces[0]),
+              for (var i = 1; i < _sides; i++)
                 Positioned.fill(
-                  child: _Side(
-                    shift: back.shift,
-                    scale: back.scale,
-                    opacity: back.opacity,
-                    child: weight,
-                  ),
+                  child: _Side(face: _face(i, pos), child: faces[i]),
                 ),
-              ],
-            );
-          },
+            ],
+          ),
         ),
       ),
     );
@@ -288,17 +367,14 @@ class _HeroCardState extends State<HeroCard>
 }
 
 class _Side extends StatelessWidget {
-  const _Side({
-    required this.shift,
-    required this.scale,
-    required this.opacity,
-    required this.child,
-  });
+  const _Side({required this.face, required this.child});
 
-  final Offset shift;
-  final double scale;
-  final double opacity;
+  final ({Offset shift, double scale, double opacity}) face;
   final Widget child;
+
+  Offset get shift => face.shift;
+  double get scale => face.scale;
+  double get opacity => face.opacity;
 
   @override
   Widget build(BuildContext context) {
@@ -329,7 +405,7 @@ class _Shell extends StatelessWidget {
   final Widget left;
   final Widget ring;
 
-  /// Which of the two dots in the corner is lit.
+  /// Which of the dots in the corner is lit.
   final int dot;
 
   @override
@@ -358,16 +434,17 @@ class _Shell extends StatelessWidget {
               ring,
             ],
           ),
-          // Two dots, so the card says it has another side before anyone pulls
-          // it: one that turns by itself and never said so reads as a glitch.
+          // Dots, so the card says it has other sides before anyone pulls it:
+          // one that turns by itself and never said so reads as a glitch.
           Positioned(
             right: -8,
             bottom: -12,
             child: Row(
               children: [
-                _Dot(on: dot == 0),
-                const SizedBox(width: 4),
-                _Dot(on: dot == 1),
+                for (var i = 0; i < _sides; i++) ...[
+                  if (i > 0) const SizedBox(width: 4),
+                  _Dot(on: dot == i),
+                ],
               ],
             ),
           ),
@@ -524,6 +601,154 @@ class _Kcal extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Третя сторона: тиждень.
+///
+/// **Шкала, а не смужка прогресу.** Зелене посередині, червоне по обох краях:
+/// погано в обидва боки, і триматися треба середини. Ліворуч з'їжджає той, хто
+/// недоїдає, праворуч той, хто переїдає. Смужка прогресу сказала б «більше
+/// краще», а це неправда про калорії.
+///
+/// **Кільце тут не про норму, а про час.** Це тижневий годинник: наповнюється
+/// потроху від понеділка до неділі, о 23:59 неділі повний, а з понеділка
+/// починається наново. Усередині стоїть день тижня, і це єдине, що там
+/// доречно: скільки зафарбовано, той і день, тож кільце читає себе вголос.
+///
+/// Дотик відкриває сторінку тижня. Про це каже пілюля під шкалою: сторона з
+/// дверима, яка про них мовчить, це двері, яких ніхто не знайде.
+class _Week extends StatelessWidget {
+  const _Week({required this.summary, required this.onOpen});
+
+  final WeekSummary summary;
+  final VoidCallback onOpen;
+
+  /// Наскільки далеко від норми позначка доїжджає до краю шкали. Чотириста це
+  /// приблизно повноцінний прийом їжі: далі за нього деталі вже не важливі,
+  /// важливо тільки те, що людина далеко.
+  static const _span = 400.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+    final off = summary.offNorm;
+    final k = (off / _span).clamp(-1.0, 1.0);
+
+    return _Shell(
+      dot: 2,
+      left: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          /* Число тут менше, ніж на сусідніх сторонах, і навмисно.
+           *
+           * Головне на цій стороні не цифра, а шкала: середнє за тиждень саме
+           * по собі мало що каже, а от де воно стоїть між недобором і
+           * перебором, каже все. Тому число віддає зріст тому, що його
+           * пояснює, і сторона перестає бути на ряд вищою за решту колоди. */
+          Text.rich(
+            TextSpan(
+              text: thousands(summary.avgKcal),
+              children: [
+                TextSpan(
+                  text: L.of(context).heroKcal,
+                  style: context.t.bodyMedium?.copyWith(fontSize: 15),
+                ),
+              ],
+            ),
+            style: context.t.headlineLarge?.copyWith(fontSize: 30, height: 1),
+          ),
+          const SizedBox(height: 12),
+          _Meter(at: k),
+          const SizedBox(height: 10),
+          /* Пілюля, а не сірий рядок зі стрілкою: рядок читався як підпис, і
+             те, що картка кудись веде, лишалось таємницею крапок у кутку. */
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: c.fillSecondary,
+              borderRadius: BorderRadius.circular(CalviSize.rPill),
+            ),
+            child: Text(
+              L.of(context).heroWeekOpen,
+              style: context.t.labelSmall?.copyWith(color: c.text, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+      ring: CalviRing(
+        progress: weekRun(),
+        child: Text(
+          // Той самий підпис дня, що під стовпчиками тижня і в стрічці дат:
+          // одна назва понеділка на застосунок, а не дві.
+          dayInfo(todayDate).label,
+          style: context.t.headlineMedium?.copyWith(
+            fontSize: 19,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 19 * 0.02,
+            height: 1,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Шкала недобору і перебору: зелене посередині, червоне по краях.
+class _Meter extends StatelessWidget {
+  const _Meter({required this.at});
+
+  /// Де стоїть позначка, від -1 (глибокий недобір) до 1 (глибокий перебір).
+  final double at;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+
+    // Одна смуга з двома полюсами, а не три кольорові зони.
+    final edge = Color.lerp(c.track, c.protein, 0.34)!;
+    final mid = Color.lerp(c.track, c.success, 0.38)!;
+
+    return SizedBox(
+      width: 190,
+      height: 13,
+      child: Stack(
+        alignment: Alignment.centerLeft,
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            height: 5,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(CalviSize.rPill),
+              gradient: LinearGradient(
+                colors: [edge, mid, mid, edge],
+                stops: const [0, 0.42, 0.58, 1],
+              ),
+            ),
+          ),
+          // Риска норми: без неї середина шкали лише малась на увазі.
+          Positioned(
+            left: 190 / 2,
+            top: -2,
+            bottom: -2,
+            child: SizedBox(width: 1, child: ColoredBox(color: c.hairline)),
+          ),
+          Positioned(
+            left: 190 * (0.5 + at * 0.5) - 6.5,
+            child: Container(
+              width: 13,
+              height: 13,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: c.button,
+                border: Border.all(color: c.card, width: 2.5),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

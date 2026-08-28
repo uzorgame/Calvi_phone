@@ -318,6 +318,25 @@ class DiaryDao extends DatabaseAccessor<CalviDb> with _$DiaryDaoMixin {
     );
   }
 
+  /* Закладка «ця чернетка чекає на питання про вагу №такий-то».
+   *
+   * Без позначки брудності: сервер про чернетки-двійники знати не мусить, це
+   * місцеве господарство екрана. Живе в базі, а не в памʼяті, щоб відповідь
+   * після перезапуску застосунку теж знайшла, кого прибрати. */
+  Future<void> bindAsk(String mealId, String askId) =>
+      (update(meals)..where((m) => m.id.equals(mealId))).write(MealsCompanion(askId: Value(askId)));
+
+  /// Чернетка, що чекає на це питання. Порожньо, якщо такої немає: питання
+  /// могло прийти з чату, де ніякої чернетки не існувало.
+  Future<String?> draftForAsk(String askId) async {
+    final row =
+        await (select(meals)
+              ..where((m) => m.askId.equals(askId) & m.deletedAt.isNull())
+              ..limit(1))
+            .getSingleOrNull();
+    return row?.id;
+  }
+
   /// Removes an entry the way the server has to hear about it: the row stays,
   /// marked gone, until every device has been told.
   Future<void> removeMeal(String id) async {

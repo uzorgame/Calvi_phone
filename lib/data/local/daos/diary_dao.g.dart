@@ -16,8 +16,7 @@ mixin _$DiaryDaoMixin on DatabaseAccessor<CalviDb> {
 class DiaryDaoManager {
   final _$DiaryDaoMixin _db;
   DiaryDaoManager(this._db);
-  $$MealsTableTableManager get meals =>
-      $$MealsTableTableManager(_db.attachedDatabase, _db.meals);
+  $$MealsTableTableManager get meals => $$MealsTableTableManager(_db.attachedDatabase, _db.meals);
   $$WaterLogsTableTableManager get waterLogs =>
       $$WaterLogsTableTableManager(_db.attachedDatabase, _db.waterLogs);
   $$WeightsTableTableManager get weights =>
@@ -27,8 +26,5 @@ class DiaryDaoManager {
   $$WorkoutsTableTableManager get workouts =>
       $$WorkoutsTableTableManager(_db.attachedDatabase, _db.workouts);
   $$MedicationTakesTableTableManager get medicationTakes =>
-      $$MedicationTakesTableTableManager(
-        _db.attachedDatabase,
-        _db.medicationTakes,
-      );
+      $$MedicationTakesTableTableManager(_db.attachedDatabase, _db.medicationTakes);
 }

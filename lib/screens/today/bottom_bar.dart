@@ -38,7 +38,11 @@ class BottomBar extends StatefulWidget {
     required this.messages,
     /* Обрана вага у відповідь на питання Нори. Один дотик замість набирання. */
     this.onWeigh,
+    /* Обраний варіант відповіді на питання з кнопками. Текст варіанта їде в
+       чат звичайним повідомленням. */
+    this.onChoose,
     this.muteMic = false,
+    this.away = false,
     this.tokensLeft,
   });
 
@@ -61,9 +65,17 @@ class BottomBar extends StatefulWidget {
   final ValueChanged<String> onSend;
   final List<Msg> messages;
   final void Function(String id, int grams)? onWeigh;
+  final void Function(String id, String option)? onChoose;
 
   /// While dictation is on, the small microphone steps aside for the big one.
   final bool muteMic;
+
+  /* Людина пише просто в картку прийому, і смуга відходить униз.
+   *
+   * Не зникає і не блякне, а зʼїжджає за край: вона нікуди не поділась, вона
+   * поступилась місцем. Поле картки живе внизу екрана, і панель разом із
+   * клавіатурою накривала саме те, що людина в цю мить заповнює. */
+  final bool away;
 
   /* Скільки токенів лишилось, за останнім словом сервера.
    *
@@ -200,6 +212,11 @@ class _BottomBarState extends State<BottomBar> {
     final c = context.c;
     final open = widget.open;
 
+    /* Відкритий чат сильніший за відхід: панель, яка сховалась разом зі своєю
+       кімнатою, це розмова за краєм екрана. Нора відповідає, питає про вагу,
+       пояснює помилку, а людина бачить лише рядок, що «рахує» вічно. */
+    final away = widget.away && !open;
+
     return Stack(
       alignment: Alignment.bottomCenter,
       children: [
@@ -233,131 +250,40 @@ class _BottomBarState extends State<BottomBar> {
           ),
         ),
 
-        GestureDetector(
-          // The bar itself opens the room without asking for the keyboard.
-          onTap: open ? null : () => widget.onOpen(false),
-          behavior: HitTestBehavior.opaque,
-          child: Padding(
-            /* Riding the keyboard rather than being pushed by it. The platform
+        /* Глуха до дотиків ЦІЛА панель, а не лише її видима частина.
+         *
+         * Тут ховалась мертва зона. `IgnorePointer` стояв усередині, на самому
+         * полотні панелі, а зовнішній перехоплювач «тап по панелі відкриває
+         * чат» разом із відступом під клавіатуру лишався живим. Непрозорий
+         * перехоплювач ловить дотики на всій своїй площі, і з відкритою
+         * клавіатурою ця площа розтягувалась на її висоту: рівно та смуга, де
+         * стоять поле картки, «плюс», «Ввести числа самому» і «Скасувати».
+         * Кожен тап там мовчки зʼїдався і відкривав невидимий чат, а свайп не
+         * рухав день. Звідси і «не працює, коли увімкнена клавіатура». */
+        IgnorePointer(
+          ignoring: away,
+          child: GestureDetector(
+            // The bar itself opens the room without asking for the keyboard.
+            onTap: open ? null : () => widget.onOpen(false),
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              /* Riding the keyboard rather than being pushed by it. The platform
                reports the inset frame by frame as its own animation runs, so the
                padding follows it directly: an AnimatedPadding on top of that was
                a second curve chasing the first, and the chase is what the finger
                read as the panel stuttering on its way up. */
-            padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-            child: TweenAnimationBuilder<double>(
-              /* The corners are the bar's own, raised or not: it is a surface
-                 laid over the day, and a surface that squares off at the bottom
-                 of the screen reads as the screen ending, not as a panel. What
-                 raising changes is the shadow it throws and the hairline it no
-                 longer needs. */
-              tween: Tween(end: open ? 1.0 : 0.0),
-              duration: const Duration(milliseconds: 420),
-              curve: CalviMotion.easeRise,
-              builder: (context, lift, child) {
-                const shape = BorderRadius.vertical(top: Radius.circular(CalviSize.rLarge));
-                return DecoratedBox(
-                  // Under the clip, so the shadow keeps the shape it is cast by.
-                  decoration: BoxDecoration(
-                    borderRadius: shape,
-                    /* Тінь угору замість риски: панель це окремий шар над
-                       тонованим ґрунтом дня, а не місце, де закінчується
-                       екран. Опущена вона кидає тиху тінь, піднята глибшу. */
-                    boxShadow: [
-                      BoxShadow(
-                        color: c.shade.withValues(alpha: c.shade.a * (0.55 + 0.45 * lift)),
-                        blurRadius: 34 + 6 * lift,
-                        offset: Offset(0, -10 - 8 * lift),
-                      ),
-                    ],
-                  ),
-                  /* The hairline is painted over the panel rather than set as its
-                     top border. A border is a straight run across the box, so the
-                     clip cut it off exactly where the corners begin and the curve
-                     was left bare: a line that stops short of the corner reads as
-                     a rendering fault, which is what it was. Raised, the shadow
-                     says the same thing better, so the line fades out. */
-                  child: CustomPaint(
-                    foregroundPainter: _TopEdge(
-                      color: c.cardBorder.withValues(alpha: c.cardBorder.a * (1 - lift)),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: shape,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(color: c.card),
-                        child: child,
-                      ),
-                    ),
-                  ),
-                );
-              },
-              child: SafeArea(
-                top: false,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 12, CalviSize.gutter, 22),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // The room grows from nothing rather than sliding in over the
-                      // day: the bar is one object that gets taller.
-                      ClipRect(
-                        // Named so a test can measure the room rather than guess at it.
-                        key: const Key('chat-room'),
-                        child: AnimatedAlign(
-                          duration: open ? _opening : _closing,
-                          curve: open ? CalviMotion.easeRise : CalviMotion.easeOut,
-                          alignment: Alignment.bottomCenter,
-                          heightFactor: open ? 1 : 0,
-                          child: RepaintBoundary(
-                            child: TweenAnimationBuilder<double>(
-                              /* One value drives both the lift and the fade, and it
-                               starts a beat late on the way up so the room opens
-                               before it fills. Two separate animations of the
-                               same thing drifted apart under load, and that
-                               drift is what read as a stutter. */
-                              tween: Tween(end: open ? 1.0 : 0.0),
-                              duration: open ? _fillIn + _fillDelay : _fillOut,
-                              curve: open
-                                  ? Interval(
-                                      _fillDelay.inMilliseconds /
-                                          (_fillIn + _fillDelay).inMilliseconds,
-                                      1,
-                                      curve: CalviMotion.easeRise,
-                                    )
-                                  : CalviMotion.easeOut,
-                              builder: (context, t, child) => Opacity(
-                                opacity: t,
-                                child: Transform.translate(
-                                  offset: Offset(0, _fillLift * (1 - t)),
-                                  child: child,
-                                ),
-                              ),
-                              child: _Room(
-                                controller: _room,
-                                messages: widget.messages,
-                                onWeigh: widget.onWeigh,
-                                tokensLeft: widget.tokensLeft,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      _SlotChip(slot: widget.slot),
-                      _Input(
-                        field: _field,
-                        focus: _focus,
-                        onFocused: () {
-                          if (!open) widget.onOpen(true);
-                        },
-                        onCamera: widget.onCamera,
-                        onHold: widget.onHold,
-                        onLetGo: widget.onLetGo,
-                        onSend: _send,
-                        muteMic: widget.muteMic,
-                      ),
-                    ],
-                  ),
-                ),
+              padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+              /* Зсув усередині відступу клавіатури, і це не випадково: панель
+               їде вниз на власну висоту з хвостом на тінь, тобто рівно за
+               клавіатуру, коли та стоїть, і рівно за край екрана, коли ні.
+               Відхід швидший за повернення з тієї ж причини, що й у складки:
+               людина вже почала писати, і панель забирається з дороги, а
+               повертається як запрошення. */
+              child: AnimatedSlide(
+                offset: away ? const Offset(0, 1.4) : Offset.zero,
+                duration: Duration(milliseconds: away ? 280 : 440),
+                curve: away ? CalviMotion.easeIn : CalviMotion.easeRise,
+                child: _panel(context, c, open),
               ),
             ),
           ),
@@ -365,15 +291,141 @@ class _BottomBarState extends State<BottomBar> {
       ],
     );
   }
+
+  Widget _panel(BuildContext context, CalviColors c, bool open) {
+    return TweenAnimationBuilder<double>(
+      /* The corners are the bar's own, raised or not: it is a surface
+                 laid over the day, and a surface that squares off at the bottom
+                 of the screen reads as the screen ending, not as a panel. What
+                 raising changes is the shadow it throws and the hairline it no
+                 longer needs. */
+      tween: Tween(end: open ? 1.0 : 0.0),
+      duration: const Duration(milliseconds: 420),
+      curve: CalviMotion.easeRise,
+      builder: (context, lift, child) {
+        const shape = BorderRadius.vertical(top: Radius.circular(CalviSize.rLarge));
+        return DecoratedBox(
+          // Under the clip, so the shadow keeps the shape it is cast by.
+          decoration: BoxDecoration(
+            borderRadius: shape,
+            /* Тінь угору замість риски: панель це окремий шар над
+                       тонованим ґрунтом дня, а не місце, де закінчується
+                       екран. Опущена вона кидає тиху тінь, піднята глибшу. */
+            boxShadow: [
+              BoxShadow(
+                color: c.shade.withValues(alpha: c.shade.a * (0.55 + 0.45 * lift)),
+                blurRadius: 34 + 6 * lift,
+                offset: Offset(0, -10 - 8 * lift),
+              ),
+            ],
+          ),
+          /* The hairline is painted over the panel rather than set as its
+                     top border. A border is a straight run across the box, so the
+                     clip cut it off exactly where the corners begin and the curve
+                     was left bare: a line that stops short of the corner reads as
+                     a rendering fault, which is what it was. Raised, the shadow
+                     says the same thing better, so the line fades out. */
+          child: CustomPaint(
+            foregroundPainter: _TopEdge(
+              color: c.cardBorder.withValues(alpha: c.cardBorder.a * (1 - lift)),
+            ),
+            child: ClipRRect(
+              borderRadius: shape,
+              child: DecoratedBox(
+                decoration: BoxDecoration(color: c.card),
+                child: child,
+              ),
+            ),
+          ),
+        );
+      },
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 12, CalviSize.gutter, 22),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // The room grows from nothing rather than sliding in over the
+              // day: the bar is one object that gets taller.
+              ClipRect(
+                // Named so a test can measure the room rather than guess at it.
+                key: const Key('chat-room'),
+                child: AnimatedAlign(
+                  duration: open ? _opening : _closing,
+                  curve: open ? CalviMotion.easeRise : CalviMotion.easeOut,
+                  alignment: Alignment.bottomCenter,
+                  heightFactor: open ? 1 : 0,
+                  child: RepaintBoundary(
+                    child: TweenAnimationBuilder<double>(
+                      /* One value drives both the lift and the fade, and it
+                               starts a beat late on the way up so the room opens
+                               before it fills. Two separate animations of the
+                               same thing drifted apart under load, and that
+                               drift is what read as a stutter. */
+                      tween: Tween(end: open ? 1.0 : 0.0),
+                      duration: open ? _fillIn + _fillDelay : _fillOut,
+                      curve: open
+                          ? Interval(
+                              _fillDelay.inMilliseconds / (_fillIn + _fillDelay).inMilliseconds,
+                              1,
+                              curve: CalviMotion.easeRise,
+                            )
+                          : CalviMotion.easeOut,
+                      builder: (context, t, child) => Opacity(
+                        opacity: t,
+                        child: Transform.translate(
+                          offset: Offset(0, _fillLift * (1 - t)),
+                          child: child,
+                        ),
+                      ),
+                      child: _Room(
+                        controller: _room,
+                        messages: widget.messages,
+                        onWeigh: widget.onWeigh,
+                        onChoose: widget.onChoose,
+                        tokensLeft: widget.tokensLeft,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              _SlotChip(slot: widget.slot),
+              _Input(
+                field: _field,
+                focus: _focus,
+                onFocused: () {
+                  if (!open) widget.onOpen(true);
+                },
+                onCamera: widget.onCamera,
+                onHold: widget.onHold,
+                onLetGo: widget.onLetGo,
+                onSend: _send,
+                muteMic: widget.muteMic,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 /// Where the messages live once the bar is raised.
 class _Room extends StatelessWidget {
-  const _Room({required this.controller, required this.messages, this.onWeigh, this.tokensLeft});
+  const _Room({
+    required this.controller,
+    required this.messages,
+    this.onWeigh,
+    this.onChoose,
+    this.tokensLeft,
+  });
 
   final ScrollController controller;
   final List<Msg> messages;
   final void Function(String id, int grams)? onWeigh;
+  final void Function(String id, String option)? onChoose;
   final int? tokensLeft;
 
   @override
@@ -429,7 +481,10 @@ class _Room extends StatelessWidget {
               children: messages.isEmpty
                   // What Nora says before anything has been said to her.
                   ? [CalviNora(text: L.of(context).barHint, hint: L.of(context).barHintMore)]
-                  : [for (final m in messages) _Bubble(msg: m, onWeigh: onWeigh)],
+                  : [
+                      for (final m in messages)
+                        _Bubble(msg: m, onWeigh: onWeigh, onChoose: onChoose),
+                    ],
             ),
           ),
         ],
@@ -440,10 +495,11 @@ class _Room extends StatelessWidget {
 
 /// One message, arriving from a little below.
 class _Bubble extends StatelessWidget {
-  const _Bubble({required this.msg, this.onWeigh});
+  const _Bubble({required this.msg, this.onWeigh, this.onChoose});
 
   final Msg msg;
   final void Function(String id, int grams)? onWeigh;
+  final void Function(String id, String option)? onChoose;
 
   @override
   Widget build(BuildContext context) {
@@ -566,6 +622,17 @@ class _Bubble extends StatelessWidget {
                       if (msg.weights.isNotEmpty && msg.weighed == null) ...[
                         const SizedBox(height: 10),
                         _WeightPicks(weights: msg.weights, onPick: (g) => onWeigh?.call(msg.id, g)),
+                      ],
+
+                      /* Питання з кнопками: готові слова під пальцем. Дотик шле
+                         текст варіанта звичайним повідомленням, і кнопки
+                         зникають: на питання відповідають один раз. */
+                      if (msg.options.isNotEmpty && msg.chosen == null) ...[
+                        const SizedBox(height: 10),
+                        _ChoicePicks(
+                          options: msg.options,
+                          onPick: (o) => onChoose?.call(msg.id, o),
+                        ),
                       ],
                     ],
                   ),
@@ -941,6 +1008,56 @@ class _TopEdge extends CustomPainter {
 
   @override
   bool shouldRepaint(_TopEdge old) => old.color != color;
+}
+
+/* Варіанти відповіді під питанням Нори, словами.
+ *
+ * Те саме шасі, що у ваг, але без зафарбованої середини: у «звичка змінилась
+ * чи лишилась» немає найімовірнішої відповіді, і підказувати її кольором
+ * означало б вирішувати за людину. Стовпчиком, а не рядом: варіанти тут
+ * реченнями, і втиснуті в третину ширини вони перестали б читатись. */
+class _ChoicePicks extends StatelessWidget {
+  const _ChoicePicks({required this.options, required this.onPick});
+
+  final List<String> options;
+  final ValueChanged<String> onPick;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final (i, option) in options.indexed) ...[
+          if (i > 0) const SizedBox(height: 8),
+          Material(
+            color: c.card,
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () => onPick(option),
+              child: Container(
+                height: 40,
+                alignment: Alignment.center,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: c.cardBorder),
+                ),
+                child: Text(
+                  option,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.t.labelLarge?.copyWith(color: c.text),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
 }
 
 /* Три ваги на вибір під питанням Нори.
