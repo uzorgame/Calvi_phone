@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../data/app_scope.dart';
+import '../../data/remote/api.dart';
 import '../../data/settings.dart';
 import '../../design/ruler.dart';
 import '../../design/shell.dart';
@@ -166,7 +167,16 @@ class ProfilePanel extends StatelessWidget {
       title: l.eraseAskTitle,
       doneLabel: l.eraseAskCta,
       danger: true,
-      onDone: () => _askSure(context),
+      /* Другий аркуш відкривається після того, як закриється перший.
+       *
+       * Аркуш після `onDone` знімає верхній маршрут, а відкритий просто тут
+       * другий аркуш якраз верхнім і став би: він зникав, не встигнувши
+       * зʼявитись, перший лишався на місці, і стирання неможливо було навіть
+       * запустити. Саме так «Видалити дані» і стало кнопкою, яка не робить
+       * нічого. */
+      onDone: () => WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) _askSure(context);
+      }),
       builder: (sheet) => Padding(
         padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 4, CalviSize.gutter, 0),
         child: Column(
@@ -200,18 +210,34 @@ class ProfilePanel extends StatelessWidget {
   Future<void> _erase(BuildContext context) async {
     final l = L.of(context);
     final messenger = ScaffoldMessenger.of(context);
-    final sync = AppScope.maybeOf(context)?.sync;
 
-    // Без синхронізації (демо-запуск без бази) стирати нема звідки.
-    if (sync == null) return;
+    /* Стирає корінь застосунку, а не ця сторінка: половина роботи належить
+       йому (перечитати препарати, зняти нагадування, перезібрати екран дня).
+       Порожньо в демо-запуску без бази: стирати нема звідки. */
+    final erase = AppScope.maybeOf(context)?.eraseAll;
+    if (erase == null) return;
 
     try {
-      await sync.eraseDiary();
+      await erase();
       messenger.showSnackBar(SnackBar(content: Text(l.eraseDone)));
+    } on ApiFailure catch (e) {
+      /* Причина людськими словами: «спробуй ще раз» без неї це порада нічого
+         не робити. Найчастіша причина тут одна, немає мережі, і сервер без неї
+         не погасить щоденник на інших пристроях. Сирий код помилки читався б
+         як «функція не працює», а не як «увімкни інтернет». */
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            l.eraseFailed(switch (e.code) {
+              'offline' => l.eraseNoNet,
+              'slow' => l.eraseSlow,
+              _ => e.code,
+            }),
+          ),
+          duration: const Duration(seconds: 8),
+        ),
+      );
     } catch (e) {
-      /* Причина в тексті: «спробуй ще раз» без неї це порада нічого не робити.
-         Найчастіша причина тут одна, немає мережі, і сервер без неї не погасить
-         щоденник на інших пристроях. */
       messenger.showSnackBar(
         SnackBar(content: Text(l.eraseFailed('$e')), duration: const Duration(seconds: 8)),
       );

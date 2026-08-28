@@ -73,7 +73,7 @@ class SyncRepository {
         accessToken: account.accessToken,
         refreshToken: account.refreshToken,
       );
-      await db.syncDao.putTokens(balance: account.balance);
+      await db.syncDao.putTokens(balance: account.balance, unlimited: account.unlimited);
       api.token = account.accessToken;
       return true;
     } on ApiFailure {

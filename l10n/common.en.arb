@@ -62,6 +62,11 @@
   "macroCShort": "C {value}",
   "@macroCShort": {"placeholders":{"value":{"type":"int"}}},
 
+  "macroPNone": "P ?",
+  "@macroPNone": {"description":"The same chip when nobody knows the figure. A question mark rather than a zero: a zero reads as a fact, and there is no fact here."},
+  "macroFNone": "F ?",
+  "macroCNone": "C ?",
+
   "macroProteinLetter": "P",
   "@macroProteinLetter": {"description":"One letter over a macro column on the plate strip."},
   "macroFatLetter": "F",

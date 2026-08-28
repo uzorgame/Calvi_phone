@@ -107,7 +107,7 @@
   "planPlan": "Plan",
   "planFree": "Free",
   "planTokens": "Tokens",
-  "planTokensFree": "2 a day",
+  "planTokensFree": "40 a month",
   "planPitch": "Unlimited tokens, history without limits, and reports for any period.",
   "planPerks": "What Premium gives",
   "planPerkChat": "Unlimited conversations with Nora",
@@ -261,5 +261,7 @@
   "eraseSureCta": "Yes, delete forever",
   "eraseDone": "The diary is erased. A clean slate.",
   "eraseFailed": "Could not erase: {why}",
-  "@eraseFailed": {"placeholders":{"why":{"type":"String"}}}
+  "@eraseFailed": {"placeholders":{"why":{"type":"String"}}},
+  "eraseNoNet": "no network. Turn on the internet and try again",
+  "eraseSlow": "the server is taking too long. Try again in a minute"
 }

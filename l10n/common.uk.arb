@@ -37,6 +37,10 @@
   "macroFShort": "Ж {value}",
   "macroCShort": "В {value}",
 
+  "macroPNone": "Б ?",
+  "macroFNone": "Ж ?",
+  "macroCNone": "В ?",
+
   "macroProteinLetter": "Б",
   "macroFatLetter": "Ж",
   "macroCarbsLetter": "В"

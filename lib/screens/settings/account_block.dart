@@ -67,8 +67,7 @@ class _AccountBlockState extends State<AccountBlock> {
 
   LoginService? get _login => AppScope.maybeOf(context)?.sync?.login;
 
-  Future<void> _signIn() =>
-      _enter('google', (login, device) => login.signIn(deviceName: device));
+  Future<void> _signIn() => _enter('google', (login, device) => login.signIn(deviceName: device));
 
   Future<void> _signInApple() =>
       _enter('apple', (login, device) => login.signInApple(deviceName: device));
@@ -336,9 +335,7 @@ class _SignedOut extends StatelessWidget {
           if (can) ...[
             const SizedBox(height: 14),
             CalviButton(
-              label: busyWith == 'google'
-                  ? L.of(context).accountBusy
-                  : L.of(context).accountGoogle,
+              label: busyWith == 'google' ? L.of(context).accountBusy : L.of(context).accountGoogle,
               enabled: !busy,
               onTap: onTap,
             ),

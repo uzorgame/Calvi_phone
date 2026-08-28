@@ -24,6 +24,7 @@ class AppScope extends InheritedWidget {
     this.real = false,
     this.setReal = _keepDemo,
     this.stats = DayStats.empty,
+    this.eraseAll,
     required super.child,
   });
 
@@ -47,6 +48,14 @@ class AppScope extends InheritedWidget {
   /// Carries local changes to the server and Nora's answers back. Null in a
   /// widget test and while the app has no database yet.
   final SyncService? sync;
+
+  /* «Видалити дані» з налаштувань, цілком: сервер, місцева база і памʼять
+     екранів. Живе тут, а не в самих налаштуваннях, бо половина роботи належить
+     кореню застосунку: перечитати препарати, зняти їхні нагадування і
+     перезібрати екран дня, який тримає розмову з Норою в памʼяті. Стирання, від
+     якого на екрані лишаються старі бульбашки і таблетки, виглядає як таке, що
+     не спрацювало. Порожньо в демо і в тестах: там стирати нема звідки. */
+  final Future<void> Function()? eraseAll;
 
   /// Whether the screens are showing the demo day or what is actually stored.
   ///

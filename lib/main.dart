@@ -339,6 +339,30 @@ class _CalviAppState extends State<CalviApp> {
     _replan();
   }
 
+  /* Скільки разів щоденник стирали. Ключем на екрані дня: стирання має
+     прибрати і те, що екран тримає в памʼяті, насамперед розмову з Норою, а
+     найчесніший спосіб забути все це народитись заново. */
+  int _era = 0;
+
+  /* «Видалити дані» з налаштувань, від сервера до останнього екрана.
+   *
+   * Сервер гасить щоденник для всіх пристроїв, місцева база чиститься, і далі
+   * робота, яку не зробить ніхто, крім кореня: препарати перечитуються з
+   * порожньої бази і забирають із собою нагадування, а екран дня
+   * перезбирається з нуля. Без цих двох кроків стирання виглядало як таке, що
+   * не спрацювало: список таблеток стояв на місці, а в чаті висіла вся
+   * розмова, бо і те, і те жило в памʼяті, а не в базі. */
+  Future<void> _eraseAll() async {
+    final sync = _sync;
+    if (sync == null) return;
+
+    await sync.eraseDiary();
+    if (!mounted) return;
+
+    setState(() => _era++);
+    await _loadMeds();
+  }
+
   /* Кожна зміна списку одразу лягає на диск і стає в чергу на сервер.
    *
    * Порівнюється те, що було, з тим, що стало: екран віддає весь список, а не
@@ -569,6 +593,8 @@ class _CalviAppState extends State<CalviApp> {
       real: _real,
       stats: _stats,
       setReal: _setReal,
+      // Тільки коли є кому стирати: у демо без бази кнопка чесно мовчить.
+      eraseAll: _sync == null ? null : _eraseAll,
       child: MaterialApp(
         navigatorKey: _nav,
         title: 'Calvi',
@@ -629,6 +655,10 @@ class _CalviAppState extends State<CalviApp> {
               null => const SizedBox.expand(),
               true => StartScreen(onFinish: _finishStart),
               false => TodayScreen(
+                /* Нова ера після «Видалити дані»: екран народжується заново і
+                   не тримає в памʼяті нічого зі стертого, насамперед розмову
+                   з Норою. */
+                key: ValueKey('day-era-$_era'),
                 ask: _evening,
                 onSettings: () => Navigator.of(context).push(slideRoute(const SettingsScreen())),
                 onMeds: () => Navigator.of(context).push(slideRoute(const MedsRoute())),
