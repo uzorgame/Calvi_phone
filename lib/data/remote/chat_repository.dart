@@ -50,6 +50,7 @@ class ChatRepository {
     DateTime? at,
     Shot? image,
     List<Map<String, String>> history = const [],
+    String place = 'today',
   }) async {
     final when = at ?? DateTime.now();
 
@@ -62,6 +63,7 @@ class ChatRepository {
       idempotencyKey: _uuid.v4(),
       image: image,
       history: history,
+      place: place,
     );
 
     await _apply(answer, slot: slot, when: when);
@@ -81,7 +83,7 @@ class ChatRepository {
    * повертають ту саму форму, і два списки полів рано чи пізно розійшлись би. */
   Future<void> _apply(NoraReply answer, {required String slot, required DateTime when}) async {
     // The balance is the server's word, mirrored so the screen can draw it.
-    await db.syncDao.putTokens(balance: answer.balance);
+    await db.syncDao.putTokens(balance: answer.balance, unlimited: answer.unlimited);
 
     /* Усе, що Нора зробила з щоденником, лягає на телефон тут же, а не
      * наступною синхронізацією.
@@ -198,7 +200,7 @@ class ChatRepository {
   /// Розбір знімка: числа назад, у щоденник нічого.
   Future<Analysis> look(Shot shot) async {
     final answer = await api.analyze(shot: shot, idempotencyKey: _uuid.v4());
-    await db.syncDao.putTokens(balance: answer.balance);
+    await db.syncDao.putTokens(balance: answer.balance, unlimited: answer.unlimited);
     return answer;
   }
 }

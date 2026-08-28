@@ -49,6 +49,8 @@ class Msg {
     this.weights = const [],
     this.weighed,
     this.askId,
+    this.options = const [],
+    this.chosen,
   });
 
   final String id;
@@ -92,6 +94,17 @@ class Msg {
    * Порожньо в усіх повідомленнях, крім самих питань. */
   final String? askId;
 
+  /* Варіанти відповіді кнопками, коли Нора поставила питання з вибором.
+   *
+   * Народилось із глютену: запис, що суперечить запамʼятаній звичці, не
+   * робиться мовчки, а питається («Ти ж не їси глютен: звичка змінилась?») із
+   * готовими варіантами під пальцем. Дотик шле текст варіанта звичайним
+   * повідомленням: це продовження розмови, а не окремий механізм. */
+  final List<String> options;
+
+  /// Який варіант обрали. Кнопки після цього зникають.
+  final String? chosen;
+
   Msg picked(int grams) => Msg(
     id: id,
     from: from,
@@ -102,6 +115,22 @@ class Msg {
     weights: weights,
     weighed: grams,
     askId: askId,
+    options: options,
+    chosen: chosen,
+  );
+
+  Msg chose(String option) => Msg(
+    id: id,
+    from: from,
+    kind: kind,
+    text: text,
+    code: code,
+    plate: plate,
+    weights: weights,
+    weighed: weighed,
+    askId: askId,
+    options: options,
+    chosen: option,
   );
 
   Msg answered({required String text, MealPlate? plate}) => Msg(
@@ -114,6 +143,8 @@ class Msg {
     weights: weights,
     weighed: weighed,
     askId: askId,
+    options: options,
+    chosen: chosen,
   );
 }
 
@@ -128,6 +159,7 @@ Msg msg({
   String? code,
   List<int> weights = const [],
   String? askId,
+  List<String> options = const [],
 }) => Msg(
   id: 'm${++_seq}',
   from: from,
@@ -138,6 +170,7 @@ Msg msg({
   pending: pending,
   weights: weights,
   askId: askId,
+  options: options,
 );
 
 /* Fixed answers for the demo. The same figures the camera sheet showed, because

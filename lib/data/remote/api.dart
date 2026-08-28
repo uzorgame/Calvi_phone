@@ -56,6 +56,7 @@ class CalviApi {
       accessToken: body['access_token'] as String,
       refreshToken: body['refresh_token'] as String,
       balance: (body['tokens'] as Map<String, dynamic>)['balance'] as int,
+      unlimited: (body['tokens'] as Map<String, dynamic>)['unlimited'] as bool?,
     );
   }
 
@@ -107,11 +108,15 @@ class CalviApi {
     required String idempotencyKey,
     Shot? image,
     List<Map<String, String>> history = const [],
+    String place = 'today',
   }) async {
     final body = await _post('/v1/chat', {
       'text': text,
       'slot': slot,
       'day': day,
+      /* Звідки пишуть. Нора одна, але на сторінці тижня сервер докладає їй
+         бриф тижня і власний розбір: там вона бачить більше. */
+      if (place != 'today') 'place': place,
       /* Кілька попередніх реплік, щоб розмова була розмовою.
        *
        * Доти кожне повідомлення йшло саме по собі, і Нора не памʼятала навіть
@@ -162,6 +167,7 @@ class CalviApi {
       email: body['email'] as String?,
       joinedAt: DateTime.tryParse(body['created_at'] as String? ?? '')?.toLocal(),
       balance: ((body['tokens'] as Map<String, dynamic>?)?['balance'] as num?)?.round() ?? 0,
+      unlimited: (body['tokens'] as Map<String, dynamic>?)?['unlimited'] as bool?,
     );
   }
 
@@ -187,6 +193,27 @@ class CalviApi {
     return NoraReply.fromWire(body, slot: slot, day: day);
   }
 
+  /// Тижневий розбір від Нори: будує новий або віддає вже збережений цього
+  /// тижня. Збережений не коштує нічого, тому повторний дотик безпечний.
+  Future<WeekReviewData> weekReview({required String idempotencyKey}) async {
+    final body = await _post('/v1/week/review', {
+      // Пояс телефона: пʼятниця 18:00 це пʼятниця там, де живе людина.
+      'tz_offset_min': DateTime.now().timeZoneOffset.inMinutes,
+      'idempotency_key': idempotencyKey,
+      'lang': dataLang,
+    }, wait: _thinking);
+    return WeekReviewData.fromWire(body);
+  }
+
+  /// Минулі розбори, найновіший перший. Це вже сплачена історія людини.
+  Future<List<WeekReviewData>> weekReviews() async {
+    final body = await _get('/v1/week/reviews');
+    return [
+      for (final r in (body['reviews'] as List<dynamic>? ?? []).whereType<Map<String, dynamic>>())
+        WeekReviewData.fromWire(r),
+    ]..removeWhere((r) => r.week.isEmpty || r.body.isEmpty);
+  }
+
   /// Розбір знімка без запису: числа повертаються, щоденник не чіпається.
   ///
   /// Окремий маршрут, а не режим чату. Тут інша дія: чат розмовляє і пише, а це
@@ -200,6 +227,7 @@ class CalviApi {
     }, wait: _thinking);
 
     final balance = body['balance'] as int? ?? 0;
+    final unlimited = body['unlimited'] as bool?;
     final e = body['estimate'] as Map<String, dynamic>?;
 
     /* Модель подивилась і не побачила страви. Це відповідь, а не поломка: далі
@@ -207,12 +235,14 @@ class CalviApi {
     if (e == null) {
       return Analysis(
         balance: balance,
+        unlimited: unlimited,
         trouble: body['trouble'] as String? ?? dataL.photoNotRecognized,
       );
     }
 
     return Analysis(
       balance: balance,
+      unlimited: unlimited,
       estimate: Estimate(
         name: e['name'] as String? ?? dataL.photoDish,
         canonicalName: e['canonical_name'] as String?,
@@ -244,19 +274,53 @@ class CalviApi {
   }
 
   /// A scanned barcode. Exact, so it is the one answer we never estimate.
+  ///
+  /// Порожньо означає рівно одне: коду не знає ні наша база, ні відкрита. Усе
+  /// інше, що могло піти не так, летить винятком і не вдає незнайомий товар.
   Future<FoodHit?> foodByBarcode(String code) async {
     try {
       final body = await _get('/v1/foods/barcode/$code');
       final food = body['food'] as Map<String, dynamic>?;
-      return food == null
-          ? null
-          : FoodHit.fromJson(food, warns: body['warns'] as Map<String, dynamic>?);
+      return food == null ? null : _hit(body, food);
     } on ApiFailure catch (e) {
       // Nobody has ever scanned it: an answer, not a breakage.
       if (e.status == 404) return null;
       rethrow;
     }
   }
+
+  /// Етикетка з тієї самої пачки, що й штрихкод.
+  ///
+  /// Основний шлях для всього, чого немає у відкритих базах, а немає там
+  /// більшості. Модель не рахує, а переписує надруковані цифри, і прочитане
+  /// лягає в спільну базу за цим кодом: наступному воно дістанеться задарма.
+  ///
+  /// Токена не коштує.
+  Future<LabelRead> readLabel({required String barcode, required Shot shot}) async {
+    final body = await _post('/v1/foods/label', {
+      'barcode': barcode,
+      'image': {'mime': shot.mime, 'data': base64Encode(shot.bytes)},
+      'lang': dataLang,
+    }, wait: _thinking);
+
+    final food = body['food'] as Map<String, dynamic>?;
+    if (food == null) {
+      return LabelRead(trouble: body['trouble'] as String? ?? dataL.photoNotRecognized);
+    }
+
+    return LabelRead(food: _hit(body, food));
+  }
+
+  /// Рядок довідника разом із тим, що сервер сказав про його повноту.
+  FoodHit _hit(Map<String, dynamic> body, Map<String, dynamic> food) => FoodHit.fromJson(
+    food,
+    warns: body['warns'] as Map<String, dynamic>?,
+    /* Старіший сервер про повноту нічого не каже. Тоді вважаємо рядок повним:
+       так поводився застосунок і доти, і це не гірше за раптове «дочитай
+       етикетку» на кожному товарі. */
+    complete: body['complete'] as bool? ?? true,
+    missing: [...?(body['missing'] as List?)?.cast<String>()],
+  );
 
   Future<Map<String, dynamic>> _get(String path) async {
     final http.Response res;
@@ -398,12 +462,20 @@ class DeviceAccount {
     required this.accessToken,
     required this.refreshToken,
     required this.balance,
+    this.unlimited,
   });
 
   final String userId;
   final String accessToken;
   final String refreshToken;
   final int balance;
+
+  /* Платний доступ: лічильника токенів у чаті немає взагалі.
+   *
+   * Порожньо означає «сервер про це не сказав», а не «ні»: старіший бекенд
+   * такого поля не шле, і записувати замість нього `false` означало б знімати
+   * підписку з людини на кожній відповіді старого маршруту. */
+  final bool? unlimited;
 }
 
 /// What one sync came back with.
@@ -454,6 +526,7 @@ class GoogleAccount {
     required this.refreshToken,
     required this.outcome,
     required this.balance,
+    this.unlimited,
     this.provider,
     this.previousUserId,
     this.email,
@@ -479,6 +552,9 @@ class GoogleAccount {
   /// Коли зʼявився обліковий запис, а не коли людина увійшла.
   final DateTime? joinedAt;
   final int balance;
+
+  /// Платний доступ. Порожньо означає «сервер про це не сказав», а не «ні».
+  final bool? unlimited;
 
   /// Чи щоденник на телефоні належить не тому, хто щойно увійшов.
   bool get switched => previousUserId != null && previousUserId != userId;
@@ -519,20 +595,55 @@ class WeightAsk {
   final List<int> weights;
 }
 
+/// Тижневий розбір, як він лежить на сервері.
+class WeekReviewData {
+  const WeekReviewData({
+    required this.week,
+    required this.body,
+    this.fresh = false,
+    this.balance,
+    this.unlimited,
+  });
+
+  factory WeekReviewData.fromWire(Map<String, dynamic> body) => WeekReviewData(
+    week: body['week'] as String? ?? '',
+    body: body['body'] as String? ?? '',
+    fresh: body['fresh'] as bool? ?? false,
+    balance: (body['balance'] as num?)?.round(),
+    unlimited: body['unlimited'] as bool?,
+  );
+
+  /// Понеділок тижня, yyyy-mm-dd: імʼя тижня, спільне з сервером.
+  final String week;
+
+  final String body;
+
+  /// Побудований щойно чи прочитаний зі сховища. Збережений не коштував нічого.
+  final bool fresh;
+
+  /// Баланс після побудови. Порожньо в переліку минулих: там нічого не коштує.
+  final int? balance;
+  final bool? unlimited;
+}
+
 class NoraReply {
   const NoraReply({
     required this.text,
     required this.balance,
     required this.logged,
+    this.unlimited,
     this.deleted = const [],
     this.fixed = const [],
     this.moved = const [],
     this.asks = const [],
+    this.closedAsks = const [],
+    this.choice,
     this.water,
     this.workouts = const [],
     this.remembered = const [],
     this.measures = const [],
     this.warning,
+    this.label,
   });
 
   /// Відповідь сервера, як вона приходить проводом.
@@ -548,6 +659,7 @@ class NoraReply {
     return NoraReply(
       text: body['text'] as String? ?? '',
       balance: body['balance'] as int? ?? 0,
+      unlimited: body['unlimited'] as bool?,
       logged: [
         for (final m in (body['logged'] as List<dynamic>? ?? []).cast<Map<String, dynamic>>())
           LoggedMeal(
@@ -600,6 +712,23 @@ class NoraReply {
               weights: [for (final g in (a['weights'] as List<dynamic>? ?? [])) (g as num).round()],
             ),
       ]..removeWhere((a) => a.id.isEmpty || a.weights.isEmpty),
+      /* Терпимо до сміття: сервер може змінитись, а старий телефон лишиться.
+         Незакрите питання дешевше за розбір, який упав цілком. */
+      closedAsks: [
+        if (body['closed_asks'] case final List<dynamic> ids)
+          for (final id in ids)
+            if (id is String && id.isNotEmpty) id,
+      ],
+      choice: switch (body['choice']) {
+        {'question': final String q, 'options': final List<dynamic> raw} => (
+          question: q,
+          options: [
+            for (final o in raw)
+              if (o is String && o.trim().isNotEmpty) o,
+          ],
+        ),
+        _ => null,
+      },
       water: body['water'] == null
           ? null
           : PouredWater(
@@ -636,6 +765,7 @@ class NoraReply {
           ),
       ],
       warning: body['warning'] as String?,
+      label: LabelFacts.fromWire(body['label']),
     );
   }
 
@@ -643,6 +773,9 @@ class NoraReply {
 
   /// What is left after this message. The server's number, never ours.
   final int balance;
+
+  /// Платний доступ. Порожньо означає «сервер про це не сказав», а не «ні».
+  final bool? unlimited;
   final List<LoggedMeal> logged;
 
   /// Ідентифікатори прибраного. Застосунок гасить ці рядки в себе одразу, тим
@@ -668,6 +801,19 @@ class NoraReply {
    * кожна наступна страва його перезаписувала. */
   final List<WeightAsk> asks;
 
+  /* Питання про вагу, закриті цим повідомленням.
+   *
+   * Вага, названа в чат словами замість кнопок, записує страву новим рядком, і
+   * сервер закриває питання сам. Застосунок прибирає за цими номерами чернетки
+   * «Нора рахує…» у картках: без них чернетка чекала б на відповідь, яка вже
+   * прозвучала. */
+  final List<String> closedAsks;
+
+  /* Питання з кнопками: запис, що суперечить запамʼятаній звичці, не робиться
+     мовчки. Варіанти малюються під бульбашкою, дотик шле текст варіанта
+     звичайним повідомленням. */
+  final ({String question, List<String> options})? choice;
+
   /// Випите, якщо Нора записала воду. Окремо від їжі, бо в застосунку це своя
   /// картка і своя норма.
   final PouredWater? water;
@@ -687,6 +833,41 @@ class NoraReply {
 
   /// «Тут важкий алерген», when the allergen check saw one.
   final String? warning;
+
+  /// Числа з прочитаної пачки, коли на знімку була вона, а не тарілка.
+  final LabelFacts? label;
+}
+
+/// Пачка, прочитана з фото в чаті: числа на сто грамів.
+///
+/// Окремо від записаного, бо не записано нічого і не мало бути: людина показала
+/// упаковку, а не тарілку. Але числа їй потрібні очима, а не тільки словами
+/// Нори, тому з них малюється та сама смужка, що під записаною стравою.
+class LabelFacts {
+  const LabelFacts({required this.name, required this.kcal, this.protein, this.fat, this.carbs});
+
+  final String name;
+  final int kcal;
+  final double? protein;
+  final double? fat;
+  final double? carbs;
+
+  static LabelFacts? fromWire(Object? raw) {
+    if (raw is! Map) return null;
+    final name = raw['name'];
+    final kcal = raw['kcal'];
+    if (name is! String || kcal is! num) return null;
+
+    double? at(Object? v) => v is num ? v.toDouble() : null;
+
+    return LabelFacts(
+      name: name,
+      kcal: kcal.round(),
+      protein: at(raw['protein_g']),
+      fat: at(raw['fat_g']),
+      carbs: at(raw['carbs_g']),
+    );
+  }
 }
 
 /// Один запис памʼяті, який щойно зробила Нора.
@@ -786,9 +967,12 @@ class Shot {
 
 /// Відповідь на розбір знімка: або оцінка, або чесне «не впізнала».
 class Analysis {
-  const Analysis({required this.balance, this.estimate, this.trouble});
+  const Analysis({required this.balance, this.estimate, this.trouble, this.unlimited});
 
   final int balance;
+
+  /// Платний доступ. Порожньо означає «сервер про це не сказав», а не «ні».
+  final bool? unlimited;
   final Estimate? estimate;
 
   /// Чому оцінки немає, якщо її немає. Людською мовою, від самої Нори.
@@ -841,22 +1025,37 @@ class FoodHit {
     required this.canonicalName,
     this.portionG,
     this.ingredients,
+    this.complete = true,
+    this.missing = const [],
     this.warnContains = const [],
     this.warnTraces = const [],
     this.warnSevere = false,
   });
 
-  factory FoodHit.fromJson(Map<String, dynamic> j, {Map<String, dynamic>? warns}) => FoodHit(
+  factory FoodHit.fromJson(
+    Map<String, dynamic> j, {
+    Map<String, dynamic>? warns,
+    bool complete = true,
+    List<String> missing = const [],
+  }) => FoodHit(
     id: j['id'] as String,
     name: j['name'] as String,
     canonicalName: j['canonicalName'] as String? ?? '',
     kcal: (j['kcal'] as num).round(),
-    proteinG: (j['proteinG'] as num?)?.toDouble() ?? 0,
-    fatG: (j['fatG'] as num?)?.toDouble() ?? 0,
-    carbsG: (j['carbsG'] as num?)?.toDouble() ?? 0,
+    /* Порожнє лишається порожнім усю дорогу.
+     *
+     * Тут стояло `?? 0`, і саме воно перетворювало «ніхто не заповнив» на
+     * «нуль»: сир із двадцятьма пʼятьма грамами білка на пачці показувався
+     * як «Б 0». Нуль тут не обережність, а неправда, і людина на білковій
+     * цілі повірить саме їй. */
+    proteinG: (j['proteinG'] as num?)?.toDouble(),
+    fatG: (j['fatG'] as num?)?.toDouble(),
+    carbsG: (j['carbsG'] as num?)?.toDouble(),
     icon: j['icon'] as String? ?? 'plate',
     portionG: (j['portionG'] as num?)?.toDouble(),
     ingredients: j['ingredients'] as String?,
+    complete: complete,
+    missing: missing,
     warnContains: [...?(warns?['contains'] as List?)?.cast<String>()],
     warnTraces: [...?(warns?['traces'] as List?)?.cast<String>()],
     warnSevere: warns?['severe'] == true,
@@ -866,11 +1065,19 @@ class FoodHit {
   final String name;
   final String canonicalName;
   final int kcal;
-  final double proteinG;
-  final double fatG;
-  final double carbsG;
+
+  /// Порожньо означає «ніхто не знає», а не «нуль».
+  final double? proteinG;
+  final double? fatG;
+  final double? carbsG;
   final String icon;
   final double? portionG;
+
+  /// Чи можна показувати це як готову відповідь і писати в щоденник.
+  final bool complete;
+
+  /// Чого саме бракує: `protein`, `fat`, `carbs`. Порожньо, коли все на місці.
+  final List<String> missing;
 
   /// Склад з упаковки, дослівно і мовою джерела. Порожньо, коли база його
   /// не знає.
@@ -884,17 +1091,38 @@ class FoodHit {
 
   /// The numbers for a real plate. Without a weight the usual portion is used,
   /// and if the reference has none either, 100 g is the honest default.
-  ({int kcal, double protein, double fat, double carbs, double grams}) forGrams([double? grams]) {
+  ///
+  /// Невідоме множення не робить відомим: чого база не знає на сто грамів, того
+  /// вона не знає і на сто тридцять.
+  ({int kcal, double? protein, double? fat, double? carbs, double grams}) forGrams([
+    double? grams,
+  ]) {
     final g = grams ?? portionG ?? 100;
     final k = g / 100;
     return (
       kcal: (kcal * k).round(),
-      protein: proteinG * k,
-      fat: fatG * k,
-      carbs: carbsG * k,
+      protein: proteinG == null ? null : proteinG! * k,
+      fat: fatG == null ? null : fatG! * k,
+      carbs: carbsG == null ? null : carbsG! * k,
       grams: g,
     );
   }
+}
+
+/// Чим скінчилось читання етикетки.
+class LabelRead {
+  const LabelRead({this.food, this.trouble, this.failure});
+
+  /// Прочитане, якщо воно витримало перевірку арифметикою.
+  final FoodHit? food;
+
+  /// Чому не вийшло, словами від сервера: таблиці не видно, цифри не сходяться.
+  /// Це про сам знімок, і людина може виправити це, перезнявши.
+  final String? trouble;
+
+  /// Не вийшло з іншої причини: мережа, сесія, сервер. Слова для цього добирає
+  /// екран, бо тільки він знає мову застосунку.
+  final ApiFailure? failure;
 }
 
 class ApiFailure implements Exception {

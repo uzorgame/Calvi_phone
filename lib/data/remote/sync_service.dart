@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+import 'package:uuid/uuid.dart';
 
 import '../local/database.dart';
 import 'api.dart';
@@ -56,7 +57,30 @@ class SyncService with WidgetsBindingObserver {
     required String slot,
     Shot? image,
     List<Map<String, String>> history = const [],
-  }) => ChatRepository(db, _api).send(text: text, slot: slot, image: image, history: history);
+    String place = 'today',
+  }) => ChatRepository(
+    db,
+    _api,
+  ).send(text: text, slot: slot, image: image, history: history, place: place);
+
+  /* Тижневий розбір. Живе тут, а не в екрані, бо тут той самий клієнт, той
+     самий акаунт і те саме дзеркало токенів: розбір коштує два, і число в
+     застосунку має змінитись тією ж миттю, а не наступним обміном. */
+  Future<WeekReviewData> weekReview() async {
+    if (!await SyncRepository(db, _api).ensureAccount()) throw const ApiFailure.offline();
+
+    final review = await _api.weekReview(idempotencyKey: const Uuid().v4());
+    if (review.balance != null) {
+      await db.syncDao.putTokens(balance: review.balance!, unlimited: review.unlimited);
+    }
+    return review;
+  }
+
+  /// Минулі розбори для сторінки «Минулі», найновіший перший.
+  Future<List<WeekReviewData>> weekReviews() async {
+    if (!await SyncRepository(db, _api).ensureAccount()) return const [];
+    return _api.weekReviews();
+  }
 
   /* Вхід через Google. Живе тут, бо саме тут лежить той самий клієнт і та сама
      база: вхід міняє обліковий запис, і робити це повз синхронізацію означало б
