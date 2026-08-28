@@ -8,6 +8,8 @@ import '../../data/measure.dart';
 import '../../data/settings.dart';
 import '../../data/app_scope.dart';
 import '../../design/icons.dart';
+import '../../design/macro_row.dart';
+import '../../design/section.dart';
 import '../../design/shell.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
@@ -184,7 +186,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           ),
         ),
 
-        _Block(
+        CalviStat(
           title: l.anGoalProgress,
           badge: l.anDonePercent(done),
           child: Column(
@@ -195,15 +197,34 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Flexible(
-                    child: _Figure(
+                    child: CalviFigure(
                       value: s.weightKg.toStringAsFixed(1),
                       cap: l.anNowKg,
                       tight: true,
                     ),
                   ),
-                  CalviIcon('trend', size: 20, color: c.textSecondary),
+                  /* Знак каже напрямок, колір каже вердикт. Сірий означає, що
+                     вердикту ще немає: ціль щойно поставлена, і руху не було. */
+                  Builder(
+                    builder: (context) {
+                      final t = goalTrend(s);
+                      return CalviIcon(
+                        t.icon,
+                        /* Більший за звичайні значки цього екрана, і навмисно:
+                           це не оздоба між двома числами, а відповідь на
+                           питання «воно працює?». На двадцяти пікселях між
+                           двома тридцятками він читався як розділовий знак. */
+                        size: 28,
+                        color: switch (t.good) {
+                          true => c.success,
+                          false => c.protein,
+                          null => c.textSecondary,
+                        },
+                      );
+                    },
+                  ),
                   Flexible(
-                    child: _Figure(
+                    child: CalviFigure(
                       value: s.targetKg.toStringAsFixed(1),
                       cap: l.anTargetKg,
                       dim: true,
@@ -243,7 +264,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           ),
         ),
 
-        _Block(
+        CalviStat(
           title: l.anKcal,
           badge: l.anShareOfNorm(share),
           warn: !ok,
@@ -251,11 +272,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             children: [
               Row(
                 children: [
-                  _Figure(value: thousands(total), cap: l.anKcalTotal),
+                  CalviFigure(value: thousands(total), cap: l.anKcalTotal),
                   const SizedBox(width: 18),
                   Container(width: 1, height: 34, color: c.cardBorder),
                   const SizedBox(width: 18),
-                  _Figure(value: thousands(avg), cap: l.anKcalAvg),
+                  CalviFigure(value: thousands(avg), cap: l.anKcalAvg),
                 ],
               ),
               const SizedBox(height: 16),
@@ -273,7 +294,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           ),
         ),
 
-        _Block(
+        CalviStat(
           title: l.anWater,
           aside: l.anWaterGoal(thousands(goal.waterMl)),
           child: Builder(
@@ -300,11 +321,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 children: [
                   Row(
                     children: [
-                      _Figure(value: '$hit', suffix: '/${dates.length}', cap: l.anDaysInNorm),
+                      CalviFigure(value: '$hit', suffix: '/${dates.length}', cap: l.anDaysInNorm),
                       const SizedBox(width: 18),
                       Container(width: 1, height: 34, color: c.cardBorder),
                       const SizedBox(width: 18),
-                      _Figure(value: thousands(avgMl), cap: l.anWaterAvg),
+                      CalviFigure(value: thousands(avgMl), cap: l.anWaterAvg),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -315,7 +336,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           ),
         ),
 
-        _Block(
+        CalviStat(
           title: l.anMeasures,
           aside: l.anMeasuresChange(tapeLabel),
           child: field == null
@@ -368,7 +389,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 ),
         ),
 
-        _Block(
+        CalviStat(
           title: l.anMacrosAvg,
           /* Підпис називає вибраний період, а не кількість записаних днів.
            *
@@ -396,71 +417,36 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                  по суті: смуга відповідає на питання «скільки лишилось», а воно
                  про сьогодні. Середнє за тиждень нікуди не лишається, воно
                  просто число, і стоїть тут як число. */
-              final rows = [
-                (
-                  label: l.macroProtein,
-                  avg: sum.protein / over,
-                  goal: goal.protein,
-                  colour: c.protein,
-                ),
-                (label: l.macroFat, avg: sum.fat / over, goal: goal.fat, colour: c.fats),
-                (label: l.macroCarbs, avg: sum.carbs / over, goal: goal.carbs, colour: c.carbs),
-              ];
-
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  for (final r in rows)
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: 8,
-                                height: 8,
-                                decoration: BoxDecoration(color: r.colour, shape: BoxShape.circle),
-                              ),
-                              const SizedBox(width: 6),
-                              Flexible(
-                                child: Text(
-                                  r.label,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: context.t.labelSmall,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text.rich(
-                            TextSpan(
-                              text: '${r.avg.round()}',
-                              children: [
-                                TextSpan(
-                                  text: ' ${l.unitG}',
-                                  style: context.t.labelSmall?.copyWith(color: c.textSecondary),
-                                ),
-                              ],
-                            ),
-                            style: context.t.titleLarge,
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            l.anPerDay,
-                            style: context.t.labelSmall?.copyWith(color: c.textSecondary),
-                          ),
-                          const SizedBox(height: 1),
-                          Text(
-                            l.anMacroGoal(r.goal),
-                            style: context.t.labelSmall?.copyWith(
-                              color: c.textSecondary.withValues(alpha: 0.7),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+              /* Та сама мова, що в карток БЖВ на дні і на сторінці тижня:
+                 число з нормою через риску, кільце зі знаком, підпис капсом.
+                 Тут стояли три колонки з крапками і чотирма рядками тексту під
+                 кожною: своя розкладка на третьому екрані поспіль для тих
+                 самих трьох величин. Кільце заразом показує те, чого чотири
+                 рядки не показували жодним чином, а саме наскільки середнє
+                 добирає до норми. */
+              return MacroRow(
+                cells: [
+                  (
+                    label: l.macroProteinCaps,
+                    icon: 'protein',
+                    value: sum.protein / over,
+                    goal: goal.protein,
+                    colour: c.protein,
+                  ),
+                  (
+                    label: l.macroFatCaps,
+                    icon: 'fat',
+                    value: sum.fat / over,
+                    goal: goal.fat,
+                    colour: c.fats,
+                  ),
+                  (
+                    label: l.macroCarbsCaps,
+                    icon: 'carbs',
+                    value: sum.carbs / over,
+                    goal: goal.carbs,
+                    colour: c.carbs,
+                  ),
                 ],
               );
             },
@@ -468,156 +454,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         ),
       ],
     );
-  }
-}
-
-class _Block extends StatelessWidget {
-  const _Block({
-    required this.title,
-    this.badge,
-    this.aside,
-    this.warn = false,
-    required this.child,
-  });
-
-  final String title;
-  final String? badge;
-  final String? aside;
-  final bool warn;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.c;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 12, CalviSize.gutter, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Row(
-              children: [
-                Expanded(child: Text(title, style: context.t.titleMedium)),
-                if (badge != null) _Badge(text: badge!, warn: warn),
-                if (aside != null) Text(aside!, style: context.t.bodyMedium),
-              ],
-            ),
-          ),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: c.card,
-              border: Border.all(color: c.cardBorder),
-              borderRadius: BorderRadius.circular(CalviSize.rLarge),
-              boxShadow: context.shadowCard,
-            ),
-            child: child,
-          ),
-          const SizedBox(height: 4),
-        ],
-      ),
-    );
-  }
-}
-
-/// The verdict beside a section title: green on the way, amber off it.
-///
-/// The one-glance answer to whether the chart under it is worth reading, which
-/// is why it is a colour and not another grey pill.
-class _Badge extends StatelessWidget {
-  const _Badge({required this.text, required this.warn});
-
-  final String text;
-  final bool warn;
-
-  /// The figure leads, so it carries the weight and the words after it do not.
-  static final _lead = RegExp(r'^(\S+)\s+(.*)$');
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.c;
-    final m = _lead.firstMatch(text);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: (warn ? c.carbs : c.success).withValues(alpha: warn ? 0.16 : 0.13),
-        borderRadius: BorderRadius.circular(CalviSize.rPill),
-      ),
-      child: Text.rich(
-        TextSpan(
-          text: m == null ? text : '${m.group(1)} ',
-          style: const TextStyle(fontWeight: FontWeight.w700),
-          children: [
-            if (m != null)
-              TextSpan(
-                text: m.group(2),
-                style: const TextStyle(fontWeight: FontWeight.w500),
-              ),
-          ],
-        ),
-        style: context.t.labelSmall?.copyWith(
-          color: chipInk(context, warn ? context.c.carbs : context.c.success),
-        ),
-      ),
-    );
-  }
-}
-
-class _Figure extends StatelessWidget {
-  const _Figure({
-    required this.value,
-    required this.cap,
-    this.suffix,
-    this.dim = false,
-    this.tight = false,
-  });
-
-  final String value;
-  final String cap;
-  final String? suffix;
-  final bool dim;
-
-  /// Sized by its own text instead of taking an equal share of the row.
-  final bool tight;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.c;
-    final body = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text.rich(
-          TextSpan(
-            text: value,
-            children: [
-              if (suffix != null)
-                TextSpan(
-                  text: suffix,
-                  style: context.t.headlineMedium?.copyWith(color: c.textSecondary),
-                ),
-            ],
-          ),
-          style: context.t.headlineLarge?.copyWith(
-            fontSize: 30,
-            height: 1,
-            color: dim ? c.textSecondary : c.text,
-          ),
-        ),
-        const SizedBox(height: 5),
-        // One line, the way the demo sets it: a caption that wraps turns a pair
-        // of figures into two columns of different heights.
-        Text(
-          cap,
-          maxLines: 1,
-          softWrap: false,
-          overflow: TextOverflow.visible,
-          style: context.t.labelSmall?.copyWith(fontWeight: FontWeight.w400),
-        ),
-      ],
-    );
-    return tight ? body : Expanded(child: body);
   }
 }
 

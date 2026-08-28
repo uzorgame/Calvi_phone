@@ -432,8 +432,13 @@ class _MacroBarsState extends State<MacroBars> with SingleTickerProviderStateMix
           ],
         ),
         const SizedBox(height: 12),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        /* Переноситься, а не вилазить. Три підписи стояли рядом, який не вмів
+           стати вужчим: на збільшеному системному шрифті «Вуглеводи» виїжджало
+           за картку смугастим попереджувачем. Тепер третій просто переходить на
+           наступний рядок, і легенда лишається легендою. */
+        Wrap(
+          alignment: WrapAlignment.center,
+          runSpacing: 6,
           children: [
             _Key(label: l.macroProtein, colour: c.protein),
             _Key(label: l.macroFat, colour: c.fats),
