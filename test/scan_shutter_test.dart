@@ -47,8 +47,8 @@ void main() {
       reason: 'кнопка обіцяє знімок, якого в цьому режимі не буде',
     );
 
-    // І назад: у страві вона на місці, бо там знімок і є вся суть.
-    await tester.tap(find.bySemanticsLabel('Страва'));
+    // І назад: у фото вона на місці, бо там знімок і є вся суть.
+    await tester.tap(find.bySemanticsLabel('Фото'));
     await tester.pump(const Duration(milliseconds: 600));
     expect(find.bySemanticsLabel('Зняти'), findsOneWidget);
   });

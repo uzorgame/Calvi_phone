@@ -1,5 +1,5 @@
 {
-  "camDish": "Meal",
+  "camDish": "Photo",
   "camBarcode": "Barcode",
   "camTitle": "Scanner",
   "camShoot": "Take a photo",
@@ -12,7 +12,7 @@
   },
 
   "camReading": "Reading…",
-  "camHintDish": "point it at the plate",
+  "camHintDish": "point it at a plate or a pack",
   "camHintBarcode": "the code inside the frame",
 
   "camShotFailed": "The shot did not work",
@@ -35,8 +35,27 @@
   "camAllergyTraces": "May contain traces of: {list}",
   "@camAllergyTraces": { "placeholders": { "list": { "type": "String" } } },
   "@camIngredients": { "placeholders": { "text": { "type": "String" } } },
-  "camUnknownCode": "I do not know this code",
-  "camUnknownCodeNote": "It is not in our base, and not in the open one either. Photograph the meal itself or write the name in words, and Nora will count it.",
+  "camUnknownCode": "This product is not in any base",
+  "camUnknownCodeNote": "Not in ours, and not in the open one. Photograph the nutrition table on the packet and I will copy the figures from it. This is free.",
+
+  "camNotAProduct": "That is not a product barcode",
+  "camNotAProductNote": "A link or an internal code was read. Aim at the striped bar with digits under it.",
+
+  "camOfflineTitle": "No network",
+  "camOffline": "The code was read, but there is nobody to ask about it. Try again when you are back online.",
+  "camSlowTitle": "The answer did not arrive",
+  "camSlow": "The code was read and the reference took too long. Try again.",
+  "camSignedOutTitle": "Please sign in again",
+  "camSignedOut": "The session is no longer valid, so the reference does not recognise us. Sign in again and the scanner will work.",
+  "camServerDownTitle": "Our server did not answer",
+  "camServerDown": "This is not about the code or the camera. Try again in a minute.",
+
+  "camGapNote": "No base knows this figure. Photograph the label and I will fill it in.",
+  "camShootLabel": "Photograph the label",
+  "camAskNoraInstead": "No label, ask Nora instead",
+  "camLabelAim": "aim at the nutrition table",
+  "camLabelReading": "Copying the figures off the packet…",
+  "camLabelNoShot": "The shot did not come out. Try photographing the label again.",
   "camEstimate": " kcal, an estimate",
   "camNotRead": "Could not make it out",
   "camShotReady": "The shot is ready",
@@ -50,7 +69,7 @@
   "camSendToNora": "Send to Nora",
 
   "camOfflineShot": "No connection. You can send the shot to Nora later",
-  "camNoTokens": "Out of tokens for today",
+  "camNoTokens": "Out of tokens",
 
   "camKcalPer": " kcal per {grams} g",
   "@camKcalPer": {"placeholders":{"grams":{"type":"int"}}},

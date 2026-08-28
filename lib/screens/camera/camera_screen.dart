@@ -11,6 +11,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../data/allergens.dart';
 import '../../data/app_scope.dart';
 import '../../data/remote/api.dart';
+import '../../data/remote/food_repository.dart';
 import '../../design/icons.dart';
 import '../../design/shell.dart';
 import '../../design/theme.dart';
@@ -70,6 +71,17 @@ List<_ModeInfo> _modes(L l) => [
 /// The one product the demo base knows.
 const demoBarcode = '4820001234567';
 
+/* Довжини, які бувають у справжнього штрихкоду товару: GTIN-8, 12, 13 і 14.
+ *
+ * Сканер читає і QR, і Code128, і це навмисно: на пачках трапляється всяке, і
+ * мовчазна камера гірша за камеру, яка каже, що саме побачила. Але шукати
+ * товар за прочитаним посиланням чи кодом партії немає сенсу, і робити з цього
+ * «не знаю цього коду» тим більше.
+ *
+ * Та сама перевірка стоїть і на сервері. Тут вона економить запит і секунду
+ * чекання, там боронить від застосунку, який її не робив. */
+final _gtin = RegExp(r'^(\d{8}|\d{12,14})$');
+
 /* The viewfinder is its own world and does not take the app's palette: a
    viewfinder that goes light in the light theme stops being a viewfinder. */
 const _ink = Color(0xFFFFFFFF);
@@ -127,7 +139,24 @@ class _CameraScreenState extends State<CameraScreen> {
      сервер, і жодного токена це не коштує. */
   String? _code;
   FoodHit? _food;
-  bool _unknown = false;
+
+  /* Чим скінчився скан.
+   *
+   * Тут стояло одне `bool _unknown`, і в нього зливалось усе: коду немає в
+   * базі, прочитався не штрихкод, сесія протухла, сервер упав, мережа зникла,
+   * відповідь не встигла. Людина на всі шість бачила «не знаю цього коду», а
+   * зробити з цим вона могла тільки в одному випадку з шести. */
+  Scanned? _scan;
+
+  /* --- Етикетка ---
+   *
+   * Того, чого немає у відкритих базах, більшість: із пʼяти пачок звичайного
+   * холодильника вона знала одну. Зате таблиця поживності надрукована на
+   * кожній, і в мить сканування вона вже в кадрі. Тому знімок етикетки це не
+   * запасний вихід, а основний шлях, і живе він тут, у сканері, поруч із
+   * кодом, до якого прив'яжеться прочитане. */
+  bool _aiming = false;
+  bool _reading = false;
 
   /* Чи вже вільна лінза для того читача, який зараз на екрані.
    *
@@ -204,14 +233,30 @@ class _CameraScreenState extends State<CameraScreen> {
        а якщо в неї потрапило двоє, людина цілилась у того, що ближче. */
     Barcode? best;
     Rect? bestRect;
+    var bestIsProduct = false;
     for (final b in capture.barcodes) {
       final value = b.rawValue?.trim();
       if (value == null || value.length < 6) continue;
 
+      /* Схоже на штрихкод товару йде поперед усього іншого.
+       *
+       * У кадрі поруч зі штрихкодом часто лежить іще щось читабельне: QR на
+       * пакованні, код партії, наліпка магазину. Раніше перемагав найбільший, і
+       * ним цілком міг виявитись QR завбільшки з долоню. Тепер більший розмір
+       * вирішує тільки між рівними: у режимі штрихкоду ми шукаємо товар. */
+      final product = _gtin.hasMatch(value);
+      if (bestIsProduct && !product) continue;
+
       final rect = codeRect(b, capture.size, _view);
-      if (best == null || (rect != null && (bestRect?.longestSide ?? 0) < rect.longestSide)) {
+      final better =
+          best == null ||
+          (product && !bestIsProduct) ||
+          (rect != null && (bestRect?.longestSide ?? 0) < rect.longestSide);
+
+      if (better) {
         best = b;
         bestRect = rect ?? bestRect;
+        bestIsProduct = product;
       }
     }
 
@@ -282,8 +327,24 @@ class _CameraScreenState extends State<CameraScreen> {
       _busy = true;
       _code = code;
       _food = null;
-      _unknown = false;
+      _scan = null;
     });
+
+    /* Прочиталось щось, що штрихкодом товару не є: QR із посиланням, код
+       складу, наліпка партії.
+     *
+     * Раніше таке їхало на сервер як штрихкод, поверталось помилкою і ставало
+     * тим самим «не знаю цього коду». Звідси й бралось відчуття, що сканер
+     * читає геть усе і не знає нічого: він справді читав усе. Тепер це видно
+     * тут, без жодного запиту, і сказано прямо. */
+    if (!_gtin.hasMatch(code)) {
+      setState(() {
+        _scan = Scanned.notAProduct;
+        _busy = false;
+        _done = true;
+      });
+      return;
+    }
 
     /* Камеру тут навмисно не зупиняємо. Зупинена вона лишає під карткою
        завмерлий кадр, а зупинити й запустити наново означало б ще одну передачу
@@ -291,15 +352,101 @@ class _CameraScreenState extends State<CameraScreen> {
        `_busy` і `_done` не пускають далі. */
 
     final sync = AppScope.of(context).sync;
-    final found = sync == null ? null : await sync.foods.byBarcode(code);
+    final res = sync == null ? const ScanResult(Scanned.offline) : await sync.foods.byBarcode(code);
 
     if (!mounted) return;
     setState(() {
-      _food = found;
-      _unknown = found == null;
+      _food = res.food;
+      _scan = res.state;
       _busy = false;
       _done = true;
     });
+  }
+
+  /// Далі етикетка: людина наводить на таблицю поживності, картка відступає.
+  ///
+  /// Разом із карткою міняється й читач лінзи. Етикетку знімає звичайна камера,
+  /// а не сканер кодів: сканер уміє тільки читати коди і кадру не віддає.
+  void _aim() {
+    HapticFeedback.selectionClick();
+    setState(() {
+      _aiming = true;
+      _done = false;
+      _lensFree = false;
+    });
+    _handLens();
+  }
+
+  /// Знімає етикетку і віддає її моделі переписати.
+  ///
+  /// Не оцінка, а переписування: цифри надрукував виробник, і робота моделі
+  /// перенести їх, а не порахувати. Прочитане лягає в спільну базу за цим
+  /// штрихкодом, тому наступному воно дістанеться задарма і без зйомки.
+  Future<void> _readLabel() async {
+    final code = _code;
+    final sync = AppScope.of(context).sync;
+    if (code == null || _reading) return;
+
+    HapticFeedback.mediumImpact();
+    setState(() => _reading = true);
+    await _capture();
+
+    final shot = _shot;
+    if (!mounted) return;
+
+    if (shot == null || sync == null) {
+      setState(() {
+        _reading = false;
+        _aiming = false;
+        _lensFree = false;
+        _done = true;
+        _scan = Scanned.unknown;
+        _trouble = L.of(context).camLabelNoShot;
+      });
+      _handLens();
+      return;
+    }
+
+    final read = await sync.foods.readLabel(barcode: code, shot: shot);
+    if (!mounted) return;
+
+    /* Знімок далі не потрібен нікому: числа з нього вже зняті, а тримати кадр
+       упаковки в памʼяті означало б віддати його потім у чат замість страви. */
+    _shot = null;
+
+    setState(() {
+      _reading = false;
+      _aiming = false;
+      // Лінза вертається сканеру, і теж по черзі, а не миттю.
+      _lensFree = false;
+      _done = true;
+
+      final food = read.food;
+      if (food != null) {
+        _food = food;
+        _scan = food.complete ? Scanned.found : Scanned.partial;
+        _trouble = null;
+        return;
+      }
+
+      /* Не вийшло. Причина стоїть на картці, і вона різна: таблиці не видно це
+         одне, а немає мережі зовсім інше, і перезнімати в другому випадку
+         немає сенсу. */
+      final l = L.of(context);
+      _scan = Scanned.unknown;
+      _trouble =
+          read.trouble ??
+          switch (read.failure?.code) {
+            'offline' => l.camOffline,
+            'slow' => l.camSlow,
+            _ => switch (read.failure?.status) {
+              401 || 403 => l.camSignedOut,
+              _ => l.camServerDown,
+            },
+          };
+    });
+
+    _handLens();
   }
 
   /// Перемикає режим і передає камеру від одного читача до іншого.
@@ -319,12 +466,27 @@ class _CameraScreenState extends State<CameraScreen> {
       _done = false;
       _code = null;
       _food = null;
-      _unknown = false;
+      _scan = null;
+      _aiming = false;
+      _reading = false;
       _lensFree = false;
       _parked = false;
       _lock = null;
     });
 
+    _handLens();
+  }
+
+  /// Передає лінзу від одного читача до іншого.
+  ///
+  /// Камера на телефоні одна, а читачів двоє: сканер кодів і звичайний
+  /// видошукач. Новий не можна відкривати, поки старий ще тримає пристрій, тому
+  /// живий шар спершу зникає з дерева зовсім, і аж за чверть секунди
+  /// зʼявляється наступний. Тут ховався сірий екран сканера.
+  ///
+  /// Потрібно не тільки на перемиканні режиму: зйомка етикетки теж міняє
+  /// читача, бо знімає її звичайна камера, а не сканер.
+  void _handLens() {
     _handoff?.cancel();
     _handoff = Timer(const Duration(milliseconds: 260), () {
       if (mounted) setState(() => _lensFree = true);
@@ -334,16 +496,24 @@ class _CameraScreenState extends State<CameraScreen> {
   /// Назад до читання, коли людина хоче спробувати ще раз.
   void _again() {
     _votes.clear();
+    // Виходимо зі зйомки етикетки: лінза вертається сканеру, і теж по черзі.
+    final wasAiming = _aiming;
+
     setState(() {
       _done = false;
       _code = null;
       _food = null;
-      _unknown = false;
+      _scan = null;
       _trouble = null;
+      _aiming = false;
+      _reading = false;
+      if (wasAiming) _lensFree = false;
       // Аж тепер рамка знову вільна шукати.
       _parked = false;
       _lock = null;
     });
+
+    if (wasAiming) _handLens();
   }
 
   /* The torch belongs to the camera, so a screen without one simply does not
@@ -365,13 +535,21 @@ class _CameraScreenState extends State<CameraScreen> {
   void _send() {
     final food = _food;
     final code = _code;
-    if (food != null && code != null) {
+
+    /* Тільки повний рядок їде в день.
+     *
+     * Неповний сюди не потрапляє: у нього головна кнопка веде на етикетку. Але
+     * перевірка стоїть і тут, бо це остання розвилка перед записом, а запис із
+     * порожнім білком уже одного разу став нулем у щоденнику. */
+    if (food != null && code != null && _scan == Scanned.found) {
       widget.onSend(CodeShot(code: code, food: food));
       return;
     }
 
-    // Код прочитався, але його не знає жодна база: не запис, а розмова.
-    if (code != null && _unknown) {
+    /* Код прочитався, етикетки на пачці немає або вона не читається: не запис,
+       а розмова. Останній вихід, а не перший: етикетку модель переписує, а тут
+       вона здогадується, і здогад коштує токен. */
+    if (code != null && _scan == Scanned.unknown) {
       widget.onSend(CodeTalk(code));
       return;
     }
@@ -442,7 +620,13 @@ class _CameraScreenState extends State<CameraScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final slim = _mode == CamMode.barcode;
+    /* Вузька рамка і сканер кодів це те саме рішення: у режимі штрихкоду лінзу
+       тримає читач кодів, а рамка звужується під смужку.
+     *
+     * Поки знімають етикетку, і те, і те відступає. Таблиця поживності це блок
+     * тексту, а не смужка, і знімає її звичайна камера: сканер кодів кадру не
+     * віддає взагалі, і `_capture()` при ньому повернув би порожнечу. */
+    final slim = _mode == CamMode.barcode && !_aiming;
 
     return Scaffold(
       backgroundColor: _dark,
@@ -570,9 +754,20 @@ class _CameraScreenState extends State<CameraScreen> {
               /* Only while it is reading. Where to point is what the frame is
                    for, and a line repeating it under every shot is a line people
                    stop seeing on the second day. */
-              if (_busy)
+              /* Поки знімають етикетку, підказка каже, куди саме цілитись.
+               *
+               * Це не ввічливість, а умова того, що з кадру взагалі щось вийде:
+               * модель переписує таблицю поживності, і кадр із лицьового боку
+               * пачки не містить її взагалі. Одне речення тут економить другу
+               * і третю спробу. */
+              if (_aiming || _busy || _reading)
                 Text(
-                  l.camReading,
+                  _reading
+                      ? l.camLabelReading
+                      : _aiming
+                      ? l.camLabelAim
+                      : l.camReading,
+                  textAlign: TextAlign.center,
                   style: TextStyle(
                     color: _ink.withValues(alpha: 0.78),
                     fontSize: CalviSize.fsMicro,
@@ -585,12 +780,13 @@ class _CameraScreenState extends State<CameraScreen> {
               _Deck(
                 mode: _mode,
                 flash: _flash,
-                busy: _busy,
+                busy: _busy || _reading,
+                aiming: _aiming,
                 slot: widget.slot,
                 onMode: _setMode,
                 onFlash: _torch,
                 onGallery: _fromGallery,
-                onShoot: _shoot,
+                onShoot: _aiming ? () => unawaited(_readLabel()) : _shoot,
               ),
               const SizedBox(height: 18),
             ],
@@ -619,8 +815,9 @@ class _CameraScreenState extends State<CameraScreen> {
               code: _code,
               food: _food,
               trouble: _trouble,
-              unknown: _unknown,
+              scan: _scan,
               onAgain: _again,
+              onAim: _aim,
               onSend: _send,
             ),
           ),
@@ -1052,6 +1249,7 @@ class _Deck extends StatelessWidget {
     required this.onFlash,
     required this.onShoot,
     required this.onGallery,
+    this.aiming = false,
   });
 
   final CamMode mode;
@@ -1061,6 +1259,9 @@ class _Deck extends StatelessWidget {
   final ValueChanged<CamMode> onMode;
   final VoidCallback onFlash;
   final VoidCallback onShoot;
+
+  /// Знімаємо етикетку. Тоді затвор потрібен і в режимі штрихкоду.
+  final bool aiming;
 
   /// A picture that already exists, chosen instead of taken.
   final VoidCallback onGallery;
@@ -1140,7 +1341,9 @@ class _Deck extends StatelessWidget {
                * Місце кнопки лишається порожнім: без нього спалах і підпис
                * картки роз'їхались би до країв, і нижній ряд стрибав би
                * щоразу, коли міняють режим. */
-              if (mode == CamMode.barcode)
+              /* Виняток один: коли знімають етикетку. Тоді кадр справді
+                 потрібен, і затвор повертається на своє місце. */
+              if (mode == CamMode.barcode && !aiming)
                 const SizedBox(width: 68, height: 68)
               else
                 _Shutter(busy: busy, onTap: onShoot),
@@ -1463,16 +1666,20 @@ class _Result extends StatelessWidget {
     required this.mode,
     required this.slot,
     required this.onAgain,
+    required this.onAim,
     required this.onSend,
     this.code,
     this.food,
     this.trouble,
-    this.unknown = false,
+    this.scan,
   });
 
   final CamMode mode;
   final String slot;
   final VoidCallback onAgain;
+
+  /// Далі етикетка: людина наводить на таблицю поживності.
+  final VoidCallback onAim;
   final VoidCallback onSend;
 
   /// Прочитаний код і те, що по ньому знайшлось у довіднику.
@@ -1482,8 +1689,8 @@ class _Result extends StatelessWidget {
   /// Чому кадр не відбувся, коли не відбувся.
   final String? trouble;
 
-  /// Код прочитано, але такого продукту не знає ні наша база, ні відкрита.
-  final bool unknown;
+  /// Чим скінчився скан. Порожньо, коли скану не було: це кадр страви.
+  final Scanned? scan;
 
   @override
   Widget build(BuildContext context) {
@@ -1493,6 +1700,25 @@ class _Result extends StatelessWidget {
     final item = food;
     // Числа за звичну порцію, а за її відсутності за сто грамів.
     final plate = item?.forGrams();
+
+    /* Неповну картку записати не можна, і кнопка про це каже прямо.
+     *
+     * Доти неповна картка від повної нічим не відрізнялась: порожній білок
+     * малювався нулем, і «Записати в обід» писало в день сир без білка. Тепер
+     * головна дія тут інша, і вона веде туди, де число справді є, на пачку. */
+    final gap = scan == Scanned.partial;
+
+    /* Що показувати, коли скан не дав товару. Кожен стан веде людину в інше
+       місце, і плутати їх означає повернутись до одного «не знаю цього коду». */
+    final (title, note) = switch (scan) {
+      Scanned.unknown => (l.camUnknownCode, trouble ?? l.camUnknownCodeNote),
+      Scanned.notAProduct => (l.camNotAProduct, l.camNotAProductNote),
+      Scanned.offline => (l.camOfflineTitle, l.camOffline),
+      Scanned.slow => (l.camSlowTitle, l.camSlow),
+      Scanned.signedOut => (l.camSignedOutTitle, l.camSignedOut),
+      Scanned.broken => (l.camServerDownTitle, l.camServerDown),
+      _ => (l.camNotRead, trouble ?? ''),
+    };
 
     return Align(
       alignment: Alignment.bottomCenter,
@@ -1565,25 +1791,47 @@ class _Result extends StatelessWidget {
                 Row(
                   children: [
                     /* Кожній клітинці її колір, той самий, що в кілець дня:
-                       око вже вивчило цю мову на головному екрані. */
+                       око вже вивчило цю мову на головному екрані.
+                     *
+                     * Невідоме число малюється рискою і блідне.
+                     *
+                     * Тут стояв `.round()` на числі, якого могло не бути, і
+                     * порожнє поле ставало нулем прямо на екрані: сир із двадцятьма
+                     * пʼятьма грамами білка показувався як «Б 0». Риска замість
+                     * нуля це не косметика, це різниця між «не знаю» і
+                     * неправдою. */
                     for (final chip in [
-                      (l.macroPShort(plate.protein.round()), c.protein),
-                      (l.macroFShort(plate.fat.round()), c.fats),
-                      (l.macroCShort(plate.carbs.round()), c.carbs),
+                      (
+                        plate.protein == null
+                            ? l.macroPNone
+                            : l.macroPShort(plate.protein!.round()),
+                        plate.protein != null,
+                        c.protein,
+                      ),
+                      (
+                        plate.fat == null ? l.macroFNone : l.macroFShort(plate.fat!.round()),
+                        plate.fat != null,
+                        c.fats,
+                      ),
+                      (
+                        plate.carbs == null ? l.macroCNone : l.macroCShort(plate.carbs!.round()),
+                        plate.carbs != null,
+                        c.carbs,
+                      ),
                     ])
                       Padding(
                         padding: const EdgeInsets.only(right: 6),
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                           decoration: BoxDecoration(
-                            color: chip.$2.withValues(alpha: 0.14),
+                            color: chip.$3.withValues(alpha: chip.$2 ? 0.14 : 0.07),
                             borderRadius: BorderRadius.circular(CalviSize.rPill),
                           ),
                           child: Text(
                             chip.$1,
                             style: context.t.labelSmall?.copyWith(
                               fontSize: 12,
-                              color: chip.$2,
+                              color: chip.$3.withValues(alpha: chip.$2 ? 1 : 0.45),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -1592,6 +1840,14 @@ class _Result extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 10),
+
+                /* Чого саме бракує і що з цим робити. Стоїть над рядком про
+                   грамовку, бо це важливіше за неї: без цього числа картка не
+                   відповідь, а половина відповіді. */
+                if (gap) ...[
+                  Text(l.camGapNote, style: context.t.bodyMedium?.copyWith(color: c.protein)),
+                  const SizedBox(height: 8),
+                ],
                 /* Чесність про грамовку. Коли виробник назвав порцію, числа
                    стоять за неї, і це сказано прямо. Коли ні, числа за сто
                    грамів, і це теж сказано прямо, бо «367 ккал» без ваги
@@ -1613,10 +1869,17 @@ class _Result extends StatelessWidget {
                     style: context.t.labelSmall?.copyWith(fontSize: 12, height: 1.4),
                   ),
                 ],
-              ] else if (unknown) ...[
-                Text(l.camUnknownCode, style: context.t.titleMedium?.copyWith(fontSize: 17)),
+              ] else if (scan != null) ...[
+                /* Код показується і тоді, коли товару за ним немає.
+                   Це не деталь: людина бачить, що саме прочиталось, і може
+                   звірити з цифрами під смужкою на пачці. */
+                if (code != null) ...[
+                  Text(code!, style: context.t.labelSmall?.copyWith(fontSize: 12)),
+                  const SizedBox(height: 4),
+                ],
+                Text(title, style: context.t.titleMedium?.copyWith(fontSize: 17)),
                 const SizedBox(height: 8),
-                Text(l.camUnknownCodeNote, style: context.t.bodyMedium),
+                Text(note, style: context.t.bodyMedium),
               ] else if (trouble != null) ...[
                 Text(l.camNotRead, style: context.t.titleMedium?.copyWith(fontSize: 17)),
                 const SizedBox(height: 8),
@@ -1651,17 +1914,64 @@ class _Result extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     flex: 2,
+                    /* Головна дія залежить від того, що сталось, і це головна
+                       зміна на цій картці.
+                     *
+                     * Повний продукт пишеться в день одразу. Неповний веде на
+                     * етикетку, бо писати в день число, якого немає, ми більше
+                     * не будемо. Незнайомий код теж веде на етикетку: вона є на
+                     * кожній пачці, а Нора здогадується і коштує токен. Решта
+                     * станів це не про товар, і кнопка там про них. */
                     child: CalviButton(
-                      // Знайдений продукт пишеться в день одразу; знімок їде до
-                      // Нори, і запис зробить уже вона.
-                      label: item != null
-                          ? l.camLogInto(slotIntoLabel(context, slot))
-                          : l.camSendToNora,
-                      onTap: onSend,
+                      label: switch (scan) {
+                        Scanned.found => l.camLogInto(slotIntoLabel(context, slot)),
+                        Scanned.partial || Scanned.unknown => l.camShootLabel,
+                        Scanned.notAProduct => l.camAgain,
+                        Scanned.offline ||
+                        Scanned.slow ||
+                        Scanned.broken ||
+                        Scanned.signedOut => l.camAgain,
+                        null =>
+                          item != null
+                              ? l.camLogInto(slotIntoLabel(context, slot))
+                              : l.camSendToNora,
+                      },
+                      onTap: switch (scan) {
+                        Scanned.partial || Scanned.unknown => onAim,
+                        Scanned.notAProduct ||
+                        Scanned.offline ||
+                        Scanned.slow ||
+                        Scanned.broken ||
+                        Scanned.signedOut => onAgain,
+                        _ => onSend,
+                      },
                     ),
                   ),
                 ],
               ),
+
+              /* Останній вихід, і саме тому він тут, а не кнопкою.
+               *
+               * Ваговий товар без етикетки буває: булочка з пекарні, сир на
+               * розріз, розвага з наліпкою магазину. Тоді лишається Нора, і
+               * вона здогадається за назвою. Це коштує токен і дає оцінку, а не
+               * цифри з пачки, тому й стоїть нижче за етикетку. */
+              if (scan == Scanned.unknown) ...[
+                const SizedBox(height: 10),
+                Center(
+                  child: GestureDetector(
+                    onTap: onSend,
+                    behavior: HitTestBehavior.opaque,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+                      child: Text(
+                        l.camAskNoraInstead,
+                        style: context.t.bodyMedium?.copyWith(decoration: TextDecoration.underline),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),

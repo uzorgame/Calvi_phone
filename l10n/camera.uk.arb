@@ -1,5 +1,5 @@
 {
-  "camDish": "Страва",
+  "camDish": "Фото",
   "camBarcode": "Штрихкод",
   "camTitle": "Сканер",
   "camShoot": "Зняти",
@@ -8,7 +8,7 @@
   "camIntoSlot": "в {slot}",
 
   "camReading": "Читаю…",
-  "camHintDish": "наведи на тарілку",
+  "camHintDish": "наведи на тарілку або пачку",
   "camHintBarcode": "код у рамку",
 
   "camShotFailed": "Кадр не вийшов",
@@ -31,8 +31,27 @@
   "camAllergyTraces": "Може містити сліди: {list}",
   "@camAllergyTraces": { "placeholders": { "list": { "type": "String" } } },
   "@camIngredients": { "placeholders": { "text": { "type": "String" } } },
-  "camUnknownCode": "Не знаю цього коду",
-  "camUnknownCodeNote": "Ні в нашій базі, ні у відкритій його немає. Сфотографуй саму страву або напиши назву словами, і Нора порахує.",
+  "camUnknownCode": "Немає цього товару в базі",
+  "camUnknownCodeNote": "Ні в нашій, ні у відкритій. Зніми таблицю поживності з упаковки, і я перепишу числа з неї. Це безкоштовно.",
+
+  "camNotAProduct": "Це не штрихкод товару",
+  "camNotAProductNote": "Прочиталось посилання або службовий код. Наведи на смужку з цифрами під нею.",
+
+  "camOfflineTitle": "Немає мережі",
+  "camOffline": "Код прочитано, але спитати про нього нема кого. Спробуй, коли зʼявиться звʼязок.",
+  "camSlowTitle": "Відповідь не встигла",
+  "camSlow": "Код прочитано, а довідник забарився. Спробуй ще раз.",
+  "camSignedOutTitle": "Треба зайти наново",
+  "camSignedOut": "Сесія недійсна, тому довідник нас не впізнає. Зайди в застосунок наново, і сканер запрацює.",
+  "camServerDownTitle": "Наш сервер не відповів",
+  "camServerDown": "Це не через код і не через камеру. Спробуй за хвилину.",
+
+  "camGapNote": "Цього числа не знає жодна база. Зніми етикетку, і я його дочитаю.",
+  "camShootLabel": "Зняти етикетку",
+  "camAskNoraInstead": "Етикетки немає, спитати Нору",
+  "camLabelAim": "наведи на таблицю поживності",
+  "camLabelReading": "Переписую числа з пачки…",
+  "camLabelNoShot": "Кадр не вийшов. Спробуй зняти етикетку ще раз.",
   "camEstimate": " ккал, оцінка",
   "camNotRead": "Не розібрала",
   "camShotReady": "Знімок готовий",
@@ -42,7 +61,7 @@
   "camSendToNora": "Надіслати Норі",
 
   "camOfflineShot": "Не дістаю мережі. Знімок можна надіслати Норі пізніше",
-  "camNoTokens": "Токени на сьогодні скінчились",
+  "camNoTokens": "Токени скінчились",
 
   "camKcalPer": " ккал на {grams} г",
   "camKcalFor": " ккал за {grams} г"

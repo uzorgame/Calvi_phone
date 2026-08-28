@@ -71,4 +71,94 @@ void main() {
     expect(parsed.icon, 'sweet');
     expect(parsed.portionG, isNull);
   });
+
+  /* --- Порожнє поле ---
+   *
+   * Сир Karička, код 8586000411364. У відкритій базі в нього не заповнене поле
+   * білка, а на упаковці написано 25 грамів. Застосунок малював «Б 0», і людина
+   * на білковій цілі бачила число, якого не існує. */
+  group('невідоме число лишається невідомим', () {
+    final eidam = FoodHit.fromJson(
+      const {
+        'id': 'f-4',
+        'canonicalName': 'eidam plátky karička',
+        'name': 'Eidam plátky, KARIČKA',
+        'kcal': 343,
+        'proteinG': null,
+        'fatG': 27,
+        'carbsG': 1,
+        'icon': 'cheese',
+      },
+      complete: false,
+      missing: const ['protein'],
+    );
+
+    test('порожній білок не стає нулем', () {
+      expect(eidam.proteinG, isNull, reason: 'нуль тут був би не обережністю, а неправдою');
+      expect(eidam.fatG, 27);
+      expect(eidam.complete, isFalse);
+      expect(eidam.missing, ['protein']);
+    });
+
+    test('множення на вагу не робить невідоме відомим', () {
+      final plate = eidam.forGrams(200);
+
+      expect(plate.kcal, 686);
+      expect(plate.fat, closeTo(54, 0.01));
+      expect(plate.protein, isNull, reason: 'чого база не знає на 100 г, того не знає і на 200');
+    });
+
+    test('повнота за замовчуванням не ламає старий сервер', () {
+      /* Старіший сервер про повноту нічого не каже. Тоді рядок вважається
+         повним: так поводився застосунок і доти, і це не гірше за раптове
+         «дочитай етикетку» на кожному товарі. */
+      final old = FoodHit.fromJson(const {
+        'id': 'f-5',
+        'canonicalName': 'борщ',
+        'name': 'Борщ',
+        'kcal': 58,
+        'proteinG': 2.1,
+        'fatG': 2.6,
+        'carbsG': 6.4,
+        'icon': 'soup',
+      });
+
+      expect(old.complete, isTrue);
+      expect(old.missing, isEmpty);
+    });
+  });
+
+  /* --- Що взагалі є штрихкодом товару ---
+   *
+   * Сканер читає і QR, і Code128. Раніше будь-яке прочитане значення їхало на
+   * сервер як штрихкод і поверталось як «не знаю цього коду»: звідси й бралось
+   * відчуття, що застосунок сканує все і не знає нічого. */
+  group('форма штрихкоду', () {
+    final gtin = RegExp(r'^(\d{8}|\d{12,14})$');
+
+    test('справжні коди з полиці проходять', () {
+      for (final code in [
+        '5201360531172', // 7DAYS, EAN-13
+        '8586000411364', // Karička, EAN-13
+        '4036300227645', // Kaufland, EAN-13
+        '8716251043643', // яйця, EAN-13
+        '049000006346', // UPC-A
+        '20015823', // EAN-8
+      ]) {
+        expect(gtin.hasMatch(code), isTrue, reason: '$code це справжній штрихкод товару');
+      }
+    });
+
+    test('усе інше штрихкодом товару не є', () {
+      for (final read in [
+        'https://calvi.uk/x', // QR із посиланням
+        'WIFI:S:home;T:WPA;;', // QR мережі
+        'L17041909 30 16', // код партії з пачки
+        '1234567', // сім цифр: такого GTIN не буває
+        '123456789012345', // пʼятнадцять цифр
+      ]) {
+        expect(gtin.hasMatch(read), isFalse, reason: '«$read» не має йти в пошук товару');
+      }
+    });
+  });
 }
