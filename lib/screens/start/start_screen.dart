@@ -923,8 +923,7 @@ class _SignInState extends State<_SignIn> {
    *
    * Питання про два щоденники тут не ставиться навмисно: на першому запуску
    * місцевих записів ще немає, і сама ситуація неможлива. */
-  Future<void> _google() =>
-      _enter('google', (login, device) => login.signIn(deviceName: device));
+  Future<void> _google() => _enter('google', (login, device) => login.signIn(deviceName: device));
 
   Future<void> _apple() =>
       _enter('apple', (login, device) => login.signInApple(deviceName: device));
@@ -1040,11 +1039,7 @@ class _SignInState extends State<_SignIn> {
                    поштою», за якою не було нічого: ні маршруту, ні планів.
                    Поки триває вхід, вона теж мовчить: піти звідси на пів дорозі
                    означає лишити акаунт у стані, якого ніхто не чекав. */
-                CalviGhost(
-                  label: l.startSignInSkip,
-                  enabled: !_busy,
-                  onTap: widget.onDone,
-                ),
+                CalviGhost(label: l.startSignInSkip, enabled: !_busy, onTap: widget.onDone),
               ],
             ),
           ),

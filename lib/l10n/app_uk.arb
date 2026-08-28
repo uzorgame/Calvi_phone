@@ -58,9 +58,51 @@
       }
     }
   },
+  "@slotEraseBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "@todayCodeTalk": {
     "placeholders": {
       "code": {
+        "type": "String"
+      }
+    }
+  },
+  "@wkLoggedValue": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@wkNoraFailed": {
+    "placeholders": {
+      "why": {
+        "type": "String"
+      }
+    }
+  },
+  "@wkOffNorm": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "@wkPastRow": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "@wkWaterValue": {
+    "placeholders": {
+      "l": {
         "type": "String"
       }
     }
@@ -196,39 +238,55 @@
   "camAllergen": "Алерген!",
   "camAllergyContains": "Містить твій алерген: {list}",
   "camAllergyTraces": "Може містити сліди: {list}",
+  "camAskNoraInstead": "Етикетки немає, спитати Нору",
   "camBarcode": "Штрихкод",
   "camBusy": "Камера не відкрилась. Найчастіше вона зайнята іншим застосунком.",
   "camCouldNotRead": "Не вийшло розібрати знімок",
-  "camDish": "Страва",
+  "camDish": "Фото",
   "camEstimate": " ккал, оцінка",
   "camFlash": "Спалах",
   "camFromPack": "Числа з упаковки. Запис не коштує токенів.",
   "camGallery": "З галереї",
+  "camGapNote": "Цього числа не знає жодна база. Зніми етикетку, і я його дочитаю.",
   "camHintBarcode": "код у рамку",
-  "camHintDish": "наведи на тарілку",
+  "camHintDish": "наведи на тарілку або пачку",
   "camIngredients": "Склад: {text}",
   "camIntoSlot": "в {slot}",
   "camKcalFor": " ккал за {grams} г",
   "camKcalPer": " ккал на {grams} г",
+  "camLabelAim": "наведи на таблицю поживності",
+  "camLabelNoShot": "Кадр не вийшов. Спробуй зняти етикетку ще раз.",
+  "camLabelReading": "Переписую числа з пачки…",
   "camLogInto": "Записати {slotInto}",
   "camNoPermission": "Немає дозволу на камеру. Його можна дати в налаштуваннях телефона.",
   "camNoScanner": "Цей телефон не вміє читати коди камерою.",
-  "camNoTokens": "Токени на сьогодні скінчились",
+  "camNoTokens": "Токени скінчились",
+  "camNotAProduct": "Це не штрихкод товару",
+  "camNotAProductNote": "Прочиталось посилання або службовий код. Наведи на смужку з цифрами під нею.",
   "camNotRead": "Не розібрала",
+  "camOffline": "Код прочитано, але спитати про нього нема кого. Спробуй, коли зʼявиться звʼязок.",
   "camOfflineShot": "Не дістаю мережі. Знімок можна надіслати Норі пізніше",
+  "camOfflineTitle": "Немає мережі",
   "camPer100": "Точної ваги на упаковці немає: числа за 100 г.",
   "camPortionPack": "Порція з упаковки: {g} г. Числа за порцію.",
   "camReading": "Читаю…",
   "camSendToNora": "Надіслати Норі",
+  "camServerDown": "Це не через код і не через камеру. Спробуй за хвилину.",
+  "camServerDownTitle": "Наш сервер не відповів",
   "camShoot": "Зняти",
+  "camShootLabel": "Зняти етикетку",
   "camShotFailed": "Кадр не вийшов",
   "camShotReady": "Знімок готовий",
   "camShotReadyNote": "Нора розбере його і відповість у чаті: назве страву, оцінить порцію і покаже, звідки взялося число. Коштує два токени.",
+  "camSignedOut": "Сесія недійсна, тому довідник нас не впізнає. Зайди в застосунок наново, і сканер запрацює.",
+  "camSignedOutTitle": "Треба зайти наново",
+  "camSlow": "Код прочитано, а довідник забарився. Спробуй ще раз.",
+  "camSlowTitle": "Відповідь не встигла",
   "camStillWorks": "Знімок страви і галерея працюють як завжди.",
   "camTitle": "Сканер",
   "camTookTooLong": "Розбір затягнувся. Спробуй ще раз",
-  "camUnknownCode": "Не знаю цього коду",
-  "camUnknownCodeNote": "Ні в нашій базі, ні у відкритій його немає. Сфотографуй саму страву або напиши назву словами, і Нора порахує.",
+  "camUnknownCode": "Немає цього товару в базі",
+  "camUnknownCodeNote": "Ні в нашій, ні у відкритій. Зніми таблицю поживності з упаковки, і я перепишу числа з неї. Це безкоштовно.",
   "deleteConfirm": "Я розумію, що дані буде видалено назавжди і відновити їх не вийде.",
   "deleteDays": "Днів із Calvi",
   "deleteEntries": "Записів у щоденнику",
@@ -267,6 +325,8 @@
   "eraseDataTitle": "Видалити дані",
   "eraseDone": "Щоденник стерто. Чистий аркуш.",
   "eraseFailed": "Не вдалось стерти: {why}",
+  "eraseNoNet": "немає мережі. Увімкни інтернет і спробуй ще раз",
+  "eraseSlow": "сервер довго відповідає. Спробуй ще раз за хвилину",
   "eraseSureBody": "Це незворотньо. Щоденник зникне назавжди, і повернути його не зможемо ні ти, ні ми.",
   "eraseSureCta": "Так, видалити назавжди",
   "eraseSureTitle": "Точно видалити?",
@@ -326,6 +386,7 @@
   "heroLeft": "лишилось ",
   "heroOf": " з {kcal}",
   "heroOver": "перебір на ",
+  "heroWeekOpen": "Розбір тижня",
   "heroWeightFrom": "зараз, від {kg} кг на старті цілі",
   "kcalUnit": "{kcal} ккал",
   "langSection": "Мова інтерфейсу",
@@ -336,16 +397,19 @@
   "loginNotSynced": "Не всі записи доїхали на сервер. Спробуй ще раз за хвилину: вхід не стирає нічого, поки все не збережено",
   "loginServer": "сервер: {why}",
   "loginSlow": "Google не відповів за хвилину. Спробуй ще раз",
+  "macroCNone": "В ?",
   "macroCShort": "В {value}",
   "macroCarbs": "Вуглеводи",
   "macroCarbsCaps": "ВУГЛЕВОДИ",
   "macroCarbsLetter": "В",
+  "macroFNone": "Ж ?",
   "macroFShort": "Ж {value}",
   "macroFat": "Жири",
   "macroFatCaps": "ЖИРИ",
   "macroFatLetter": "Ж",
   "macroMedsCaps": "ПРЕПАРАТИ",
   "macroOfGrams": " / {goal}г",
+  "macroPNone": "Б ?",
   "macroPShort": "Б {value}",
   "macroProtein": "Білок",
   "macroProteinCaps": "БІЛОК",
@@ -445,7 +509,7 @@
   "planStoreNote": "Оплата проходить через App Store або Google Play. Скасувати можна там само, у налаштуваннях передплат, і Calvi на це не впливає.",
   "planTitle": "Підписка",
   "planTokens": "Токени",
-  "planTokensFree": "2 на добу",
+  "planTokensFree": "40 на місяць",
   "planYear": "Рік",
   "planYearBilled": "1 800 грн раз на рік",
   "planYearHint": "150 грн на місяць, списується раз на рік",
@@ -555,12 +619,19 @@
   "sexShortFemale": "Ж",
   "sexShortMale": "Ч",
   "slotBreakfast": "Сніданок",
+  "slotByHand": "Ввести числа самому",
+  "slotCancel": "Скасувати",
   "slotDinner": "Вечеря",
+  "slotEraseBody": "«{name}» стоїть без чисел. Рядок зникне з дня.",
+  "slotEraseDo": "Прибрати",
+  "slotEraseTitle": "Прибрати чернетку?",
+  "slotGrams": "ВАГА, Г",
   "slotIntoBreakfast": "в сніданок",
   "slotIntoDinner": "у вечерю",
   "slotIntoLunch": "в обід",
   "slotIntoOther": "в «{name}»",
   "slotIntoSnack": "в перекус",
+  "slotKcal": "ККАЛ",
   "slotLog": "Записати",
   "slotLunch": "Обід",
   "slotSnack": "Перекус",
@@ -628,7 +699,6 @@
   "themeSystemHint": "слухає налаштування системи",
   "todayBarcode": "Штрихкод",
   "todayCodeTalk": "Відсканував штрихкод {code}, у базах його немає. Нічого не записуй: розпитай мене про цей продукт або підкажи, як його порахувати.",
-  "todayDemo": "Демо",
   "todayDone": "Готово.",
   "todayFailedRetry": "Не вийшло. Спробуй ще раз за хвилину.",
   "todayHowManyGrams": "Скільки грамів було: {dish}?",
@@ -639,15 +709,12 @@
   "todayLoggedCount": "Записано {count}",
   "todayLoggedInto": "Записала {slotInto}: {dish}.",
   "todayLoggedIntoWithNumbers": "Записала {slotInto}: {dish}, {kcal} ккал за {grams} г.",
-  "todayMine": "Мої",
   "todayNoraSlow": "Нора думає довше звичного. Спробуй ще раз, токен не списався.",
   "todayOffline": "Не дістаю мережі. Спробуй ще раз, коли зʼявиться.",
   "todayOfflineSaved": "Не дістаю мережі. Запис лишиться на телефоні і поїде, коли зʼявиться.",
-  "todayOutOfTokens": "Токени на сьогодні скінчились. Записати вручну можна завжди.",
-  "todayPhotoMeal": "Фото страви",
+  "todayOutOfTokens": "Токени скінчились. Записати вручну можна завжди.",
+  "todayPhotoMeal": "Фото",
   "todayQuestionClosed": "Це питання вже закрите. Скажи вагу словами, якщо треба.",
-  "todayShowingDemo": "Показаний демонстраційний день",
-  "todayShowingMine": "Показані мої записи",
   "unitCm": "см",
   "unitG": "г",
   "unitKcal": "ккал",
@@ -686,6 +753,43 @@
   "wfOptional": "  необовʼязково",
   "wheelLess": "Менше",
   "wheelMore": "Більше",
+  "wkDaysOk": "днів у нормі",
+  "wkEmpty": "За цей тиждень ще нічого не записано. Запиши перший день, і тут з’явиться картина.",
+  "wkFactsHead": "Разом за тиждень",
+  "wkKcalHead": "Калорії",
+  "wkLoggedCap": "днів записано",
+  "wkLoggedValue": "{n} із 7",
+  "wkMacroHead": "БЖВ",
+  "wkNoWeight": "вага: не зважувались",
+  "wkNoraBtn": "Зробити розбір",
+  "wkNoraFailed": "Не вийшло побудувати розбір: {why}",
+  "wkNoraGreet": "Питай про будь-що з цього розбору: про страву, звичку чи що поправити першим.",
+  "wkNoraLoading": "Нора вивчає тиждень…",
+  "wkNoraLocked": "Аналітика буде доступна в пʼятницю",
+  "wkNoraNoNet": "немає мережі",
+  "wkNoraNoTokens": "токени скінчились",
+  "wkNoraP1": "Основа в тебе здорова, і це рідкість: майже все домашнє. Борщ, яєчня, вівсянка: на такій базі решта поправляється швидко.",
+  "wkNoraP2": "Тепер чесно. Овочів за тиждень майже не було, а солодке було щодня: млинці з медом, компот. Білка бракує не тому, що ти мало їси, а тому, що в тарілці багато вуглеводів і мало мʼяса, риби чи сиру. І три вечері з семи були після десятої.",
+  "wkNoraP3": "Поки нічого страшного, але саме так виглядає раціон, який у сорок здивує аналізами. Один крок на наступний тиждень, більше нічого не міняй: до кожного обіду щось зелене, а замість компоту вода.",
+  "wkNoraPlaceholder": "Спитай про цей тиждень",
+  "wkNoraPromise": "Чесний підсумок тижня: що вийшло, де просіло і один крок на наступний.",
+  "wkNoraReply1": "Найпростіший обмін цього тижня: компот на воду. Мінус ложка цукру щоразу, а борщу він нічого не винен.",
+  "wkNoraReply2": "Зелене до обіду не мусить бути салатом. Огірок або пів перця поруч із тарілкою вже роблять роботу.",
+  "wkNoraSlow": "сервер довго відповідає",
+  "wkNoraTalk": "Поговорити про це з Норою",
+  "wkNoraTitle": "Розбір від Нори",
+  "wkNorm": "норма",
+  "wkOffNorm": "{n} від норми",
+  "wkPastEmpty": "Минулих розборів ще немає. Перший зʼявиться тут наступного понеділка.",
+  "wkPastRow": "Тиждень від {day}",
+  "wkPastTitle": "Минулі",
+  "wkPerDay": "ккал у середньому за добу",
+  "wkPerDayAside": "у середньому за добу",
+  "wkTitle": "Тиждень",
+  "wkTotalCap": "ккал за тиждень",
+  "wkWaterCap": "води за добу",
+  "wkWaterValue": "{l} л",
+  "wkWeightCap": "вага за тиждень",
   "workoutAdd": "Додати тренування",
   "workoutBurned": "−{kcal} ккал",
   "workoutCollapse": "Згорнути",

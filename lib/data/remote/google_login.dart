@@ -106,14 +106,18 @@ class GoogleLogin {
   Future<String?> idToken() async {
     if (!available) {
       lastError = dataL.loginNotConfigured;
-      _note('кнопка недоступна: serverClientId=${serverClientId.isNotEmpty}, '
-          'iosClientId=${iosClientId.isNotEmpty}, apple=$_apple');
+      _note(
+        'кнопка недоступна: serverClientId=${serverClientId.isNotEmpty}, '
+        'iosClientId=${iosClientId.isNotEmpty}, apple=$_apple',
+      );
       return null;
     }
 
     lastError = null;
-    _note('старт: platform=$defaultTargetPlatform, '
-        'server=...${serverClientId.substring(serverClientId.length - 26)}');
+    _note(
+      'старт: platform=$defaultTargetPlatform, '
+      'server=...${serverClientId.substring(serverClientId.length - 26)}',
+    );
 
     try {
       await _init();
@@ -124,11 +128,13 @@ class GoogleLogin {
          відповідей: він не каже нічого, і людина не може навіть повторити.
          Хвилини вистачає і на вибір пошти, і на повільну мережу; хто справді
          відійшов і повернувся, побачить не колесо, а пораду спробувати ще. */
-      final account = await GoogleSignIn.instance
-          .authenticate()
-          .timeout(const Duration(seconds: 60));
+      final account = await GoogleSignIn.instance.authenticate().timeout(
+        const Duration(seconds: 60),
+      );
       final token = account.authentication.idToken;
-      _note('успіх: ${account.email}, токен=${token == null ? 'НЕМАЄ' : '${token.length} символів'}');
+      _note(
+        'успіх: ${account.email}, токен=${token == null ? 'НЕМАЄ' : '${token.length} символів'}',
+      );
       if (token == null) lastError = dataL.loginNoToken;
       return token;
     } on TimeoutException {
@@ -138,8 +144,10 @@ class GoogleLogin {
     } on GoogleSignInException catch (e) {
       /* Кожне поле окремо і дослівно: code, description, details. Саме тут
          живе відповідь, чому аркуш закрився. */
-      _note('GoogleSignInException: code=${e.code.name} | '
-          'description=${e.description} | details=${e.details}');
+      _note(
+        'GoogleSignInException: code=${e.code.name} | '
+        'description=${e.description} | details=${e.details}',
+      );
 
       lastError = refusal(e.code, e.description);
       return null;

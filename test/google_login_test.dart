@@ -52,64 +52,63 @@ void main() {
     List<String>? log,
     List<Object?>? pushed,
     List<int>? sizes,
-  }) =>
-      CalviApi(
-        base: Uri.parse('https://x.test'),
-        client: MockClient((req) async {
-          log?.add(req.url.path);
-          switch (req.url.path) {
-            case '/v1/auth/google':
-              return http.Response(jsonEncode(account), 200);
-            case '/v1/devices':
-              return http.Response(
-                jsonEncode({
-                  'user_id': 'device-user',
-                  'access_token': 'device-access',
-                  'refresh_token': 'device-refresh',
-                  'tokens': {'balance': 30},
-                }),
-                200,
-              );
-            case '/v1/sync':
-              final body = jsonDecode(req.body) as Map<String, dynamic>;
-              final changes = (body['changes'] as List<dynamic>);
-              pushed?.addAll(changes);
-              sizes?.add(changes.length);
-              /* Справжній сервер приймає щонайбільше 500 змін за запит, і тест
+  }) => CalviApi(
+    base: Uri.parse('https://x.test'),
+    client: MockClient((req) async {
+      log?.add(req.url.path);
+      switch (req.url.path) {
+        case '/v1/auth/google':
+          return http.Response(jsonEncode(account), 200);
+        case '/v1/devices':
+          return http.Response(
+            jsonEncode({
+              'user_id': 'device-user',
+              'access_token': 'device-access',
+              'refresh_token': 'device-refresh',
+              'tokens': {'balance': 30},
+            }),
+            200,
+          );
+        case '/v1/sync':
+          final body = jsonDecode(req.body) as Map<String, dynamic>;
+          final changes = (body['changes'] as List<dynamic>);
+          pushed?.addAll(changes);
+          sizes?.add(changes.length);
+          /* Справжній сервер приймає щонайбільше 500 змін за запит, і тест
                  поводиться так само: перевищення це відмова, а не мовчазне
                  «якось прийняли». Саме ця відмова одного разу зламала вхід. */
-              if (changes.length > 500) {
-                return http.Response(
-                  jsonEncode({
-                    'error': {
-                      'code': 'bad_request',
-                      'details': [
-                        {'path': 'changes', 'message': 'Array must contain at most 500 element(s)'},
-                      ],
-                    },
-                  }),
-                  400,
-                );
-              }
-              // Приймаємо все, що прислали: рядок отримує номер і стає чистим.
-              return http.Response(
-                jsonEncode({
-                  'cursor': 0,
-                  'accepted': [
-                    for (var i = 0; i < changes.length; i++)
-                      {'id': (changes[i] as Map<String, dynamic>)['id'], 'seq': i + 1},
+          if (changes.length > 500) {
+            return http.Response(
+              jsonEncode({
+                'error': {
+                  'code': 'bad_request',
+                  'details': [
+                    {'path': 'changes', 'message': 'Array must contain at most 500 element(s)'},
                   ],
-                  'changes': <Object?>[],
-                  'has_more': false,
-                }),
-                200,
-              );
-            case '/v1/profile':
-              return http.Response(jsonEncode({'profile': null}), 200);
+                },
+              }),
+              400,
+            );
           }
-          return http.Response('{}', 200);
-        }),
-      );
+          // Приймаємо все, що прислали: рядок отримує номер і стає чистим.
+          return http.Response(
+            jsonEncode({
+              'cursor': 0,
+              'accepted': [
+                for (var i = 0; i < changes.length; i++)
+                  {'id': (changes[i] as Map<String, dynamic>)['id'], 'seq': i + 1},
+              ],
+              'changes': <Object?>[],
+              'has_more': false,
+            }),
+            200,
+          );
+        case '/v1/profile':
+          return http.Response(jsonEncode({'profile': null}), 200);
+      }
+      return http.Response('{}', 200);
+    }),
+  );
 
   Map<String, dynamic> reply({
     required String userId,
@@ -208,8 +207,11 @@ void main() {
       greaterThanOrEqualTo(250),
       reason: 'перемкнулись, довізши лише $pushedBeforeAuth рядків із 250',
     );
-    expect(log.take(auth).where((p) => p == '/v1/sync').length, greaterThanOrEqualTo(3),
-        reason: 'сотня на обмін означає щонайменше три обміни до входу');
+    expect(
+      log.take(auth).where((p) => p == '/v1/sync').length,
+      greaterThanOrEqualTo(3),
+      reason: 'сотня на обмін означає щонайменше три обміни до входу',
+    );
     expect((await db.syncDao.state()).userId, 'old-account');
   });
 
@@ -240,8 +242,11 @@ void main() {
     final auth = log.indexOf('/v1/auth/google');
     final pushedBeforeAuth = pushed.length;
     expect(pushedBeforeAuth >= 520, isTrue, reason: 'не все доїхало до перемикання');
-    expect(log.sublist(0, auth).where((p) => p == '/v1/sync').length >= 2, isTrue,
-        reason: 'черга такого розміру не могла піти одним запитом');
+    expect(
+      log.sublist(0, auth).where((p) => p == '/v1/sync').length >= 2,
+      isTrue,
+      reason: 'черга такого розміру не могла піти одним запитом',
+    );
   });
 
   test('відмова сервера називає поле, а не лише код', () async {
@@ -367,7 +372,10 @@ void main() {
     await db.customStatement("update meals set id = 'busted-id' where 1=1");
 
     final pushed = <Object?>[];
-    final api = answering(reply(userId: 'u1', outcome: 'linked'), pushed: pushed);
+    final api = answering(
+      reply(userId: 'u1', outcome: 'linked'),
+      pushed: pushed,
+    );
     final login = LoginService(db: db, api: api, google: _FakeGoogle());
 
     expect(await login.signIn(), LoginResult.done);

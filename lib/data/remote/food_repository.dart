@@ -40,17 +40,30 @@ class FoodRepository {
   /// not something to interrupt a person with.
   Future<bool> enrich(String mealId, String text, {double? grams}) async {
     final hits = await suggest(text);
-    if (hits.isEmpty) return false;
 
-    final food = hits.first;
+    /* Неповний рядок довідником не є.
+     *
+     * Відколи порожнє поле перестало вдавати нуль, у довіднику бувають картки з
+     * калоріями і без білка. Підставити таку означало б дописати людині страву
+     * з нулем білка тому, що хтось у народній базі не заповнив одну клітинку.
+     * Краще лишити запис як був: його ще виправить Нора або сама людина. */
+    FoodHit? food;
+    for (final f in hits) {
+      if (f.complete) {
+        food = f;
+        break;
+      }
+    }
+    if (food == null) return false;
+
     final n = food.forGrams(grams);
 
     await db.diaryDao.applyFood(
       mealId,
       kcal: n.kcal,
-      protein: n.protein,
-      fat: n.fat,
-      carbs: n.carbs,
+      protein: n.protein ?? 0,
+      fat: n.fat ?? 0,
+      carbs: n.carbs ?? 0,
       icon: food.icon,
       canonicalName: food.canonicalName,
       grams: n.grams,
@@ -58,13 +71,83 @@ class FoodRepository {
     return true;
   }
 
-  /// A scanned code, which is exact. Returns null when nobody has scanned it
-  /// before and Open Food Facts has never heard of it either.
-  Future<FoodHit?> byBarcode(String code) async {
+  /// A scanned code, which is exact.
+  ///
+  /// Повертає те, що справді сталось, а не «є або немає».
+  ///
+  /// Доти тут стояло `on ApiFailure { return null; }`, і шість різних подій
+  /// зливались в одну: коду немає в базі, коду не тієї форми, сесія протухла,
+  /// сервер упав, мережа зникла, відповідь не встигла. Усе це виглядало як
+  /// «не знаю цього коду», і поки причини були нерозрізненні, полагодити не
+  /// можна було жодну: людина бачила той самий екран, а ми не бачили нічого.
+  Future<ScanResult> byBarcode(String code) async {
     try {
-      return await api.foodByBarcode(code);
-    } on ApiFailure {
-      return null;
+      final hit = await api.foodByBarcode(code);
+      if (hit == null) return const ScanResult(Scanned.unknown);
+      return ScanResult(hit.complete ? Scanned.found : Scanned.partial, hit);
+    } on ApiFailure catch (e) {
+      return ScanResult(switch (e.code) {
+        'offline' => Scanned.offline,
+        'slow' => Scanned.slow,
+        _ => switch (e.status) {
+          401 || 403 => Scanned.signedOut,
+          400 || 422 => Scanned.notAProduct,
+          _ => Scanned.broken,
+        },
+      });
     }
   }
+
+  /// Етикетка з тієї самої пачки. Не коштує токена і лягає в спільну базу.
+  ///
+  /// Причина невдачі доїжджає цілою, як і в скані: «не видно таблиці» і «немає
+  /// мережі» це різні речі, і виправляють їх по-різному.
+  Future<LabelRead> readLabel({required String barcode, required Shot shot}) async {
+    try {
+      return await api.readLabel(barcode: barcode, shot: shot);
+    } on ApiFailure catch (e) {
+      return LabelRead(failure: e);
+    }
+  }
+}
+
+/// Чим скінчився скан штрихкоду.
+///
+/// Сім станів замість одного, і кожен веде людину кудись в інше місце: повну
+/// картку записують, неповну дочитують з етикетки, незнайомий код знімають
+/// етикеткою, а протухлу сесію не полагодить ні те, ні інше.
+enum Scanned {
+  /// Товар знайдено, і всі три числа в ньому названі.
+  found,
+
+  /// Товар знайдено, але якогось із трьох чисел не знає жодна база.
+  partial,
+
+  /// Коду не знає ніхто. Далі етикетка.
+  unknown,
+
+  /// Прочиталось щось, що не є штрихкодом товару: QR із посиланням, код складу.
+  notAProduct,
+
+  /// Мережі немає.
+  offline,
+
+  /// Мережа є, відповіді не дочекались.
+  slow,
+
+  /// Сесія недійсна. Жодне сканування не працюватиме, доки не зайти наново.
+  signedOut,
+
+  /// Сервер відповів помилкою. Не провина людини і не її камери.
+  broken,
+}
+
+class ScanResult {
+  const ScanResult(this.state, [this.food]);
+
+  final Scanned state;
+
+  /// Те, що знайшлось. Порожньо у всіх станах, крім [Scanned.found] і
+  /// [Scanned.partial].
+  final FoodHit? food;
 }

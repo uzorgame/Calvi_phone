@@ -23,8 +23,7 @@ class AppleLogin {
   /// існує, але вимагає веб-обв'язки, якої в нас немає, а кнопка Apple на
   /// Android і не потрібна: правило магазину стосується лише iOS.
   bool get available =>
-      defaultTargetPlatform == TargetPlatform.iOS ||
-      defaultTargetPlatform == TargetPlatform.macOS;
+      defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS;
 
   /// Чому не вийшло минулого разу, словами Apple.
   ///

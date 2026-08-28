@@ -454,6 +454,9 @@ class LEn extends L {
   }
 
   @override
+  String get camAskNoraInstead => 'No label, ask Nora instead';
+
+  @override
   String get camBarcode => 'Barcode';
 
   @override
@@ -463,7 +466,7 @@ class LEn extends L {
   String get camCouldNotRead => 'Could not read the shot';
 
   @override
-  String get camDish => 'Meal';
+  String get camDish => 'Photo';
 
   @override
   String get camEstimate => ' kcal, an estimate';
@@ -478,10 +481,13 @@ class LEn extends L {
   String get camGallery => 'From the gallery';
 
   @override
+  String get camGapNote => 'No base knows this figure. Photograph the label and I will fill it in.';
+
+  @override
   String get camHintBarcode => 'the code inside the frame';
 
   @override
-  String get camHintDish => 'point it at the plate';
+  String get camHintDish => 'point it at a plate or a pack';
 
   @override
   String camIngredients(String text) {
@@ -504,6 +510,15 @@ class LEn extends L {
   }
 
   @override
+  String get camLabelAim => 'aim at the nutrition table';
+
+  @override
+  String get camLabelNoShot => 'The shot did not come out. Try photographing the label again.';
+
+  @override
+  String get camLabelReading => 'Copying the figures off the packet…';
+
+  @override
   String camLogInto(String slotInto) {
     return 'Log it $slotInto';
   }
@@ -515,13 +530,27 @@ class LEn extends L {
   String get camNoScanner => 'This phone cannot read codes with the camera.';
 
   @override
-  String get camNoTokens => 'Out of tokens for today';
+  String get camNoTokens => 'Out of tokens';
+
+  @override
+  String get camNotAProduct => 'That is not a product barcode';
+
+  @override
+  String get camNotAProductNote =>
+      'A link or an internal code was read. Aim at the striped bar with digits under it.';
 
   @override
   String get camNotRead => 'Could not make it out';
 
   @override
+  String get camOffline =>
+      'The code was read, but there is nobody to ask about it. Try again when you are back online.';
+
+  @override
   String get camOfflineShot => 'No connection. You can send the shot to Nora later';
+
+  @override
+  String get camOfflineTitle => 'No network';
 
   @override
   String get camPer100 => 'No exact weight on the packaging: figures are per 100 g.';
@@ -538,7 +567,16 @@ class LEn extends L {
   String get camSendToNora => 'Send to Nora';
 
   @override
+  String get camServerDown => 'This is not about the code or the camera. Try again in a minute.';
+
+  @override
+  String get camServerDownTitle => 'Our server did not answer';
+
+  @override
   String get camShoot => 'Take a photo';
+
+  @override
+  String get camShootLabel => 'Photograph the label';
 
   @override
   String get camShotFailed => 'The shot did not work';
@@ -551,6 +589,19 @@ class LEn extends L {
       'Nora will read it and answer in the chat: she will name the dish, estimate the portion and show where the figure came from. It costs two tokens.';
 
   @override
+  String get camSignedOut =>
+      'The session is no longer valid, so the reference does not recognise us. Sign in again and the scanner will work.';
+
+  @override
+  String get camSignedOutTitle => 'Please sign in again';
+
+  @override
+  String get camSlow => 'The code was read and the reference took too long. Try again.';
+
+  @override
+  String get camSlowTitle => 'The answer did not arrive';
+
+  @override
   String get camStillWorks => 'Meal photos and the gallery work as usual.';
 
   @override
@@ -560,11 +611,11 @@ class LEn extends L {
   String get camTookTooLong => 'Reading it took too long. Try again';
 
   @override
-  String get camUnknownCode => 'I do not know this code';
+  String get camUnknownCode => 'This product is not in any base';
 
   @override
   String get camUnknownCodeNote =>
-      'It is not in our base, and not in the open one either. Photograph the meal itself or write the name in words, and Nora will count it.';
+      'Not in ours, and not in the open one. Photograph the nutrition table on the packet and I will copy the figures from it. This is free.';
 
   @override
   String get deleteConfirm =>
@@ -695,6 +746,12 @@ class LEn extends L {
   String eraseFailed(String why) {
     return 'Could not erase: $why';
   }
+
+  @override
+  String get eraseNoNet => 'no network. Turn on the internet and try again';
+
+  @override
+  String get eraseSlow => 'the server is taking too long. Try again in a minute';
 
   @override
   String get eraseSureBody =>
@@ -895,6 +952,9 @@ class LEn extends L {
   String get heroOver => 'over by ';
 
   @override
+  String get heroWeekOpen => 'The week in full';
+
+  @override
   String heroWeightFrom(String kg) {
     return 'now, from $kg kg at the start of the goal';
   }
@@ -934,6 +994,9 @@ class LEn extends L {
   String get loginSlow => 'Google did not answer in a minute. Try again';
 
   @override
+  String get macroCNone => 'C ?';
+
+  @override
   String macroCShort(int value) {
     return 'C $value';
   }
@@ -946,6 +1009,9 @@ class LEn extends L {
 
   @override
   String get macroCarbsLetter => 'C';
+
+  @override
+  String get macroFNone => 'F ?';
 
   @override
   String macroFShort(int value) {
@@ -968,6 +1034,9 @@ class LEn extends L {
   String macroOfGrams(int goal) {
     return ' / ${goal}g';
   }
+
+  @override
+  String get macroPNone => 'P ?';
 
   @override
   String macroPShort(int value) {
@@ -1307,7 +1376,7 @@ class LEn extends L {
   String get planTokens => 'Tokens';
 
   @override
-  String get planTokensFree => '2 a day';
+  String get planTokensFree => '40 a month';
 
   @override
   String get planYear => 'Year';
@@ -1654,7 +1723,27 @@ class LEn extends L {
   String get slotBreakfast => 'Breakfast';
 
   @override
+  String get slotByHand => 'Enter the numbers yourself';
+
+  @override
+  String get slotCancel => 'Cancel';
+
+  @override
   String get slotDinner => 'Dinner';
+
+  @override
+  String slotEraseBody(String name) {
+    return '\"$name\" still has no numbers. The row will leave the day.';
+  }
+
+  @override
+  String get slotEraseDo => 'Remove';
+
+  @override
+  String get slotEraseTitle => 'Remove the draft?';
+
+  @override
+  String get slotGrams => 'WEIGHT, G';
 
   @override
   String get slotIntoBreakfast => 'into breakfast';
@@ -1672,6 +1761,9 @@ class LEn extends L {
 
   @override
   String get slotIntoSnack => 'into a snack';
+
+  @override
+  String get slotKcal => 'KCAL';
 
   @override
   String get slotLog => 'Log it';
@@ -1900,9 +1992,6 @@ class LEn extends L {
   }
 
   @override
-  String get todayDemo => 'Demo';
-
-  @override
   String get todayDone => 'Done.';
 
   @override
@@ -1943,9 +2032,6 @@ class LEn extends L {
   }
 
   @override
-  String get todayMine => 'Mine';
-
-  @override
   String get todayNoraSlow =>
       'Nora is thinking longer than usual. Try again, the token was not spent.';
 
@@ -1957,20 +2043,14 @@ class LEn extends L {
       'No connection. The entry stays on the phone and goes up when it returns.';
 
   @override
-  String get todayOutOfTokens => 'Out of tokens for today. Logging by hand always works.';
+  String get todayOutOfTokens => 'Out of tokens. Logging by hand always works.';
 
   @override
-  String get todayPhotoMeal => 'Meal photo';
+  String get todayPhotoMeal => 'Photo';
 
   @override
   String get todayQuestionClosed =>
       'That question is already closed. Say the weight in words if you need to.';
-
-  @override
-  String get todayShowingDemo => 'Showing the sample day';
-
-  @override
-  String get todayShowingMine => 'Showing my entries';
 
   @override
   String get unitCm => 'cm';
@@ -2099,6 +2179,135 @@ class LEn extends L {
 
   @override
   String get wheelMore => 'More';
+
+  @override
+  String get wkDaysOk => 'days on goal';
+
+  @override
+  String get wkEmpty =>
+      'Nothing has been logged this week yet. Log the first day and the picture appears.';
+
+  @override
+  String get wkFactsHead => 'The week in total';
+
+  @override
+  String get wkKcalHead => 'Calories';
+
+  @override
+  String get wkLoggedCap => 'days logged';
+
+  @override
+  String wkLoggedValue(int n) {
+    return '$n of 7';
+  }
+
+  @override
+  String get wkMacroHead => 'Macros';
+
+  @override
+  String get wkNoWeight => 'weight: no weigh-ins';
+
+  @override
+  String get wkNoraBtn => 'Build the analysis';
+
+  @override
+  String wkNoraFailed(String why) {
+    return 'Could not build the analysis: $why';
+  }
+
+  @override
+  String get wkNoraGreet =>
+      'Ask about anything in this read: a dish, a habit, or what to fix first.';
+
+  @override
+  String get wkNoraLoading => 'Nora is reading the week…';
+
+  @override
+  String get wkNoraLocked => 'The analysis opens on Friday';
+
+  @override
+  String get wkNoraNoNet => 'no network';
+
+  @override
+  String get wkNoraNoTokens => 'out of tokens';
+
+  @override
+  String get wkNoraP1 =>
+      'Your base is healthy, and that is rare: almost everything is home-cooked. Borscht, scrambled eggs, porridge: on a base like that the rest is quick to fix.';
+
+  @override
+  String get wkNoraP2 =>
+      'Now honestly. Vegetables barely showed up all week, while sweets showed up daily: pancakes with honey, compote. Protein runs short not because you eat little, but because the plate is heavy on carbs and light on meat, fish or cheese. And three dinners out of seven landed after ten.';
+
+  @override
+  String get wkNoraP3 =>
+      'Nothing scary yet, but this is exactly the diet that surprises your bloodwork at forty. One step for next week, change nothing else: something green with every lunch, and water instead of the compote.';
+
+  @override
+  String get wkNoraPlaceholder => 'Ask about this week';
+
+  @override
+  String get wkNoraPromise =>
+      'An honest read of your week: what worked, what slipped, and one step for the next.';
+
+  @override
+  String get wkNoraReply1 =>
+      'The easiest swap this week: water instead of the compote. A spoon of sugar less every time, and the borscht owes it nothing.';
+
+  @override
+  String get wkNoraReply2 =>
+      'Greens with lunch do not have to mean a salad. A cucumber or half a pepper next to the plate already does the job.';
+
+  @override
+  String get wkNoraSlow => 'the server is taking too long';
+
+  @override
+  String get wkNoraTalk => 'Talk it over with Nora';
+
+  @override
+  String get wkNoraTitle => 'Nora on your week';
+
+  @override
+  String get wkNorm => 'goal';
+
+  @override
+  String wkOffNorm(String n) {
+    return '$n off the goal';
+  }
+
+  @override
+  String get wkPastEmpty => 'No past analyses yet. The first one will appear here next Monday.';
+
+  @override
+  String wkPastRow(String day) {
+    return 'Week of $day';
+  }
+
+  @override
+  String get wkPastTitle => 'Past weeks';
+
+  @override
+  String get wkPerDay => 'kcal a day on average';
+
+  @override
+  String get wkPerDayAside => 'a day on average';
+
+  @override
+  String get wkTitle => 'The week';
+
+  @override
+  String get wkTotalCap => 'kcal over the week';
+
+  @override
+  String get wkWaterCap => 'of water a day';
+
+  @override
+  String wkWaterValue(String l) {
+    return '$l l';
+  }
+
+  @override
+  String get wkWeightCap => 'weight this week';
 
   @override
   String get workoutAdd => 'Add a workout';

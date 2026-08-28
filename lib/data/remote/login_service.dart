@@ -193,7 +193,7 @@ class LoginService {
       joinedAt: account.joinedAt,
       provider: account.provider,
     );
-    await db.syncDao.putTokens(balance: account.balance);
+    await db.syncDao.putTokens(balance: account.balance, unlimited: account.unlimited);
     api.token = account.accessToken;
   }
 }

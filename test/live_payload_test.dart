@@ -85,9 +85,11 @@ void main() {
             200,
           );
         case '/v1/sync':
-          return http.Response(sync, 200, headers: {
-            'content-type': 'application/json; charset=utf-8',
-          });
+          return http.Response(
+            sync,
+            200,
+            headers: {'content-type': 'application/json; charset=utf-8'},
+          );
         case '/v1/profile':
           return http.Response(jsonEncode({'profile': null}), 200);
       }
@@ -96,7 +98,11 @@ void main() {
   );
 
   test('вхід із дійсною відповіддю бойового сервера доходить до кінця', () async {
-    final login = LoginService(db: db, api: serving(sync: _live), google: _FakeGoogle());
+    final login = LoginService(
+      db: db,
+      api: serving(sync: _live),
+      google: _FakeGoogle(),
+    );
 
     expect(await login.signIn(), LoginResult.done, reason: login.error ?? '');
 
@@ -132,7 +138,11 @@ void main() {
     /* Захист другим шаром. Сервер полагоджено, але застосунок живе на телефонах
        довше за будь-яку серверну версію, і зустріти старий сервер він ще може. */
     final broken = _live.replaceAll('"amount":"2.0"', '"amount":2');
-    final login = LoginService(db: db, api: serving(sync: broken), google: _FakeGoogle());
+    final login = LoginService(
+      db: db,
+      api: serving(sync: broken),
+      google: _FakeGoogle(),
+    );
 
     expect(await login.signIn(), LoginResult.done, reason: login.error ?? '');
     expect((await db.select(db.medications).get()).single.amount, '2');

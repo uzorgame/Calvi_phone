@@ -237,11 +237,8 @@ class _MedsScreenState extends State<MedsScreen> {
           ? null
           : CalviAdd(
               label: l.medsAdd,
-              onTap: () => openMedSheet(
-                context,
-                now: DateTime.now().millisecondsSinceEpoch,
-                onSave: _save,
-              ),
+              onTap: () =>
+                  openMedSheet(context, now: DateTime.now().millisecondsSinceEpoch, onSave: _save),
             ),
       children: [
         if (_hint != null)
@@ -461,11 +458,8 @@ class _MedsScreenState extends State<MedsScreen> {
             child: AddRow(
               label: l.medsAdd,
               open: false,
-              onTap: () => openMedSheet(
-                context,
-                now: DateTime.now().millisecondsSinceEpoch,
-                onSave: _save,
-              ),
+              onTap: () =>
+                  openMedSheet(context, now: DateTime.now().millisecondsSinceEpoch, onSave: _save),
             ),
           ),
 
@@ -642,9 +636,7 @@ class _GroupState extends State<_Group> with SingleTickerProviderStateMixin {
                        піксель туди-сюди. */
                     decoration: BoxDecoration(
                       border: Border(
-                        bottom: BorderSide(
-                          color: c.cardBorder.withValues(alpha: opening ? 1 : t),
-                        ),
+                        bottom: BorderSide(color: c.cardBorder.withValues(alpha: opening ? 1 : t)),
                       ),
                     ),
                     child: Row(
@@ -894,11 +886,7 @@ class _RailRow extends StatelessWidget {
                 child: Column(
                   children: [
                     for (final it in items)
-                      _Dose(
-                        med: it.med,
-                        taken: it.taken,
-                        onTap: () => onToggle(it.med.id, at),
-                      ),
+                      _Dose(med: it.med, taken: it.taken, onTap: () => onToggle(it.med.id, at)),
                   ],
                 ),
               ),

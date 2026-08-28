@@ -37,6 +37,8 @@ void main() {
     open: false,
     onToggle: () {},
     onAdd: (_) {},
+    onManual: (_) {},
+    noraCan: true,
   );
 
   testWidgets('українською картка називається своїм словом', (tester) async {

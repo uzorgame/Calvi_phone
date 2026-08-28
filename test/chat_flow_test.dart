@@ -26,6 +26,8 @@ void main() {
                 open: true,
                 onToggle: () {},
                 onAdd: said.add,
+                onManual: (_) {},
+                noraCan: true,
               ),
             ],
           ),

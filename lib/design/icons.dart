@@ -201,8 +201,23 @@ const calviIcons = <String, String>{
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="9.6" cy="9.6" rx="5.4" ry="6.2" transform="rotate(-45 9.6 9.6)" /><path d="M13.4 13.4l6 6" /><path d="M6.4 6.4l6.4 6.4M12.8 6.4L6.4 12.8" /></svg>',
   'tomato':
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.6a6.2 6.2 0 1 0 0 12.4 6.2 6.2 0 1 0 0-12.4z" /><path d="M12 7.6 9.5 5.2M12 7.6l2.5-2.4M12 7.6V4.8" /></svg>',
-  'trend':
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 16.6l5-5.4 3.6 3 4.4-5.4 4.2 3.6" /><path d="M16.6 8.8h4v4" /></svg>',
+  /* Три знаки того, куди насправді йде вага. Один із них стоїть між «поточна»
+     і «ціль» на картці прогресу, і який саме, вирішує [goalTrend].
+
+     На їхньому місці стояла одна ламана лінія зростання, і зламана вона була
+     двічі. Геометрично: лінія закінчувалась у точці (20.6, 12.4), спускаючись
+     униз, а вістря малювалось кутом у (20.6, 8.8) і дивилось угору. Вістря
+     висіло окремо від лінії, під іншим кутом, і читалось як кривий значок.
+
+     По суті: вона показувала зростання завжди, кому б що не було потрібно.
+     Людині, яка худне за планом, екран малював стрілку вгору. */
+  'trend-up':
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 16.6L9.4 10.6l3.6 3.6 7.6-7.6" /><path d="M15.4 6.6h5.2v5.2" /></svg>',
+  'trend-down':
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 7.4L9.4 13.4l3.6-3.6 7.6 7.6" /><path d="M15.4 17.4h5.2v-5.2" /></svg>',
+  // Вага тримається. Для цілі «тримати» це і є успіх, а не відсутність руху.
+  'equal':
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9.4h14" /><path d="M5 14.6h14" /></svg>',
   'up':
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19.4V4.6M6.4 10.2L12 4.6l5.6 5.6" /></svg>',
   'user':

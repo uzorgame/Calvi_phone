@@ -208,12 +208,7 @@ class _Drum extends StatelessWidget {
         shaderCallback: (rect) => const LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Color(0x00000000),
-            Color(0xFF000000),
-            Color(0xFF000000),
-            Color(0x00000000),
-          ],
+          colors: [Color(0x00000000), Color(0xFF000000), Color(0xFF000000), Color(0x00000000)],
           stops: [0, 0.34, 0.66, 1],
         ).createShader(rect),
         blendMode: BlendMode.dstIn,

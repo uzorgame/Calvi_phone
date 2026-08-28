@@ -305,6 +305,9 @@
       }
     }
   },
+  "@macroPNone": {
+    "description": "The same chip when nobody knows the figure. A question mark rather than a zero: a zero reads as a fact, and there is no fact here."
+  },
   "@macroPShort": {
     "description": "Macro chips under a dish: one letter and the grams.",
     "placeholders": {
@@ -486,6 +489,13 @@
   "@slotBreakfast": {
     "description": "The four meal cards. The assistant may rename a card by the time it happened, and then its own words are shown instead of these."
   },
+  "@slotEraseBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "@slotIntoBreakfast": {
     "description": "«Logged into breakfast». A whole phrase, not a preposition glued to the name: Ukrainian declines the noun after it («у вечерю», not «в вечеря») and alternates the preposition itself for sound, so neither half survives being assembled in code."
   },
@@ -622,6 +632,41 @@
     "placeholders": {
       "min": {
         "type": "int"
+      }
+    }
+  },
+  "@wkLoggedValue": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@wkNoraFailed": {
+    "placeholders": {
+      "why": {
+        "type": "String"
+      }
+    }
+  },
+  "@wkOffNorm": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "@wkPastRow": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "@wkWaterValue": {
+    "placeholders": {
+      "l": {
+        "type": "String"
       }
     }
   },
@@ -770,39 +815,55 @@
   "camAllergen": "Allergen!",
   "camAllergyContains": "Contains your allergen: {list}",
   "camAllergyTraces": "May contain traces of: {list}",
+  "camAskNoraInstead": "No label, ask Nora instead",
   "camBarcode": "Barcode",
   "camBusy": "The camera did not open. Usually another app is holding it.",
   "camCouldNotRead": "Could not read the shot",
-  "camDish": "Meal",
+  "camDish": "Photo",
   "camEstimate": " kcal, an estimate",
   "camFlash": "Flash",
   "camFromPack": "Figures from the packaging. Logging this costs no tokens.",
   "camGallery": "From the gallery",
+  "camGapNote": "No base knows this figure. Photograph the label and I will fill it in.",
   "camHintBarcode": "the code inside the frame",
-  "camHintDish": "point it at the plate",
+  "camHintDish": "point it at a plate or a pack",
   "camIngredients": "Ingredients: {text}",
   "camIntoSlot": "into {slot}",
   "camKcalFor": " kcal for {grams} g",
   "camKcalPer": " kcal per {grams} g",
+  "camLabelAim": "aim at the nutrition table",
+  "camLabelNoShot": "The shot did not come out. Try photographing the label again.",
+  "camLabelReading": "Copying the figures off the packet…",
   "camLogInto": "Log it {slotInto}",
   "camNoPermission": "No camera permission. You can grant it in the phone's settings.",
   "camNoScanner": "This phone cannot read codes with the camera.",
-  "camNoTokens": "Out of tokens for today",
+  "camNoTokens": "Out of tokens",
+  "camNotAProduct": "That is not a product barcode",
+  "camNotAProductNote": "A link or an internal code was read. Aim at the striped bar with digits under it.",
   "camNotRead": "Could not make it out",
+  "camOffline": "The code was read, but there is nobody to ask about it. Try again when you are back online.",
   "camOfflineShot": "No connection. You can send the shot to Nora later",
+  "camOfflineTitle": "No network",
   "camPer100": "No exact weight on the packaging: figures are per 100 g.",
   "camPortionPack": "Portion from the packaging: {g} g. Figures are per portion.",
   "camReading": "Reading…",
   "camSendToNora": "Send to Nora",
+  "camServerDown": "This is not about the code or the camera. Try again in a minute.",
+  "camServerDownTitle": "Our server did not answer",
   "camShoot": "Take a photo",
+  "camShootLabel": "Photograph the label",
   "camShotFailed": "The shot did not work",
   "camShotReady": "The shot is ready",
   "camShotReadyNote": "Nora will read it and answer in the chat: she will name the dish, estimate the portion and show where the figure came from. It costs two tokens.",
+  "camSignedOut": "The session is no longer valid, so the reference does not recognise us. Sign in again and the scanner will work.",
+  "camSignedOutTitle": "Please sign in again",
+  "camSlow": "The code was read and the reference took too long. Try again.",
+  "camSlowTitle": "The answer did not arrive",
   "camStillWorks": "Meal photos and the gallery work as usual.",
   "camTitle": "Scanner",
   "camTookTooLong": "Reading it took too long. Try again",
-  "camUnknownCode": "I do not know this code",
-  "camUnknownCodeNote": "It is not in our base, and not in the open one either. Photograph the meal itself or write the name in words, and Nora will count it.",
+  "camUnknownCode": "This product is not in any base",
+  "camUnknownCodeNote": "Not in ours, and not in the open one. Photograph the nutrition table on the packet and I will copy the figures from it. This is free.",
   "deleteConfirm": "I understand the data will be deleted forever and cannot be brought back.",
   "deleteDays": "Days with Calvi",
   "deleteEntries": "Entries in the diary",
@@ -841,6 +902,8 @@
   "eraseDataTitle": "Delete data",
   "eraseDone": "The diary is erased. A clean slate.",
   "eraseFailed": "Could not erase: {why}",
+  "eraseNoNet": "no network. Turn on the internet and try again",
+  "eraseSlow": "the server is taking too long. Try again in a minute",
   "eraseSureBody": "This cannot be undone. The diary disappears forever, and neither you nor we can bring it back.",
   "eraseSureCta": "Yes, delete forever",
   "eraseSureTitle": "Delete for sure?",
@@ -900,6 +963,7 @@
   "heroLeft": "left ",
   "heroOf": " of {kcal}",
   "heroOver": "over by ",
+  "heroWeekOpen": "The week in full",
   "heroWeightFrom": "now, from {kg} kg at the start of the goal",
   "kcalUnit": "{kcal} kcal",
   "langSection": "Interface language",
@@ -910,16 +974,19 @@
   "loginNotSynced": "Not every entry has reached the server yet. Try again in a minute: signing in erases nothing until everything is saved",
   "loginServer": "server: {why}",
   "loginSlow": "Google did not answer in a minute. Try again",
+  "macroCNone": "C ?",
   "macroCShort": "C {value}",
   "macroCarbs": "Carbs",
   "macroCarbsCaps": "CARBS",
   "macroCarbsLetter": "C",
+  "macroFNone": "F ?",
   "macroFShort": "F {value}",
   "macroFat": "Fat",
   "macroFatCaps": "FAT",
   "macroFatLetter": "F",
   "macroMedsCaps": "MEDS",
   "macroOfGrams": " / {goal}g",
+  "macroPNone": "P ?",
   "macroPShort": "P {value}",
   "macroProtein": "Protein",
   "macroProteinCaps": "PROTEIN",
@@ -1019,7 +1086,7 @@
   "planStoreNote": "Payment goes through the App Store or Google Play. You can cancel in the same place, in subscription settings, and Calvi has no say in it.",
   "planTitle": "Subscription",
   "planTokens": "Tokens",
-  "planTokensFree": "2 a day",
+  "planTokensFree": "40 a month",
   "planYear": "Year",
   "planYearBilled": "1,800 UAH once a year",
   "planYearHint": "150 UAH a month, charged once a year",
@@ -1129,12 +1196,19 @@
   "sexShortFemale": "F",
   "sexShortMale": "M",
   "slotBreakfast": "Breakfast",
+  "slotByHand": "Enter the numbers yourself",
+  "slotCancel": "Cancel",
   "slotDinner": "Dinner",
+  "slotEraseBody": "\"{name}\" still has no numbers. The row will leave the day.",
+  "slotEraseDo": "Remove",
+  "slotEraseTitle": "Remove the draft?",
+  "slotGrams": "WEIGHT, G",
   "slotIntoBreakfast": "into breakfast",
   "slotIntoDinner": "into dinner",
   "slotIntoLunch": "into lunch",
   "slotIntoOther": "into “{name}”",
   "slotIntoSnack": "into a snack",
+  "slotKcal": "KCAL",
   "slotLog": "Log it",
   "slotLunch": "Lunch",
   "slotSnack": "Snack",
@@ -1202,7 +1276,6 @@
   "themeSystemHint": "follows the system setting",
   "todayBarcode": "Barcode",
   "todayCodeTalk": "I scanned barcode {code} and no base knows it. Do not log anything: ask me about this product or tell me how to count it.",
-  "todayDemo": "Demo",
   "todayDone": "Done.",
   "todayFailedRetry": "Did not work. Try again in a minute.",
   "todayHowManyGrams": "How many grams was the {dish}?",
@@ -1213,15 +1286,12 @@
   "todayLoggedCount": "{count} logged",
   "todayLoggedInto": "Logged {slotInto}: {dish}.",
   "todayLoggedIntoWithNumbers": "Logged {slotInto}: {dish}, {kcal} kcal per {grams} g.",
-  "todayMine": "Mine",
   "todayNoraSlow": "Nora is thinking longer than usual. Try again, the token was not spent.",
   "todayOffline": "No connection. Try again once it is back.",
   "todayOfflineSaved": "No connection. The entry stays on the phone and goes up when it returns.",
-  "todayOutOfTokens": "Out of tokens for today. Logging by hand always works.",
-  "todayPhotoMeal": "Meal photo",
+  "todayOutOfTokens": "Out of tokens. Logging by hand always works.",
+  "todayPhotoMeal": "Photo",
   "todayQuestionClosed": "That question is already closed. Say the weight in words if you need to.",
-  "todayShowingDemo": "Showing the sample day",
-  "todayShowingMine": "Showing my entries",
   "unitCm": "cm",
   "unitG": "g",
   "unitKcal": "kcal",
@@ -1260,6 +1330,43 @@
   "wfOptional": "  optional",
   "wheelLess": "Less",
   "wheelMore": "More",
+  "wkDaysOk": "days on goal",
+  "wkEmpty": "Nothing has been logged this week yet. Log the first day and the picture appears.",
+  "wkFactsHead": "The week in total",
+  "wkKcalHead": "Calories",
+  "wkLoggedCap": "days logged",
+  "wkLoggedValue": "{n} of 7",
+  "wkMacroHead": "Macros",
+  "wkNoWeight": "weight: no weigh-ins",
+  "wkNoraBtn": "Build the analysis",
+  "wkNoraFailed": "Could not build the analysis: {why}",
+  "wkNoraGreet": "Ask about anything in this read: a dish, a habit, or what to fix first.",
+  "wkNoraLoading": "Nora is reading the week…",
+  "wkNoraLocked": "The analysis opens on Friday",
+  "wkNoraNoNet": "no network",
+  "wkNoraNoTokens": "out of tokens",
+  "wkNoraP1": "Your base is healthy, and that is rare: almost everything is home-cooked. Borscht, scrambled eggs, porridge: on a base like that the rest is quick to fix.",
+  "wkNoraP2": "Now honestly. Vegetables barely showed up all week, while sweets showed up daily: pancakes with honey, compote. Protein runs short not because you eat little, but because the plate is heavy on carbs and light on meat, fish or cheese. And three dinners out of seven landed after ten.",
+  "wkNoraP3": "Nothing scary yet, but this is exactly the diet that surprises your bloodwork at forty. One step for next week, change nothing else: something green with every lunch, and water instead of the compote.",
+  "wkNoraPlaceholder": "Ask about this week",
+  "wkNoraPromise": "An honest read of your week: what worked, what slipped, and one step for the next.",
+  "wkNoraReply1": "The easiest swap this week: water instead of the compote. A spoon of sugar less every time, and the borscht owes it nothing.",
+  "wkNoraReply2": "Greens with lunch do not have to mean a salad. A cucumber or half a pepper next to the plate already does the job.",
+  "wkNoraSlow": "the server is taking too long",
+  "wkNoraTalk": "Talk it over with Nora",
+  "wkNoraTitle": "Nora on your week",
+  "wkNorm": "goal",
+  "wkOffNorm": "{n} off the goal",
+  "wkPastEmpty": "No past analyses yet. The first one will appear here next Monday.",
+  "wkPastRow": "Week of {day}",
+  "wkPastTitle": "Past weeks",
+  "wkPerDay": "kcal a day on average",
+  "wkPerDayAside": "a day on average",
+  "wkTitle": "The week",
+  "wkTotalCap": "kcal over the week",
+  "wkWaterCap": "of water a day",
+  "wkWaterValue": "{l} l",
+  "wkWeightCap": "weight this week",
   "workoutAdd": "Add a workout",
   "workoutBurned": "−{kcal} kcal",
   "workoutCollapse": "Collapse",

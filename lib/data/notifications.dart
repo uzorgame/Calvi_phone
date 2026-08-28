@@ -364,8 +364,7 @@ class LocalSink implements NotificationSink {
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
     if (android != null) return await android.areNotificationsEnabled() ?? false;
 
-    final ios = _plugin
-        .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
+    final ios = _plugin.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
     return (await ios?.checkPermissions())?.isEnabled ?? false;
   }
 
@@ -382,8 +381,7 @@ class LocalSink implements NotificationSink {
       return allowed;
     }
 
-    final ios = _plugin
-        .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
+    final ios = _plugin.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
     // Бейдж теж: системне вікно iOS показується один раз за життя встановлення,
     // і те, чого не спитали зараз, потім можна ввімкнути лише в налаштуваннях.
     return await ios?.requestPermissions(alert: true, sound: true, badge: true) ?? false;

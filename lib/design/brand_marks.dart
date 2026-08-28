@@ -34,8 +34,7 @@ class GoogleMark extends StatelessWidget {
   final double size;
 
   @override
-  Widget build(BuildContext context) =>
-      SvgPicture.string(_google, width: size, height: size);
+  Widget build(BuildContext context) => SvgPicture.string(_google, width: size, height: size);
 }
 
 /// Знак Apple: одноколірний, бере колір тексту поруч із собою.

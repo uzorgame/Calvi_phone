@@ -879,6 +879,12 @@ abstract class L {
   /// **'May contain traces of: {list}'**
   String camAllergyTraces(String list);
 
+  /// No description provided for @camAskNoraInstead.
+  ///
+  /// In en, this message translates to:
+  /// **'No label, ask Nora instead'**
+  String get camAskNoraInstead;
+
   /// No description provided for @camBarcode.
   ///
   /// In en, this message translates to:
@@ -900,7 +906,7 @@ abstract class L {
   /// No description provided for @camDish.
   ///
   /// In en, this message translates to:
-  /// **'Meal'**
+  /// **'Photo'**
   String get camDish;
 
   /// No description provided for @camEstimate.
@@ -927,6 +933,12 @@ abstract class L {
   /// **'From the gallery'**
   String get camGallery;
 
+  /// No description provided for @camGapNote.
+  ///
+  /// In en, this message translates to:
+  /// **'No base knows this figure. Photograph the label and I will fill it in.'**
+  String get camGapNote;
+
   /// No description provided for @camHintBarcode.
   ///
   /// In en, this message translates to:
@@ -936,7 +948,7 @@ abstract class L {
   /// No description provided for @camHintDish.
   ///
   /// In en, this message translates to:
-  /// **'point it at the plate'**
+  /// **'point it at a plate or a pack'**
   String get camHintDish;
 
   /// No description provided for @camIngredients.
@@ -963,6 +975,24 @@ abstract class L {
   /// **' kcal per {grams} g'**
   String camKcalPer(int grams);
 
+  /// No description provided for @camLabelAim.
+  ///
+  /// In en, this message translates to:
+  /// **'aim at the nutrition table'**
+  String get camLabelAim;
+
+  /// No description provided for @camLabelNoShot.
+  ///
+  /// In en, this message translates to:
+  /// **'The shot did not come out. Try photographing the label again.'**
+  String get camLabelNoShot;
+
+  /// No description provided for @camLabelReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Copying the figures off the packet…'**
+  String get camLabelReading;
+
   /// The whole phrase comes from the shared slot phrases, because Ukrainian declines the card name after the preposition.
   ///
   /// In en, this message translates to:
@@ -984,8 +1014,20 @@ abstract class L {
   /// No description provided for @camNoTokens.
   ///
   /// In en, this message translates to:
-  /// **'Out of tokens for today'**
+  /// **'Out of tokens'**
   String get camNoTokens;
+
+  /// No description provided for @camNotAProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'That is not a product barcode'**
+  String get camNotAProduct;
+
+  /// No description provided for @camNotAProductNote.
+  ///
+  /// In en, this message translates to:
+  /// **'A link or an internal code was read. Aim at the striped bar with digits under it.'**
+  String get camNotAProductNote;
 
   /// No description provided for @camNotRead.
   ///
@@ -993,11 +1035,23 @@ abstract class L {
   /// **'Could not make it out'**
   String get camNotRead;
 
+  /// No description provided for @camOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'The code was read, but there is nobody to ask about it. Try again when you are back online.'**
+  String get camOffline;
+
   /// No description provided for @camOfflineShot.
   ///
   /// In en, this message translates to:
   /// **'No connection. You can send the shot to Nora later'**
   String get camOfflineShot;
+
+  /// No description provided for @camOfflineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No network'**
+  String get camOfflineTitle;
 
   /// No description provided for @camPer100.
   ///
@@ -1023,11 +1077,29 @@ abstract class L {
   /// **'Send to Nora'**
   String get camSendToNora;
 
+  /// No description provided for @camServerDown.
+  ///
+  /// In en, this message translates to:
+  /// **'This is not about the code or the camera. Try again in a minute.'**
+  String get camServerDown;
+
+  /// No description provided for @camServerDownTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Our server did not answer'**
+  String get camServerDownTitle;
+
   /// No description provided for @camShoot.
   ///
   /// In en, this message translates to:
   /// **'Take a photo'**
   String get camShoot;
+
+  /// No description provided for @camShootLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Photograph the label'**
+  String get camShootLabel;
 
   /// No description provided for @camShotFailed.
   ///
@@ -1046,6 +1118,30 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Nora will read it and answer in the chat: she will name the dish, estimate the portion and show where the figure came from. It costs two tokens.'**
   String get camShotReadyNote;
+
+  /// No description provided for @camSignedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'The session is no longer valid, so the reference does not recognise us. Sign in again and the scanner will work.'**
+  String get camSignedOut;
+
+  /// No description provided for @camSignedOutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please sign in again'**
+  String get camSignedOutTitle;
+
+  /// No description provided for @camSlow.
+  ///
+  /// In en, this message translates to:
+  /// **'The code was read and the reference took too long. Try again.'**
+  String get camSlow;
+
+  /// No description provided for @camSlowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The answer did not arrive'**
+  String get camSlowTitle;
 
   /// No description provided for @camStillWorks.
   ///
@@ -1068,13 +1164,13 @@ abstract class L {
   /// No description provided for @camUnknownCode.
   ///
   /// In en, this message translates to:
-  /// **'I do not know this code'**
+  /// **'This product is not in any base'**
   String get camUnknownCode;
 
   /// No description provided for @camUnknownCodeNote.
   ///
   /// In en, this message translates to:
-  /// **'It is not in our base, and not in the open one either. Photograph the meal itself or write the name in words, and Nora will count it.'**
+  /// **'Not in ours, and not in the open one. Photograph the nutrition table on the packet and I will copy the figures from it. This is free.'**
   String get camUnknownCodeNote;
 
   /// No description provided for @deleteConfirm.
@@ -1304,6 +1400,18 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Could not erase: {why}'**
   String eraseFailed(String why);
+
+  /// No description provided for @eraseNoNet.
+  ///
+  /// In en, this message translates to:
+  /// **'no network. Turn on the internet and try again'**
+  String get eraseNoNet;
+
+  /// No description provided for @eraseSlow.
+  ///
+  /// In en, this message translates to:
+  /// **'the server is taking too long. Try again in a minute'**
+  String get eraseSlow;
 
   /// No description provided for @eraseSureBody.
   ///
@@ -1659,6 +1767,12 @@ abstract class L {
   /// **'over by '**
   String get heroOver;
 
+  /// No description provided for @heroWeekOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'The week in full'**
+  String get heroWeekOpen;
+
   /// No description provided for @heroWeightFrom.
   ///
   /// In en, this message translates to:
@@ -1719,6 +1833,12 @@ abstract class L {
   /// **'Google did not answer in a minute. Try again'**
   String get loginSlow;
 
+  /// No description provided for @macroCNone.
+  ///
+  /// In en, this message translates to:
+  /// **'C ?'**
+  String get macroCNone;
+
   /// No description provided for @macroCShort.
   ///
   /// In en, this message translates to:
@@ -1742,6 +1862,12 @@ abstract class L {
   /// In en, this message translates to:
   /// **'C'**
   String get macroCarbsLetter;
+
+  /// No description provided for @macroFNone.
+  ///
+  /// In en, this message translates to:
+  /// **'F ?'**
+  String get macroFNone;
 
   /// No description provided for @macroFShort.
   ///
@@ -1778,6 +1904,12 @@ abstract class L {
   /// In en, this message translates to:
   /// **' / {goal}g'**
   String macroOfGrams(int goal);
+
+  /// The same chip when nobody knows the figure. A question mark rather than a zero: a zero reads as a fact, and there is no fact here.
+  ///
+  /// In en, this message translates to:
+  /// **'P ?'**
+  String get macroPNone;
 
   /// Macro chips under a dish: one letter and the grams.
   ///
@@ -2376,7 +2508,7 @@ abstract class L {
   /// No description provided for @planTokensFree.
   ///
   /// In en, this message translates to:
-  /// **'2 a day'**
+  /// **'40 a month'**
   String get planTokensFree;
 
   /// No description provided for @planYear.
@@ -3033,11 +3165,47 @@ abstract class L {
   /// **'Breakfast'**
   String get slotBreakfast;
 
+  /// No description provided for @slotByHand.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the numbers yourself'**
+  String get slotByHand;
+
+  /// No description provided for @slotCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get slotCancel;
+
   /// No description provided for @slotDinner.
   ///
   /// In en, this message translates to:
   /// **'Dinner'**
   String get slotDinner;
+
+  /// No description provided for @slotEraseBody.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{name}\" still has no numbers. The row will leave the day.'**
+  String slotEraseBody(String name);
+
+  /// No description provided for @slotEraseDo.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get slotEraseDo;
+
+  /// No description provided for @slotEraseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove the draft?'**
+  String get slotEraseTitle;
+
+  /// No description provided for @slotGrams.
+  ///
+  /// In en, this message translates to:
+  /// **'WEIGHT, G'**
+  String get slotGrams;
 
   /// «Logged into breakfast». A whole phrase, not a preposition glued to the name: Ukrainian declines the noun after it («у вечерю», not «в вечеря») and alternates the preposition itself for sound, so neither half survives being assembled in code.
   ///
@@ -3068,6 +3236,12 @@ abstract class L {
   /// In en, this message translates to:
   /// **'into a snack'**
   String get slotIntoSnack;
+
+  /// No description provided for @slotKcal.
+  ///
+  /// In en, this message translates to:
+  /// **'KCAL'**
+  String get slotKcal;
 
   /// No description provided for @slotLog.
   ///
@@ -3471,12 +3645,6 @@ abstract class L {
   /// **'I scanned barcode {code} and no base knows it. Do not log anything: ask me about this product or tell me how to count it.'**
   String todayCodeTalk(String code);
 
-  /// No description provided for @todayDemo.
-  ///
-  /// In en, this message translates to:
-  /// **'Demo'**
-  String get todayDemo;
-
   /// No description provided for @todayDone.
   ///
   /// In en, this message translates to:
@@ -3537,12 +3705,6 @@ abstract class L {
   /// **'Logged {slotInto}: {dish}, {kcal} kcal per {grams} g.'**
   String todayLoggedIntoWithNumbers(String slotInto, String dish, int kcal, int grams);
 
-  /// No description provided for @todayMine.
-  ///
-  /// In en, this message translates to:
-  /// **'Mine'**
-  String get todayMine;
-
   /// No description provided for @todayNoraSlow.
   ///
   /// In en, this message translates to:
@@ -3564,13 +3726,13 @@ abstract class L {
   /// No description provided for @todayOutOfTokens.
   ///
   /// In en, this message translates to:
-  /// **'Out of tokens for today. Logging by hand always works.'**
+  /// **'Out of tokens. Logging by hand always works.'**
   String get todayOutOfTokens;
 
   /// No description provided for @todayPhotoMeal.
   ///
   /// In en, this message translates to:
-  /// **'Meal photo'**
+  /// **'Photo'**
   String get todayPhotoMeal;
 
   /// No description provided for @todayQuestionClosed.
@@ -3578,18 +3740,6 @@ abstract class L {
   /// In en, this message translates to:
   /// **'That question is already closed. Say the weight in words if you need to.'**
   String get todayQuestionClosed;
-
-  /// No description provided for @todayShowingDemo.
-  ///
-  /// In en, this message translates to:
-  /// **'Showing the sample day'**
-  String get todayShowingDemo;
-
-  /// No description provided for @todayShowingMine.
-  ///
-  /// In en, this message translates to:
-  /// **'Showing my entries'**
-  String get todayShowingMine;
 
   /// No description provided for @unitCm.
   ///
@@ -3818,6 +3968,228 @@ abstract class L {
   /// In en, this message translates to:
   /// **'More'**
   String get wheelMore;
+
+  /// No description provided for @wkDaysOk.
+  ///
+  /// In en, this message translates to:
+  /// **'days on goal'**
+  String get wkDaysOk;
+
+  /// No description provided for @wkEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing has been logged this week yet. Log the first day and the picture appears.'**
+  String get wkEmpty;
+
+  /// No description provided for @wkFactsHead.
+  ///
+  /// In en, this message translates to:
+  /// **'The week in total'**
+  String get wkFactsHead;
+
+  /// No description provided for @wkKcalHead.
+  ///
+  /// In en, this message translates to:
+  /// **'Calories'**
+  String get wkKcalHead;
+
+  /// No description provided for @wkLoggedCap.
+  ///
+  /// In en, this message translates to:
+  /// **'days logged'**
+  String get wkLoggedCap;
+
+  /// No description provided for @wkLoggedValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} of 7'**
+  String wkLoggedValue(int n);
+
+  /// No description provided for @wkMacroHead.
+  ///
+  /// In en, this message translates to:
+  /// **'Macros'**
+  String get wkMacroHead;
+
+  /// No description provided for @wkNoWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'weight: no weigh-ins'**
+  String get wkNoWeight;
+
+  /// No description provided for @wkNoraBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Build the analysis'**
+  String get wkNoraBtn;
+
+  /// No description provided for @wkNoraFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not build the analysis: {why}'**
+  String wkNoraFailed(String why);
+
+  /// No description provided for @wkNoraGreet.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask about anything in this read: a dish, a habit, or what to fix first.'**
+  String get wkNoraGreet;
+
+  /// No description provided for @wkNoraLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Nora is reading the week…'**
+  String get wkNoraLoading;
+
+  /// No description provided for @wkNoraLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'The analysis opens on Friday'**
+  String get wkNoraLocked;
+
+  /// No description provided for @wkNoraNoNet.
+  ///
+  /// In en, this message translates to:
+  /// **'no network'**
+  String get wkNoraNoNet;
+
+  /// No description provided for @wkNoraNoTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'out of tokens'**
+  String get wkNoraNoTokens;
+
+  /// No description provided for @wkNoraP1.
+  ///
+  /// In en, this message translates to:
+  /// **'Your base is healthy, and that is rare: almost everything is home-cooked. Borscht, scrambled eggs, porridge: on a base like that the rest is quick to fix.'**
+  String get wkNoraP1;
+
+  /// No description provided for @wkNoraP2.
+  ///
+  /// In en, this message translates to:
+  /// **'Now honestly. Vegetables barely showed up all week, while sweets showed up daily: pancakes with honey, compote. Protein runs short not because you eat little, but because the plate is heavy on carbs and light on meat, fish or cheese. And three dinners out of seven landed after ten.'**
+  String get wkNoraP2;
+
+  /// No description provided for @wkNoraP3.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing scary yet, but this is exactly the diet that surprises your bloodwork at forty. One step for next week, change nothing else: something green with every lunch, and water instead of the compote.'**
+  String get wkNoraP3;
+
+  /// No description provided for @wkNoraPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask about this week'**
+  String get wkNoraPlaceholder;
+
+  /// No description provided for @wkNoraPromise.
+  ///
+  /// In en, this message translates to:
+  /// **'An honest read of your week: what worked, what slipped, and one step for the next.'**
+  String get wkNoraPromise;
+
+  /// No description provided for @wkNoraReply1.
+  ///
+  /// In en, this message translates to:
+  /// **'The easiest swap this week: water instead of the compote. A spoon of sugar less every time, and the borscht owes it nothing.'**
+  String get wkNoraReply1;
+
+  /// No description provided for @wkNoraReply2.
+  ///
+  /// In en, this message translates to:
+  /// **'Greens with lunch do not have to mean a salad. A cucumber or half a pepper next to the plate already does the job.'**
+  String get wkNoraReply2;
+
+  /// No description provided for @wkNoraSlow.
+  ///
+  /// In en, this message translates to:
+  /// **'the server is taking too long'**
+  String get wkNoraSlow;
+
+  /// No description provided for @wkNoraTalk.
+  ///
+  /// In en, this message translates to:
+  /// **'Talk it over with Nora'**
+  String get wkNoraTalk;
+
+  /// No description provided for @wkNoraTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nora on your week'**
+  String get wkNoraTitle;
+
+  /// No description provided for @wkNorm.
+  ///
+  /// In en, this message translates to:
+  /// **'goal'**
+  String get wkNorm;
+
+  /// No description provided for @wkOffNorm.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} off the goal'**
+  String wkOffNorm(String n);
+
+  /// No description provided for @wkPastEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No past analyses yet. The first one will appear here next Monday.'**
+  String get wkPastEmpty;
+
+  /// No description provided for @wkPastRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Week of {day}'**
+  String wkPastRow(String day);
+
+  /// No description provided for @wkPastTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Past weeks'**
+  String get wkPastTitle;
+
+  /// No description provided for @wkPerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'kcal a day on average'**
+  String get wkPerDay;
+
+  /// No description provided for @wkPerDayAside.
+  ///
+  /// In en, this message translates to:
+  /// **'a day on average'**
+  String get wkPerDayAside;
+
+  /// No description provided for @wkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The week'**
+  String get wkTitle;
+
+  /// No description provided for @wkTotalCap.
+  ///
+  /// In en, this message translates to:
+  /// **'kcal over the week'**
+  String get wkTotalCap;
+
+  /// No description provided for @wkWaterCap.
+  ///
+  /// In en, this message translates to:
+  /// **'of water a day'**
+  String get wkWaterCap;
+
+  /// No description provided for @wkWaterValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{l} l'**
+  String wkWaterValue(String l);
+
+  /// No description provided for @wkWeightCap.
+  ///
+  /// In en, this message translates to:
+  /// **'weight this week'**
+  String get wkWeightCap;
 
   /// No description provided for @workoutAdd.
   ///

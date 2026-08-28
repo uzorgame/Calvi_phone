@@ -461,6 +461,9 @@ class LUk extends L {
   }
 
   @override
+  String get camAskNoraInstead => 'Етикетки немає, спитати Нору';
+
+  @override
   String get camBarcode => 'Штрихкод';
 
   @override
@@ -470,7 +473,7 @@ class LUk extends L {
   String get camCouldNotRead => 'Не вийшло розібрати знімок';
 
   @override
-  String get camDish => 'Страва';
+  String get camDish => 'Фото';
 
   @override
   String get camEstimate => ' ккал, оцінка';
@@ -485,10 +488,13 @@ class LUk extends L {
   String get camGallery => 'З галереї';
 
   @override
+  String get camGapNote => 'Цього числа не знає жодна база. Зніми етикетку, і я його дочитаю.';
+
+  @override
   String get camHintBarcode => 'код у рамку';
 
   @override
-  String get camHintDish => 'наведи на тарілку';
+  String get camHintDish => 'наведи на тарілку або пачку';
 
   @override
   String camIngredients(String text) {
@@ -511,6 +517,15 @@ class LUk extends L {
   }
 
   @override
+  String get camLabelAim => 'наведи на таблицю поживності';
+
+  @override
+  String get camLabelNoShot => 'Кадр не вийшов. Спробуй зняти етикетку ще раз.';
+
+  @override
+  String get camLabelReading => 'Переписую числа з пачки…';
+
+  @override
   String camLogInto(String slotInto) {
     return 'Записати $slotInto';
   }
@@ -523,13 +538,27 @@ class LUk extends L {
   String get camNoScanner => 'Цей телефон не вміє читати коди камерою.';
 
   @override
-  String get camNoTokens => 'Токени на сьогодні скінчились';
+  String get camNoTokens => 'Токени скінчились';
+
+  @override
+  String get camNotAProduct => 'Це не штрихкод товару';
+
+  @override
+  String get camNotAProductNote =>
+      'Прочиталось посилання або службовий код. Наведи на смужку з цифрами під нею.';
 
   @override
   String get camNotRead => 'Не розібрала';
 
   @override
+  String get camOffline =>
+      'Код прочитано, але спитати про нього нема кого. Спробуй, коли зʼявиться звʼязок.';
+
+  @override
   String get camOfflineShot => 'Не дістаю мережі. Знімок можна надіслати Норі пізніше';
+
+  @override
+  String get camOfflineTitle => 'Немає мережі';
 
   @override
   String get camPer100 => 'Точної ваги на упаковці немає: числа за 100 г.';
@@ -546,7 +575,16 @@ class LUk extends L {
   String get camSendToNora => 'Надіслати Норі';
 
   @override
+  String get camServerDown => 'Це не через код і не через камеру. Спробуй за хвилину.';
+
+  @override
+  String get camServerDownTitle => 'Наш сервер не відповів';
+
+  @override
   String get camShoot => 'Зняти';
+
+  @override
+  String get camShootLabel => 'Зняти етикетку';
 
   @override
   String get camShotFailed => 'Кадр не вийшов';
@@ -559,6 +597,19 @@ class LUk extends L {
       'Нора розбере його і відповість у чаті: назве страву, оцінить порцію і покаже, звідки взялося число. Коштує два токени.';
 
   @override
+  String get camSignedOut =>
+      'Сесія недійсна, тому довідник нас не впізнає. Зайди в застосунок наново, і сканер запрацює.';
+
+  @override
+  String get camSignedOutTitle => 'Треба зайти наново';
+
+  @override
+  String get camSlow => 'Код прочитано, а довідник забарився. Спробуй ще раз.';
+
+  @override
+  String get camSlowTitle => 'Відповідь не встигла';
+
+  @override
   String get camStillWorks => 'Знімок страви і галерея працюють як завжди.';
 
   @override
@@ -568,11 +619,11 @@ class LUk extends L {
   String get camTookTooLong => 'Розбір затягнувся. Спробуй ще раз';
 
   @override
-  String get camUnknownCode => 'Не знаю цього коду';
+  String get camUnknownCode => 'Немає цього товару в базі';
 
   @override
   String get camUnknownCodeNote =>
-      'Ні в нашій базі, ні у відкритій його немає. Сфотографуй саму страву або напиши назву словами, і Нора порахує.';
+      'Ні в нашій, ні у відкритій. Зніми таблицю поживності з упаковки, і я перепишу числа з неї. Це безкоштовно.';
 
   @override
   String get deleteConfirm => 'Я розумію, що дані буде видалено назавжди і відновити їх не вийде.';
@@ -704,6 +755,12 @@ class LUk extends L {
   String eraseFailed(String why) {
     return 'Не вдалось стерти: $why';
   }
+
+  @override
+  String get eraseNoNet => 'немає мережі. Увімкни інтернет і спробуй ще раз';
+
+  @override
+  String get eraseSlow => 'сервер довго відповідає. Спробуй ще раз за хвилину';
 
   @override
   String get eraseSureBody =>
@@ -903,6 +960,9 @@ class LUk extends L {
   String get heroOver => 'перебір на ';
 
   @override
+  String get heroWeekOpen => 'Розбір тижня';
+
+  @override
   String heroWeightFrom(String kg) {
     return 'зараз, від $kg кг на старті цілі';
   }
@@ -942,6 +1002,9 @@ class LUk extends L {
   String get loginSlow => 'Google не відповів за хвилину. Спробуй ще раз';
 
   @override
+  String get macroCNone => 'В ?';
+
+  @override
   String macroCShort(int value) {
     return 'В $value';
   }
@@ -954,6 +1017,9 @@ class LUk extends L {
 
   @override
   String get macroCarbsLetter => 'В';
+
+  @override
+  String get macroFNone => 'Ж ?';
 
   @override
   String macroFShort(int value) {
@@ -976,6 +1042,9 @@ class LUk extends L {
   String macroOfGrams(int goal) {
     return ' / $goalг';
   }
+
+  @override
+  String get macroPNone => 'Б ?';
 
   @override
   String macroPShort(int value) {
@@ -1315,7 +1384,7 @@ class LUk extends L {
   String get planTokens => 'Токени';
 
   @override
-  String get planTokensFree => '2 на добу';
+  String get planTokensFree => '40 на місяць';
 
   @override
   String get planYear => 'Рік';
@@ -1668,7 +1737,27 @@ class LUk extends L {
   String get slotBreakfast => 'Сніданок';
 
   @override
+  String get slotByHand => 'Ввести числа самому';
+
+  @override
+  String get slotCancel => 'Скасувати';
+
+  @override
   String get slotDinner => 'Вечеря';
+
+  @override
+  String slotEraseBody(String name) {
+    return '«$name» стоїть без чисел. Рядок зникне з дня.';
+  }
+
+  @override
+  String get slotEraseDo => 'Прибрати';
+
+  @override
+  String get slotEraseTitle => 'Прибрати чернетку?';
+
+  @override
+  String get slotGrams => 'ВАГА, Г';
 
   @override
   String get slotIntoBreakfast => 'в сніданок';
@@ -1686,6 +1775,9 @@ class LUk extends L {
 
   @override
   String get slotIntoSnack => 'в перекус';
+
+  @override
+  String get slotKcal => 'ККАЛ';
 
   @override
   String get slotLog => 'Записати';
@@ -1918,9 +2010,6 @@ class LUk extends L {
   }
 
   @override
-  String get todayDemo => 'Демо';
-
-  @override
   String get todayDone => 'Готово.';
 
   @override
@@ -1961,9 +2050,6 @@ class LUk extends L {
   }
 
   @override
-  String get todayMine => 'Мої';
-
-  @override
   String get todayNoraSlow => 'Нора думає довше звичного. Спробуй ще раз, токен не списався.';
 
   @override
@@ -1974,19 +2060,13 @@ class LUk extends L {
       'Не дістаю мережі. Запис лишиться на телефоні і поїде, коли зʼявиться.';
 
   @override
-  String get todayOutOfTokens => 'Токени на сьогодні скінчились. Записати вручну можна завжди.';
+  String get todayOutOfTokens => 'Токени скінчились. Записати вручну можна завжди.';
 
   @override
-  String get todayPhotoMeal => 'Фото страви';
+  String get todayPhotoMeal => 'Фото';
 
   @override
   String get todayQuestionClosed => 'Це питання вже закрите. Скажи вагу словами, якщо треба.';
-
-  @override
-  String get todayShowingDemo => 'Показаний демонстраційний день';
-
-  @override
-  String get todayShowingMine => 'Показані мої записи';
 
   @override
   String get unitCm => 'см';
@@ -2114,6 +2194,135 @@ class LUk extends L {
 
   @override
   String get wheelMore => 'Більше';
+
+  @override
+  String get wkDaysOk => 'днів у нормі';
+
+  @override
+  String get wkEmpty =>
+      'За цей тиждень ще нічого не записано. Запиши перший день, і тут з’явиться картина.';
+
+  @override
+  String get wkFactsHead => 'Разом за тиждень';
+
+  @override
+  String get wkKcalHead => 'Калорії';
+
+  @override
+  String get wkLoggedCap => 'днів записано';
+
+  @override
+  String wkLoggedValue(int n) {
+    return '$n із 7';
+  }
+
+  @override
+  String get wkMacroHead => 'БЖВ';
+
+  @override
+  String get wkNoWeight => 'вага: не зважувались';
+
+  @override
+  String get wkNoraBtn => 'Зробити розбір';
+
+  @override
+  String wkNoraFailed(String why) {
+    return 'Не вийшло побудувати розбір: $why';
+  }
+
+  @override
+  String get wkNoraGreet =>
+      'Питай про будь-що з цього розбору: про страву, звичку чи що поправити першим.';
+
+  @override
+  String get wkNoraLoading => 'Нора вивчає тиждень…';
+
+  @override
+  String get wkNoraLocked => 'Аналітика буде доступна в пʼятницю';
+
+  @override
+  String get wkNoraNoNet => 'немає мережі';
+
+  @override
+  String get wkNoraNoTokens => 'токени скінчились';
+
+  @override
+  String get wkNoraP1 =>
+      'Основа в тебе здорова, і це рідкість: майже все домашнє. Борщ, яєчня, вівсянка: на такій базі решта поправляється швидко.';
+
+  @override
+  String get wkNoraP2 =>
+      'Тепер чесно. Овочів за тиждень майже не було, а солодке було щодня: млинці з медом, компот. Білка бракує не тому, що ти мало їси, а тому, що в тарілці багато вуглеводів і мало мʼяса, риби чи сиру. І три вечері з семи були після десятої.';
+
+  @override
+  String get wkNoraP3 =>
+      'Поки нічого страшного, але саме так виглядає раціон, який у сорок здивує аналізами. Один крок на наступний тиждень, більше нічого не міняй: до кожного обіду щось зелене, а замість компоту вода.';
+
+  @override
+  String get wkNoraPlaceholder => 'Спитай про цей тиждень';
+
+  @override
+  String get wkNoraPromise =>
+      'Чесний підсумок тижня: що вийшло, де просіло і один крок на наступний.';
+
+  @override
+  String get wkNoraReply1 =>
+      'Найпростіший обмін цього тижня: компот на воду. Мінус ложка цукру щоразу, а борщу він нічого не винен.';
+
+  @override
+  String get wkNoraReply2 =>
+      'Зелене до обіду не мусить бути салатом. Огірок або пів перця поруч із тарілкою вже роблять роботу.';
+
+  @override
+  String get wkNoraSlow => 'сервер довго відповідає';
+
+  @override
+  String get wkNoraTalk => 'Поговорити про це з Норою';
+
+  @override
+  String get wkNoraTitle => 'Розбір від Нори';
+
+  @override
+  String get wkNorm => 'норма';
+
+  @override
+  String wkOffNorm(String n) {
+    return '$n від норми';
+  }
+
+  @override
+  String get wkPastEmpty => 'Минулих розборів ще немає. Перший зʼявиться тут наступного понеділка.';
+
+  @override
+  String wkPastRow(String day) {
+    return 'Тиждень від $day';
+  }
+
+  @override
+  String get wkPastTitle => 'Минулі';
+
+  @override
+  String get wkPerDay => 'ккал у середньому за добу';
+
+  @override
+  String get wkPerDayAside => 'у середньому за добу';
+
+  @override
+  String get wkTitle => 'Тиждень';
+
+  @override
+  String get wkTotalCap => 'ккал за тиждень';
+
+  @override
+  String get wkWaterCap => 'води за добу';
+
+  @override
+  String wkWaterValue(String l) {
+    return '$l л';
+  }
+
+  @override
+  String get wkWeightCap => 'вага за тиждень';
 
   @override
   String get workoutAdd => 'Додати тренування';

@@ -107,7 +107,10 @@ void main() {
 
   test('перший вхід зберігає акаунт і йде на маршрут Apple, а не Google', () async {
     final log = <String>[];
-    final api = answering(reply(userId: 'u1', outcome: 'created'), log: log);
+    final api = answering(
+      reply(userId: 'u1', outcome: 'created'),
+      log: log,
+    );
     final login = service(api);
 
     expect(await login.signInApple(), LoginResult.done);

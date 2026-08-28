@@ -34,6 +34,8 @@ void main() {
                 open: true,
                 onToggle: () {},
                 onAdd: (_) {},
+                onManual: (_) {},
+                noraCan: true,
               ),
             ],
           ),
@@ -69,7 +71,9 @@ void main() {
         supportedLocales: L.supportedLocales,
         locale: const Locale('uk'),
         theme: calviLightTheme,
-        home: Scaffold(body: SlotInput(onSend: (_) {})),
+        home: Scaffold(
+          body: SlotInput(onSend: (_) {}, onManual: (_) {}, noraCan: true),
+        ),
       ),
     );
     await tester.pumpAndSettle();

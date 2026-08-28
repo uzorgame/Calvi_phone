@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:calvi/data/app_scope.dart';
 import 'package:calvi/data/fixtures.dart';
 import 'package:calvi/data/settings.dart';
+import 'package:calvi/data/day_stats.dart';
+import 'package:calvi/data/week.dart';
 import 'package:calvi/design/shell.dart';
 import 'package:calvi/design/theme.dart';
 import 'package:calvi/screens/today/bottom_bar.dart';
@@ -36,7 +38,13 @@ void main() {
       _wrap(
         ListView(
           children: [
-            HeroCard(day: dayFor(0), burned: dayFor(0).burned, goal: goalOf(initialSettings())),
+            HeroCard(
+              day: dayFor(0),
+              burned: dayFor(0).burned,
+              goal: goalOf(initialSettings()),
+              week: _week,
+              onWeek: () {},
+            ),
             const SizedBox(height: 900),
           ],
         ),
@@ -136,3 +144,6 @@ void main() {
     expect(down, isFalse, reason: 'натискання не відпустилося');
   });
 }
+
+/// Показовий тиждень для картки: сторона тижня читає готове зведення.
+final _week = weekSummary(DayStats.demo(), initialSettings());

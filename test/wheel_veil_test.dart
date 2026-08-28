@@ -22,7 +22,9 @@ void main() {
     final drum = CalviWheel(values: const [1, 2, 3], value: 2, suffix: 'кг', onPick: (_) {});
     return MaterialApp(
       theme: theme ?? calviDarkTheme,
-      home: Scaffold(body: on == null ? drum : CalviOn(color: on, child: drum)),
+      home: Scaffold(
+        body: on == null ? drum : CalviOn(color: on, child: drum),
+      ),
     );
   }
 
