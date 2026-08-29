@@ -699,6 +699,12 @@ abstract class L {
   /// **'{share}% of the norm'**
   String anShareOfNorm(int share);
 
+  /// No description provided for @anStartKg.
+  ///
+  /// In en, this message translates to:
+  /// **'start, kg'**
+  String get anStartKg;
+
   /// No description provided for @anTargetKg.
   ///
   /// In en, this message translates to:
@@ -1940,6 +1946,24 @@ abstract class L {
   /// In en, this message translates to:
   /// **'auto '**
   String get mealAuto;
+
+  /// No description provided for @mealEditDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete entry'**
+  String get mealEditDelete;
+
+  /// No description provided for @mealEditKcal.
+  ///
+  /// In en, this message translates to:
+  /// **'kcal'**
+  String get mealEditKcal;
+
+  /// No description provided for @mealEditSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get mealEditSave;
 
   /// No description provided for @mealEmpty.
   ///
@@ -4208,6 +4232,12 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Collapse'**
   String get workoutCollapse;
+
+  /// No description provided for @workoutMinUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'min'**
+  String get workoutMinUnit;
 
   /// No description provided for @workoutNone.
   ///

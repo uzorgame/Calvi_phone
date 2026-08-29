@@ -357,6 +357,9 @@ class LUk extends L {
   }
 
   @override
+  String get anStartKg => 'старт, кг';
+
+  @override
   String get anTargetKg => 'ціль, кг';
 
   @override
@@ -1062,6 +1065,15 @@ class LUk extends L {
 
   @override
   String get mealAuto => 'авто ';
+
+  @override
+  String get mealEditDelete => 'Видалити запис';
+
+  @override
+  String get mealEditKcal => 'ккал';
+
+  @override
+  String get mealEditSave => 'Зберегти';
 
   @override
   String get mealEmpty => 'Тут поки порожньо. Напиши, що було, і я запишу.';
@@ -2334,6 +2346,9 @@ class LUk extends L {
 
   @override
   String get workoutCollapse => 'Згорнути';
+
+  @override
+  String get workoutMinUnit => 'хв';
 
   @override
   String get workoutNone => 'нічого не записано';

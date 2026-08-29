@@ -17,6 +17,7 @@ import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import '../../format.dart';
 import '../../l10n/app_localizations.dart';
+import '../analytics/charts.dart';
 
 /// Тижнева аналітика: окрема сторінка, вхід із третьої сторони картки дня.
 ///
@@ -44,10 +45,23 @@ class WeekScreen extends StatefulWidget {
 }
 
 class _WeekScreenState extends State<WeekScreen> {
-  /* Розбори з сервера, найновіший перший. Порожньо, поки відповідь у дорозі:
-     сторінка з числами живе і без неї, а «Минулі» доростуть, коли приїде. */
+  /* Розбори з сервера, найновіший перший. null означає «ще не знаємо», і це
+     не те саме, що порожньо: поки відповідь у дорозі, блок Нори не малюється
+     зовсім. Кнопка «Зробити розбір», показана на мить над уже збудованим
+     розбором, обіцяла б те, чого не станеться. */
   List<WeekReviewData>? _reviews;
+
+  /* Память сесії: сторінку відкривають і закривають усі вихідні, а розбори
+     міняються раз на тиждень. Перший вхід питає сервер, наступні зустрічають
+     готовим станом без миготіння, і лише звіряються з сервером у тлі. */
+  static List<WeekReviewData>? _cache;
   bool _asked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _reviews = _cache;
+  }
 
   @override
   void didChangeDependencies() {
@@ -56,18 +70,27 @@ class _WeekScreenState extends State<WeekScreen> {
     _asked = true;
 
     final scope = AppScope.of(context);
-    if (!scope.real || scope.sync == null) return;
+    if (!scope.real || scope.sync == null) {
+      // Питати нема кого, тобто відповідь відома: розборів немає.
+      _reviews ??= const <WeekReviewData>[];
+      return;
+    }
 
     /* Тихо: сторінку відкривають заради чисел, і мережа їм не потрібна.
-       Не приїхало, значить «Минулі» порожні, а розбір цього тижня, якщо він
-       був, добудується кнопкою: повторний запит збереженого нічого не коштує. */
+       Не приїхало, значить показуємо, що знали, або чесну кнопку: повторний
+       запит збереженого розбору однаково нічого не коштує. */
     unawaited(
       scope.sync!
           .weekReviews()
           .then((rows) {
+            _cache = rows;
             if (mounted) setState(() => _reviews = rows);
           })
-          .catchError((_) {}),
+          .catchError((_) {
+            if (mounted && _reviews == null) {
+              setState(() => _reviews = const <WeekReviewData>[]);
+            }
+          }),
     );
   }
 
@@ -75,6 +98,8 @@ class _WeekScreenState extends State<WeekScreen> {
   /// читають один список, і другого джерела правди тут немає.
   void _keep(WeekReviewData fresh) {
     setState(() => _reviews = [fresh, ...?_reviews?.where((r) => r.week != fresh.week)]);
+    // Тільки справжні розбори: показовий розбір демки не мусить пережити демку.
+    if (AppScope.of(context).real) _cache = _reviews;
   }
 
   @override
@@ -138,6 +163,7 @@ class _WeekScreenState extends State<WeekScreen> {
           key: ValueKey('nora-$week'),
           real: scope.real,
           stored: stored?.body,
+          loading: scope.real && _reviews == null,
           now: widget.now,
           onFresh: _keep,
         ),
@@ -161,7 +187,16 @@ class _WeekScreenState extends State<WeekScreen> {
                 ],
               ),
               const SizedBox(height: 16),
-              _DayBars(week: w, normLabel: l.wkNorm),
+              /* Той самий банер, що на екрані аналітики, і буквально той самий
+                 віджет: питання «скільки і з чого» тут те саме, а другий графік
+                 для нього був би другою мовою. */
+              MacroBars(
+                rows: [
+                  for (final d in w.byDay)
+                    (label: d.label, protein: d.protein, fat: d.fat, carbs: d.carbs),
+                ],
+                norm: w.normKcal,
+              ),
             ],
           ),
         ),
@@ -335,115 +370,6 @@ class _Sep extends StatelessWidget {
   );
 }
 
-/// Сім стовпчиків із рискою норми, на шасі води з аналітики.
-class _DayBars extends StatelessWidget {
-  const _DayBars({required this.week, required this.normLabel});
-
-  final WeekSummary week;
-  final String normLabel;
-
-  static const _height = 86.0;
-
-  /* Вхід, знятий із демки один в один: стовпчики виростають знизу за 620 мс
-     тією самою пружною кривою cubic-bezier(0.22, 1, 0.36, 1). Сторінка, де
-     графік уже стоїть готовим на першому кадрі, читається як таблиця, а не як
-     сторінка, що ожила. */
-  static const _grow = Duration(milliseconds: 620);
-  static const _rise = Cubic(0.22, 1, 0.36, 1);
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.c;
-
-    /* Шкала впирається у найвищий день, але не нижче за норму: тиждень
-       суцільного недобору, намальований до стелі, виглядав би виконаним. */
-    final top = week.byDay.fold<int>(week.normKcal, (a, d) => d.kcal > a ? d.kcal : a);
-    final max = (top * 1.12).clamp(1, double.infinity);
-
-    return Column(
-      children: [
-        SizedBox(
-          height: _height,
-          child: Stack(
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  for (final d in week.byDay)
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 3),
-                        child: TweenAnimationBuilder<double>(
-                          tween: Tween(begin: 0, end: 1),
-                          duration: _grow,
-                          curve: _rise,
-                          builder: (context, t, child) => FractionallySizedBox(
-                            widthFactor: 1,
-                            heightFactor: ((d.kcal / max).clamp(0.035, 1.0)) * t,
-                            alignment: Alignment.bottomCenter,
-                            child: child,
-                          ),
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              /* Зелений день витриманий, бордовий ні, і це
-                                 стосується обох боків: недоїсти на тисячу це
-                                 теж не успіх худнення, а голодування.
-
-                                 Тут стояв колір за одним лише перебором, і
-                                 недобір фарбувався так само, як влучання: два
-                                 різні дні виглядали однаково. Правило тепер те
-                                 саме, що фарбує кружечки в стрічці дня.
-
-                                 Сьогодні і дні без запису лишаються чорнилом
-                                 упівсили: вердикту в них ще немає. */
-                              color: !d.logged
-                                  ? c.track
-                                  : switch (d.ok) {
-                                      true => c.success,
-                                      false => c.protein,
-                                      null => Color.lerp(c.track, c.button, 0.55)!,
-                                    },
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: _height * (week.normKcal / max),
-                child: Row(
-                  children: [
-                    Expanded(child: Container(height: 1, color: c.hairline)),
-                    const SizedBox(width: 6),
-                    Text(normLabel, style: context.t.labelSmall?.copyWith(fontSize: 10)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            for (final d in week.byDay)
-              Expanded(
-                child: Text(
-                  d.label,
-                  textAlign: TextAlign.center,
-                  style: context.t.labelSmall?.copyWith(fontSize: 11),
-                ),
-              ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
 /// Одне число з підписом у сітці «Разом за тиждень».
 class _Fact extends StatelessWidget {
   const _Fact({required this.value, required this.cap});
@@ -491,12 +417,19 @@ class _NoraBlock extends StatefulWidget {
     super.key,
     required this.real,
     required this.stored,
+    required this.loading,
     required this.now,
     required this.onFresh,
   });
 
   /// Демо не кличе модель і не замикається на будні: воно показує сторінку.
   final bool real;
+
+  /// Чи ще їде з сервера відповідь про те, є розбір цього тижня чи немає.
+  ///
+  /// Поки їде, картка стоїть згорнутою: показати запрошення і за мить замінити
+  /// його розбором означає смикнути всю сторінку в людини на очах.
+  final bool loading;
 
   /// Розбір цього тижня, якщо він уже збудований. Тоді кнопки немає зовсім.
   final String? stored;
@@ -719,6 +652,27 @@ class _NoraBlockState extends State<_NoraBlock> {
        збудований у пʼятницю розбір читається всю суботу й неділю. */
     final locked = widget.real && _phase != _Phase.open && !reviewOpen(widget.now);
 
+    /* Одна картка на всі стани, і саме тому вона не смикається.
+     *
+     * Список розборів приходить із сервера пізніше за перший кадр, і поки він
+     * у дорозі, ми не знаємо, що показувати: розбір, запрошення чи очікування.
+     * Раніше на цей час блока не було зовсім, і сторінка перебудовувалась у
+     * людини на очах. Тепер картка стоїть із першого кадру згорнутою, а коли
+     * відповідь приходить, вона просто розкривається донизу тим самим рухом,
+     * що й решта складок застосунку. Порожньої відповіді немає: є або розбір,
+     * або запрошення, або рядок очікування. */
+    final Widget? body = widget.loading
+        ? null
+        : _phase == _Phase.open
+        ? _cardBody(context, c, l)
+        : locked
+        ? _waiting(context, c, l)
+        : _invite(context, c, l);
+
+    /* Складається дотиком тільки готовий розбір: у запрошення і в очікування
+       складати нема чого, і стрілка там не з'являється. */
+    final foldable = _phase == _Phase.open;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 12, CalviSize.gutter, 0),
       /* Росте до природної висоти сама: у Flutter це вміє AnimatedSize, і
@@ -727,34 +681,25 @@ class _NoraBlockState extends State<_NoraBlock> {
         duration: const Duration(milliseconds: 520),
         curve: Curves.easeOutQuart,
         alignment: Alignment.topCenter,
-        child: _phase == _Phase.open
-            ? _card(context)
-            : locked
-            ? _lockedLine(context, c, l)
-            : _cta(context, c, l),
+        child: _card(context, c, l, body: body, foldable: foldable),
       ),
     );
   }
 
   /* Прогрес-лінія замість кнопки в будні: тиждень набирається, і з ним
-     набирається те, про що буде розбір. Тиха заливка, а не чорна кнопка:
-     натискати тут нема чого. */
-  Widget _lockedLine(BuildContext context, CalviColors c, L l) {
+     набирається те, про що буде розбір. Натискати тут нема чого, тому й кнопки
+     немає. */
+  Widget _waiting(BuildContext context, CalviColors c, L l) {
     final run = reviewProgress(widget.now);
 
-    return Container(
+    return Padding(
       key: const Key('wk-locked'),
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 13, 16, 14),
-      decoration: BoxDecoration(
-        color: c.fillSecondary,
-        borderRadius: BorderRadius.circular(CalviSize.rLarge),
-      ),
+      padding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l.wkNoraLocked, style: context.t.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
-          const SizedBox(height: 10),
+          Text(l.wkNoraLocked, style: context.t.bodyMedium?.copyWith(color: c.textSecondary)),
+          const SizedBox(height: 12),
           ClipRRect(
             borderRadius: BorderRadius.circular(CalviSize.rPill),
             child: SizedBox(
@@ -776,30 +721,14 @@ class _NoraBlockState extends State<_NoraBlock> {
     );
   }
 
-  /* Запрошення до розбору: та сама біла картка, в якій він потім житиме.
-     Заголовок і рядок обіцянки кажуть, що саме купується, кнопка лише
-     погоджується: гола темна пігулка на пів екрана казала «плати», не
-     сказавши за що. */
-  Widget _cta(BuildContext context, CalviColors c, L l) => Container(
-    width: double.infinity,
-    padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
-    decoration: BoxDecoration(
-      color: c.card,
-      border: Border.all(color: c.cardBorder),
-      borderRadius: BorderRadius.circular(CalviSize.rLarge),
-      boxShadow: context.shadowCard,
-    ),
+  /* Запрошення до розбору в тій самій картці, де він потім і житиме. Рядок
+     обіцянки каже, що саме купується, кнопка лише погоджується: гола темна
+     пігулка на пів екрана казала «плати», не сказавши за що. */
+  Widget _invite(BuildContext context, CalviColors c, L l) => Padding(
+    padding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l.wkNoraTitle.toUpperCase(),
-          style: context.t.labelSmall?.copyWith(
-            fontWeight: FontWeight.w600,
-            letterSpacing: CalviSize.fsMicro * 0.04,
-          ),
-        ),
-        const SizedBox(height: 10),
         Text(
           l.wkNoraPromise,
           style: context.t.bodyMedium?.copyWith(color: c.textSecondary, height: 1.5),
@@ -854,19 +783,23 @@ class _NoraBlockState extends State<_NoraBlock> {
     ),
   );
 
-  /* Готовий розбір живе згортуваною карткою.
+  /* Картка розбору: заголовок, який стоїть завжди, і тіло, яке росте під ним.
    *
    * Розбір читають раз, а сторінку відкривають усі вихідні: розгорнутий назавжди
-   * текст на пів екрана відсував би числа тижня щоразу. Тому кожен вхід на
-   * сторінку починається зі згорнутої картки (як рядок «Минулих»), і лише
-   * щойно збудований розбір розгортається сам: його ще не читали.
+   * текст на пів екрана відсував би числа тижня щоразу. Тому готовий розбір
+   * зустрічає кожен вхід згорнутим (як рядок «Минулих»), і лише щойно
+   * збудований розгортається сам: його ще не читали.
    *
    * Рух той самий, що в карток дня ([CalviFold]), стрілка та сама, що в рядків
-   * налаштувань: праворуч коли згорнуто, донизу коли розгорнуто. */
-  Widget _card(BuildContext context) {
-    final c = context.c;
-    final l = L.of(context);
-
+   * налаштувань: праворуч коли згорнуто, донизу коли розгорнуто. Там, де
+   * складати нема чого, стрілки немає зовсім. */
+  Widget _card(
+    BuildContext context,
+    CalviColors c,
+    L l, {
+    required Widget? body,
+    required bool foldable,
+  }) {
     return Container(
       width: double.infinity,
       clipBehavior: Clip.antiAlias,
@@ -880,7 +813,7 @@ class _NoraBlockState extends State<_NoraBlock> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           GestureDetector(
-            onTap: () => setState(() => _open = !_open),
+            onTap: foldable ? () => setState(() => _open = !_open) : null,
             behavior: HitTestBehavior.opaque,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(18, 16, 14, 16),
@@ -898,17 +831,27 @@ class _NoraBlockState extends State<_NoraBlock> {
                   /* Праворуч коли згорнуто, донизу коли відкрито: стрілка
                      показує, куди розгорнеться тіло, як у рядків налаштувань,
                      а не куди поїде дотик. */
-                  AnimatedRotation(
-                    turns: _open ? 0.25 : 0,
+                  AnimatedOpacity(
+                    opacity: foldable ? 1 : 0,
                     duration: CalviMotion.normal,
                     curve: CalviMotion.ease,
-                    child: CalviIcon('chevron', size: 16, color: c.textSecondary),
+                    child: AnimatedRotation(
+                      turns: _open ? 0.25 : 0,
+                      duration: CalviMotion.normal,
+                      curve: CalviMotion.ease,
+                      child: CalviIcon('chevron', size: 16, color: c.textSecondary),
+                    ),
                   ),
                 ],
               ),
             ),
           ),
-          CalviFold(open: _open, child: _cardBody(context, c, l)),
+          CalviFold(
+            /* Запрошення і очікування стоять розгорнутими: їх не ховають, вони
+               і є те, заради чого картка тут. Складається лише розбір. */
+            open: body != null && (!foldable || _open),
+            child: body ?? const SizedBox(width: double.infinity),
+          ),
         ],
       ),
     );

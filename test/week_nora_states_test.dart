@@ -56,6 +56,27 @@ void main() {
     expect(find.text(l.wkNoraLocked), findsNothing);
   });
 
+  testWidgets('шапка розбору стоїть у кожному стані', (tester) async {
+    /* Блок Нори не міняє своєї подоби: заголовок картки той самий і в будні,
+       коли розбір ще зачинений, і у вихідні, коли його пропонують збудувати, і
+       коли він уже написаний. Доти сторінка на першому вході встигала показати
+       дві різні картки поспіль і смикалась. */
+    final l = await L.delegate.load(const Locale('uk'));
+    final head = l.wkNoraTitle.toUpperCase();
+
+    // Середа: зачинено.
+    await tester.pumpWidget(wrap(real: true, now: DateTime(2026, 8, 26, 12)));
+    await tester.pumpAndSettle();
+    expect(find.text(head), findsOneWidget, reason: 'у будні картка без шапки');
+    expect(find.text(l.wkNoraLocked), findsOneWidget);
+
+    // Пʼятниця ввечері: відчинено, і в тій самій картці стоїть кнопка.
+    await tester.pumpWidget(wrap(real: true, now: DateTime(2026, 8, 28, 19)));
+    await tester.pumpAndSettle();
+    expect(find.text(head), findsOneWidget, reason: 'у вихідні картка без шапки');
+    expect(find.text(l.wkNoraBtn), findsOneWidget);
+  });
+
   testWidgets('демо не замикається на будні: вітрина показує кнопку', (tester) async {
     await tester.pumpWidget(wrap(now: DateTime(2026, 8, 26, 12)));
     await tester.pumpAndSettle();

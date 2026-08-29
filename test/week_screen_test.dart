@@ -46,6 +46,14 @@ void main() {
     expect(find.text(l.wkNoraBtn), findsOneWidget, reason: 'кнопки розбору немає');
     expect(find.text(l.wkKcalHead), findsOneWidget);
     expect(find.text(l.wkMacroHead), findsOneWidget);
+
+    /* Нижні блоки доводиться прокрутити: банер калорій став вищим, відколи
+       показує склад дня і легенду до нього. */
+    await tester.scrollUntilVisible(
+      find.text(l.wkFactsHead),
+      220,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text(l.wkFactsHead), findsOneWidget);
 
     /* Числа ті самі, що на третій стороні картки дня: обидва читачі беруть одне

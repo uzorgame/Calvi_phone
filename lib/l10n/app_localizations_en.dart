@@ -350,6 +350,9 @@ class LEn extends L {
   }
 
   @override
+  String get anStartKg => 'start, kg';
+
+  @override
   String get anTargetKg => 'goal, kg';
 
   @override
@@ -1054,6 +1057,15 @@ class LEn extends L {
 
   @override
   String get mealAuto => 'auto ';
+
+  @override
+  String get mealEditDelete => 'Delete entry';
+
+  @override
+  String get mealEditKcal => 'kcal';
+
+  @override
+  String get mealEditSave => 'Save';
 
   @override
   String get mealEmpty => 'Nothing here yet. Write what it was and I will log it.';
@@ -2319,6 +2331,9 @@ class LEn extends L {
 
   @override
   String get workoutCollapse => 'Collapse';
+
+  @override
+  String get workoutMinUnit => 'min';
 
   @override
   String get workoutNone => 'nothing logged';
