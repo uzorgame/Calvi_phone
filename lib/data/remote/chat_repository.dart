@@ -51,6 +51,7 @@ class ChatRepository {
     Shot? image,
     List<Map<String, String>> history = const [],
     String place = 'today',
+    bool card = false,
   }) async {
     final when = at ?? DateTime.now();
 
@@ -64,6 +65,7 @@ class ChatRepository {
       image: image,
       history: history,
       place: place,
+      card: card,
     );
 
     await _apply(answer, slot: slot, when: when);

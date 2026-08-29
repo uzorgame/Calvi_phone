@@ -24,6 +24,7 @@ import '../../design/icons.dart';
 import '../../design/theme.dart';
 import '../../design/shell.dart';
 import '../../design/tokens.dart';
+import '../../design/wheel.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/labels.dart';
 import '../../design/slide.dart';
@@ -690,14 +691,29 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
         text: text,
         slot: slotId ?? _nextSlotId(_dayNow(AppScope.of(context))),
         image: image,
-        history: _recent(waiting),
+        /* Запис у картку їде без історії чату і з ознакою картки.
+         *
+         * Історія тут не контекст, а пастка: «мідії 300 грам», вписані в
+         * сніданок через хвилину після розмови про обідню пасту з
+         * морепродуктами, читались моделлю як уточнення тієї пасти, і запис
+         * їхав в обід. Людина, яка пише в картку, не продовжує розмову, вона
+         * робить запис. Ознака ж каже серверу записати рівно в цю картку і не
+         * питати ваги: коли її не названо, береться звична порція. */
+        history: draft != null ? const [] : _recent(waiting),
+        card: draft != null,
       );
 
       /* Чернетка прибирається до перевірки `mounted`: записане на сервері вже
          їде в базу, і залишити поруч із ним вічно зайнятого двійника через те,
          що людина встигла піти з екрана, було б помилкою в даних, а не в
-         інтерфейсі. */
-      if (draft != null && answer.logged.isNotEmpty && db != null) {
+         інтерфейсі.
+
+         Виправлення теж запис. Модель вільна прочитати вписане в картку як
+         поправку до щойно записаного (fix_meal замість log_meal): результат у
+         дні вже стоїть, і чернетці нема чого чекати. Доти «чистим» вважався
+         тільки log_meal, і чернетка після виправлення висіла «рахує» вічно. */
+      final wrote = answer.logged.isNotEmpty || answer.fixed.isNotEmpty;
+      if (draft != null && wrote && db != null) {
         unawaited(db.diaryDao.removeMeal(draft));
       }
 
@@ -723,9 +739,11 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
         }
       }
 
-      if (quiet && answer.logged.isEmpty) {
+      if (quiet && !wrote) {
         /* Клавіатура додолу разом із підняттям штори: питання про вагу має
-           стояти перед очима, а не за клавіатурою поля, з якого все почалось. */
+           стояти перед очима, а не за клавіатурою поля, з якого все почалось.
+           Штора підіймається лише коли нічого не записано і не виправлено:
+           будь-який запис уже видно в дні, і розмова про нього не потрібна. */
         FocusManager.instance.primaryFocus?.unfocus();
         setState(() => _chatOpen = true);
       }
@@ -1005,6 +1023,173 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
           textAlign: TextAlign.center,
           style: sheetContext.t.bodyMedium?.copyWith(height: 1.45),
         ),
+      ),
+    );
+  }
+
+  /* Запис у руках людини: вага колесом, видалення явною кнопкою.
+   *
+   * Приходять сюди з одним і тим самим «це не так»: або не стільки, або взагалі
+   * не те. Тому обидві дії живуть на одному аркуші. Зміна ваги це один рух, а
+   * не чотири поля: калорії і БЖВ перераховуються за грамами пропорційно, і
+   * людина бачить ціну кожного оберту ще до «Зберегти». */
+  void _editMeal(AppScope scope, Meal meal) {
+    final db = scope.db;
+    if (db == null || meal.grams <= 0) return;
+
+    var grams = meal.grams;
+    // Крок колеса: пʼять грамів. Точніше не міряє жодна домашня вага.
+    final steps = [for (var g = 10; g <= 1500; g += 5) g];
+
+    calviSheet<void>(
+      context,
+      title: meal.title,
+      doneLabel: l.mealEditSave,
+      cancelLabel: l.mealEditDelete,
+      onCancel: () {
+        unawaited(db.diaryDao.removeMeal(meal.id).then((_) => scope.sync?.now()));
+      },
+      onDone: () {
+        if (grams == meal.grams) return;
+        final k = grams / meal.grams;
+        unawaited(
+          db.diaryDao
+              .reweighMeal(
+                meal.id,
+                grams: grams.toDouble(),
+                kcal: (meal.kcal * k).round(),
+                protein: (meal.protein * k).roundToDouble(),
+                fat: (meal.fat * k).roundToDouble(),
+                carbs: (meal.carbs * k).roundToDouble(),
+              )
+              .then((_) => scope.sync?.now()),
+        );
+      },
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (sheetContext, set) {
+          final k = grams / meal.grams;
+          final c = sheetContext.c;
+
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              /* Числа наживо, тією ж мовою, що рядок у картці: калорії
+                 великим, під ними БЖВ крапками своїх кольорів. */
+              Text.rich(
+                TextSpan(
+                  text: '${(meal.kcal * k).round()}',
+                  style: sheetContext.t.headlineLarge?.copyWith(fontSize: 30, height: 1),
+                  children: [
+                    TextSpan(
+                      text: ' ${l.mealEditKcal}',
+                      style: sheetContext.t.bodyMedium?.copyWith(color: c.textSecondary),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  for (final (colour, value) in [
+                    (c.protein, meal.protein),
+                    (c.fats, meal.fat),
+                    (c.carbs, meal.carbs),
+                  ]) ...[
+                    Container(
+                      width: 5,
+                      height: 5,
+                      margin: const EdgeInsets.only(right: 5),
+                      decoration: BoxDecoration(shape: BoxShape.circle, color: colour),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 9),
+                      child: Text(
+                        '${(value * k).round()}',
+                        style: sheetContext.t.labelSmall?.copyWith(color: c.textSecondary),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 10),
+              CalviWheel(
+                values: steps,
+                value: (grams / 5).round().clamp(2, 300) * 5,
+                suffix: l.unitG,
+                compact: true,
+                onPick: (g) => set(() => grams = g),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  /* Сесія тренування в руках людини, тим самим аркушем, що й запис їжі.
+     Калорії тренування це функція хвилин, тож зміна тривалості один рух:
+     спалене їде за хвилинами пропорційно, і людина бачить його до «Зберегти». */
+  void _editWorkout(AppScope scope, Workout w) {
+    final db = scope.db;
+    if (db == null || w.minutes <= 0) return;
+
+    var mins = w.minutes;
+    final steps = [for (var m = 5; m <= 480; m += 5) m];
+
+    calviSheet<void>(
+      context,
+      title: w.title,
+      doneLabel: l.mealEditSave,
+      cancelLabel: l.mealEditDelete,
+      onCancel: () {
+        unawaited(db.diaryDao.removeWorkout(w.id).then((_) => scope.sync?.now()));
+      },
+      onDone: () {
+        if (mins == w.minutes) return;
+        unawaited(
+          db.diaryDao
+              .reweighWorkout(w.id, minutes: mins, kcal: (w.kcal * mins / w.minutes).round())
+              .then((_) => scope.sync?.now()),
+        );
+      },
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (sheetContext, set) {
+          final c = sheetContext.c;
+
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              /* Спалене тим самим знаком і кольором, що в рядку картки: це
+                 єдине число дня, яке рухає норму в правильний бік. Хвилини
+                 каже саме колесо, другий рядок був би луною. */
+              Text.rich(
+                TextSpan(
+                  text: '−${(w.kcal * mins / w.minutes).round()}',
+                  style: sheetContext.t.headlineLarge?.copyWith(
+                    fontSize: 30,
+                    height: 1,
+                    color: c.success,
+                  ),
+                  children: [
+                    TextSpan(
+                      text: ' ${l.mealEditKcal}',
+                      style: sheetContext.t.bodyMedium?.copyWith(color: c.textSecondary),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+              CalviWheel(
+                values: steps,
+                value: (mins / 5).round().clamp(1, 96) * 5,
+                suffix: l.workoutMinUnit,
+                compact: true,
+                onPick: (m) => set(() => mins = m),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -1349,6 +1534,7 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
                                       noraCan: _noraCan,
                                       onWriting: (on) => _setWriting(slot.id, on),
                                       onErase: (meal) => _eraseDraft(scope, meal),
+                                      onEdit: real ? (meal) => _editMeal(scope, meal) : null,
                                       onManual: (entry) {
                                         final db = scope.db;
                                         if (real && db != null) {
@@ -1396,6 +1582,7 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
                                 child: WorkoutCard(
                                   workouts: workouts,
                                   onAdd: (w) => _addWorkout(scope, w),
+                                  onEdit: real ? (w) => _editWorkout(scope, w) : null,
                                   open: _openCard == 'workout',
                                   onToggle: () => _toggle('workout'),
                                 ),

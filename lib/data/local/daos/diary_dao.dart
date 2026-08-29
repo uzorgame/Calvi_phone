@@ -216,6 +216,54 @@ class DiaryDao extends DatabaseAccessor<CalviDb> with _$DiaryDaoMixin {
     );
   }
 
+  /* Вага, поправлена рукою людини, і числа, що поїхали за нею.
+   *
+   * Один рух замість чотирьох полів: калорії і БЖВ перераховані пропорційно
+   * грамам ще на екрані, сюди приходить готовий результат. Рядок стає брудним і
+   * їде на сервер звичайною синхронізацією, як будь-яка інша правка. */
+  Future<void> reweighMeal(
+    String id, {
+    required double grams,
+    required int kcal,
+    required double protein,
+    required double fat,
+    required double carbs,
+  }) async {
+    await (update(meals)..where((m) => m.id.equals(id) & m.deletedAt.isNull())).write(
+      MealsCompanion(
+        grams: Value(grams),
+        kcal: Value(kcal),
+        proteinG: Value(protein),
+        fatG: Value(fat),
+        carbsG: Value(carbs),
+        updatedAt: Value(DateTime.now()),
+        dirty: const Value(true),
+      ),
+    );
+  }
+
+  /* Тривалість, поправлена рукою людини, і спалене, що поїхало за нею.
+     Один рух, як у ваги страви: калорії тренування це функція хвилин. */
+  Future<void> reweighWorkout(String id, {required int minutes, required int kcal}) async {
+    await (update(workouts)..where((w) => w.id.equals(id) & w.deletedAt.isNull())).write(
+      WorkoutsCompanion(
+        minutes: Value(minutes),
+        kcal: Value(kcal),
+        updatedAt: Value(DateTime.now()),
+        dirty: const Value(true),
+      ),
+    );
+  }
+
+  /// Прибирає сесію так само мʼяко, як запис їжі: рядок лишається, поки про
+  /// нього не почує сервер.
+  Future<void> removeWorkout(String id) async {
+    final now = DateTime.now();
+    await (update(workouts)..where((w) => w.id.equals(id))).write(
+      WorkoutsCompanion(deletedAt: Value(now), updatedAt: Value(now), dirty: const Value(true)),
+    );
+  }
+
   /// Прийняті дози цього дня, парами «препарат|година».
   Future<Set<String>> takesOn(DateTime day) async {
     final key = dayKey(day);

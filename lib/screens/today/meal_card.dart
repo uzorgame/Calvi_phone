@@ -26,6 +26,7 @@ class MealCard extends StatelessWidget {
     required this.noraCan,
     this.onWriting,
     this.onErase,
+    this.onEdit,
   });
 
   final SlotDef slot;
@@ -47,6 +48,9 @@ class MealCard extends StatelessWidget {
 
   /// Довге натискання по чернетці: людина хоче її прибрати.
   final ValueChanged<Meal>? onErase;
+
+  /// Дотик по порахованому рядку: вага і видалення в руках людини.
+  final ValueChanged<Meal>? onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +98,11 @@ class MealCard extends StatelessWidget {
               ),
             ),
           for (final m in meals)
-            MealRow(meal: m, onErase: onErase == null ? null : () => onErase!(m)),
+            MealRow(
+              meal: m,
+              onErase: onErase == null ? null : () => onErase!(m),
+              onOpen: onEdit == null ? null : () => onEdit!(m),
+            ),
           SlotInput(
             onSend: onAdd,
             onManual: onManual,
@@ -109,7 +117,7 @@ class MealCard extends StatelessWidget {
 }
 
 class MealRow extends StatelessWidget {
-  const MealRow({super.key, required this.meal, this.onErase});
+  const MealRow({super.key, required this.meal, this.onErase, this.onOpen});
 
   final Meal meal;
 
@@ -119,10 +127,19 @@ class MealRow extends StatelessWidget {
      неї немає іншого способу піти. */
   final VoidCallback? onErase;
 
+  /* Дотик по порахованому рядку відкриває його аркуш: вага колесом і видалення
+     явною кнопкою. Чернетки не відкриваються: у них ще нема чисел, які можна
+     було б посунути, а їхній вихід це довге натискання вище. */
+  final VoidCallback? onOpen;
+
   @override
   Widget build(BuildContext context) {
     final c = context.c;
-    return GestureDetector(onLongPress: meal.pending ? onErase : null, child: _row(context, c));
+    return GestureDetector(
+      onLongPress: meal.pending ? onErase : null,
+      onTap: meal.pending || meal.grams <= 0 ? null : onOpen,
+      child: _row(context, c),
+    );
   }
 
   Widget _row(BuildContext context, CalviColors c) {

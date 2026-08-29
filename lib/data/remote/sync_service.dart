@@ -58,10 +58,12 @@ class SyncService with WidgetsBindingObserver {
     Shot? image,
     List<Map<String, String>> history = const [],
     String place = 'today',
+    /// Написане в поле картки, а не в чат: запис лягає рівно в цю картку.
+    bool card = false,
   }) => ChatRepository(
     db,
     _api,
-  ).send(text: text, slot: slot, image: image, history: history, place: place);
+  ).send(text: text, slot: slot, image: image, history: history, place: place, card: card);
 
   /* Тижневий розбір. Живе тут, а не в екрані, бо тут той самий клієнт, той
      самий акаунт і те саме дзеркало токенів: розбір коштує два, і число в

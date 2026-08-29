@@ -20,12 +20,16 @@ class WorkoutCard extends StatefulWidget {
     required this.onAdd,
     required this.open,
     required this.onToggle,
+    this.onEdit,
   });
 
   final List<Workout> workouts;
   final ValueChanged<Workout> onAdd;
   final bool open;
   final VoidCallback onToggle;
+
+  /// Дотик по сесії: хвилини і видалення в руках людини.
+  final ValueChanged<Workout>? onEdit;
 
   @override
   State<WorkoutCard> createState() => _WorkoutCardState();
@@ -73,7 +77,11 @@ class _WorkoutCardState extends State<WorkoutCard> {
       onToggle: widget.onToggle,
       child: Column(
         children: [
-          for (final w in widget.workouts) _WorkoutRow(workout: w),
+          for (final w in widget.workouts)
+            _WorkoutRow(
+              workout: w,
+              onOpen: widget.onEdit == null ? null : () => widget.onEdit!(w),
+            ),
           if (_picked != null)
             WorkoutForm(
               activity: _picked!,
@@ -96,13 +104,26 @@ class _WorkoutCardState extends State<WorkoutCard> {
 }
 
 class _WorkoutRow extends StatelessWidget {
-  const _WorkoutRow({required this.workout});
+  const _WorkoutRow({required this.workout, this.onOpen});
 
   final Workout workout;
+
+  /* Дотик відкриває аркуш сесії: хвилини колесом і видалення явною кнопкою.
+     Сесію без тривалості нема за що перерахувати, тож вона не відкривається:
+     хвилини і є її єдине число. */
+  final VoidCallback? onOpen;
 
   @override
   Widget build(BuildContext context) {
     final c = context.c;
+    return GestureDetector(
+      onTap: workout.minutes <= 0 ? null : onOpen,
+      behavior: HitTestBehavior.opaque,
+      child: _row(context, c),
+    );
+  }
+
+  Widget _row(BuildContext context, CalviColors c) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
