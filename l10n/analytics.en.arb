@@ -10,6 +10,7 @@
   "anForMonth": "over the month",
 
   "anGoalProgress": "Progress to the goal",
+  "anStartKg": "start, kg",
   "anNowKg": "now, kg",
   "anTargetKg": "goal, kg",
   "anWeightEmpty": "The curve appears after the second weigh-in. Tell Nora your weight and she will log it herself.",

@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 
 import '../../data/day.dart';
@@ -24,11 +22,21 @@ class Period {
   final String label;
 }
 
+/* Періоди кратні семи, і це не примха.
+ *
+ * Сторінка малює сім колонок, і період, який на сім не ділиться, доводилось
+ * округляти вгору: «місяць» ставав тридцятьма пʼятьма днями, «рік» трьома
+ * сотнями сімдесятьма одним. Число під графіком казало «17 із 35» там, де
+ * людина обрала місяць, і жодного пояснення тому числу на екрані не було.
+ *
+ * Тепер вікно рівно таке, як написано на кнопці: чотири тижні, тринадцять,
+ * пʼятдесят два. Заразом усі колонки стали однакової ширини в днях, а без
+ * цього лінія норми на них не значила б нічого. */
 List<Period> _periods(L l) => [
   Period(days: 7, label: l.anWeek),
-  Period(days: 30, label: l.anMonth),
-  Period(days: 90, label: l.anQuarter),
-  Period(days: 365, label: l.anYear),
+  Period(days: 28, label: l.anMonth),
+  Period(days: 91, label: l.anQuarter),
+  Period(days: 364, label: l.anYear),
 ];
 
 /// Показова крива ваги. Тільки для демо, і більше ніде.
@@ -37,45 +45,35 @@ const _demoWeights = [81.0, 80.6, 80.9, 79.8, 79.4, 78.9, 78.6];
 /// Підписи показової кривої: сім місяців підряд, скороченнями мови застосунку.
 List<String> get _demoLabels => [for (var m = 6; m <= 12; m++) monthShort(m)];
 
-/// Крива ваги за записами, розкладена на сім точок вибраного періоду.
+/// Крива ваги за записами вибраного періоду: кожне зважування точкою.
 ///
-/// Не кожен день, а середнє по відрізку, бо графік заввишки сто тридцять
-/// пікселів не покаже двісті точок нічим, крім шуму. Порожні відрізки просто
-/// пропускаються, і лінія йде від запису до запису.
+/// **Кожне, а не середнє по відрізку.** Тут стояло сім точок, у кожній середнє
+/// своєї частини періоду, і від цього на одному екрані жили два різні графіки
+/// однієї ваги: згладжений угорі й справжній у «Замірах» нижче. Гірше за
+/// несхожість було число: остання точка згладженої кривої це середнє останніх
+/// днів, тому підказка казала «79.0», поки заголовок над нею казав «78.8».
 ///
-/// Раніше тут стояв сталий ряд із семи чисел, той самий у будь-якому режимі: на
-/// екрані аналітики вага людини не мінялась ніколи, хай би скільки вона
-/// зважувалась.
-({List<double> values, List<String> labels}) weightCurve(Map<int, double> byDay, int days) {
-  if (byDay.isEmpty) return (values: const [], labels: const []);
+/// Підписами йдуть дві дати, перша й остання, як у стрічці замірів: під кожною
+/// точкою підпис не стане, а кінці відрізка кажуть, за який час усе це було.
+({List<double> values, List<String> labels, List<String> dates}) weightCurve(
+  Map<int, double> byDay,
+  int days,
+) {
+  final inside = [
+    for (final e in byDay.entries)
+      if (e.key >= -days + 1 && e.key <= 0) e,
+  ]..sort((a, b) => a.key.compareTo(b.key));
 
-  const buckets = 7;
+  if (inside.isEmpty) return (values: const [], labels: const [], dates: const []);
 
-  /* Відрізок рахується з вибраного періоду, а не з півроку назавжди.
-   *
-   * Тут стояло сталих двадцять шість тижнів, і крива ваги показувала одне й те
-   * саме, хоч тиждень вибери, хоч рік: перемикач угорі рухав усе на сторінці,
-   * крім найпершої картки. Людина натискала «Тиждень» і бачила місяці. */
-  final span = math.max(1, (days / buckets).ceil());
-
-  final values = <double>[];
-  final labels = <String>[];
-
-  for (var i = buckets - 1; i >= 0; i--) {
-    final to = -i * span;
-    final from = to - span + 1;
-
-    final inside = [
-      for (final e in byDay.entries)
-        if (e.key >= from && e.key <= to) e.value,
-    ];
-    if (inside.isEmpty) continue;
-
-    values.add(inside.reduce((a, b) => a + b) / inside.length);
-    labels.add(dayInfo(to).full.split(' ').last.substring(0, 3));
-  }
-
-  return (values: values, labels: labels);
+  return (
+    values: [for (final e in inside) e.value],
+    labels: inside.length < 2
+        ? const []
+        : [dayInfo(inside.first.key).full, dayInfo(inside.last.key).full],
+    // Дата кожної точки: її каже підказка, коли по кривій ведуть пальцем.
+    dates: [for (final e in inside) dayInfo(e.key).full],
+  );
 }
 
 class AnalyticsScreen extends StatefulWidget {
@@ -108,10 +106,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
      * не каже. Для тижня береться три місяці, для всього іншого рівно те, що
      * вибрали. Раніше підлога стояла на трьох місяцях завжди, і «Місяць» нічого
      * не міняв. */
-    final tapeDays = days < 30 ? 90 : days;
+    final tapeDays = days < 28 ? 91 : days;
     final tapeLabel = switch (tapeDays) {
-      >= 365 => l.anForYear,
-      >= 90 => l.anForQuarter,
+      >= 364 => l.anForYear,
+      >= 91 => l.anForQuarter,
       _ => l.anForMonth,
     };
 
@@ -191,38 +189,65 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           badge: l.anDonePercent(done),
           child: Column(
             children: [
-              // Гнучкі обидва числа: підписи під ними це слова, а слова довші
-              // на вузькому телефоні й зі збільшеним шрифтом системи.
+              /* Три числа, зліва направо: звідки почали, де зараз, куди йдемо.
+                 Без першого другому нема з чим порівнюватись: «78.8» саме по
+                 собі не каже, це вже пів дороги чи ще нічого. Поточне посередині
+                 і під стрілкою, бо саме воно рухається.
+
+                 Рівняються верхом, і від цього ряд стає ледь помітною дугою:
+                 крайні числа стоять вище, а поточне сідає під стрілку рівно на
+                 її висоту. Рівняння низом ставило всі три на одну лінію, і
+                 поточне переставало бути головним. Дуга тримається сама, без
+                 відступів у пікселях, тому вціліє і на більшому шрифті системи.
+
+                 Гнучкі всі три: підписи під ними це слова, а слова довші на
+                 вузькому телефоні й зі збільшеним шрифтом системи. */
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Flexible(
                     child: CalviFigure(
-                      value: s.weightKg.toStringAsFixed(1),
-                      cap: l.anNowKg,
+                      value: s.goalStartKg.toStringAsFixed(1),
+                      cap: l.anStartKg,
+                      dim: true,
                       tight: true,
                     ),
                   ),
-                  /* Знак каже напрямок, колір каже вердикт. Сірий означає, що
-                     вердикту ще немає: ціль щойно поставлена, і руху не було. */
-                  Builder(
-                    builder: (context) {
-                      final t = goalTrend(s);
-                      return CalviIcon(
-                        t.icon,
-                        /* Більший за звичайні значки цього екрана, і навмисно:
-                           це не оздоба між двома числами, а відповідь на
-                           питання «воно працює?». На двадцяти пікселях між
-                           двома тридцятками він читався як розділовий знак. */
-                        size: 28,
-                        color: switch (t.good) {
-                          true => c.success,
-                          false => c.protein,
-                          null => c.textSecondary,
-                        },
-                      );
-                    },
+                  const Spacer(),
+                  Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        /* Знак каже напрямок, колір каже вердикт. Сірий означає,
+                           що вердикту ще немає: ціль щойно поставлена, і руху не
+                           було. */
+                        Builder(
+                          builder: (context) {
+                            final t = goalTrend(s);
+                            return CalviIcon(
+                              t.icon,
+                              /* Помітний над числом, але не сперечається з ним
+                                 за увагу: це відповідь на «воно працює?», а не
+                                 розділовий знак між двома числами. */
+                              size: 30,
+                              color: switch (t.good) {
+                                true => c.success,
+                                false => c.protein,
+                                null => c.textSecondary,
+                              },
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 2),
+                        CalviFigure(
+                          value: s.weightKg.toStringAsFixed(1),
+                          cap: l.anNowKg,
+                          tight: true,
+                        ),
+                      ],
+                    ),
                   ),
+                  const Spacer(),
                   Flexible(
                     child: CalviFigure(
                       value: s.targetKg.toStringAsFixed(1),
@@ -240,18 +265,22 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                      Той самий перемикач, що й на головній: він відповідає за
                      всю сторінку, а не за половину. */
                   final curve = stats.demo
-                      ? (values: _demoWeights, labels: _demoLabels)
+                      ? (values: _demoWeights, labels: _demoLabels, dates: _demoLabels)
                       : weightCurve(stats.weights, days);
 
                   if (curve.values.length < 2) {
                     return _Note(l.anWeightEmpty);
                   }
 
+                  /* Без чорної підказки на останній точці, як у «Замірах»
+                     нижче: поточна вага вже стоїть числом над цим графіком, і
+                     бульбашка з тим самим числом лише повторювала його, а
+                     заразом налазила на позначку цілі в кутку. */
                   return LineChart(
                     values: curve.values,
                     labels: curve.labels,
+                    dates: curve.dates,
                     goal: s.targetKg,
-                    highlight: curve.values.length - 1,
                     height: 132,
                   );
                 },
@@ -289,6 +318,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       if (totalsOver(b.dates) case final t)
                         (label: b.label, protein: t.protein, fat: t.fat, carbs: t.carbs),
                   ],
+                  /* Норма денна, а скільки днів стоїть в одній колонці, графік
+                     знає окремо: у місяці й році колонка це кілька днів, і
+                     помножити треба не саму лише норму, а й повітря над нею. */
+                  norm: goal.kcal,
+                  span: buckets.first.dates.length,
                 ),
             ],
           ),
@@ -307,14 +341,19 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               final avgMl = wetDays == 0
                   ? 0
                   : (dates.fold<int>(0, (a, d) => a + stats.waterOn(d)) / wetDays).round();
+              /* Колонка кількох днів показує середнє за день, а не суму і не
+                 найкращий день. Сума височіла б над денною рискою норми і не
+                 значила б нічого, а найкращий день казав би «норму взято», якщо
+                 з тринадцяти днів її взяв один. Середнє порівнюється з рискою
+                 чесно і збігається з числом, яке стоїть над графіком. */
+              int perDay(List<int> span) {
+                final wet = span.where((d) => stats.waterOn(d) > 0).toList();
+                if (wet.isEmpty) return 0;
+                return (wet.fold<int>(0, (a, d) => a + stats.waterOn(d)) / wet.length).round();
+              }
+
               final water = [
-                for (final b in buckets)
-                  (
-                    label: b.label,
-                    // A column of several days shows the best of them: a sum
-                    // would tower over the daily target line and mean nothing.
-                    ml: b.dates.fold<int>(0, (a, d) => math.max(a, stats.waterOn(d))),
-                  ),
+                for (final b in buckets) (label: b.label, ml: perDay(b.dates)),
               ];
 
               return Column(
@@ -381,6 +420,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                           labels: points.length < 2
                               ? const []
                               : [dayInfo(points.first.date).full, dayInfo(points.last.date).full],
+                          // Дата кожного заміру, для числа під пальцем.
+                          dates: [for (final m in points) dayInfo(m.date).full],
                           unit: field.unit,
                         );
                       },

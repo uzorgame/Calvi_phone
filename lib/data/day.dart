@@ -354,6 +354,16 @@ class DayInfo {
   final String full;
 }
 
+/// Дата коротко, «31.05», для осей графіків.
+///
+/// На періодах довших за тиждень колонка це не один день, і назвати її двома
+/// літерами дня тижня нема як. Стояло саме число дня («31», «13»), і сім таких
+/// чисел під графіком не казали ні місяця, ні року: підпис був, а дати не було.
+String shortDate(int offset) {
+  final d = calendarDay(offset);
+  return '${d.day}.${d.month.toString().padLeft(2, '0')}';
+}
+
 DayInfo dayInfo(int offset) {
   final d = calendarDay(offset);
   return DayInfo(

@@ -15,6 +15,9 @@ class WeekDay {
     required this.date,
     required this.label,
     required this.kcal,
+    required this.protein,
+    required this.fat,
+    required this.carbs,
     required this.logged,
     required this.ok,
   });
@@ -26,6 +29,11 @@ class WeekDay {
   final String label;
 
   final int kcal;
+
+  /// Грами складників цього дня: стовпчик каже, з чого склались калорії.
+  final int protein;
+  final int fat;
+  final int carbs;
 
   /// Чи є за цей день бодай щось. День без запису це прогалина, а не нуль.
   final bool logged;
@@ -122,6 +130,9 @@ WeekSummary weekSummary(DayStats stats, SettingsState s) {
         date: date,
         label: dayInfo(date).label,
         kcal: totals.kcal,
+        protein: totals.protein,
+        fat: totals.fat,
+        carbs: totals.carbs,
         logged: has,
         ok: !has || date >= 0
             ? null

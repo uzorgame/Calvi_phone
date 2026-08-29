@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
@@ -23,6 +24,7 @@ class LineChart extends StatefulWidget {
     this.goal,
     this.highlight,
     this.highlightNote,
+    this.dates,
     this.unit,
     this.height = 150,
     this.draw = const Duration(milliseconds: 900),
@@ -39,6 +41,14 @@ class LineChart extends StatefulWidget {
 
   /// The line under the figure in that callout, usually a date.
   final String? highlightNote;
+
+  /// Дата кожної точки, для числа під пальцем.
+  ///
+  /// Крива каже «щось рухається», але не каже, скільки саме було у вівторок.
+  /// Підпис під кожною точкою перетворив би графік на таблицю, тому число
+  /// приходить на дотик, і разом із ним день, до якого воно належить. Порожньо
+  /// означає, що графік не знає своїх дат: тоді під пальцем буде саме число.
+  final List<String>? dates;
 
   /// Одиниця під виділеною точкою. Порожньо означає кілограми: так стоїть
   /// майже скрізь, а слово для них знає лише екран.
@@ -61,6 +71,9 @@ class _LineChartState extends State<LineChart> with SingleTickerProviderStateMix
      робить це буденною ситуацією, а не крайнім випадком. */
   late final AnimationController _c;
 
+  /// Точка під пальцем. Порожньо означає, що криву ще не питали.
+  int? _at;
+
   @override
   void initState() {
     super.initState();
@@ -70,6 +83,26 @@ class _LineChartState extends State<LineChart> with SingleTickerProviderStateMix
       // second look at the screen never catches it mid-stroke.
       duration: widget.draw,
     )..forward();
+  }
+
+  @override
+  void didUpdateWidget(LineChart old) {
+    super.didUpdateWidget(old);
+    // Інші дані означають іншу криву: тримати на ній стару точку нема сенсу.
+    if (old.values.length != widget.values.length) _at = null;
+  }
+
+  /// Яка точка стоїть під цим дотиком.
+  void _pick(double dx, double width) {
+    const padX = 5.0;
+    final span = width - padX * 2;
+    if (span <= 0) return;
+    final share = (dx - padX) / span;
+    final i = (share * (widget.values.length - 1)).round().clamp(0, widget.values.length - 1);
+    if (i == _at) return;
+    // Відгук на кожну нову точку, а не на кожен піксель руху.
+    HapticFeedback.selectionClick();
+    setState(() => _at = i);
   }
 
   @override
@@ -113,66 +146,91 @@ class _LineChartState extends State<LineChart> with SingleTickerProviderStateMix
         SizedBox(
           height: widget.height,
           child: LayoutBuilder(
-            builder: (context, box) => AnimatedBuilder(
-              animation: _c,
-              builder: (context, _) {
-                final drawn = CalviMotion.ease.transform(_c.value);
-                return Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Positioned.fill(
-                      child: CustomPaint(
-                        painter: _LinePainter(
-                          values: widget.values,
-                          goal: widget.goal,
-                          highlight: widget.highlight,
-                          progress: drawn,
-                          ink: c.button,
-                          grid: c.cardBorder,
-                          success: c.success,
-                          page: c.card,
-                        ),
-                      ),
-                    ),
-
-                    /* The goal reads as a number, not as a dashed line somebody
-                       has to decode. It sits just above its own line so it never
-                       lands on the month labels under the plot. */
-                    if (widget.goal != null)
-                      Positioned(
-                        right: 0,
-                        bottom: 8,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                          decoration: BoxDecoration(
-                            color: Color.alphaBlend(c.success.withValues(alpha: 0.15), c.card),
-                            borderRadius: BorderRadius.circular(CalviSize.rPill),
-                          ),
-                          child: Text(
-                            L.of(context).anChartGoal(_trimGoal(widget.goal!)),
-                            style: context.t.labelSmall?.copyWith(
-                              fontSize: 10,
-                              color: chipInk(context, c.success),
+            builder: (context, box) => TapRegion(
+              /* Вибір гасне від дотику будь-де поза графіком, як і вибрана
+                 колонка калорій: одна мова на весь екран. */
+              onTapOutside: _at == null ? null : (_) => setState(() => _at = null),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                /* Дотик і ковзання по горизонталі беруться графіком, усе
+                   інше лишається сторінці: вертикальний рух мусить гортати
+                   екран, а не водити по кривій. */
+                onTapDown: (d) => _pick(d.localPosition.dx, box.maxWidth),
+                onHorizontalDragStart: (d) => _pick(d.localPosition.dx, box.maxWidth),
+                onHorizontalDragUpdate: (d) => _pick(d.localPosition.dx, box.maxWidth),
+                child: AnimatedBuilder(
+                  animation: _c,
+                  builder: (context, _) {
+                    final drawn = CalviMotion.ease.transform(_c.value);
+                    return Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Positioned.fill(
+                          child: CustomPaint(
+                            painter: _LinePainter(
+                              values: widget.values,
+                              goal: widget.goal,
+                              highlight: _at ?? widget.highlight,
+                              scrub: _at,
+                              progress: drawn,
+                              ink: c.button,
+                              grid: c.cardBorder,
+                              success: c.success,
+                              page: c.card,
+                              hairline: c.hairline,
                             ),
                           ),
                         ),
-                      ),
 
-                    /* The callout arrives after the line reaches it, never with
-                       it: a label sitting on a point the line has not drawn yet
-                       says the chart was finished before it was. */
-                    if (widget.highlight != null)
-                      _Callout(
-                        at: _pointAt(widget.highlight!, box.biggest),
-                        value:
-                            '${widget.values[widget.highlight!]} '
-                            '${widget.unit ?? L.of(context).unitKg}',
-                        note: widget.highlightNote,
-                        shown: drawn > 0.98,
-                      ),
-                  ],
-                );
-              },
+                        /* The goal reads as a number, not as a dashed line
+                           somebody has to decode. It sits just above its own
+                           line so it never lands on the month labels under the
+                           plot. */
+                        if (widget.goal != null)
+                          Positioned(
+                            right: 0,
+                            bottom: 8,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                              decoration: BoxDecoration(
+                                color: Color.alphaBlend(c.success.withValues(alpha: 0.15), c.card),
+                                borderRadius: BorderRadius.circular(CalviSize.rPill),
+                              ),
+                              child: Text(
+                                L.of(context).anChartGoal(_trimGoal(widget.goal!)),
+                                style: context.t.labelSmall?.copyWith(
+                                  fontSize: 10,
+                                  color: chipInk(context, c.success),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                        /* Число точки: під пальцем, коли криву питають, або на
+                           заздалегідь названій точці. Приходить після того, як
+                           лінія до неї дійшла: підпис на ще не намальованій
+                           точці каже, що графік закінчився раніше, ніж почався. */
+                        if ((_at ?? widget.highlight) case final i?)
+                          _Callout(
+                            at: _pointAt(i, box.biggest),
+                            width: box.maxWidth,
+                            /* Один знак після коми, і це не косметика: точка
+                               кривої часто є середнім кількох зважувань, а
+                               середнє двох чесних чисел дає 78.97500000000001.
+                               Людина бачила цей хвіст замість своєї ваги. */
+                            value:
+                                '${widget.values[i].toStringAsFixed(1)} '
+                                '${widget.unit ?? L.of(context).unitKg}',
+                            note: _at != null && widget.dates != null && i < widget.dates!.length
+                                ? widget.dates![i]
+                                : widget.highlightNote,
+                            shown: drawn > 0.98,
+                          ),
+                      ],
+                    );
+                  },
+                ),
+              ),
             ),
           ),
         ),
@@ -215,21 +273,28 @@ class _LinePainter extends CustomPainter {
     required this.values,
     required this.goal,
     required this.highlight,
+    required this.scrub,
     required this.progress,
     required this.ink,
     required this.grid,
     required this.success,
     required this.page,
+    required this.hairline,
   });
 
   final List<double> values;
   final double? goal;
   final int? highlight;
+
+  /// Точка під пальцем: до неї малюється волосінь через увесь графік.
+  final int? scrub;
+
   final double progress;
   final Color ink;
   final Color grid;
   final Color success;
   final Color page;
+  final Color hairline;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -299,6 +364,19 @@ class _LinePainter extends CustomPainter {
         ..color = ink,
     );
 
+    /* Волосінь від верху до низу: вона каже, яку саме точку тримає палець, поки
+       сама точка під ним і її не видно. */
+    if (scrub != null) {
+      final at = pts[scrub!.clamp(0, pts.length - 1)].dx;
+      canvas.drawLine(
+        Offset(at, 0),
+        Offset(at, size.height - padB),
+        Paint()
+          ..color = hairline
+          ..strokeWidth = 1,
+      );
+    }
+
     if (highlight != null && progress > 0.98) {
       final p = pts[highlight!.clamp(0, pts.length - 1)];
       canvas.drawCircle(p, 4, Paint()..color = page);
@@ -340,21 +418,65 @@ class _LinePainter extends CustomPainter {
 ///
 /// A single grey bar answers «how much»; this answers «of what», which is the
 /// question a plateau usually turns out to be about.
+///
+/// **Один банер на дві сторінки.** Той самий графік стоїть на аналітиці і на
+/// сторінці тижня: питання там одне, і два різні малюнки для нього були б двома
+/// мовами.
+///
+/// Числа зʼявляються на дотик, а не стоять завжди: сім колонок по чотири цифри
+/// це таблиця, а не графік. Перший дотик вибирає колонку і каже її калорії,
+/// другий дотик по складнику каже калорії складника, той самий складник ще раз
+/// повертає день, а дотик будь-де поза колонками знімає вибір.
 class MacroBars extends StatefulWidget {
-  const MacroBars({super.key, required this.rows});
+  const MacroBars({super.key, required this.rows, required this.norm, this.span = 1});
 
-  /// Kilocalories from each macro, per column, oldest first.
+  /// Grams of each macro, per column, oldest first.
   final List<({String label, int protein, int fat, int carbs})> rows;
+
+  /// Денна норма калорій.
+  final int norm;
+
+  /// Скільки днів стоїть в одній колонці.
+  ///
+  /// На тижні це один день, у місяці й році колонка збирає кілька, і тоді разом
+  /// із нею множиться все: і норма, і повітря над нею. Інакше на річному
+  /// графіку лінія норми виїжджає під саму стелю і зникає з очей.
+  final int span;
 
   @override
   State<MacroBars> createState() => _MacroBarsState();
 }
 
+/// Котрий складник питають: білок, жири чи вуглеводи.
+enum _Macro { protein, fat, carbs }
+
 class _MacroBarsState extends State<MacroBars> with SingleTickerProviderStateMixin {
+  /* Висота графіка і те, як вона тримається на різних даних.
+   *
+   * Над нормою завжди стоїть повітря на пʼятсот калорій: лінія норми має жити
+   * всередині графіка, а не на його стелі, інакше день, який ледь перебрав,
+   * малюється врівень із нормою і перебору не видно.
+   *
+   * День, який вийшов і за це повітря, не стискає графік, а розтягує його:
+   * висота росте разом зі стелею, тому ціна пікселя в калоріях лишається та
+   * сама, і лінія норми стоїть там само, де стояла. Так стовпчики не
+   * перетворюються на смужки в тиждень, коли одна вечеря вибилась із ряду.
+   *
+   * Зростання не безмежне: після [_tallest] графік перестає рости і стовпчики
+   * починають меншати. Інакше один день на десять тисяч калорій виштовхнув би
+   * решту сторінки за екран. */
+  static const _height = 130.0;
+  static const _tallest = 200.0;
+  static const _air = 500;
+
   /* One controller for the whole row; each bar takes its own slice of it, so a
      column arrives a beat after the one to its left instead of the row snapping
      into place as a block. */
   late final AnimationController _grow;
+
+  /// Вибрана колонка і вибраний у ній складник. Порожньо означає, що не питали.
+  int? _pick;
+  _Macro? _part;
 
   @override
   void initState() {
@@ -371,6 +493,7 @@ class _MacroBarsState extends State<MacroBars> with SingleTickerProviderStateMix
     // A new period is a new chart, and it earns the growth again.
     if (old.rows.length != widget.rows.length || old.rows.first.label != widget.rows.first.label) {
       _grow.forward(from: 0);
+      _clear();
     }
   }
 
@@ -380,72 +503,202 @@ class _MacroBarsState extends State<MacroBars> with SingleTickerProviderStateMix
     super.dispose();
   }
 
+  void _clear() {
+    _pick = null;
+    _part = null;
+  }
+
+  void _tap(int column, _Macro part) {
+    setState(() {
+      /* Дотик завжди влучає в якийсь складник, тому «вибрати колонку» означає
+         «перший дотик по невибраній»: складник питається лише другим. */
+      if (_pick != column) {
+        _pick = column;
+        _part = null;
+        return;
+      }
+      _part = _part == part ? null : part;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = context.c;
     final l = L.of(context);
     final rows = widget.rows;
     final totals = [for (final r in rows) r.protein * 4 + r.carbs * 4 + r.fat * 9];
-    final max = totals.fold<int>(1, math.max);
 
-    return Column(
-      children: [
-        SizedBox(
-          height: 118,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              for (final (i, r) in rows.indexed)
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: AnimatedBuilder(
-                      animation: _grow,
-                      builder: (context, _) => _Stack(
-                        grow: _grow,
-                        rank: i,
-                        count: rows.length,
-                        fraction: totals[i] / max,
-                        parts: [
-                          (r.fat * 9, c.fats),
-                          (r.carbs * 4, c.carbs),
-                          (r.protein * 4, c.protein),
-                        ],
-                      ),
+    /* Стеля графіка це норма плюс повітря, а коли день вибився і за нього, то
+       сам той день із дещицею запасу над ним. Обидва числа рахуються на цілу
+       колонку: пʼять днів в одній колонці означають і пʼятикратну норму, і
+       пʼятикратне повітря. */
+    final span = math.max(widget.span, 1);
+    final norm = math.max(widget.norm * span, 1);
+    final air = norm + _air * span;
+    final tallest = totals.fold<int>(0, math.max);
+    final max = tallest <= air ? air.toDouble() : tallest * 1.06;
+
+    /* Висота росте рівно настільки, наскільки стеля вийшла за повітря над
+       нормою: доти ціна пікселя в калоріях стала, і лінія норми не рухається
+       з місця, хай яким видався тиждень. */
+    final height = (_height * (max / air)).clamp(_height, _tallest);
+
+    /* Число, яке спитали дотиком: калорії дня або одного складника. Малюється
+       не в колонці, а тут, поверх усього графіка, і саме тому не ріжеться: у
+       колонці йому дозволена була б лише її ширина, і «2 510» ставало «2 51».
+       На довгих періодах числа ще довші, і в тонку смугу не влізли б ніяк. */
+    final r = _pick == null ? null : rows[_pick!];
+    final tip = r == null
+        ? null
+        : switch (_part) {
+            _Macro.protein => r.protein * 4,
+            _Macro.fat => r.fat * 9,
+            _Macro.carbs => r.carbs * 4,
+            null => totals[_pick!],
+          };
+
+    return TapRegion(
+      /* Вибір гасне від дотику будь-де поза колонками: в цій картці, під нею,
+         на іншому кінці екрана. Дотики по самих колонках сюди не долітають. */
+      onTapOutside: _pick == null ? null : (_) => setState(_clear),
+      child: Column(
+        children: [
+          /* Повітря над графіком: там стає число, яке спитали дотиком, і без
+             цього відступу воно налазило б на підпис картки. */
+          const SizedBox(height: 14),
+          SizedBox(
+            height: height,
+            child: LayoutBuilder(
+              builder: (context, box) {
+                // Ширина однієї колонки: за нею стає число над вибраною.
+                final cell = box.maxWidth / rows.length;
+
+                return Stack(
+                  // Пігулка числа виходить за межі колонки і має право на це.
+                  clipBehavior: Clip.none,
+                  children: [
+                /* На всю висоту, а не самим рядом стовпчиків.
+                 *
+                 * Ряд, покладений у стопку звичайною дитиною, отримує вільні
+                 * обмеження, і FractionallySizedBox у вільних обмеженнях
+                 * стискається до самої смуги. Ряд ставав заввишки з найвищий
+                 * стовпчик, спливав до верху стопки, а під ним лишалась
+                 * порожнеча в піврядка: дні тижня від'їжджали вниз, і лінія
+                 * норми, відлічена від низу стопки, опинялась усередині
+                 * стовпчиків. Тому висота тут задається силою. */
+                Positioned.fill(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (final (i, r) in rows.indexed)
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: AnimatedBuilder(
+                              animation: _grow,
+                              builder: (context, _) => _Stack(
+                                grow: _grow,
+                                rank: i,
+                                count: rows.length,
+                                fraction: totals[i] / max,
+                                total: totals[i],
+                                parts: [
+                                  (_Macro.carbs, r.carbs * 4, c.carbs),
+                                  (_Macro.fat, r.fat * 9, c.fats),
+                                  (_Macro.protein, r.protein * 4, c.protein),
+                                ],
+                                picked: _pick == i,
+                                dimmed: _pick != null && _pick != i,
+                                part: _pick == i ? _part : null,
+                                onTap: (part) => _tap(i, part),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+
+                /* Лінія норми поперек стовпчиків, із самим числом норми при ній:
+                   скільки саме, а не лише де. Норма живе в налаштуваннях і
+                   міняється разом із ціллю, тому і висота, і число рахуються з
+                   неї щоразу. */
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: height * (norm / max),
+                  /* Наскрізна для дотиків. Заливка кольором ловить дотики, і
+                     риска в один піксель забирала собі цілу смугу впоперек
+                     графіка: дотик по стовпчику саме там мовчав, і причини
+                     цього не видно нікому. */
+                  child: IgnorePointer(
+                    child: Row(
+                      children: [
+                        Expanded(child: Container(height: 1, color: c.hairline)),
+                        const SizedBox(width: 6),
+                        /* Підкладка кольору картки: риска йде поверх стовпчиків,
+                           і без неї число лягало просто на останній із них. */
+                        ColoredBox(
+                          color: c.card,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 3),
+                            child: Text(
+                              // Норма цілої колонки, та сама, за якою стоїть риска.
+                              thousands(norm),
+                              style: context.t.labelSmall?.copyWith(fontSize: 10),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
+                  ),
+                ),
+
+                /* Число над колонкою, поверх усього іншого. Три ширини колонки
+                   під нього, вирівняне серединою: довге число виходить за свою
+                   колонку в обидва боки, і саме тому воно живе тут, а не в
+                   ній. */
+                if (tip != null && totals[_pick!] > 0)
+                  Positioned(
+                    bottom: height * (totals[_pick!] / max) * 1.1 + 9,
+                    left: cell * (_pick! - 1),
+                    width: cell * 3,
+                    child: IgnorePointer(child: Center(child: _Tip(kcal: tip))),
+                  ),
+                  ],
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              for (final r in rows)
+                Expanded(
+                  child: Text(
+                    r.label,
+                    textAlign: TextAlign.center,
+                    style: context.t.labelSmall?.copyWith(fontSize: 11),
                   ),
                 ),
             ],
           ),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            for (final r in rows)
-              Expanded(
-                child: Text(
-                  r.label,
-                  textAlign: TextAlign.center,
-                  style: context.t.labelSmall?.copyWith(fontSize: 11),
-                ),
-              ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        /* Переноситься, а не вилазить. Три підписи стояли рядом, який не вмів
-           стати вужчим: на збільшеному системному шрифті «Вуглеводи» виїжджало
-           за картку смугастим попереджувачем. Тепер третій просто переходить на
-           наступний рядок, і легенда лишається легендою. */
-        Wrap(
-          alignment: WrapAlignment.center,
-          runSpacing: 6,
-          children: [
-            _Key(label: l.macroProtein, colour: c.protein),
-            _Key(label: l.macroFat, colour: c.fats),
-            _Key(label: l.macroCarbs, colour: c.carbs),
-          ],
-        ),
-      ],
+          const SizedBox(height: 12),
+          /* Переноситься, а не вилазить. Три підписи стояли рядом, який не вмів
+             стати вужчим: на збільшеному системному шрифті «Вуглеводи» виїжджало
+             за картку смугастим попереджувачем. Тепер третій просто переходить на
+             наступний рядок, і легенда лишається легендою. */
+          Wrap(
+            alignment: WrapAlignment.center,
+            runSpacing: 6,
+            children: [
+              _Key(label: l.macroProtein, colour: c.protein),
+              _Key(label: l.macroFat, colour: c.fats),
+              _Key(label: l.macroCarbs, colour: c.carbs),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -456,14 +709,34 @@ class _Stack extends StatelessWidget {
     required this.rank,
     required this.count,
     required this.fraction,
+    required this.total,
     required this.parts,
+    required this.picked,
+    required this.dimmed,
+    required this.part,
+    required this.onTap,
   });
 
   final Animation<double> grow;
   final int rank;
   final int count;
   final double fraction;
-  final List<(int, Color)> parts;
+
+  /// Калорії всієї колонки, для підказки.
+  final int total;
+
+  final List<(_Macro, int, Color)> parts;
+
+  /// Ця колонка вибрана.
+  final bool picked;
+
+  /// Вибрана інша: ця відходить на задній план.
+  final bool dimmed;
+
+  /// Вибраний складник цієї колонки, якщо питали саме його.
+  final _Macro? part;
+
+  final ValueChanged<_Macro> onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -475,25 +748,92 @@ class _Stack extends StatelessWidget {
       step * rank + 0.5,
       curve: CalviMotion.ease,
     ).transform(grow.value);
-    return FractionallySizedBox(
-      heightFactor: (fraction * at).clamp(0.0, 1.0),
+
+    final shown = [
+      for (final (macro, kcal, colour) in parts)
+        if (kcal > 0) (macro, kcal, colour),
+    ];
+
+    /* Найменша смужка, яку ще видно і в яку ще можна поцілити пальцем: день на
+       двісті калорій це запис, а не порожнє місце. */
+    final grown = math.max((fraction * at).clamp(0.0, 1.0), 0.03 * at);
+
+    return Align(
       alignment: Alignment.bottomCenter,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(5),
-        child: Column(
-          /* Stretch, not the default centre. A childless ColoredBox takes the
-             smallest size its constraints allow, and a centring Column hands
-             out loose width, so every segment collapsed to a zero-width sliver
-             that laid out correctly and painted nothing. */
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (final (weight, colour) in parts)
-              if (weight > 0)
-                Expanded(
-                  flex: weight,
-                  child: ColoredBox(color: colour),
-                ),
-          ],
+      child: FractionallySizedBox(
+        widthFactor: 1,
+        heightFactor: grown,
+        alignment: Alignment.bottomCenter,
+        child: AnimatedOpacity(
+          opacity: dimmed ? 0.55 : 1,
+          duration: CalviMotion.normal,
+          curve: CalviMotion.ease,
+          /* Колонка росте цілою і лишається суцільною: силует і заокруглення ті
+             самі, що в спокої. Вибраний складник кажуть не висуванням, яке
+             ламало б силует, а тим, що решта всередині пригасає. */
+          child: AnimatedScale(
+            scale: picked ? 1.1 : 1,
+            alignment: Alignment.bottomCenter,
+            duration: CalviMotion.normal,
+            curve: CalviMotion.ease,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: Column(
+                /* Stretch, not the default centre. A childless ColoredBox takes
+                   the smallest size its constraints allow, and a centring Column
+                   hands out loose width, so every segment collapsed to a
+                   zero-width sliver that laid out correctly and painted
+                   nothing. */
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (final (macro, kcal, colour) in shown)
+                    Expanded(
+                      flex: kcal,
+                      child: GestureDetector(
+                        onTap: () => onTap(macro),
+                        behavior: HitTestBehavior.opaque,
+                        child: AnimatedOpacity(
+                          opacity: part == null || part == macro ? 1 : 0.45,
+                          duration: CalviMotion.normal,
+                          curve: CalviMotion.ease,
+                          child: ColoredBox(color: colour),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Число калорій на дотик: чорнильна пігулка поверх стовпчика.
+class _Tip extends StatelessWidget {
+  const _Tip({required this.kcal});
+
+  final int kcal;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: c.button,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+        child: Text(
+          thousands(kcal),
+          maxLines: 1,
+          style: context.t.labelSmall?.copyWith(
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+            color: c.buttonText,
+          ),
         ),
       ),
     );
@@ -667,9 +1007,16 @@ class _HydrationBarsState extends State<HydrationBars> with SingleTickerProvider
                   children: [
                     Expanded(child: Container(height: 1, color: c.hairline)),
                     const SizedBox(width: 6),
-                    Text(
-                      thousands(widget.goalMl),
-                      style: context.t.labelSmall?.copyWith(fontSize: 10),
+                    // Підкладка кольору картки: інакше число лягає на стовпчик.
+                    ColoredBox(
+                      color: c.card,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 3),
+                        child: Text(
+                          thousands(widget.goalMl),
+                          style: context.t.labelSmall?.copyWith(fontSize: 10),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -754,9 +1101,19 @@ class MacroLine extends StatelessWidget {
 
 /// The pill that names one reading on the line.
 class _Callout extends StatelessWidget {
-  const _Callout({required this.at, required this.value, required this.note, required this.shown});
+  const _Callout({
+    required this.at,
+    required this.width,
+    required this.value,
+    required this.note,
+    required this.shown,
+  });
 
   final Offset at;
+
+  /// Ширина графіка: пігулка не має права виїхати за неї.
+  final double width;
+
   final String value;
   final String? note;
   final bool shown;
@@ -764,12 +1121,18 @@ class _Callout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.c;
+    /* Пігулка вирівняна серединою по точці, тож на першій і останній половина
+       її ширини лишалась би за межами картки. Число, обрізане краєм, гірше за
+       число, зсунуте на сантиметр. */
+    const half = 46.0;
+    final left = (at.dx - half).clamp(0.0, math.max(0.0, width - half * 2)).toDouble();
+
     return Positioned(
       // Above the point and centred on it, with a nudge off the top edge so the
       // pill never sits on the reading it is describing.
-      left: at.dx - 46,
+      left: left,
       top: at.dy - 52,
-      width: 92,
+      width: half * 2,
       child: AnimatedOpacity(
         opacity: shown ? 1 : 0,
         duration: const Duration(milliseconds: 340),

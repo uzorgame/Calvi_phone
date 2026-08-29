@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:calvi/data/app_scope.dart';
 import 'package:calvi/data/day.dart';
 import 'package:calvi/data/day_stats.dart';
+import 'package:calvi/data/measure.dart';
 import 'package:calvi/data/settings.dart';
 import 'package:calvi/design/theme.dart';
 import 'package:calvi/l10n/app_localizations.dart';
@@ -141,7 +142,7 @@ void main() {
     await tester.tap(find.text(l.anMonth));
     await tester.pumpAndSettle();
 
-    // Місяць це тридцять днів, і день на пʼятдесятий назад у нього не входить.
+    // Місяць це чотири тижні, і день на пʼятдесятий назад у нього не входить.
     expect(
       (await _readAll(tester)).contains('|1\u00A0000|'),
       isTrue,
@@ -159,6 +160,119 @@ void main() {
     );
 
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('картка прогресу каже три числа: старт, зараз і ціль', (tester) async {
+    _phone(tester);
+    final s = initialSettings().copyWith(goalStartKg: 84.5, weightKg: 80.2, targetKg: 74);
+    await tester.pumpWidget(_wrap(DayStats.demo(), s: s));
+    await tester.pumpAndSettle();
+
+    /* Без стартової ваги середнє число ні з чим не порівняти: «80.2» саме по
+       собі не каже, це вже пів дороги чи ще нічого. */
+    expect(find.text('84.5'), findsWidgets, reason: 'старту немає');
+    expect(find.text('80.2'), findsWidgets, reason: 'поточної ваги немає');
+    expect(find.text('74.0'), findsWidgets, reason: 'цілі немає');
+
+    final l = await L.delegate.load(const Locale('uk'));
+    expect(find.text(l.anStartKg), findsOneWidget, reason: 'старт без підпису');
+  });
+
+  testWidgets('обидва графіки ваги показують одну й ту саму вагу', (tester) async {
+    _phone(tester);
+
+    /* На екрані дві криві ваги: у картці прогресу і в «Замірах». Дані під ними
+       одні, тож і остання точка мусить бути одна. Доти верхня крива згладжувала
+       період у сім середніх, і її підказка казала «79.0» там, де заголовок над
+       нею казав «78.8»: два числа однієї ваги на одному екрані. */
+    final s = initialSettings().copyWith(goalStartKg: 84.0, weightKg: 78.8, targetKg: 74);
+    final stats = DayStats(
+      totals: const {},
+      water: const {},
+      weights: const {-1: 78.8, -2: 79.4, -5: 79.9, -9: 80.6, -14: 81.2, -20: 82.0},
+      measures: [
+        for (final e in const {-1: 78.8, -2: 79.4, -5: 79.9, -9: 80.6, -14: 81.2, -20: 82.0}.entries)
+          Measure(date: e.key, values: {'weightKg': e.value}),
+      ],
+      demo: false,
+    );
+
+    await tester.pumpWidget(_wrap(stats, s: s));
+    await tester.pumpAndSettle();
+
+    final seen = await _readAll(tester);
+
+    // Одне число ваги на весь екран: те, що людина зважила останнім.
+    expect(seen.contains('|78.8|'), isTrue, reason: 'поточної ваги немає: $seen');
+
+    /* Жодного середнього, якого людина не записувала. 79.1 це середнє двох
+       останніх зважувань, і саме такі числа малювала згладжена крива, поки
+       картка прогресу жила за своїм правилом. */
+    for (final invented in ['79.1', '79.0', '80.2']) {
+      expect(
+        seen.contains('|$invented|'),
+        isFalse,
+        reason: 'на екрані число, якого немає в записах: $invented',
+      );
+      expect(
+        seen.contains('|$invented кг|'),
+        isFalse,
+        reason: 'на кривій число, якого немає в записах: $invented',
+      );
+    }
+  });
+
+  testWidgets('вага в підказці кругла, а не з хвостом', (tester) async {
+    _phone(tester);
+
+    /* Точка кривої це середнє кількох зважувань за відрізок, а середнє двох
+       чесних чисел дає 78.97500000000001. Саме цей хвіст людина й бачила
+       замість своєї ваги. */
+    final stats = DayStats(
+      totals: const {},
+      water: const {},
+      weights: const {-1: 78.9, -2: 79.05, -20: 80.0, -40: 81.0},
+      demo: false,
+    );
+
+    await tester.pumpWidget(_wrap(stats));
+    await tester.pumpAndSettle();
+
+    final seen = await _readAll(tester);
+    expect(
+      RegExp(r'\d+\.\d{3,}').hasMatch(seen),
+      isFalse,
+      reason: 'на екрані число з довгим хвостом: $seen',
+    );
+  });
+
+  testWidgets('вікно періоду рівно таке, як написано на кнопці', (tester) async {
+    _phone(tester);
+
+    /* Сім колонок ділять період націло, тому місяць це чотири тижні, а не
+       тридцять пʼять днів. Доти під графіком води стояло «17 із 35» там, де
+       людина обрала місяць, і пояснити те число було нічим. */
+    final stats = DayStats(
+      totals: const {},
+      water: {for (var d = -400; d <= 0; d++) d: 2500},
+      weights: const {},
+      demo: false,
+    );
+
+    await tester.pumpWidget(_wrap(stats));
+    await tester.pumpAndSettle();
+
+    final l = await L.delegate.load(const Locale('uk'));
+
+    expect((await _readAll(tester)).contains('|7/7|'), isTrue, reason: 'тиждень не сім днів');
+
+    await tester.tap(find.text(l.anMonth));
+    await tester.pumpAndSettle();
+    expect((await _readAll(tester)).contains('|28/28|'), isTrue, reason: 'місяць не чотири тижні');
+
+    await tester.tap(find.text(l.anQuarter));
+    await tester.pumpAndSettle();
+    expect((await _readAll(tester)).contains('|91/91|'), isTrue, reason: 'квартал не тринадцять тижнів');
   });
 
   testWidgets('середнє ділиться на записані дні, а не на календар', (tester) async {

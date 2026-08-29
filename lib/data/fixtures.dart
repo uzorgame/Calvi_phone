@@ -487,7 +487,10 @@ List<DayBucket> bucketDays(int days) {
     final dates = [for (var d = last - size + 1; d <= last; d++) d];
     final opens = dates.first;
     out.add(
-      DayBucket(label: size == 1 ? dayInfo(opens).label : '${dayInfo(opens).day}', dates: dates),
+      /* Колонка ширша за добу підписується датою свого початку, а не самим
+         числом дня: «13» під стовпчиком не каже ні місяця, ні того, що колонка
+         взагалі про кілька днів. */
+      DayBucket(label: size == 1 ? dayInfo(opens).label : shortDate(opens), dates: dates),
     );
   }
   return out;

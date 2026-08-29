@@ -31,7 +31,7 @@ void main() {
         locale: const Locale('uk'),
         theme: calviLightTheme,
         home: Scaffold(
-          body: Center(child: MacroBars(rows: rows)),
+          body: Center(child: MacroBars(rows: rows, norm: 2380)),
         ),
       ),
     );
