@@ -504,76 +504,95 @@ class _Kcal extends StatelessWidget {
 
     return _Shell(
       dot: 0,
-      left: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          /* Великим числом стоїть зʼїдене, а не залишок.
+      /* Числа набігають до нових значень, а не стрибають на них.
+       *
+       * Записана страва це подія, і картка дня має показати її рухом. Кільце
+       * поруч уже їде до нової довжини само, тож без цього число і дуга
+       * рухались урізнобій: одне вже на місці, друга ще в дорозі. Тривалість і
+       * крива тут ті самі, що в кільця, тому вони приходять разом.
+       *
+       * Перше значення показується як є: тween без початку не рухається на
+       * першій побудові, і лічильник не крутиться на кожному вході в день. */
+      left: TweenAnimationBuilder<double>(
+        tween: Tween(end: eaten.toDouble()),
+        duration: const Duration(milliseconds: 620),
+        curve: CalviMotion.easeRise,
+        builder: (context, value, _) {
+          final shownEaten = value.round();
+          final shownLeft = goal.kcal + burned - shownEaten;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              /* Великим числом стоїть зʼїдене, а не залишок.
            *
            * Людина відкриває застосунок, щоб побачити, скільки вона вже зʼїла, і
            * саме це число шукає очима першим. Залишок це висновок із нього, і
            * він доречний рядком нижче. До того ж залишок буває відʼємним, і
            * найбільша цифра на екрані переставала означати те, що означала
            * вранці. */
-          Text.rich(
-            TextSpan(
-              text: thousands(eaten),
-              children: [
+              Text.rich(
                 TextSpan(
-                  text: L.of(context).heroKcal,
-                  style: context.t.bodyMedium?.copyWith(fontSize: 17),
+                  text: thousands(shownEaten),
+                  children: [
+                    TextSpan(
+                      text: L.of(context).heroKcal,
+                      style: context.t.bodyMedium?.copyWith(fontSize: 17),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            style: context.t.displayLarge?.copyWith(height: 1),
-          ),
-          const SizedBox(height: 7),
-          Text.rich(
-            TextSpan(
-              children: [
-                if (left >= 0) ...[
-                  TextSpan(text: L.of(context).heroLeft),
-                  TextSpan(
-                    text: thousands(left),
-                    style: TextStyle(color: c.text, fontWeight: FontWeight.w600),
-                  ),
-                  TextSpan(text: L.of(context).heroOf(thousands(goal.kcal + burned))),
-                ] else ...[
-                  TextSpan(text: L.of(context).heroOver),
-                  TextSpan(
-                    text: thousands(left.abs()),
-                    style: TextStyle(color: c.protein, fontWeight: FontWeight.w600),
-                  ),
-                  TextSpan(text: L.of(context).heroFrom(thousands(goal.kcal + burned))),
-                ],
-              ],
-            ),
-            style: context.t.bodyMedium?.copyWith(height: 1.5),
-          ),
-          /* Спалене чіпом, а не словами в рядку.
+                style: context.t.displayLarge?.copyWith(height: 1),
+              ),
+              const SizedBox(height: 7),
+              Text.rich(
+                TextSpan(
+                  children: [
+                    if (left >= 0) ...[
+                      TextSpan(text: L.of(context).heroLeft),
+                      TextSpan(
+                        text: thousands(shownLeft),
+                        style: TextStyle(color: c.text, fontWeight: FontWeight.w600),
+                      ),
+                      TextSpan(text: L.of(context).heroOf(thousands(goal.kcal + burned))),
+                    ] else ...[
+                      TextSpan(text: L.of(context).heroOver),
+                      TextSpan(
+                        text: thousands(shownLeft.abs()),
+                        style: TextStyle(color: c.protein, fontWeight: FontWeight.w600),
+                      ),
+                      TextSpan(text: L.of(context).heroFrom(thousands(goal.kcal + burned))),
+                    ],
+                  ],
+                ),
+                style: context.t.bodyMedium?.copyWith(height: 1.5),
+              ),
+              /* Спалене чіпом, а не словами в рядку.
            *
            * Мінус, бо тренування спалило калорії. Число пояснює себе саме:
            * «-310 спалено» лишало питання, звідки воно взялось, а «за
            * тренування» відповідає на нього і показує, чому норма сьогодні
            * більша. */
-          if (burned > 0) ...[
-            const SizedBox(height: 6),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
-              decoration: BoxDecoration(
-                color: c.success.withValues(alpha: 0.14),
-                borderRadius: BorderRadius.circular(CalviSize.rPill),
-              ),
-              child: Text(
-                L.of(context).heroBurned(burned),
-                style: context.t.labelSmall?.copyWith(
-                  color: c.success,
-                  fontWeight: FontWeight.w600,
+              if (burned > 0) ...[
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: c.success.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(CalviSize.rPill),
+                  ),
+                  child: Text(
+                    L.of(context).heroBurned(burned),
+                    style: context.t.labelSmall?.copyWith(
+                      color: c.success,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ],
-        ],
+              ],
+            ],
+          );
+        },
       ),
       ring: CalviRing(
         progress: progress,
