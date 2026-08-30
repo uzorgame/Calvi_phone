@@ -700,12 +700,61 @@ class _SlotChip extends StatelessWidget {
   }
 }
 
+/* Один напис живого плейсхолдера.
+ *
+ * Грає свій рух один раз при народженні, як у демці: новий проступає за 900 мс
+ * із запізненням у 150 мс, піднімаючись на чотири пікселі, старий згасає за
+ * 700 мс, спливаючи на ті самі чотири вгору. Ключ робить кожен напис новим
+ * віджетом, тому анімації не треба керувати: вона і є життям віджета. */
+class _Ghost extends StatelessWidget {
+  const _Ghost({
+    super.key,
+    required this.text,
+    required this.style,
+    required this.leaving,
+    this.still = false,
+  });
+
+  final String text;
+  final TextStyle? style;
+  final bool leaving;
+
+  /// Системне «менше руху»: напис просто стоїть, без входу.
+  final bool still;
+
+  @override
+  Widget build(BuildContext context) {
+    final word = Text(text, maxLines: 1, overflow: TextOverflow.ellipsis, style: style);
+    if (still) return word;
+
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: leaving ? 700 : 1050),
+      curve: leaving
+          ? Curves.easeOut
+          // Запізнення входу сховане в криву: перших 150 мс руху немає.
+          : const Interval(150 / 1050, 1, curve: Curves.easeOut),
+      builder: (context, t, child) {
+        final gone = leaving ? t : 1 - t;
+        return Opacity(
+          opacity: leaving ? 1 - t : t,
+          child: Transform.translate(
+            offset: Offset(0, leaving ? -4.0 * t : 4.0 * gone),
+            child: child,
+          ),
+        );
+      },
+      child: word,
+    );
+  }
+}
+
 /// The field and its two buttons, in one pill.
 ///
 /// One shape, not three: the camera and the microphone are ways of saying the
 /// same thing as typing, and standing them outside the field would make them
 /// read as separate features.
-class _Input extends StatelessWidget {
+class _Input extends StatefulWidget {
   const _Input({
     required this.field,
     required this.focus,
@@ -731,8 +780,73 @@ class _Input extends StatelessWidget {
   final bool muteMic;
 
   @override
+  State<_Input> createState() => _InputState();
+}
+
+class _InputState extends State<_Input> {
+  /* Живий плейсхолдер: імʼя, а за ним приклади по колу.
+   *
+   * Поле, підписане самим «Нора», не каже, що воно розуміє минулі дні, воду і
+   * тренування, і людина дізнається про це, тільки витративши токен. Приклади
+   * розповідають це безкоштовно. Імʼя лишається першим тактом кожного кола:
+   * поле все ще звертання до Нори, а не рядок пошуку. */
+  static const _spin = Duration(milliseconds: 5500);
+
+  int _hintAt = 0;
+  int? _prevHint;
+  Timer? _spinner;
+
+  @override
+  void initState() {
+    super.initState();
+    _spinner = Timer.periodic(_spin, (_) {
+      /* Такт пропускається, поки в полі є текст: підказки під набраним не
+         видно, і міняти її там нема для кого. Порожнє поле підхопить ротацію
+         наступним тактом. */
+      if (!mounted || widget.field.text.isNotEmpty) return;
+      setState(() {
+        _prevHint = _hintAt;
+        _hintAt = (_hintAt + 1) % _lines(L.of(context)).length;
+      });
+    });
+    // Набраний і стертий текст ховає і повертає підказку тієї ж миті.
+    widget.field.addListener(_onTyped);
+  }
+
+  void _onTyped() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _spinner?.cancel();
+    widget.field.removeListener(_onTyped);
+    super.dispose();
+  }
+
+  List<String> _lines(L l) => [
+    l.noraName,
+    l.barHintEggs,
+    l.barHintYesterday,
+    l.barHintBorscht,
+    l.barHintProtein,
+    l.barHintWater,
+    l.barHintRun,
+    l.barHintWeighed,
+    l.barHintDelete,
+  ];
+
+  @override
   Widget build(BuildContext context) {
     final c = context.c;
+    final field = widget.field;
+    final focus = widget.focus;
+    final onFocused = widget.onFocused;
+    final onCamera = widget.onCamera;
+    final onHold = widget.onHold;
+    final onLetGo = widget.onLetGo;
+    final onSend = widget.onSend;
+    final muteMic = widget.muteMic;
     return Container(
       padding: const EdgeInsets.fromLTRB(18, 8, 8, 8),
       decoration: BoxDecoration(
@@ -742,24 +856,74 @@ class _Input extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: TextField(
-              textAlignVertical: TextAlignVertical.center,
-              controller: field,
-              focusNode: focus,
-              onTap: onFocused,
-              onSubmitted: (_) => onSend(),
-              textInputAction: TextInputAction.send,
-              style: context.t.bodyLarge?.copyWith(fontSize: CalviSize.fsBody),
-              decoration: InputDecoration(
-                isDense: true,
-                contentPadding: EdgeInsets.zero,
-                border: InputBorder.none,
-                hintText: L.of(context).noraName,
-                hintStyle: context.t.bodyLarge?.copyWith(
-                  fontSize: CalviSize.fsBody,
-                  color: c.textSecondary,
+            child: Stack(
+              alignment: Alignment.centerLeft,
+              children: [
+                /* Підказка живе окремим шаром, а не hintText: атрибут не вміє
+                   мінятись рухом. Старий напис згасає, спливаючи на кілька
+                   пікселів угору, новий проступає знизу з легким запізненням:
+                   заміна читається як перегортання, а не як блимання. Шар
+                   глухий до дотиків і до читалки екрана: полю лишається його
+                   власний прозорий hint, який і несе семантику. */
+                if (field.text.isEmpty)
+                  ExcludeSemantics(
+                    child: IgnorePointer(
+                      child: Builder(
+                        builder: (context) {
+                          final lines = _lines(L.of(context));
+                          final still = MediaQuery.of(context).disableAnimations;
+                          final style = context.t.bodyLarge?.copyWith(
+                            fontSize: CalviSize.fsBody,
+                            color: c.textSecondary,
+                          );
+                          return Stack(
+                            alignment: Alignment.centerLeft,
+                            children: [
+                              if (_prevHint != null && !still)
+                                _Ghost(
+                                  key: ValueKey('out-$_prevHint'),
+                                  text: lines[_prevHint!],
+                                  style: style,
+                                  leaving: true,
+                                ),
+                              _Ghost(
+                                key: ValueKey('in-$_hintAt'),
+                                text: lines[_hintAt % lines.length],
+                                style: style,
+                                leaving: false,
+                                still: still,
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                /* Імʼя поля живе в семантиці, а не другим написом.
+                 *
+                 * Тут стояв прозорий hintText «Нора»: очі його не бачили, зате
+                 * в дереві він був справжнім написом поруч із живою підказкою,
+                 * і два однакові слова на одному екрані плутали і читалку, і
+                 * тести. Мітка каже те саме, не малюючи нічого. */
+                Semantics(
+                  textField: true,
+                  label: L.of(context).noraName,
+                  child: TextField(
+                    textAlignVertical: TextAlignVertical.center,
+                    controller: field,
+                    focusNode: focus,
+                    onTap: onFocused,
+                    onSubmitted: (_) => onSend(),
+                    textInputAction: TextInputAction.send,
+                    style: context.t.bodyLarge?.copyWith(fontSize: CalviSize.fsBody),
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      contentPadding: EdgeInsets.zero,
+                      border: InputBorder.none,
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
           const SizedBox(width: 8),

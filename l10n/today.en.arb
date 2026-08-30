@@ -49,6 +49,14 @@
 
 
   "noraName": "Nora",
+  "barHintEggs": "Two eggs and toast",
+  "barHintYesterday": "What did I eat yesterday?",
+  "barHintBorscht": "Borscht 300 g for lunch",
+  "barHintProtein": "How much protein is left?",
+  "barHintWater": "Drank 500 ml of water",
+  "barHintRun": "Ran 40 minutes",
+  "barHintWeighed": "Weighed in: 78.8",
+  "barHintDelete": "Delete the last entry",
   "barHint": "Write the way you speak.",
   "barHintMore": "\"two eggs and toast\", \"drank 300 of water\", \"ran 40 minutes\": I will work it out and put it in the right card",
   "barLogsInto": "Logging into ",

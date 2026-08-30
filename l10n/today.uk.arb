@@ -24,6 +24,14 @@
 
 
   "noraName": "Нора",
+  "barHintEggs": "Два яйця і тост",
+  "barHintYesterday": "Що я їв учора?",
+  "barHintBorscht": "Борщ 300 г на обід",
+  "barHintProtein": "Скільки білка лишилось?",
+  "barHintWater": "Випив 500 мл води",
+  "barHintRun": "Біг 40 хвилин",
+  "barHintWeighed": "Зважився: 78.8",
+  "barHintDelete": "Видали останній запис",
   "barHint": "Пиши як кажеш.",
   "barHintMore": "«два яйця і тост», «випив 300 води», «біг 40 хвилин»: розберу і запишу в потрібну картку",
   "barLogsInto": "Записую в ",

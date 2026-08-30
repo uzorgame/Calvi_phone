@@ -428,8 +428,32 @@ class LEn extends L {
   String get barHint => 'Write the way you speak.';
 
   @override
+  String get barHintBorscht => 'Borscht 300 g for lunch';
+
+  @override
+  String get barHintDelete => 'Delete the last entry';
+
+  @override
+  String get barHintEggs => 'Two eggs and toast';
+
+  @override
   String get barHintMore =>
       '\"two eggs and toast\", \"drank 300 of water\", \"ran 40 minutes\": I will work it out and put it in the right card';
+
+  @override
+  String get barHintProtein => 'How much protein is left?';
+
+  @override
+  String get barHintRun => 'Ran 40 minutes';
+
+  @override
+  String get barHintWater => 'Drank 500 ml of water';
+
+  @override
+  String get barHintWeighed => 'Weighed in: 78.8';
+
+  @override
+  String get barHintYesterday => 'What did I eat yesterday?';
 
   @override
   String get barLogsInto => 'Logging into ';

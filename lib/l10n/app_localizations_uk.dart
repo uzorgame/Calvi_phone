@@ -435,8 +435,32 @@ class LUk extends L {
   String get barHint => 'Пиши як кажеш.';
 
   @override
+  String get barHintBorscht => 'Борщ 300 г на обід';
+
+  @override
+  String get barHintDelete => 'Видали останній запис';
+
+  @override
+  String get barHintEggs => 'Два яйця і тост';
+
+  @override
   String get barHintMore =>
       '«два яйця і тост», «випив 300 води», «біг 40 хвилин»: розберу і запишу в потрібну картку';
+
+  @override
+  String get barHintProtein => 'Скільки білка лишилось?';
+
+  @override
+  String get barHintRun => 'Біг 40 хвилин';
+
+  @override
+  String get barHintWater => 'Випив 500 мл води';
+
+  @override
+  String get barHintWeighed => 'Зважився: 78.8';
+
+  @override
+  String get barHintYesterday => 'Що я їв учора?';
 
   @override
   String get barLogsInto => 'Записую в ';

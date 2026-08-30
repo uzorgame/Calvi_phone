@@ -837,11 +837,59 @@ abstract class L {
   /// **'Write the way you speak.'**
   String get barHint;
 
+  /// No description provided for @barHintBorscht.
+  ///
+  /// In en, this message translates to:
+  /// **'Borscht 300 g for lunch'**
+  String get barHintBorscht;
+
+  /// No description provided for @barHintDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the last entry'**
+  String get barHintDelete;
+
+  /// No description provided for @barHintEggs.
+  ///
+  /// In en, this message translates to:
+  /// **'Two eggs and toast'**
+  String get barHintEggs;
+
   /// No description provided for @barHintMore.
   ///
   /// In en, this message translates to:
   /// **'\"two eggs and toast\", \"drank 300 of water\", \"ran 40 minutes\": I will work it out and put it in the right card'**
   String get barHintMore;
+
+  /// No description provided for @barHintProtein.
+  ///
+  /// In en, this message translates to:
+  /// **'How much protein is left?'**
+  String get barHintProtein;
+
+  /// No description provided for @barHintRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Ran 40 minutes'**
+  String get barHintRun;
+
+  /// No description provided for @barHintWater.
+  ///
+  /// In en, this message translates to:
+  /// **'Drank 500 ml of water'**
+  String get barHintWater;
+
+  /// No description provided for @barHintWeighed.
+  ///
+  /// In en, this message translates to:
+  /// **'Weighed in: 78.8'**
+  String get barHintWeighed;
+
+  /// No description provided for @barHintYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'What did I eat yesterday?'**
+  String get barHintYesterday;
 
   /// No description provided for @barLogsInto.
   ///
