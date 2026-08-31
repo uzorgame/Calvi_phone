@@ -16,13 +16,15 @@ mixin _$SyncDaoMixin on DatabaseAccessor<CalviDb> {
   $ChatMessagesTable get chatMessages => attachedDatabase.chatMessages;
   $TokenStateTable get tokenState => attachedDatabase.tokenState;
   $SyncMetaTable get syncMeta => attachedDatabase.syncMeta;
+  $ServerSnapshotsTable get serverSnapshots => attachedDatabase.serverSnapshots;
   SyncDaoManager get managers => SyncDaoManager(this);
 }
 
 class SyncDaoManager {
   final _$SyncDaoMixin _db;
   SyncDaoManager(this._db);
-  $$MealsTableTableManager get meals => $$MealsTableTableManager(_db.attachedDatabase, _db.meals);
+  $$MealsTableTableManager get meals =>
+      $$MealsTableTableManager(_db.attachedDatabase, _db.meals);
   $$WaterLogsTableTableManager get waterLogs =>
       $$WaterLogsTableTableManager(_db.attachedDatabase, _db.waterLogs);
   $$WeightsTableTableManager get weights =>
@@ -34,7 +36,10 @@ class SyncDaoManager {
   $$MedicationsTableTableManager get medications =>
       $$MedicationsTableTableManager(_db.attachedDatabase, _db.medications);
   $$MedicationTakesTableTableManager get medicationTakes =>
-      $$MedicationTakesTableTableManager(_db.attachedDatabase, _db.medicationTakes);
+      $$MedicationTakesTableTableManager(
+        _db.attachedDatabase,
+        _db.medicationTakes,
+      );
   $$AllergiesTableTableManager get allergies =>
       $$AllergiesTableTableManager(_db.attachedDatabase, _db.allergies);
   $$ProfileTableTableManager get profile =>
@@ -45,4 +50,9 @@ class SyncDaoManager {
       $$TokenStateTableTableManager(_db.attachedDatabase, _db.tokenState);
   $$SyncMetaTableTableManager get syncMeta =>
       $$SyncMetaTableTableManager(_db.attachedDatabase, _db.syncMeta);
+  $$ServerSnapshotsTableTableManager get serverSnapshots =>
+      $$ServerSnapshotsTableTableManager(
+        _db.attachedDatabase,
+        _db.serverSnapshots,
+      );
 }

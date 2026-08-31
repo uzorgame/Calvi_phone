@@ -15,6 +15,7 @@ import '../../design/ruler.dart';
 import '../../design/shell.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
+import 'welcome.dart';
 import '../../design/wheel.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/labels.dart';
@@ -72,10 +73,20 @@ List<({Direction id, String label, String hint})> _goals(L l) => [
 /// There is no social proof here and no testimonials. We have no users yet, and
 /// a review invented for a demo is a lie that ships.
 class StartScreen extends StatefulWidget {
-  const StartScreen({super.key, required this.onFinish, this.step = 0});
+  const StartScreen({super.key, required this.onFinish, this.onSignedIn, this.step = 0});
 
   /// Where the finished profile goes.
   final void Function(StartDraft) onFinish;
+
+  /* Вхід у наявний акаунт, коли анкети не було.
+   *
+   * Інший кінець «Старту», і навмисно не [onFinish]: тут нема чого зберігати.
+   * Профіль людини лежить на сервері, і віддати замість нього заводську
+   * чернетку означало б затерти справжні цілі тими, яких ніхто не вводив.
+   *
+   * `false` у відповідь означає, що в акаунті профілю не виявилось, і анкету
+   * все-таки доведеться пройти. */
+  final Future<bool> Function()? onSignedIn;
 
   /// Which screen to open on. Only the demo entry point passes anything else.
   final int step;
@@ -143,6 +154,14 @@ class _StartScreenState extends State<StartScreen> {
 
   late int _step = widget.step;
 
+  /* Вітання показується тільки на справжньому першому запуску. Демо-вхід
+     просить конкретний крок, і зустрічати його розвилкою означало б не
+     виконати прохання. */
+  late bool _welcome = widget.step == 0;
+
+  /// Вхід відкрили з вітання: анкети не було, і екран входу каже інше.
+  bool _returning = false;
+
   Sex _sex = Sex.m;
   int _age = 26;
   int _heightCm = 178;
@@ -177,6 +196,21 @@ class _StartScreenState extends State<StartScreen> {
 
   void _go(int n) => setState(() => _step = n);
 
+  /* Вхід не відбувся: вікно закрили або акаунт виявився без профілю. Далі
+     звичайна дорога новачка, з першого питання. Прапорець знімається, бо екран
+     входу в кінці має знову говорити мовою тих, хто щойно порахував норму. */
+  void _toForm() => setState(() {
+    _returning = false;
+    _step = 0;
+  });
+
+  /* Зайшли в наявний акаунт. Нічого не збираємо і нічого не зберігаємо: профіль
+     приходить з обміну таким, яким лежить на сервері. */
+  Future<void> _entered() async {
+    final ok = await widget.onSignedIn?.call() ?? false;
+    if (!ok && mounted) _toForm();
+  }
+
   void _done() => widget.onFinish(
     StartDraft(
       sex: _sex,
@@ -196,6 +230,21 @@ class _StartScreenState extends State<StartScreen> {
 
   @override
   Widget build(BuildContext context) {
+    /* Перший екран першого запуску це не питання, а розвилка: людина тут уперше
+       чи повертається. Той, хто повертається, іде одразу на вхід і не заповнює
+       нічого: його профіль лежить на сервері. Демо-вхід на конкретний крок
+       вітання минає, бо йому показують саме те питання, яке попросили. */
+    if (_welcome) {
+      return WelcomeScreen(
+        onStart: () => setState(() => _welcome = false),
+        onSignIn: () => setState(() {
+          _welcome = false;
+          _returning = true;
+          _step = startSteps - 1;
+        }),
+      );
+    }
+
     return Scaffold(
       /* Прозорий навмисно: під сторінкою лежить ґрунт, а суцільне тло
          Scaffold накрило б його рівним кольором і від «Вугілля» лишився б
@@ -253,7 +302,14 @@ class _StartScreenState extends State<StartScreen> {
     3 => _paceStep(),
     4 => _lifeStep(),
     5 => _normStep(),
-    _ => _SignIn(onDone: _done),
+    /* Два різні кінці одного екрана. Пройшов анкету: чернетка стає профілем.
+       Прийшов із вітання: профіль забирається з акаунта, а якщо вхід не
+       відбувся, анкету все одно треба пройти, тому дорога веде на перший крок. */
+    _ => _SignIn(
+      onDone: _returning ? _toForm : _done,
+      onEntered: _returning ? _entered : null,
+      returning: _returning,
+    ),
   };
 
   /* Три відповіді одним екраном, і всі три без роздумів.
@@ -529,11 +585,11 @@ class _StartScreenState extends State<StartScreen> {
         const SizedBox(height: CalviSize.gapCard),
         Row(
           children: [
-            _MacroDot(label: l.macroProtein, value: _protein, colour: c.protein),
+            _MacroDot(label: l.macroProtein, value: _protein, colour: c.protein, icon: 'protein'),
             const SizedBox(width: CalviSize.gapCard),
-            _MacroDot(label: l.macroFat, value: _fat, colour: c.fats),
+            _MacroDot(label: l.macroFat, value: _fat, colour: c.fats, icon: 'fat'),
             const SizedBox(width: CalviSize.gapCard),
-            _MacroDot(label: l.macroCarbs, value: _carbs, colour: c.carbs),
+            _MacroDot(label: l.macroCarbs, value: _carbs, colour: c.carbs, icon: 'carbs'),
           ],
         ),
         const SizedBox(height: CalviSize.gapCard),
@@ -800,12 +856,24 @@ class _Field extends StatelessWidget {
   }
 }
 
+/* Знак у кільці той самий, що на картках дня.
+ *
+ * Тут кільця стояли порожніми, і три однакові кола відрізнялись лише кольором:
+ * людина бачила їх уперше і мусила читати підпис, щоб зрозуміти, котре з них
+ * котре. На дні ці самі величини вже позначені знаками, і саме тут вони
+ * зустрічаються вперше, тож саме тут знак і має з'явитись. */
 class _MacroDot extends StatelessWidget {
-  const _MacroDot({required this.label, required this.value, required this.colour});
+  const _MacroDot({
+    required this.label,
+    required this.value,
+    required this.colour,
+    required this.icon,
+  });
 
   final String label;
   final int value;
   final Color colour;
+  final String icon;
 
   @override
   Widget build(BuildContext context) {
@@ -821,7 +889,13 @@ class _MacroDot extends StatelessWidget {
         ),
         child: Column(
           children: [
-            CalviRing(progress: 1, size: 40, stroke: 5, color: colour),
+            CalviRing(
+              progress: 1,
+              size: 40,
+              stroke: 5,
+              color: colour,
+              child: CalviIcon(icon, size: 14, color: colour),
+            ),
             const SizedBox(height: 8),
             Text(
               L.of(context).gramsUnit(value),
@@ -897,9 +971,20 @@ class _Note extends StatelessWidget {
    something the person has seen rather than paying for something promised. The
    cost is real: everything before this exists only while the app is open. */
 class _SignIn extends StatefulWidget {
-  const _SignIn({required this.onDone});
+  const _SignIn({required this.onDone, this.onEntered, this.returning = false});
 
+  /* Сюди прийшли з вітання, тобто акаунт уже є, і анкети ніхто не проходив.
+     Міняє те, що каже екран: обіцяти «норма порахована» тому, хто нічого не
+     рахував, означало б говорити про роботу, якої він не робив. */
+  final bool returning;
+
+  /// Далі без акаунта: вхід пропустили, закрили вікно або він не вдався.
   final VoidCallback onDone;
+
+  /* Вхід таки відбувся. Окремий кінець, бо він єдиний, після якого профіль уже
+     є і збирати його наново не можна. Порожній, коли акаунт тут не очікується:
+     на дорозі новачка вхід і пропуск ведуть в одне місце. */
+  final Future<void> Function()? onEntered;
 
   @override
   State<_SignIn> createState() => _SignInState();
@@ -949,9 +1034,20 @@ class _SignInState extends State<_SignIn> {
 
     switch (result) {
       case LoginResult.done:
-      case LoginResult.canceled:
       case LoginResult.partial:
-        // Вхід відбувся; недовезений щоденник забере наступний обмін.
+        /* Вхід відбувся; недовезений щоденник забере наступний обмін. За
+           акаунтом іде обмін, і він не миттєвий, тому кнопка лишається зайнятою
+           до кінця: інакше екран виглядав би так, ніби нічого не сталось. */
+        final entered = widget.onEntered;
+        if (entered != null) {
+          setState(() => _busyWith = who);
+          await entered();
+          if (mounted) setState(() => _busyWith = null);
+          return;
+        }
+        widget.onDone();
+      case LoginResult.canceled:
+        // Вікно закрили: акаунта не стало, тому далі звичайною дорогою.
         widget.onDone();
       case LoginResult.failed:
         // Причина в тексті: без неї збій виглядає як мовчання, а до сервера він
@@ -988,7 +1084,7 @@ class _SignInState extends State<_SignIn> {
       padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 0, CalviSize.gutter, 16),
       children: [
         Text(
-          l.startSignInTitle,
+          widget.returning ? l.startSignInBackTitle : l.startSignInTitle,
           style: context.t.displayLarge?.copyWith(
             fontSize: 34,
             letterSpacing: 34 * -0.03,
@@ -997,7 +1093,7 @@ class _SignInState extends State<_SignIn> {
         ),
         const SizedBox(height: 12),
         Text(
-          l.startSignInText,
+          widget.returning ? l.startSignInBackText : l.startSignInText,
           style: context.t.bodyMedium?.copyWith(fontSize: CalviSize.fsBody, height: 1.5),
         ),
         const SizedBox(height: 24),

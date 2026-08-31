@@ -4,9 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:calvi/data/app_scope.dart';
 import 'package:calvi/data/settings.dart';
 import 'package:calvi/design/shell.dart';
-import 'package:calvi/design/icons.dart';
 import 'package:calvi/design/theme.dart';
 import 'package:calvi/main.dart';
+import 'package:calvi/screens/menu.dart';
 import 'package:calvi/screens/settings/settings_screen.dart';
 import 'package:calvi/l10n/app_localizations.dart';
 
@@ -169,14 +169,22 @@ void main() {
     await tester.pumpWidget(const CalviApp(storage: false, hello: false));
     await tester.pump(const Duration(seconds: 1));
 
+    /* Перший запуск відкривається розвилкою «уперше чи повертаюсь». Тести
+       йдуть дорогою новачка, тому тиснуть «Почати». */
+    await tester.tap(find.text('Почати'));
+    await tester.pumpAndSettle();
+
     for (var i = 0; i < 6; i++) {
       await tester.tap(find.text('Далі'));
       await tester.pumpAndSettle();
     }
-    await tester.tap(find.text('Поки без входу'));
+    await tester.tap(find.text('Увійти без акаунту'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byWidgetPredicate((w) => w is CalviIcon && w.name == 'settings'));
+    /* Налаштування тепер живуть у меню з шапки: спершу меню, тоді рядок. */
+    await tester.tap(find.byType(CalviMenuButton));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Налаштування'));
     await tester.pumpAndSettle();
     expect(find.text('Налаштування'), findsOneWidget, reason: 'налаштування не відкрились');
 

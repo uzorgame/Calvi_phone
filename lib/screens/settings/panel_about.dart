@@ -3,6 +3,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../design/shell.dart';
+import '../menu.dart';
 import '../../design/theme.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -61,6 +62,7 @@ class _AboutPanelState extends State<AboutPanel> {
   Widget build(BuildContext context) {
     final l = L.of(context);
     return CalviScreen(
+      trailing: const CalviMenuButton(),
       onBack: widget.onBack,
       title: l.aboutTitle,
       foot: CalviButton(

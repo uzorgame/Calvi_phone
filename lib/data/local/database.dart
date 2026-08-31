@@ -12,6 +12,7 @@ import 'tables/medications.dart';
 import 'tables/profile.dart';
 import 'tables/sync_meta.dart';
 import 'tables/tokens.dart';
+import 'tables/server_snapshots.dart';
 import 'tables/water_logs.dart';
 import 'tables/weights.dart';
 import 'tables/workouts.dart';
@@ -42,6 +43,7 @@ part 'database.g.dart';
     ChatMessages,
     TokenState,
     SyncMeta,
+    ServerSnapshots,
   ],
   daos: [DiaryDao, SyncDao],
 )
@@ -76,7 +78,7 @@ class CalviDb extends _$CalviDb {
   );
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -205,6 +207,12 @@ class CalviDb extends _$CalviDb {
          вигадати звʼязок заднім числом не можна. */
       if (from < 13) {
         await m.addColumn(meals, meals.askId);
+      }
+
+      /* Знімки серверних списків (книга рецептів, минулі розбори). Порожні на
+         старті і це правильно: перше ж відкриття сторінки їх наповнить. */
+      if (from < 14) {
+        await m.createTable(serverSnapshots);
       }
     },
     beforeOpen: (details) async {

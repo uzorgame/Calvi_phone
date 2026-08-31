@@ -59,12 +59,17 @@ void main() {
     await tester.pumpWidget(const CalviApp(storage: false, hello: false));
     await tester.pump(const Duration(seconds: 1));
 
+    /* Перший запуск відкривається розвилкою «уперше чи повертаюсь». Тести
+       йдуть дорогою новачка, тому тиснуть «Почати». */
+    await tester.tap(find.text('Почати'));
+    await tester.pumpAndSettle();
+
     // Straight through the first run to the day.
     for (var i = 0; i < 6; i++) {
       await tester.tap(find.text('Далі'));
       await tester.pumpAndSettle();
     }
-    await tester.tap(find.text('Поки без входу'));
+    await tester.tap(find.text('Увійти без акаунту'));
     await tester.pump(const Duration(seconds: 1));
 
     /* Through the bar at the bottom, which is where most sentences arrive. It

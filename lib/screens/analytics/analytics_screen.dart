@@ -14,6 +14,7 @@ import '../../design/tokens.dart';
 import '../../format.dart';
 import 'charts.dart';
 import '../../l10n/app_localizations.dart';
+import '../menu.dart';
 
 class Period {
   const Period({required this.days, required this.label});
@@ -160,17 +161,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
     return CalviScreen(
       title: l.anTitle,
-      trailing: GestureDetector(
-        onTap: widget.onSettings,
-        behavior: HitTestBehavior.opaque,
-        child: Container(
-          width: 38,
-          height: 38,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(shape: BoxShape.circle, color: c.fillSecondary),
-          child: const CalviIcon('settings', size: 18),
-        ),
-      ),
+      /* Меню замість налаштувань, як на головній: налаштування тепер
+         усередині нього. */
+      trailing: const CalviMenuButton(),
       children: [
         /* A row of four equal pills read as tabs and behaved as nothing: nothing
            moved when one was pressed, and there was no way to tell which was

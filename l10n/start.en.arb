@@ -63,7 +63,7 @@
   "startSignInBusy": "Signing in…",
   "startSignInGoogle": "Continue with Google",
   "startSignInApple": "Continue with Apple",
-  "startSignInSkip": "Not now",
+  "startSignInSkip": "Continue without an account",
 
   "startAgreeHead": "I agree to the ",
   "@startAgreeHead": {
@@ -89,5 +89,17 @@
     "description": "Launch splash «Plain»: three short promises, one per row. The longest English row measures 205 of the 342 available pixels."
   },
   "helloStepCount": "I'll count the calories",
-  "helloStepLog": "I'll log it in your day"
+  "helloStepLog": "I'll log it in your day",
+
+  "welLead": "Counts calories from your own words",
+  "welSaid": "Had two eggs and toast",
+  "welEggs": "Two fried eggs",
+  "welEggsGrams": "120 g",
+  "welToast": "Toast with butter",
+  "welToastGrams": "50 g",
+  "welTotal": "Together",
+  "welStart": "Get started",
+  "welHaveAccount": "I already have an account",
+  "startSignInBackTitle": "Welcome back",
+  "startSignInBackText": "Sign in with the same account and everything comes back: the diary, the goal, the norm and the measurements. Nothing to fill in again."
 }

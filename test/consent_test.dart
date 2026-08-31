@@ -17,6 +17,11 @@ void main() {
     await tester.pumpWidget(const CalviApp(storage: false, hello: false));
     await tester.pump(const Duration(seconds: 1));
 
+    /* Перший запуск відкривається розвилкою «уперше чи повертаюсь». Тести
+       йдуть дорогою новачка, тому тиснуть «Почати». */
+    await tester.tap(find.text('Почати'));
+    await tester.pumpAndSettle();
+
     // Про тебе, Вага, Ціль, Темп, Спосіб життя, Норма.
     for (var i = 0; i < 6; i++) {
       await tester.tap(find.text('Далі'));

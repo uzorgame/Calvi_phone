@@ -1,29 +1,23 @@
 {
   "kcalUnit": "{kcal} ккал",
   "gramsUnit": "{grams} г",
-
   "unitKcal": "ккал",
   "unitKg": "кг",
   "unitCm": "см",
   "unitG": "г",
   "unitMl": "мл",
-
   "macroProtein": "Білок",
   "macroFat": "Жири",
   "macroCarbs": "Вуглеводи",
-
   "slotBreakfast": "Сніданок",
   "slotLunch": "Обід",
   "slotDinner": "Вечеря",
   "slotSnack": "Перекус",
-
   "slotIntoBreakfast": "в сніданок",
   "slotIntoLunch": "в обід",
   "slotIntoDinner": "у вечерю",
   "slotIntoSnack": "в перекус",
-
   "slotIntoOther": "в «{name}»",
-
   "actionDone": "Готово",
   "actionCancel": "Скасувати",
   "actionDelete": "Видалити",
@@ -32,16 +26,23 @@
   "actionSave": "Зберегти",
   "actionAdd": "Додати",
   "actionClose": "Закрити",
-
   "macroPShort": "Б {value}",
   "macroFShort": "Ж {value}",
   "macroCShort": "В {value}",
-
   "macroPNone": "Б ?",
   "macroFNone": "Ж ?",
   "macroCNone": "В ?",
-
   "macroProteinLetter": "Б",
   "macroFatLetter": "Ж",
-  "macroCarbsLetter": "В"
+  "macroCarbsLetter": "В",
+  "menuTitle": "Меню",
+  "menuDiary": "Щоденник",
+  "menuAnalytics": "Аналітика",
+  "menuWeek": "Тижневий аналіз",
+  "menuRecipes": "Рецепти",
+  "menuNora": "Знайомство з Норою",
+  "menuSoon": "скоро",
+  "menuPlan": "Тарифи",
+  "menuSettings": "Налаштування",
+  "menuAbout": "Про застосунок"
 }

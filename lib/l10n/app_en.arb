@@ -408,7 +408,17 @@
       }
     }
   },
-  "@normOffBy": {
+  "@normOffOver": {
+    "placeholders": {
+      "sum": {
+        "type": "String"
+      },
+      "off": {
+        "type": "int"
+      }
+    }
+  },
+  "@normOffUnder": {
     "placeholders": {
       "sum": {
         "type": "String"
@@ -428,6 +438,83 @@
   "@plateFor": {
     "placeholders": {
       "grams": {
+        "type": "int"
+      }
+    }
+  },
+  "@rcAllergyWarn": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcChatGreet": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@rcCountFew": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@rcDeleteBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcItemsTotal": {
+    "placeholders": {
+      "g": {
+        "type": "int"
+      }
+    }
+  },
+  "@rcMinutes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@rcOfDay": {
+    "placeholders": {
+      "p": {
+        "type": "int"
+      }
+    }
+  },
+  "@rcPortion": {
+    "placeholders": {
+      "g": {
+        "type": "int"
+      }
+    }
+  },
+  "@rcServingsFew": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@rcServingsMany": {
+    "placeholders": {
+      "n": {
         "type": "int"
       }
     }
@@ -1050,9 +1137,19 @@
   "medsTomorrow": "tomorrow",
   "medsUnmarked": "Not marked yet: ",
   "medsUntil": "until {date}",
+  "menuAbout": "About",
+  "menuAnalytics": "Analytics",
+  "menuDiary": "Diary",
+  "menuNora": "Meet Nora",
+  "menuPlan": "Plans",
+  "menuRecipes": "Recipes",
+  "menuSettings": "Settings",
+  "menuSoon": "soon",
+  "menuTitle": "Menu",
+  "menuWeek": "Weekly review",
   "noraName": "Nora",
   "normAuto": "Count it automatically",
-  "normAutoFrom": "From weight, height, age, activity and goal: ",
+  "normAutoFrom": "From weight at goal start, height, age, activity and pace: ",
   "normAutoHint": "from weight, height, age, activity and the goal: {kcal} kcal",
   "normAutoShort": "Automatic",
   "normByHand": "Set it by hand",
@@ -1068,7 +1165,8 @@
   "normMacros": "Macros",
   "normManual": "set by hand",
   "normOf": "of {kcal} kcal",
-  "normOffBy": "The split gives {sum} kcal, {off} away",
+  "normOffOver": "The split gives {sum} kcal, {off} over the norm",
+  "normOffUnder": "The split gives {sum} kcal, {off} under the norm",
   "normPerDay": "kcal a day",
   "normTitle": "Norm",
   "normWater": "Water",
@@ -1127,6 +1225,58 @@
   "profileAge": "Age",
   "profileHeight": "Height",
   "profileSex": "Sex",
+  "rcAllergyWarn": "Contains {names}, which is on your allergy list. Be careful with this one.",
+  "rcAsk": "Ask Nora for a recipe",
+  "rcAskAbout": "Ask Nora about this recipe",
+  "rcAskCancel": "Cancel",
+  "rcAskGo": "Ask",
+  "rcAskPlaceholder": "chicken, broccoli, rice",
+  "rcAskTitle": "What is in the kitchen?",
+  "rcAsking": "Thinking…",
+  "rcChatGreet": "Ask about \"{name}\": what to swap, how not to ruin it, what to prep ahead.",
+  "rcChatPlaceholder": "Ask about this recipe",
+  "rcCount": "{n} recipes",
+  "rcCountFew": "{n} recipes",
+  "rcCountOne": "1 recipe",
+  "rcDeleteBody": "\"{name}\" will leave the book. Diary entries logged from it will stay.",
+  "rcDeleteCta": "Delete",
+  "rcDeleteFailed": "Could not delete. Try again.",
+  "rcDeleteTitle": "Delete this recipe?",
+  "rcEmpty": "Nothing here yet. Tell Nora what is in the kitchen and the first recipe appears.",
+  "rcEmptyMine": "No recipes of your own yet. Dictate any to Nora and it lands here.",
+  "rcEyebrow": "The kitchen",
+  "rcFromMine": "Mine",
+  "rcFromNora": "From Nora",
+  "rcHeroA": "What to cook",
+  "rcHeroB": "today",
+  "rcHeroLede": "Say what you have at home. Nora suggests and counts the serving; your own recipe works too.",
+  "rcItemsHead": "Products",
+  "rcItemsTotal": "total {g} g",
+  "rcJustNow": "just now",
+  "rcLoadFailed": "The recipe book failed to load. Pull to retry.",
+  "rcMinutes": "{n} min",
+  "rcNoTools": "Nothing but a knife and a bowl",
+  "rcOfDay": "that is {p}% of the daily norm",
+  "rcPerServing": "per serving",
+  "rcPerServingHead": "Per serving",
+  "rcPickTitle": "Pick a dish",
+  "rcPortion": "serving {g} g",
+  "rcServingsFew": "{n} servings",
+  "rcServingsMany": "{n} servings",
+  "rcServingsOne": "1 serving",
+  "rcStepsHead": "How to cook",
+  "rcSuggestFailed": "Nora could not compose recipes. Try again.",
+  "rcTabAll": "All",
+  "rcTabMine": "Mine",
+  "rcTabNora": "From Nora",
+  "rcTitle": "Recipes",
+  "rcToolBlender": "Blender",
+  "rcToolGrill": "Grill",
+  "rcToolMixer": "Mixer",
+  "rcToolOven": "Oven",
+  "rcToolPan": "Pan",
+  "rcToolPot": "Pot",
+  "rcToolsHead": "What the kitchen needs",
   "remAbout": "About what",
   "remAdd": "Add a reminder",
   "remAt": "At",
@@ -1264,11 +1414,13 @@
   "startSexMale": "Male",
   "startSexOther": "Other",
   "startSignInApple": "Continue with Apple",
+  "startSignInBackText": "Sign in with the same account and everything comes back: the diary, the goal, the norm and the measurements. Nothing to fill in again.",
+  "startSignInBackTitle": "Welcome back",
   "startSignInBusy": "Signing in…",
   "startSignInFailed": "Could not sign in. Try again, or carry on without an account.",
   "startSignInFailedWhy": "Could not sign in. {why}",
   "startSignInGoogle": "Continue with Google",
-  "startSignInSkip": "Not now",
+  "startSignInSkip": "Continue without an account",
   "startSignInText": "The norm is counted. Sign in to keep it: history, measurements and entries will be on every device, not only here.",
   "startSignInTitle": "Let us keep this",
   "startTargetWeight": "Target weight",
@@ -1327,6 +1479,15 @@
   "weightHint": "What you weigh today. The goal and the pace towards it live separately.",
   "weightNote": "Weigh yourself in the morning, before eating: that way the daily swings do not turn the chart into noise. One reading a week is already a trend.",
   "weightTitle": "Weight",
+  "welEggs": "Two fried eggs",
+  "welEggsGrams": "120 g",
+  "welHaveAccount": "I already have an account",
+  "welLead": "Counts calories from your own words",
+  "welSaid": "Had two eggs and toast",
+  "welStart": "Get started",
+  "welToast": "Toast with butter",
+  "welToastGrams": "50 g",
+  "welTotal": "Together",
   "wfBurned": "Burned, kcal",
   "wfDuration": "Duration",
   "wfDurationCap": "Duration, min",

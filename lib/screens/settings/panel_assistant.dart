@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../data/settings.dart';
 import '../../design/icons.dart';
 import '../../design/shell.dart';
+import '../menu.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import '../today/slot_card.dart';
@@ -61,6 +62,7 @@ class _AssistantPanelState extends State<AssistantPanel> {
 
     final l = L.of(context);
     return CalviScreen(
+      trailing: const CalviMenuButton(),
       onBack: widget.onBack,
       title: l.assistantTitle,
       hint: l.assistantHint(assistantName),

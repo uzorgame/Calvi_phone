@@ -1,0 +1,119 @@
+{
+  "rcTitle": "Recipes",
+  "rcEyebrow": "The kitchen",
+  "rcCount": "{n} recipes",
+  "@rcCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "rcCountOne": "1 recipe",
+  "rcCountFew": "{n} recipes",
+  "@rcCountFew": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "rcHeroA": "What to cook",
+  "rcHeroB": "today",
+  "rcHeroLede": "Say what you have at home. Nora suggests and counts the serving; your own recipe works too.",
+  "rcAsk": "Ask Nora for a recipe",
+  "rcTabAll": "All",
+  "rcTabNora": "From Nora",
+  "rcTabMine": "Mine",
+  "rcFromNora": "From Nora",
+  "rcFromMine": "Mine",
+  "rcEmpty": "Nothing here yet. Tell Nora what is in the kitchen and the first recipe appears.",
+  "rcEmptyMine": "No recipes of your own yet. Dictate any to Nora and it lands here.",
+  "rcMinutes": "{n} min",
+  "@rcMinutes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "rcServingsOne": "1 serving",
+  "rcServingsFew": "{n} servings",
+  "@rcServingsFew": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "rcServingsMany": "{n} servings",
+  "@rcServingsMany": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "rcPerServing": "per serving",
+  "rcPerServingHead": "Per serving",
+  "rcPortion": "serving {g} g",
+  "@rcPortion": {
+    "placeholders": {
+      "g": {
+        "type": "int"
+      }
+    }
+  },
+  "rcOfDay": "that is {p}% of the daily norm",
+  "@rcOfDay": {
+    "placeholders": {
+      "p": {
+        "type": "int"
+      }
+    }
+  },
+  "rcItemsHead": "Products",
+  "rcItemsTotal": "total {g} g",
+  "@rcItemsTotal": {
+    "placeholders": {
+      "g": {
+        "type": "int"
+      }
+    }
+  },
+  "rcToolsHead": "What the kitchen needs",
+  "rcNoTools": "Nothing but a knife and a bowl",
+  "rcStepsHead": "How to cook",
+  "rcAskAbout": "Ask Nora about this recipe",
+  "rcAsking": "Thinking…",
+  "rcAskTitle": "What is in the kitchen?",
+  "rcPickTitle": "Pick a dish",
+  "rcAskPlaceholder": "chicken, broccoli, rice",
+  "rcAskGo": "Ask",
+  "rcAskCancel": "Cancel",
+  "rcJustNow": "just now",
+  "rcToolOven": "Oven",
+  "rcToolPan": "Pan",
+  "rcToolPot": "Pot",
+  "rcToolBlender": "Blender",
+  "rcToolGrill": "Grill",
+  "rcToolMixer": "Mixer",
+  "rcChatGreet": "Ask about \"{name}\": what to swap, how not to ruin it, what to prep ahead.",
+  "@rcChatGreet": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "rcChatPlaceholder": "Ask about this recipe",
+  "rcLoadFailed": "The recipe book failed to load. Pull to retry.",
+  "rcSuggestFailed": "Nora could not compose recipes. Try again.",
+  "rcDeleteTitle": "Delete this recipe?",
+  "rcDeleteBody": "\"{name}\" will leave the book. Diary entries logged from it will stay.",
+  "@rcDeleteBody": { "placeholders": { "name": { "type": "String" } } },
+  "rcDeleteCta": "Delete",
+  "rcDeleteFailed": "Could not delete. Try again.",
+  "rcAllergyWarn": "Contains {names}, which is on your allergy list. Be careful with this one.",
+  "@rcAllergyWarn": { "placeholders": { "names": { "type": "String" } } }
+}

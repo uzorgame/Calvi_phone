@@ -1,0 +1,119 @@
+{
+  "rcTitle": "Рецепти",
+  "rcEyebrow": "Кухня",
+  "rcCount": "{n} рецептів",
+  "@rcCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "rcCountOne": "1 рецепт",
+  "rcCountFew": "{n} рецепти",
+  "@rcCountFew": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "rcHeroA": "Що приготувати",
+  "rcHeroB": "сьогодні",
+  "rcHeroLede": "Скажи, що є вдома. Нора порадить і порахує порцію; свій рецепт теж можна продиктувати.",
+  "rcAsk": "Попросити рецепт у Нори",
+  "rcTabAll": "Усі",
+  "rcTabNora": "Від Нори",
+  "rcTabMine": "Мої",
+  "rcFromNora": "Від Нори",
+  "rcFromMine": "Мій",
+  "rcEmpty": "Тут порожньо. Скажи Норі, що є на кухні, і перший рецепт зʼявиться.",
+  "rcEmptyMine": "Своїх рецептів ще немає. Продиктуй Норі будь-який, і він стане тут.",
+  "rcMinutes": "{n} хв",
+  "@rcMinutes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "rcServingsOne": "1 порція",
+  "rcServingsFew": "{n} порції",
+  "@rcServingsFew": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "rcServingsMany": "{n} порцій",
+  "@rcServingsMany": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "rcPerServing": "на порцію",
+  "rcPerServingHead": "На порцію",
+  "rcPortion": "порція {g} г",
+  "@rcPortion": {
+    "placeholders": {
+      "g": {
+        "type": "int"
+      }
+    }
+  },
+  "rcOfDay": "це {p}% денної норми",
+  "@rcOfDay": {
+    "placeholders": {
+      "p": {
+        "type": "int"
+      }
+    }
+  },
+  "rcItemsHead": "Продукти",
+  "rcItemsTotal": "разом {g} г",
+  "@rcItemsTotal": {
+    "placeholders": {
+      "g": {
+        "type": "int"
+      }
+    }
+  },
+  "rcToolsHead": "Потрібно на кухні",
+  "rcNoTools": "Нічого, крім ножа і миски",
+  "rcStepsHead": "Як готувати",
+  "rcAskAbout": "Спитати Нору про цей рецепт",
+  "rcAsking": "Думаю…",
+  "rcAskTitle": "Що є на кухні?",
+  "rcPickTitle": "Обери страву",
+  "rcAskPlaceholder": "курка, броколі, рис",
+  "rcAskGo": "Спитати",
+  "rcAskCancel": "Скасувати",
+  "rcJustNow": "щойно",
+  "rcToolOven": "Духовка",
+  "rcToolPan": "Сковорода",
+  "rcToolPot": "Каструля",
+  "rcToolBlender": "Блендер",
+  "rcToolGrill": "Гриль",
+  "rcToolMixer": "Міксер",
+  "rcChatGreet": "Питай про «{name}»: чим замінити продукт, як не зіпсувати, що зробити наперед. Підкажу по ходу готування.",
+  "@rcChatGreet": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "rcChatPlaceholder": "Спитай про цей рецепт",
+  "rcLoadFailed": "Книга рецептів не завантажилась. Потягни, щоб спробувати ще.",
+  "rcSuggestFailed": "Нора не змогла скласти рецепти. Спробуй ще раз.",
+  "rcDeleteTitle": "Видалити рецепт?",
+  "rcDeleteBody": "«{name}» зникне з книги. Записи в щоденнику, зроблені за ним, лишаться.",
+  "@rcDeleteBody": { "placeholders": { "name": { "type": "String" } } },
+  "rcDeleteCta": "Видалити",
+  "rcDeleteFailed": "Не вийшло видалити. Спробуй ще раз.",
+  "rcAllergyWarn": "У складі {names}, а це у твоїх алергіях. Обережно з цим рецептом.",
+  "@rcAllergyWarn": { "placeholders": { "names": { "type": "String" } } }
+}

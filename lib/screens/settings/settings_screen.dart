@@ -6,6 +6,7 @@ import '../../data/legal.dart';
 import '../../data/settings.dart';
 import '../../data/app_scope.dart';
 import '../meds/meds_route.dart';
+import '../menu.dart';
 import '../../design/icons.dart';
 import '../../design/shell.dart';
 import '../../design/slide.dart';
@@ -30,7 +31,11 @@ const devTelegram = 'calvi_dev';
 /// Settings, and the sub-screens behind each row. Every row opens something:
 /// a row that leads nowhere teaches people to stop tapping rows.
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+  const SettingsScreen({super.key, this.panel});
+
+  /* Панель, з якої відкритись одразу: меню веде на «Тарифи» чи «Про
+     застосунок» без зупинки на корені налаштувань. */
+  final String? panel;
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -42,7 +47,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
      panel arrives exactly the way settings itself arrived. Pushing a route put
      a second screen over the first, with the old list still under it sliding
      its own way, and that is the entrance that read as unfinished. */
-  String? _panel;
+  late String? _panel = widget.panel == 'plan' || widget.panel == 'about' ? widget.panel : null;
 
   /// Whether anything has been opened yet, so the list does not slide on
   /// arrival: the screen is already being carried in by the route that opened
@@ -150,6 +155,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ? _panelFor(_panel!, s, set)
           : CalviScreen(
               title: l.setTitle,
+              trailing: const CalviMenuButton(),
               /* Список довгий, а «Тема» лежить у ньому далеко внизу. Повернення
                  з панелі має приземляти туди, звідки пішов, а не на початок:
                  інакше кожен вибір коштує ще одного гортання наосліп. */

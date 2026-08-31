@@ -2289,6 +2289,66 @@ abstract class L {
   /// **'until {date}'**
   String medsUntil(String date);
 
+  /// No description provided for @menuAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get menuAbout;
+
+  /// No description provided for @menuAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Analytics'**
+  String get menuAnalytics;
+
+  /// No description provided for @menuDiary.
+  ///
+  /// In en, this message translates to:
+  /// **'Diary'**
+  String get menuDiary;
+
+  /// No description provided for @menuNora.
+  ///
+  /// In en, this message translates to:
+  /// **'Meet Nora'**
+  String get menuNora;
+
+  /// No description provided for @menuPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Plans'**
+  String get menuPlan;
+
+  /// No description provided for @menuRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes'**
+  String get menuRecipes;
+
+  /// No description provided for @menuSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get menuSettings;
+
+  /// No description provided for @menuSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'soon'**
+  String get menuSoon;
+
+  /// No description provided for @menuTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Menu'**
+  String get menuTitle;
+
+  /// No description provided for @menuWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly review'**
+  String get menuWeek;
+
   /// No description provided for @noraName.
   ///
   /// In en, this message translates to:
@@ -2304,7 +2364,7 @@ abstract class L {
   /// No description provided for @normAutoFrom.
   ///
   /// In en, this message translates to:
-  /// **'From weight, height, age, activity and goal: '**
+  /// **'From weight at goal start, height, age, activity and pace: '**
   String get normAutoFrom;
 
   /// No description provided for @normAutoHint.
@@ -2397,11 +2457,17 @@ abstract class L {
   /// **'of {kcal} kcal'**
   String normOf(String kcal);
 
-  /// No description provided for @normOffBy.
+  /// No description provided for @normOffOver.
   ///
   /// In en, this message translates to:
-  /// **'The split gives {sum} kcal, {off} away'**
-  String normOffBy(String sum, int off);
+  /// **'The split gives {sum} kcal, {off} over the norm'**
+  String normOffOver(String sum, int off);
+
+  /// No description provided for @normOffUnder.
+  ///
+  /// In en, this message translates to:
+  /// **'The split gives {sum} kcal, {off} under the norm'**
+  String normOffUnder(String sum, int off);
 
   /// No description provided for @normPerDay.
   ///
@@ -2750,6 +2816,318 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Sex'**
   String get profileSex;
+
+  /// No description provided for @rcAllergyWarn.
+  ///
+  /// In en, this message translates to:
+  /// **'Contains {names}, which is on your allergy list. Be careful with this one.'**
+  String rcAllergyWarn(String names);
+
+  /// No description provided for @rcAsk.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask Nora for a recipe'**
+  String get rcAsk;
+
+  /// No description provided for @rcAskAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask Nora about this recipe'**
+  String get rcAskAbout;
+
+  /// No description provided for @rcAskCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get rcAskCancel;
+
+  /// No description provided for @rcAskGo.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask'**
+  String get rcAskGo;
+
+  /// No description provided for @rcAskPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'chicken, broccoli, rice'**
+  String get rcAskPlaceholder;
+
+  /// No description provided for @rcAskTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What is in the kitchen?'**
+  String get rcAskTitle;
+
+  /// No description provided for @rcAsking.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking…'**
+  String get rcAsking;
+
+  /// No description provided for @rcChatGreet.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask about \"{name}\": what to swap, how not to ruin it, what to prep ahead.'**
+  String rcChatGreet(String name);
+
+  /// No description provided for @rcChatPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask about this recipe'**
+  String get rcChatPlaceholder;
+
+  /// No description provided for @rcCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} recipes'**
+  String rcCount(int n);
+
+  /// No description provided for @rcCountFew.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} recipes'**
+  String rcCountFew(int n);
+
+  /// No description provided for @rcCountOne.
+  ///
+  /// In en, this message translates to:
+  /// **'1 recipe'**
+  String get rcCountOne;
+
+  /// No description provided for @rcDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{name}\" will leave the book. Diary entries logged from it will stay.'**
+  String rcDeleteBody(String name);
+
+  /// No description provided for @rcDeleteCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get rcDeleteCta;
+
+  /// No description provided for @rcDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete. Try again.'**
+  String get rcDeleteFailed;
+
+  /// No description provided for @rcDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this recipe?'**
+  String get rcDeleteTitle;
+
+  /// No description provided for @rcEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing here yet. Tell Nora what is in the kitchen and the first recipe appears.'**
+  String get rcEmpty;
+
+  /// No description provided for @rcEmptyMine.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipes of your own yet. Dictate any to Nora and it lands here.'**
+  String get rcEmptyMine;
+
+  /// No description provided for @rcEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'The kitchen'**
+  String get rcEyebrow;
+
+  /// No description provided for @rcFromMine.
+  ///
+  /// In en, this message translates to:
+  /// **'Mine'**
+  String get rcFromMine;
+
+  /// No description provided for @rcFromNora.
+  ///
+  /// In en, this message translates to:
+  /// **'From Nora'**
+  String get rcFromNora;
+
+  /// No description provided for @rcHeroA.
+  ///
+  /// In en, this message translates to:
+  /// **'What to cook'**
+  String get rcHeroA;
+
+  /// No description provided for @rcHeroB.
+  ///
+  /// In en, this message translates to:
+  /// **'today'**
+  String get rcHeroB;
+
+  /// No description provided for @rcHeroLede.
+  ///
+  /// In en, this message translates to:
+  /// **'Say what you have at home. Nora suggests and counts the serving; your own recipe works too.'**
+  String get rcHeroLede;
+
+  /// No description provided for @rcItemsHead.
+  ///
+  /// In en, this message translates to:
+  /// **'Products'**
+  String get rcItemsHead;
+
+  /// No description provided for @rcItemsTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'total {g} g'**
+  String rcItemsTotal(int g);
+
+  /// No description provided for @rcJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'just now'**
+  String get rcJustNow;
+
+  /// No description provided for @rcLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The recipe book failed to load. Pull to retry.'**
+  String get rcLoadFailed;
+
+  /// No description provided for @rcMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} min'**
+  String rcMinutes(int n);
+
+  /// No description provided for @rcNoTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing but a knife and a bowl'**
+  String get rcNoTools;
+
+  /// No description provided for @rcOfDay.
+  ///
+  /// In en, this message translates to:
+  /// **'that is {p}% of the daily norm'**
+  String rcOfDay(int p);
+
+  /// No description provided for @rcPerServing.
+  ///
+  /// In en, this message translates to:
+  /// **'per serving'**
+  String get rcPerServing;
+
+  /// No description provided for @rcPerServingHead.
+  ///
+  /// In en, this message translates to:
+  /// **'Per serving'**
+  String get rcPerServingHead;
+
+  /// No description provided for @rcPickTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a dish'**
+  String get rcPickTitle;
+
+  /// No description provided for @rcPortion.
+  ///
+  /// In en, this message translates to:
+  /// **'serving {g} g'**
+  String rcPortion(int g);
+
+  /// No description provided for @rcServingsFew.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} servings'**
+  String rcServingsFew(int n);
+
+  /// No description provided for @rcServingsMany.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} servings'**
+  String rcServingsMany(int n);
+
+  /// No description provided for @rcServingsOne.
+  ///
+  /// In en, this message translates to:
+  /// **'1 serving'**
+  String get rcServingsOne;
+
+  /// No description provided for @rcStepsHead.
+  ///
+  /// In en, this message translates to:
+  /// **'How to cook'**
+  String get rcStepsHead;
+
+  /// No description provided for @rcSuggestFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Nora could not compose recipes. Try again.'**
+  String get rcSuggestFailed;
+
+  /// No description provided for @rcTabAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get rcTabAll;
+
+  /// No description provided for @rcTabMine.
+  ///
+  /// In en, this message translates to:
+  /// **'Mine'**
+  String get rcTabMine;
+
+  /// No description provided for @rcTabNora.
+  ///
+  /// In en, this message translates to:
+  /// **'From Nora'**
+  String get rcTabNora;
+
+  /// No description provided for @rcTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes'**
+  String get rcTitle;
+
+  /// No description provided for @rcToolBlender.
+  ///
+  /// In en, this message translates to:
+  /// **'Blender'**
+  String get rcToolBlender;
+
+  /// No description provided for @rcToolGrill.
+  ///
+  /// In en, this message translates to:
+  /// **'Grill'**
+  String get rcToolGrill;
+
+  /// No description provided for @rcToolMixer.
+  ///
+  /// In en, this message translates to:
+  /// **'Mixer'**
+  String get rcToolMixer;
+
+  /// No description provided for @rcToolOven.
+  ///
+  /// In en, this message translates to:
+  /// **'Oven'**
+  String get rcToolOven;
+
+  /// No description provided for @rcToolPan.
+  ///
+  /// In en, this message translates to:
+  /// **'Pan'**
+  String get rcToolPan;
+
+  /// No description provided for @rcToolPot.
+  ///
+  /// In en, this message translates to:
+  /// **'Pot'**
+  String get rcToolPot;
+
+  /// No description provided for @rcToolsHead.
+  ///
+  /// In en, this message translates to:
+  /// **'What the kitchen needs'**
+  String get rcToolsHead;
 
   /// No description provided for @remAbout.
   ///
@@ -3573,6 +3951,18 @@ abstract class L {
   /// **'Continue with Apple'**
   String get startSignInApple;
 
+  /// No description provided for @startSignInBackText.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with the same account and everything comes back: the diary, the goal, the norm and the measurements. Nothing to fill in again.'**
+  String get startSignInBackText;
+
+  /// No description provided for @startSignInBackTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome back'**
+  String get startSignInBackTitle;
+
   /// No description provided for @startSignInBusy.
   ///
   /// In en, this message translates to:
@@ -3600,7 +3990,7 @@ abstract class L {
   /// No description provided for @startSignInSkip.
   ///
   /// In en, this message translates to:
-  /// **'Not now'**
+  /// **'Continue without an account'**
   String get startSignInSkip;
 
   /// No description provided for @startSignInText.
@@ -3950,6 +4340,60 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Weight'**
   String get weightTitle;
+
+  /// No description provided for @welEggs.
+  ///
+  /// In en, this message translates to:
+  /// **'Two fried eggs'**
+  String get welEggs;
+
+  /// No description provided for @welEggsGrams.
+  ///
+  /// In en, this message translates to:
+  /// **'120 g'**
+  String get welEggsGrams;
+
+  /// No description provided for @welHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'I already have an account'**
+  String get welHaveAccount;
+
+  /// No description provided for @welLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Counts calories from your own words'**
+  String get welLead;
+
+  /// No description provided for @welSaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Had two eggs and toast'**
+  String get welSaid;
+
+  /// No description provided for @welStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get welStart;
+
+  /// No description provided for @welToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Toast with butter'**
+  String get welToast;
+
+  /// No description provided for @welToastGrams.
+  ///
+  /// In en, this message translates to:
+  /// **'50 g'**
+  String get welToastGrams;
+
+  /// No description provided for @welTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Together'**
+  String get welTotal;
 
   /// No description provided for @wfBurned.
   ///

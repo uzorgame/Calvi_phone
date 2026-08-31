@@ -26,6 +26,7 @@ import '../../design/shell.dart';
 import '../../design/tokens.dart';
 import '../../design/wheel.dart';
 import '../../l10n/app_localizations.dart';
+import '../menu.dart';
 import '../../l10n/labels.dart';
 import '../../design/slide.dart';
 import '../analytics/analytics_screen.dart';
@@ -1453,7 +1454,9 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
                           // one beside it only opens a drawer of the same app.
                           _Square(icon: 'chart', onTap: () => _openAnalytics(context)),
                           const SizedBox(width: 8),
-                          _Round(icon: 'settings', onTap: widget.onSettings),
+                          /* Меню замість налаштувань: налаштування переїхали всередину меню,
+                             разом із рецептами, тижнем і тарифами. */
+                          const CalviMenuButton(),
                         ],
                       ),
                     ),
@@ -1752,30 +1755,6 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
   String _nextSlot(DayModel day) {
     final best = _nextSlotDef(day);
     return best == null ? l.slotSnack : slotTitle(context, best);
-  }
-}
-
-class _Round extends StatelessWidget {
-  const _Round({required this.icon, required this.onTap});
-
-  final String icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.c;
-    return CalviPress(
-      onTap: onTap,
-      builder: (context, down) => AnimatedContainer(
-        duration: CalviMotion.fast,
-        curve: CalviMotion.ease,
-        width: 38,
-        height: 38,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(shape: BoxShape.circle, color: down ? c.hover : c.fillSecondary),
-        child: CalviIcon(icon, size: 20),
-      ),
-    );
   }
 }
 

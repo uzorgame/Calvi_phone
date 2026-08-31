@@ -5,6 +5,7 @@ import '../../data/remote/api.dart';
 import '../../data/settings.dart';
 import '../../design/ruler.dart';
 import '../../design/shell.dart';
+import '../menu.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import '../../design/wheel.dart';
@@ -63,6 +64,7 @@ class ProfilePanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = L.of(context);
     return CalviScreen(
+      trailing: const CalviMenuButton(),
       onBack: onBack,
       title: l.setProfile,
       foot: CalviButton(label: l.actionDone, onTap: () => (onBack ?? Navigator.of(context).pop)()),
@@ -260,6 +262,7 @@ class WeightPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = L.of(context);
     return CalviScreen(
+      trailing: const CalviMenuButton(),
       onBack: onBack,
       title: l.weightTitle,
       hint: l.weightHint,
@@ -318,6 +321,7 @@ class _GoalPanelState extends State<GoalPanel> {
     final diff = (s.weightKg - s.targetKg).abs();
 
     return CalviScreen(
+      trailing: const CalviMenuButton(),
       onBack: widget.onBack,
       title: l.setGoal,
       foot: CalviButton(
@@ -524,6 +528,7 @@ class NormPanel extends StatelessWidget {
     final perKg = (s.waterMl / s.weightKg * 10).round() / 10;
 
     return CalviScreen(
+      trailing: const CalviMenuButton(),
       onBack: onBack,
       title: l.normTitle,
       foot: CalviButton(label: l.actionDone, onTap: () => (onBack ?? Navigator.of(context).pop)()),
@@ -617,7 +622,12 @@ class NormPanel extends StatelessWidget {
                 /* Стан рядком, а не кольоровою плашкою: коли все сходиться, це
                    не подія, і зелений прямокутник святкував би арифметику. */
                 Text(
-                  ok ? l.normFits : l.normOffBy(thousands(sum), off.abs()),
+                  ok
+                      ? l.normFits
+                      // Напрям словами: «на 858 осторонь» не каже, куди саме.
+                      : off < 0
+                      ? l.normOffUnder(thousands(sum), off.abs())
+                      : l.normOffOver(thousands(sum), off.abs()),
                   style: context.t.labelSmall?.copyWith(color: ok ? null : c.protein),
                 ),
 

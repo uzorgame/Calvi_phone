@@ -50,7 +50,7 @@
   "startSignInBusy": "Заходимо…",
   "startSignInGoogle": "Продовжити з Google",
   "startSignInApple": "Продовжити з Apple",
-  "startSignInSkip": "Поки без входу",
+  "startSignInSkip": "Увійти без акаунту",
 
   "startAgreeHead": "Погоджуюсь з ",
   "startAgreeTerms": "умовами користування",
@@ -64,5 +64,17 @@
 
   "helloStepSay": "Скажи, що їв",
   "helloStepCount": "Порахую калорії",
-  "helloStepLog": "Запишу в день"
+  "helloStepLog": "Запишу в день",
+
+  "welLead": "Рахує калорії з твоїх слів",
+  "welSaid": "Зʼїв два яйця і тост",
+  "welEggs": "Яєчня з двох яєць",
+  "welEggsGrams": "120 г",
+  "welToast": "Тост з маслом",
+  "welToastGrams": "50 г",
+  "welTotal": "Разом",
+  "welStart": "Почати",
+  "welHaveAccount": "У мене вже є акаунт",
+  "startSignInBackTitle": "З поверненням",
+  "startSignInBackText": "Увійди тим самим акаунтом, і все повернеться на місце: щоденник, ціль, норма і заміри. Заповнювати наново нічого не треба."
 }

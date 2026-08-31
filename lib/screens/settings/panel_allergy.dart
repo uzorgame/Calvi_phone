@@ -6,6 +6,7 @@ import '../../data/allergens.dart';
 import '../../data/settings.dart';
 import '../../design/icons.dart';
 import '../../design/shell.dart';
+import '../menu.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import 'panels_account.dart';
@@ -111,6 +112,7 @@ class _AllergyPanelState extends State<AllergyPanel> {
     /* Без кнопки «Готово» внизу: тут нема чого підтверджувати, кожна алергія
        зберігається своєю кнопкою в банері, а вихід це «назад» зверху зліва. */
     return CalviScreen(
+      trailing: const CalviMenuButton(),
       onBack: widget.onBack,
       title: l.allergyTitle,
       children: [

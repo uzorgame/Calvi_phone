@@ -1259,13 +1259,43 @@ class LUk extends L {
   }
 
   @override
+  String get menuAbout => 'Про застосунок';
+
+  @override
+  String get menuAnalytics => 'Аналітика';
+
+  @override
+  String get menuDiary => 'Щоденник';
+
+  @override
+  String get menuNora => 'Знайомство з Норою';
+
+  @override
+  String get menuPlan => 'Тарифи';
+
+  @override
+  String get menuRecipes => 'Рецепти';
+
+  @override
+  String get menuSettings => 'Налаштування';
+
+  @override
+  String get menuSoon => 'скоро';
+
+  @override
+  String get menuTitle => 'Меню';
+
+  @override
+  String get menuWeek => 'Тижневий аналіз';
+
+  @override
   String get noraName => 'Нора';
 
   @override
   String get normAuto => 'Рахувати автоматично';
 
   @override
-  String get normAutoFrom => 'З ваги, зросту, віку, активності й цілі: ';
+  String get normAutoFrom => 'З ваги на старті цілі, зросту, віку, активності й темпу: ';
 
   @override
   String normAutoHint(String kcal) {
@@ -1323,8 +1353,13 @@ class LUk extends L {
   }
 
   @override
-  String normOffBy(String sum, int off) {
-    return 'Склад дає $sum ккал, це на $off осторонь';
+  String normOffOver(String sum, int off) {
+    return 'Склад дає $sum ккал, на $off більше за норму';
+  }
+
+  @override
+  String normOffUnder(String sum, int off) {
+    return 'Склад дає $sum ккал, на $off менше за норму';
   }
 
   @override
@@ -1508,6 +1543,185 @@ class LUk extends L {
 
   @override
   String get profileSex => 'Стать';
+
+  @override
+  String rcAllergyWarn(String names) {
+    return 'У складі $names, а це у твоїх алергіях. Обережно з цим рецептом.';
+  }
+
+  @override
+  String get rcAsk => 'Попросити рецепт у Нори';
+
+  @override
+  String get rcAskAbout => 'Спитати Нору про цей рецепт';
+
+  @override
+  String get rcAskCancel => 'Скасувати';
+
+  @override
+  String get rcAskGo => 'Спитати';
+
+  @override
+  String get rcAskPlaceholder => 'курка, броколі, рис';
+
+  @override
+  String get rcAskTitle => 'Що є на кухні?';
+
+  @override
+  String get rcAsking => 'Думаю…';
+
+  @override
+  String rcChatGreet(String name) {
+    return 'Питай про «$name»: чим замінити продукт, як не зіпсувати, що зробити наперед. Підкажу по ходу готування.';
+  }
+
+  @override
+  String get rcChatPlaceholder => 'Спитай про цей рецепт';
+
+  @override
+  String rcCount(int n) {
+    return '$n рецептів';
+  }
+
+  @override
+  String rcCountFew(int n) {
+    return '$n рецепти';
+  }
+
+  @override
+  String get rcCountOne => '1 рецепт';
+
+  @override
+  String rcDeleteBody(String name) {
+    return '«$name» зникне з книги. Записи в щоденнику, зроблені за ним, лишаться.';
+  }
+
+  @override
+  String get rcDeleteCta => 'Видалити';
+
+  @override
+  String get rcDeleteFailed => 'Не вийшло видалити. Спробуй ще раз.';
+
+  @override
+  String get rcDeleteTitle => 'Видалити рецепт?';
+
+  @override
+  String get rcEmpty => 'Тут порожньо. Скажи Норі, що є на кухні, і перший рецепт зʼявиться.';
+
+  @override
+  String get rcEmptyMine => 'Своїх рецептів ще немає. Продиктуй Норі будь-який, і він стане тут.';
+
+  @override
+  String get rcEyebrow => 'Кухня';
+
+  @override
+  String get rcFromMine => 'Мій';
+
+  @override
+  String get rcFromNora => 'Від Нори';
+
+  @override
+  String get rcHeroA => 'Що приготувати';
+
+  @override
+  String get rcHeroB => 'сьогодні';
+
+  @override
+  String get rcHeroLede =>
+      'Скажи, що є вдома. Нора порадить і порахує порцію; свій рецепт теж можна продиктувати.';
+
+  @override
+  String get rcItemsHead => 'Продукти';
+
+  @override
+  String rcItemsTotal(int g) {
+    return 'разом $g г';
+  }
+
+  @override
+  String get rcJustNow => 'щойно';
+
+  @override
+  String get rcLoadFailed => 'Книга рецептів не завантажилась. Потягни, щоб спробувати ще.';
+
+  @override
+  String rcMinutes(int n) {
+    return '$n хв';
+  }
+
+  @override
+  String get rcNoTools => 'Нічого, крім ножа і миски';
+
+  @override
+  String rcOfDay(int p) {
+    return 'це $p% денної норми';
+  }
+
+  @override
+  String get rcPerServing => 'на порцію';
+
+  @override
+  String get rcPerServingHead => 'На порцію';
+
+  @override
+  String get rcPickTitle => 'Обери страву';
+
+  @override
+  String rcPortion(int g) {
+    return 'порція $g г';
+  }
+
+  @override
+  String rcServingsFew(int n) {
+    return '$n порції';
+  }
+
+  @override
+  String rcServingsMany(int n) {
+    return '$n порцій';
+  }
+
+  @override
+  String get rcServingsOne => '1 порція';
+
+  @override
+  String get rcStepsHead => 'Як готувати';
+
+  @override
+  String get rcSuggestFailed => 'Нора не змогла скласти рецепти. Спробуй ще раз.';
+
+  @override
+  String get rcTabAll => 'Усі';
+
+  @override
+  String get rcTabMine => 'Мої';
+
+  @override
+  String get rcTabNora => 'Від Нори';
+
+  @override
+  String get rcTitle => 'Рецепти';
+
+  @override
+  String get rcToolBlender => 'Блендер';
+
+  @override
+  String get rcToolGrill => 'Гриль';
+
+  @override
+  String get rcToolMixer => 'Міксер';
+
+  @override
+  String get rcToolOven => 'Духовка';
+
+  @override
+  String get rcToolPan => 'Сковорода';
+
+  @override
+  String get rcToolPot => 'Каструля';
+
+  @override
+  String get rcToolsHead => 'Потрібно на кухні';
 
   @override
   String get remAbout => 'Про що';
@@ -1968,6 +2182,13 @@ class LUk extends L {
   String get startSignInApple => 'Продовжити з Apple';
 
   @override
+  String get startSignInBackText =>
+      'Увійди тим самим акаунтом, і все повернеться на місце: щоденник, ціль, норма і заміри. Заповнювати наново нічого не треба.';
+
+  @override
+  String get startSignInBackTitle => 'З поверненням';
+
+  @override
   String get startSignInBusy => 'Заходимо…';
 
   @override
@@ -1982,7 +2203,7 @@ class LUk extends L {
   String get startSignInGoogle => 'Продовжити з Google';
 
   @override
-  String get startSignInSkip => 'Поки без входу';
+  String get startSignInSkip => 'Увійти без акаунту';
 
   @override
   String get startSignInText =>
@@ -2183,6 +2404,33 @@ class LUk extends L {
 
   @override
   String get weightTitle => 'Вага';
+
+  @override
+  String get welEggs => 'Яєчня з двох яєць';
+
+  @override
+  String get welEggsGrams => '120 г';
+
+  @override
+  String get welHaveAccount => 'У мене вже є акаунт';
+
+  @override
+  String get welLead => 'Рахує калорії з твоїх слів';
+
+  @override
+  String get welSaid => 'Зʼїв два яйця і тост';
+
+  @override
+  String get welStart => 'Почати';
+
+  @override
+  String get welToast => 'Тост з маслом';
+
+  @override
+  String get welToastGrams => '50 г';
+
+  @override
+  String get welTotal => 'Разом';
 
   @override
   String get wfBurned => 'Спалено, ккал';

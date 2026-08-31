@@ -1251,13 +1251,43 @@ class LEn extends L {
   }
 
   @override
+  String get menuAbout => 'About';
+
+  @override
+  String get menuAnalytics => 'Analytics';
+
+  @override
+  String get menuDiary => 'Diary';
+
+  @override
+  String get menuNora => 'Meet Nora';
+
+  @override
+  String get menuPlan => 'Plans';
+
+  @override
+  String get menuRecipes => 'Recipes';
+
+  @override
+  String get menuSettings => 'Settings';
+
+  @override
+  String get menuSoon => 'soon';
+
+  @override
+  String get menuTitle => 'Menu';
+
+  @override
+  String get menuWeek => 'Weekly review';
+
+  @override
   String get noraName => 'Nora';
 
   @override
   String get normAuto => 'Count it automatically';
 
   @override
-  String get normAutoFrom => 'From weight, height, age, activity and goal: ';
+  String get normAutoFrom => 'From weight at goal start, height, age, activity and pace: ';
 
   @override
   String normAutoHint(String kcal) {
@@ -1315,8 +1345,13 @@ class LEn extends L {
   }
 
   @override
-  String normOffBy(String sum, int off) {
-    return 'The split gives $sum kcal, $off away';
+  String normOffOver(String sum, int off) {
+    return 'The split gives $sum kcal, $off over the norm';
+  }
+
+  @override
+  String normOffUnder(String sum, int off) {
+    return 'The split gives $sum kcal, $off under the norm';
   }
 
   @override
@@ -1500,6 +1535,186 @@ class LEn extends L {
 
   @override
   String get profileSex => 'Sex';
+
+  @override
+  String rcAllergyWarn(String names) {
+    return 'Contains $names, which is on your allergy list. Be careful with this one.';
+  }
+
+  @override
+  String get rcAsk => 'Ask Nora for a recipe';
+
+  @override
+  String get rcAskAbout => 'Ask Nora about this recipe';
+
+  @override
+  String get rcAskCancel => 'Cancel';
+
+  @override
+  String get rcAskGo => 'Ask';
+
+  @override
+  String get rcAskPlaceholder => 'chicken, broccoli, rice';
+
+  @override
+  String get rcAskTitle => 'What is in the kitchen?';
+
+  @override
+  String get rcAsking => 'Thinking…';
+
+  @override
+  String rcChatGreet(String name) {
+    return 'Ask about \"$name\": what to swap, how not to ruin it, what to prep ahead.';
+  }
+
+  @override
+  String get rcChatPlaceholder => 'Ask about this recipe';
+
+  @override
+  String rcCount(int n) {
+    return '$n recipes';
+  }
+
+  @override
+  String rcCountFew(int n) {
+    return '$n recipes';
+  }
+
+  @override
+  String get rcCountOne => '1 recipe';
+
+  @override
+  String rcDeleteBody(String name) {
+    return '\"$name\" will leave the book. Diary entries logged from it will stay.';
+  }
+
+  @override
+  String get rcDeleteCta => 'Delete';
+
+  @override
+  String get rcDeleteFailed => 'Could not delete. Try again.';
+
+  @override
+  String get rcDeleteTitle => 'Delete this recipe?';
+
+  @override
+  String get rcEmpty =>
+      'Nothing here yet. Tell Nora what is in the kitchen and the first recipe appears.';
+
+  @override
+  String get rcEmptyMine => 'No recipes of your own yet. Dictate any to Nora and it lands here.';
+
+  @override
+  String get rcEyebrow => 'The kitchen';
+
+  @override
+  String get rcFromMine => 'Mine';
+
+  @override
+  String get rcFromNora => 'From Nora';
+
+  @override
+  String get rcHeroA => 'What to cook';
+
+  @override
+  String get rcHeroB => 'today';
+
+  @override
+  String get rcHeroLede =>
+      'Say what you have at home. Nora suggests and counts the serving; your own recipe works too.';
+
+  @override
+  String get rcItemsHead => 'Products';
+
+  @override
+  String rcItemsTotal(int g) {
+    return 'total $g g';
+  }
+
+  @override
+  String get rcJustNow => 'just now';
+
+  @override
+  String get rcLoadFailed => 'The recipe book failed to load. Pull to retry.';
+
+  @override
+  String rcMinutes(int n) {
+    return '$n min';
+  }
+
+  @override
+  String get rcNoTools => 'Nothing but a knife and a bowl';
+
+  @override
+  String rcOfDay(int p) {
+    return 'that is $p% of the daily norm';
+  }
+
+  @override
+  String get rcPerServing => 'per serving';
+
+  @override
+  String get rcPerServingHead => 'Per serving';
+
+  @override
+  String get rcPickTitle => 'Pick a dish';
+
+  @override
+  String rcPortion(int g) {
+    return 'serving $g g';
+  }
+
+  @override
+  String rcServingsFew(int n) {
+    return '$n servings';
+  }
+
+  @override
+  String rcServingsMany(int n) {
+    return '$n servings';
+  }
+
+  @override
+  String get rcServingsOne => '1 serving';
+
+  @override
+  String get rcStepsHead => 'How to cook';
+
+  @override
+  String get rcSuggestFailed => 'Nora could not compose recipes. Try again.';
+
+  @override
+  String get rcTabAll => 'All';
+
+  @override
+  String get rcTabMine => 'Mine';
+
+  @override
+  String get rcTabNora => 'From Nora';
+
+  @override
+  String get rcTitle => 'Recipes';
+
+  @override
+  String get rcToolBlender => 'Blender';
+
+  @override
+  String get rcToolGrill => 'Grill';
+
+  @override
+  String get rcToolMixer => 'Mixer';
+
+  @override
+  String get rcToolOven => 'Oven';
+
+  @override
+  String get rcToolPan => 'Pan';
+
+  @override
+  String get rcToolPot => 'Pot';
+
+  @override
+  String get rcToolsHead => 'What the kitchen needs';
 
   @override
   String get remAbout => 'About what';
@@ -1950,6 +2165,13 @@ class LEn extends L {
   String get startSignInApple => 'Continue with Apple';
 
   @override
+  String get startSignInBackText =>
+      'Sign in with the same account and everything comes back: the diary, the goal, the norm and the measurements. Nothing to fill in again.';
+
+  @override
+  String get startSignInBackTitle => 'Welcome back';
+
+  @override
   String get startSignInBusy => 'Signing in…';
 
   @override
@@ -1964,7 +2186,7 @@ class LEn extends L {
   String get startSignInGoogle => 'Continue with Google';
 
   @override
-  String get startSignInSkip => 'Not now';
+  String get startSignInSkip => 'Continue without an account';
 
   @override
   String get startSignInText =>
@@ -2168,6 +2390,33 @@ class LEn extends L {
 
   @override
   String get weightTitle => 'Weight';
+
+  @override
+  String get welEggs => 'Two fried eggs';
+
+  @override
+  String get welEggsGrams => '120 g';
+
+  @override
+  String get welHaveAccount => 'I already have an account';
+
+  @override
+  String get welLead => 'Counts calories from your own words';
+
+  @override
+  String get welSaid => 'Had two eggs and toast';
+
+  @override
+  String get welStart => 'Get started';
+
+  @override
+  String get welToast => 'Toast with butter';
+
+  @override
+  String get welToastGrams => '50 g';
+
+  @override
+  String get welTotal => 'Together';
 
   @override
   String get wfBurned => 'Burned, kcal';

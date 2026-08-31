@@ -218,6 +218,67 @@ class CalviApi {
     ]..removeWhere((r) => r.week.isEmpty || r.body.isEmpty);
   }
 
+  /// Книга рецептів людини, найновіший перший.
+  Future<List<RecipeData>> recipes() async {
+    final body = await _get('/v1/recipes');
+    return [
+      for (final r in (body['recipes'] as List<dynamic>? ?? []).whereType<Map<String, dynamic>>())
+        RecipeData.fromWire(r),
+    ]..removeWhere((r) => r.title.isEmpty);
+  }
+
+  /// Покласти рецепт у книгу: обраний із порад Нори або продиктований.
+  Future<RecipeData> createRecipe(RecipeData draft) async {
+    final body = await _post('/v1/recipes', draft.toWire());
+    return RecipeData.fromWire(body['recipe'] as Map<String, dynamic>? ?? const {});
+  }
+
+  /// Прибрати рецепт із книги. Сервер гасить мʼяко (deleted_at), тож Нора
+  /// його більше не знаходить, а записи щоденника, зроблені за ним, живуть.
+  Future<bool> deleteRecipe(String id) async {
+    final http.Response res;
+    try {
+      res = await _client
+          .delete(
+            base.resolve('/v1/recipes/$id'),
+            headers: {..._client_, if (token != null) 'authorization': 'Bearer $token'},
+          )
+          .timeout(timeout);
+    } on TimeoutException {
+      throw const ApiFailure.slow();
+    } catch (e) {
+      throw const ApiFailure.offline();
+    }
+
+    if (res.statusCode >= 400) {
+      throw ApiFailure(code: _errorCode(res.body), status: res.statusCode);
+    }
+
+    final body = jsonDecode(res.body) as Map<String, dynamic>;
+    return body['ok'] as bool? ?? false;
+  }
+
+  /// Три страви під те, що є вдома. Коштує токен, тому з ключем повтору;
+  /// відповідь несе баланс, і застосунок дзеркалить його одразу.
+  Future<RecipeSuggestions> suggestRecipes({
+    required String what,
+    required String idempotencyKey,
+  }) async {
+    final body = await _post('/v1/recipes/suggest', {
+      'what': what,
+      'idempotency_key': idempotencyKey,
+    }, wait: _thinking);
+    return RecipeSuggestions(
+      options: [
+        for (final r
+            in (body['options'] as List<dynamic>? ?? []).whereType<Map<String, dynamic>>())
+          RecipeData.fromWire(r),
+      ],
+      balance: (body['balance'] as num?)?.round(),
+      unlimited: body['unlimited'] as bool?,
+    );
+  }
+
   /// Розбір знімка без запису: числа повертаються, щоденник не чіпається.
   ///
   /// Окремий маршрут, а не режим чату. Тут інша дія: чат розмовляє і пише, а це
@@ -597,6 +658,98 @@ class WeightAsk {
   final String name;
 
   final List<int> weights;
+}
+
+/// Рецепт із книги, як він лежить на сервері. Числа НА ПОРЦІЮ; вага порції
+/// поруч, тож будь-які грами рахуються пропорцією.
+class RecipeData {
+  const RecipeData({
+    this.id = '',
+    required this.title,
+    this.icon = 'plate',
+    this.origin = 'nora',
+    required this.minutes,
+    required this.servings,
+    required this.gramsPerServing,
+    required this.kcal,
+    required this.protein,
+    required this.fat,
+    required this.carbs,
+    this.tools = const [],
+    this.items = const [],
+    this.steps = const [],
+    this.why,
+    this.createdAt,
+  });
+
+  factory RecipeData.fromWire(Map<String, dynamic> b) => RecipeData(
+    id: b['id'] as String? ?? '',
+    title: b['title'] as String? ?? '',
+    icon: b['icon'] as String? ?? 'plate',
+    origin: b['origin'] as String? ?? 'nora',
+    minutes: (b['minutes'] as num?)?.round() ?? 0,
+    servings: (b['servings'] as num?)?.round() ?? 1,
+    gramsPerServing: (b['grams_per_serving'] as num?)?.round() ?? 0,
+    kcal: (b['kcal'] as num?)?.round() ?? 0,
+    protein: (b['protein_g'] as num?)?.round() ?? 0,
+    fat: (b['fat_g'] as num?)?.round() ?? 0,
+    carbs: (b['carbs_g'] as num?)?.round() ?? 0,
+    tools: [for (final t in (b['tools'] as List<dynamic>? ?? [])) t.toString()],
+    items: [
+      for (final i in (b['items'] as List<dynamic>? ?? []).whereType<Map<String, dynamic>>())
+        (name: i['name'] as String? ?? '', grams: (i['grams'] as num?)?.round() ?? 0),
+    ],
+    steps: [for (final s in (b['steps'] as List<dynamic>? ?? [])) s.toString()],
+    why: b['why'] as String?,
+    createdAt: DateTime.tryParse(b['created_at'] as String? ?? ''),
+  );
+
+  Map<String, dynamic> toWire() => {
+    'title': title,
+    'icon': icon,
+    'origin': origin,
+    'minutes': minutes,
+    'servings': servings,
+    'grams_per_serving': gramsPerServing,
+    'kcal': kcal,
+    'protein_g': protein,
+    'fat_g': fat,
+    'carbs_g': carbs,
+    'tools': tools,
+    'items': [
+      for (final i in items) {'name': i.name, 'grams': i.grams},
+    ],
+    'steps': steps,
+    if (why != null && why!.isNotEmpty) 'why': why,
+  };
+
+  final String id;
+  final String title;
+  final String icon;
+
+  /// 'nora' або 'mine': хто приніс.
+  final String origin;
+
+  final int minutes;
+  final int servings;
+  final int gramsPerServing;
+  final int kcal;
+  final int protein;
+  final int fat;
+  final int carbs;
+  final List<String> tools;
+  final List<({String name, int grams})> items;
+  final List<String> steps;
+  final String? why;
+  final DateTime? createdAt;
+}
+
+/// Відповідь підбору: до трьох страв і дзеркало балансу.
+class RecipeSuggestions {
+  const RecipeSuggestions({required this.options, this.balance, this.unlimited});
+  final List<RecipeData> options;
+  final int? balance;
+  final bool? unlimited;
 }
 
 /// Тижневий розбір, як він лежить на сервері.

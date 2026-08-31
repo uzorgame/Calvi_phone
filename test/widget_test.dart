@@ -13,11 +13,64 @@ void main() {
     await tester.pumpWidget(const CalviApp(storage: false, hello: false));
     await tester.pump(const Duration(seconds: 1));
 
-    /* Перше, що бачить новий телефон, це перше питання «Старту». Вітання
-       звідси пішло в заставку, і першим екраном стало те, заради чого «Старт»
-       узагалі є. */
+    /* Перше, що бачить новий телефон, це розвилка, а не питання про стать.
+       Той, хто вже має акаунт, мусить мати куди піти з першого ж екрана:
+       заповнювати анкету заради даних, які лежать на сервері, безглуздо. */
+    expect(find.text('Почати'), findsOneWidget);
+    expect(find.text('У мене вже є акаунт'), findsOneWidget);
+    expect(find.text('Про тебе'), findsNothing, reason: 'питання ще не ставили');
+
+    // Дорога новачка: за розвилкою починається те, заради чого «Старт» і є.
+    await tester.tap(find.text('Почати'));
+    await tester.pumpAndSettle();
+
     expect(find.text('Про тебе'), findsOneWidget);
     expect(find.text('Сніданок'), findsNothing, reason: 'день ще не заслужено');
+  });
+
+  testWidgets('«У мене вже є акаунт» веде одразу на вхід, без питань', (tester) async {
+    tester.view.physicalSize = const Size(390, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    tester.platformDispatcher.localesTestValue = const [Locale('uk')];
+    addTearDown(tester.platformDispatcher.clearLocalesTestValue);
+
+    await tester.pumpWidget(const CalviApp(storage: false, hello: false));
+    await tester.pump(const Duration(seconds: 1));
+
+    await tester.tap(find.text('У мене вже є акаунт'));
+    await tester.pumpAndSettle();
+
+    /* Жодного питання анкети між розвилкою і входом: профіль приїде з акаунта
+       разом зі щоденником. Кнопок провайдерів у тестовій збірці немає, бо вхід
+       у ній не налаштований, тому екран пізнається за тим, що на ньому є
+       завжди. */
+    expect(find.text('Увійти без акаунту'), findsOneWidget);
+    expect(find.text('Про тебе'), findsNothing);
+  });
+
+  testWidgets('той, хто повертається, не пропускає анкету повз вхід', (tester) async {
+    tester.view.physicalSize = const Size(390, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    tester.platformDispatcher.localesTestValue = const [Locale('uk')];
+    addTearDown(tester.platformDispatcher.clearLocalesTestValue);
+
+    await tester.pumpWidget(const CalviApp(storage: false, hello: false));
+    await tester.pump(const Duration(seconds: 1));
+
+    await tester.tap(find.text('У мене вже є акаунт'));
+    await tester.pumpAndSettle();
+
+    /* Передумав входити. Профілю нема ні на телефоні, ні в акаунті, і випустити
+       його на день означало б зберегти заводську чернетку «Старту»: чоловік, 26
+       років, 178 см. На сервері вона затерла б справжні цілі, а на телефоні
+       просто збрехала б. Тому дорога веде на перше питання, а не в день. */
+    await tester.tap(find.text('Увійти без акаунту'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Про тебе'), findsOneWidget, reason: 'анкету обійшли стороною');
+    expect(find.text('Сніданок'), findsNothing, reason: 'день відкрився з чужим профілем');
   });
 
   testWidgets('перший запуск проходиться до кінця і відкриває день', (tester) async {
@@ -30,6 +83,11 @@ void main() {
     await tester.pumpWidget(const CalviApp(storage: false, hello: false));
     await tester.pump(const Duration(seconds: 1));
 
+    /* Перший запуск відкривається розвилкою «уперше чи повертаюсь». Тести
+       йдуть дорогою новачка, тому тиснуть «Почати». */
+    await tester.tap(find.text('Почати'));
+    await tester.pumpAndSettle();
+
     // Про тебе, Вага, Ціль, Темп, Спосіб життя, Норма.
     // Settle rather than a fixed pump: the switcher keeps the outgoing step in
     // the tree for the length of the slide, and two «Далі» is an ambiguous tap.
@@ -40,7 +98,7 @@ void main() {
 
     expect(find.text('Збережімо це'), findsOneWidget, reason: 'акаунт останній, не перший');
 
-    await tester.tap(find.text('Поки без входу'));
+    await tester.tap(find.text('Увійти без акаунту'));
     await tester.pump(const Duration(seconds: 1));
 
     // Breakfast, lunch and dinner stand whether or not anything went into them.

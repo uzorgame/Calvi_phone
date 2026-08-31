@@ -5,6 +5,7 @@ import '../../data/settings.dart';
 import '../../design/icons.dart';
 import '../../design/repeat_picker.dart';
 import '../../design/shell.dart';
+import '../menu.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import '../../design/wheel.dart';
@@ -309,6 +310,7 @@ class _RemindersPanelState extends State<RemindersPanel> {
     /* Без кнопки «Готово» внизу: тут нема чого підтверджувати, кожне
        нагадування зберігається своїм аркушем, а вихід це «назад» угорі. */
     return CalviScreen(
+      trailing: const CalviMenuButton(),
       onBack: widget.onBack,
       title: l.remTitle,
       children: [

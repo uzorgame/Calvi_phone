@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
 import 'package:uuid/uuid.dart';
@@ -75,13 +76,126 @@ class SyncService with WidgetsBindingObserver {
     if (review.balance != null) {
       await db.syncDao.putTokens(balance: review.balance!, unlimited: review.unlimited);
     }
+
+    /* Свіжий розбір одразу в чоло знімка: перезапуск застосунку має зустріти
+       його на місці, а не чекати наступної відповіді сервера. Той самий
+       тиждень, збудований наново, витісняє свою стару версію. */
+    final had = await weekReviewsSnapshot() ?? const <WeekReviewData>[];
+    await _putReviewsSnapshot([review, ...had.where((w) => w.week != review.week)]);
+
     return review;
   }
 
-  /// Минулі розбори для сторінки «Минулі», найновіший перший.
+  /// Минулі розбори, як їх востаннє віддав сервер. Null до першої відповіді.
+  Future<List<WeekReviewData>?> weekReviewsSnapshot() async {
+    final raw = await db.syncDao.snapshot(_reviewsKey);
+    if (raw == null) return null;
+    try {
+      return [
+        for (final b in jsonDecode(raw) as List<dynamic>)
+          WeekReviewData.fromWire(b as Map<String, dynamic>),
+      ];
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _putReviewsSnapshot(List<WeekReviewData> rows) => db.syncDao.putSnapshot(
+    _reviewsKey,
+    // fresh і баланс у знімок не йдуть: збережений розбір уже нічого не коштує.
+    jsonEncode([
+      for (final r in rows) {'week': r.week, 'body': r.body},
+    ]),
+  );
+
+  /// Минулі розбори для сторінки «Минулі», найновіший перший. Успіх осідає
+  /// в знімок.
   Future<List<WeekReviewData>> weekReviews() async {
     if (!await SyncRepository(db, _api).ensureAccount()) return const [];
-    return _api.weekReviews();
+    final rows = await _api.weekReviews();
+    await _putReviewsSnapshot(rows);
+    return rows;
+  }
+
+  /* --- Знімки серверних списків ---
+   *
+   * Книга рецептів і минулі розбори належать серверу: телефон їх не творить,
+   * лише показує. Щоб сторінки відкривались миттєво і без мережі, останнє
+   * слово сервера лежить у місцевій базі, і правила прості: знімок читається
+   * при відкритті, пишеться кожною вдалою відповіддю, місцевих правок у ньому
+   * не буває. Через це серверу й телефону нема за що битись: у знімка немає
+   * власної думки, він завжди програє свіжій відповіді. */
+
+  static const _recipesKey = 'recipes';
+  static const _reviewsKey = 'week_reviews';
+
+  /* toWire шле чернетку на сервер і тому не знає id та дати; знімок мусить
+     памʼятати обидва, інакше після перезапуску картки втратять «щойно». */
+  Map<String, dynamic> _recipeJson(RecipeData r) => {
+    ...r.toWire(),
+    'id': r.id,
+    if (r.createdAt != null) 'created_at': r.createdAt!.toIso8601String(),
+  };
+
+  Future<void> _putRecipesSnapshot(List<RecipeData> rows) => db.syncDao.putSnapshot(
+    _recipesKey,
+    jsonEncode([for (final r in rows) _recipeJson(r)]),
+  );
+
+  /// Книга, як її востаннє віддав сервер. Null, коли знімка ще не було.
+  Future<List<RecipeData>?> recipesSnapshot() async {
+    final raw = await db.syncDao.snapshot(_recipesKey);
+    if (raw == null) return null;
+    try {
+      return [
+        for (final b in jsonDecode(raw) as List<dynamic>)
+          RecipeData.fromWire(b as Map<String, dynamic>),
+      ];
+    } catch (_) {
+      // Зіпсований знімок означає «знімка немає», а не поламану сторінку.
+      return null;
+    }
+  }
+
+  /// Книга рецептів людини, найновіший перший. Успіх осідає в знімок.
+  Future<List<RecipeData>> recipes() async {
+    if (!await SyncRepository(db, _api).ensureAccount()) return const [];
+    final rows = await _api.recipes();
+    await _putRecipesSnapshot(rows);
+    return rows;
+  }
+
+  /// Покласти рецепт у книгу. Відповідь сервера стає в чоло знімка.
+  Future<RecipeData> saveRecipe(RecipeData draft) async {
+    if (!await SyncRepository(db, _api).ensureAccount()) throw const ApiFailure.offline();
+    final saved = await _api.createRecipe(draft);
+    final had = await recipesSnapshot();
+    if (had != null) await _putRecipesSnapshot([saved, ...had]);
+    return saved;
+  }
+
+  /// Прибрати рецепт із книги. Знімок худне лише після згоди сервера: якщо
+  /// видалення не дійшло, рецепт чесно лишається на екрані.
+  Future<void> deleteRecipe(String id) async {
+    if (!await SyncRepository(db, _api).ensureAccount()) throw const ApiFailure.offline();
+    await _api.deleteRecipe(id);
+    final had = await recipesSnapshot();
+    if (had != null) {
+      await _putRecipesSnapshot([for (final r in had) if (r.id != id) r]);
+    }
+  }
+
+  /* Підбір страв. Живе тут із тієї ж причини, що тижневий розбір: той самий
+     клієнт і те саме дзеркало токенів, число в застосунку міняється тією ж
+     миттю, а не наступним обміном. */
+  Future<List<RecipeData>> suggestRecipes(String what) async {
+    if (!await SyncRepository(db, _api).ensureAccount()) throw const ApiFailure.offline();
+
+    final got = await _api.suggestRecipes(what: what, idempotencyKey: const Uuid().v4());
+    if (got.balance != null) {
+      await db.syncDao.putTokens(balance: got.balance!, unlimited: got.unlimited);
+    }
+    return got.options;
   }
 
   /* Вхід через Google. Живе тут, бо саме тут лежить той самий клієнт і та сама

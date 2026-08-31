@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../data/settings.dart';
 import '../../design/icons.dart';
 import '../../design/shell.dart';
+import '../menu.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import '../../l10n/app_localizations.dart';
@@ -30,6 +31,7 @@ class ThemePanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = L.of(context);
     return CalviScreen(
+      trailing: const CalviMenuButton(),
       onBack: onBack,
       title: l.setTheme,
       foot: CalviButton(label: l.actionDone, onTap: () => (onBack ?? Navigator.of(context).pop)()),
@@ -72,6 +74,7 @@ class LangPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = L.of(context);
     return CalviScreen(
+      trailing: const CalviMenuButton(),
       onBack: onBack,
       title: l.setLang,
       foot: CalviButton(label: l.actionDone, onTap: () => (onBack ?? Navigator.of(context).pop)()),
@@ -112,6 +115,7 @@ class _PlanPanelState extends State<PlanPanel> {
   Widget build(BuildContext context) {
     final l = L.of(context);
     return CalviScreen(
+      trailing: const CalviMenuButton(),
       onBack: widget.onBack,
       title: l.planTitle,
       foot: CalviButton(
@@ -197,6 +201,7 @@ class PrivacyPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = L.of(context);
     return CalviScreen(
+      trailing: const CalviMenuButton(),
       onBack: onBack,
       title: l.privacyTitle,
       foot: CalviButton(label: l.actionDone, onTap: () => (onBack ?? Navigator.of(context).pop)()),
@@ -266,6 +271,7 @@ class _DeletePanelState extends State<DeletePanel> {
   Widget build(BuildContext context) {
     final l = L.of(context);
     return CalviScreen(
+      trailing: const CalviMenuButton(),
       onBack: widget.onBack,
       title: l.deleteTitle,
       hint: l.deleteNote,

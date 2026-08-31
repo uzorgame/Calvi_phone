@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../data/legal.dart';
 import '../../design/shell.dart';
+import '../menu.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import '../../l10n/app_localizations.dart';
@@ -26,6 +27,7 @@ class LegalPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CalviScreen(
+      trailing: const CalviMenuButton(),
       onBack: onBack,
       title: doc.title,
       foot: CalviButton(

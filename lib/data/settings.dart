@@ -328,8 +328,14 @@ const activityLevels = <ActivityLevel>[
 const assistantName = 'Nora';
 
 /// Basal metabolic rate, Mifflin-St Jeor.
+///
+/// Вага тут береться на старті цілі, а не жива. Доти норма їхала за кожним
+/// зважуванням, і на наборі це замикалось у спіраль: їж до норми, важ
+/// більше, норма росте, їж ще більше. Тепер норма стоїть, поки людина сама
+/// не поставить нову ціль (збереження цілі заякорює goalStartKg наново), а
+/// жива вага рухає інше: прогрес і «приблизно до…» у цілі.
 double bmr(SettingsState s) {
-  final base = 10 * s.weightKg + 6.25 * s.heightCm - 5 * s.age;
+  final base = 10 * s.goalStartKg + 6.25 * s.heightCm - 5 * s.age;
   if (s.sex == Sex.m) return base + 5;
   if (s.sex == Sex.f) return base - 161;
   // Neither formula fits, so take the midpoint rather than pick one at random.

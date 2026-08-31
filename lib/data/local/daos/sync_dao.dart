@@ -10,6 +10,7 @@ import '../tables/medication_takes.dart';
 import '../tables/medications.dart';
 import '../tables/profile.dart';
 import '../tables/sync_meta.dart';
+import '../tables/server_snapshots.dart';
 import '../tables/tokens.dart';
 import '../tables/water_logs.dart';
 import '../tables/weights.dart';
@@ -36,6 +37,7 @@ part 'sync_dao.g.dart';
     ChatMessages,
     TokenState,
     SyncMeta,
+    ServerSnapshots,
   ],
 )
 class SyncDao extends DatabaseAccessor<CalviDb> with _$SyncDaoMixin {
@@ -320,8 +322,28 @@ class SyncDao extends DatabaseAccessor<CalviDb> with _$SyncDaoMixin {
       await delete(medicationTakes).go();
       await delete(medications).go();
       await delete(chatMessages).go();
+      // Знімки серверних списків теж: краще зайвий раз перепитати сервер,
+      // ніж показати стертому щоденнику стару книгу.
+      await delete(serverSnapshots).go();
     });
   }
+
+  /* --- Знімки серверних списків ---
+   *
+   * Сервер один володіє книгою рецептів і минулими розборами; тут лежить його
+   * останнє слово, щоб сторінка відкривалась миттєво і без мережі. Місцевих
+   * правок у знімках не буває, кожен пишеться цілком. */
+
+  Future<String?> snapshot(String key) async {
+    final row = await (select(
+      serverSnapshots,
+    )..where((s) => s.key.equals(key))).getSingleOrNull();
+    return row?.body;
+  }
+
+  Future<void> putSnapshot(String key, String body) => into(serverSnapshots).insertOnConflictUpdate(
+    ServerSnapshotsCompanion.insert(key: key, body: body, fetchedAt: DateTime.now()),
+  );
 
   /// Everything this person wrote, gone. Used by «вийти» on a shared phone and
   /// by «видалити акаунт»: the local copy has to go with the account.
@@ -340,6 +362,8 @@ class SyncDao extends DatabaseAccessor<CalviDb> with _$SyncDaoMixin {
       await delete(allergies).go();
       await delete(profile).go();
       await delete(chatMessages).go();
+      // Знімки належать акаунту і йдуть разом із ним.
+      await delete(serverSnapshots).go();
       await (update(syncMeta)..where((s) => s.id.equals(1))).write(
         const SyncMetaCompanion(cursor: Value(0), userId: Value(null)),
       );

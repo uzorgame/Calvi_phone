@@ -17,6 +17,7 @@ import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import '../../format.dart';
 import '../../l10n/app_localizations.dart';
+import '../menu.dart';
 import '../analytics/charts.dart';
 
 /// Тижнева аналітика: окрема сторінка, вхід із третьої сторони картки дня.
@@ -50,18 +51,7 @@ class _WeekScreenState extends State<WeekScreen> {
      зовсім. Кнопка «Зробити розбір», показана на мить над уже збудованим
      розбором, обіцяла б те, чого не станеться. */
   List<WeekReviewData>? _reviews;
-
-  /* Память сесії: сторінку відкривають і закривають усі вихідні, а розбори
-     міняються раз на тиждень. Перший вхід питає сервер, наступні зустрічають
-     готовим станом без миготіння, і лише звіряються з сервером у тлі. */
-  static List<WeekReviewData>? _cache;
   bool _asked = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _reviews = _cache;
-  }
 
   @override
   void didChangeDependencies() {
@@ -76,14 +66,23 @@ class _WeekScreenState extends State<WeekScreen> {
       return;
     }
 
-    /* Тихо: сторінку відкривають заради чисел, і мережа їм не потрібна.
+    /* Розбори приходять двома кроками, як книга рецептів. Спершу знімок із
+       місцевої бази: остання відповідь сервера, миттєво і без мережі, тож
+       блок Нори стоїть на місці одразу навіть після перезапуску. Тоді тихе
+       освіження: сторінку відкривають заради чисел, і мережа їм не потрібна.
        Не приїхало, значить показуємо, що знали, або чесну кнопку: повторний
        запит збереженого розбору однаково нічого не коштує. */
+    unawaited(
+      scope.sync!.weekReviewsSnapshot().then((snap) {
+        if (mounted && snap != null && _reviews == null) {
+          setState(() => _reviews = snap);
+        }
+      }),
+    );
     unawaited(
       scope.sync!
           .weekReviews()
           .then((rows) {
-            _cache = rows;
             if (mounted) setState(() => _reviews = rows);
           })
           .catchError((_) {
@@ -95,11 +94,10 @@ class _WeekScreenState extends State<WeekScreen> {
   }
 
   /// Розбір, збудований щойно, стає в чоло списку: «Минулі» і поточний блок
-  /// читають один список, і другого джерела правди тут немає.
+  /// читають один список, і другого джерела правди тут немає. У знімок його
+  /// вже поклав weekReview, тут лишається тільки екран.
   void _keep(WeekReviewData fresh) {
     setState(() => _reviews = [fresh, ...?_reviews?.where((r) => r.week != fresh.week)]);
-    // Тільки справжні розбори: показовий розбір демки не мусить пережити демку.
-    if (AppScope.of(context).real) _cache = _reviews;
   }
 
   @override
@@ -134,7 +132,7 @@ class _WeekScreenState extends State<WeekScreen> {
          тобто саме тоді, коли туди переїхав свіжий розбір. */
       return CalviScreen(
         title: l.wkTitle,
-        trailing: _Settings(onTap: widget.onSettings),
+        trailing: const CalviMenuButton(),
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 40, CalviSize.gutter, 24),
@@ -155,7 +153,7 @@ class _WeekScreenState extends State<WeekScreen> {
 
     return CalviScreen(
       title: l.wkTitle,
-      trailing: _Settings(onTap: widget.onSettings),
+      trailing: const CalviMenuButton(),
       children: [
         /* Розбір найпершим, над усіма числами: числа нижче це матеріал, а
            розбір це відповідь, і людина приходить сюди по відповідь. */
@@ -338,25 +336,6 @@ class _WeekScreenState extends State<WeekScreen> {
 }
 
 /// Кнопка налаштувань у шапці, один в один як на аналітиці.
-class _Settings extends StatelessWidget {
-  const _Settings({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => GestureDetector(
-    onTap: onTap,
-    behavior: HitTestBehavior.opaque,
-    child: Container(
-      width: 38,
-      height: 38,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(shape: BoxShape.circle, color: context.c.fillSecondary),
-      child: const CalviIcon('settings', size: 18),
-    ),
-  );
-}
-
 /// Розділова риска між парою чисел, як на аналітиці.
 class _Sep extends StatelessWidget {
   const _Sep();
