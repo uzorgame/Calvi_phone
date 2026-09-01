@@ -84,6 +84,18 @@ class CalviApi {
     );
   }
 
+  /* Спитати сервер, чи він уже знає про покупку.
+   *
+   * Сервер сам звіряється з RevenueCat і відповідає станом токенів, тим самим,
+   * що їде в обміні. Викликається одразу після вікна магазину і після
+   * відновлення покупок: чекати чергового обміну з лічильником на екрані
+   * означало б, що людина читає «не спрацювало». */
+  Future<({int balance, bool unlimited})> refreshSubscription() async {
+    final body = await _post('/v1/subscriptions/refresh', const {});
+    final t = body['tokens'] as Map<String, dynamic>;
+    return (balance: (t['balance'] as num).round(), unlimited: t['unlimited'] as bool? ?? false);
+  }
+
   /* Профіль возиться своїм маршрутом, а не в загальному обміні.
    *
    * У щоденнику їздять рядки: свій ідентифікатор, своя черга, мʼяке видалення.

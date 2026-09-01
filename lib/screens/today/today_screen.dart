@@ -1634,6 +1634,8 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
                 tokensLeft: snap.data?.syncedAt == null || snap.data?.unlimited == true
                     ? null
                     : snap.data?.balance,
+                // Підписка: на місці числа стоїть «Pro».
+                pro: snap.data?.syncedAt != null && snap.data?.unlimited == true,
                 slot: _nextSlot(day),
                 open: _chatOpen,
                 /* Ховається тільки на час диктування, коли її закриває збільшена

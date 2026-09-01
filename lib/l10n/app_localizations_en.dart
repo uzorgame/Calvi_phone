@@ -645,6 +645,9 @@ class LEn extends L {
       'Not in ours, and not in the open one. Photograph the nutrition table on the packet and I will copy the figures from it. This is free.';
 
   @override
+  String get chatPro => 'Pro';
+
+  @override
   String get deleteConfirm =>
       'I understand the data will be deleted forever and cannot be brought back.';
 
@@ -1422,7 +1425,7 @@ class LEn extends L {
   String get planMonthBilled => 'billed monthly';
 
   @override
-  String get planMonthly => 'Monthly subscription';
+  String get planMonthly => 'Pro monthly';
 
   @override
   String get planNothingToRestore => 'No purchases on this account';
@@ -1431,7 +1434,10 @@ class LEn extends L {
   String get planNow => 'Now';
 
   @override
-  String get planOn => 'Active';
+  String get planOn => 'Pro';
+
+  @override
+  String get planPending => 'Payment went through. Access arrives within a minute';
 
   @override
   String get planPerMonth => '/mo';
@@ -1486,6 +1492,16 @@ class LEn extends L {
   String get planRestored => 'Subscription restored';
 
   @override
+  String get planSignInGo => 'Sign in';
+
+  @override
+  String get planSignInNote =>
+      'The subscription is tied to an account with an email. That way it survives a new phone and works on all your devices.';
+
+  @override
+  String get planSignInTitle => 'Sign in first';
+
+  @override
   String get planStoreOffline => 'The store is not responding. Check your internet connection';
 
   @override
@@ -1521,7 +1537,7 @@ class LEn extends L {
   }
 
   @override
-  String get planYearly => 'Yearly subscription';
+  String get planYearly => 'Pro yearly';
 
   @override
   String plateFor(int grams) {

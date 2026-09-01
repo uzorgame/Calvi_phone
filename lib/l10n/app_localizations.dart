@@ -1227,6 +1227,12 @@ abstract class L {
   /// **'Not in ours, and not in the open one. Photograph the nutrition table on the packet and I will copy the figures from it. This is free.'**
   String get camUnknownCodeNote;
 
+  /// No description provided for @chatPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro'**
+  String get chatPro;
+
   /// No description provided for @deleteConfirm.
   ///
   /// In en, this message translates to:
@@ -2598,7 +2604,7 @@ abstract class L {
   /// No description provided for @planMonthly.
   ///
   /// In en, this message translates to:
-  /// **'Monthly subscription'**
+  /// **'Pro monthly'**
   String get planMonthly;
 
   /// No description provided for @planNothingToRestore.
@@ -2616,8 +2622,14 @@ abstract class L {
   /// No description provided for @planOn.
   ///
   /// In en, this message translates to:
-  /// **'Active'**
+  /// **'Pro'**
   String get planOn;
+
+  /// No description provided for @planPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment went through. Access arrives within a minute'**
+  String get planPending;
 
   /// No description provided for @planPerMonth.
   ///
@@ -2721,6 +2733,24 @@ abstract class L {
   /// **'Subscription restored'**
   String get planRestored;
 
+  /// No description provided for @planSignInGo.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get planSignInGo;
+
+  /// No description provided for @planSignInNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The subscription is tied to an account with an email. That way it survives a new phone and works on all your devices.'**
+  String get planSignInNote;
+
+  /// No description provided for @planSignInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in first'**
+  String get planSignInTitle;
+
   /// No description provided for @planStoreOffline.
   ///
   /// In en, this message translates to:
@@ -2790,7 +2820,7 @@ abstract class L {
   /// No description provided for @planYearly.
   ///
   /// In en, this message translates to:
-  /// **'Yearly subscription'**
+  /// **'Pro yearly'**
   String get planYearly;
 
   /// No description provided for @plateFor.

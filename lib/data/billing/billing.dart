@@ -251,6 +251,32 @@ class Billing {
     }
   }
 
+  /* Який тариф діє за словом магазину: 'month', 'year' або 'on', коли підписка
+     є, а строк її невідомий. Порожньо, коли нічого не діє або магазин мовчить.
+   *
+   * Тільки для напису на екрані підписки. Доступ і тут дає сервер: він каже
+   * «лічильник знято», а магазин лише підказує, за який із двох тарифів. Строк
+   * береться з товару, а не з його назви: назви в крамницях різні, а P1M і P1Y
+   * однакові скрізь. */
+  static Future<String?> activeKind() async {
+    if (!_ready) return null;
+    try {
+      final info = await Purchases.getCustomerInfo();
+      final ids = info.activeSubscriptions;
+      if (ids.isEmpty) return info.entitlements.active.isEmpty ? null : 'on';
+      final products = await Purchases.getProducts(ids.toList());
+      for (final p in products) {
+        final period = p.subscriptionPeriod;
+        if (period == null) continue;
+        return period.contains('Y') ? 'year' : 'month';
+      }
+      return 'on';
+    } catch (e) {
+      debugPrint('billing: не дізнались тариф ($e)');
+      return null;
+    }
+  }
+
   /* Куди йти скасовувати.
    *
    * Своєї кнопки «скасувати» в застосунку немає і не буде: підпискою керує

@@ -5,7 +5,6 @@ import '../../data/allergens.dart';
 import '../../data/legal.dart';
 import '../../data/settings.dart';
 import '../../data/app_scope.dart';
-import '../../data/local/database.dart' show TokenStateData;
 import '../meds/meds_route.dart';
 import '../menu.dart';
 import '../../design/icons.dart';
@@ -108,18 +107,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         onMeds: () => _openMeds(context),
         now: DateTime.now().millisecondsSinceEpoch,
       ),
-      /* Стан підписки живе в сервера, а не в налаштуваннях: єдине, що він каже
-         застосунку, це `unlimited`, і саме воно вирішує, показати «Активна» чи
-         «Безкоштовний». Поки перша відповідь у дорозі (`syncedAt` порожній),
-         тариф вважається безкоштовним: інакше екран мигне «Активна» тим, хто
-         не платить. */
-      'plan' => StreamBuilder<TokenStateData?>(
-        stream: AppScope.maybeOf(context)?.db?.syncDao.watchTokens(),
-        builder: (context, snap) => PlanPanel(
-          onBack: _close,
-          pro: snap.data?.syncedAt != null && snap.data?.unlimited == true ? 'on' : '',
-        ),
-      ),
+      /* Стан підписки живе в сервера, а не в налаштуваннях, і панель слухає
+         його сама: так вона правдива з будь-якого входу, а не лише з цього. */
+      'plan' => PlanPanel(onBack: _close, onSignIn: () => _open('profile')),
       'theme' => ThemePanel(s: s, set: set, onBack: _close),
       'lang' => LangPanel(s: s, set: set, onBack: _close),
       'privacy' => PrivacyPanel(s: s, set: set, onBack: _close),

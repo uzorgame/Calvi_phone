@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../data/app_scope.dart';
 import '../../data/billing/billing.dart';
+import '../../data/local/database.dart' show TokenStateData;
 
 import '../../data/legal.dart';
 import '../../data/settings.dart';
@@ -106,21 +107,15 @@ class LangPanel extends StatelessWidget {
 
 /// Subscription. Paid through the stores and nowhere else.
 class PlanPanel extends StatefulWidget {
-  const PlanPanel({super.key, this.onBack, this.pro = ''});
+  const PlanPanel({super.key, this.onBack, this.onSignIn});
 
   /// How the panel closes: settings puts its list back rather than a route
   /// popping, because the panel lives inside settings.
   final VoidCallback? onBack;
 
-  /* Який тариф діє. Порожньо це безкоштовний, 'on' це оплачений тариф
-     невідомого виду, 'month' і 'year' це відомий.
-   *
-   * Третій стан не зайвий, а єдино чесний: сервер каже застосунку лише
-   * `unlimited`, тобто «лічильник знято», і не каже, з якої підписки. Доки
-   * білінг не підключений, вибрати за нього вид тарифу означало б написати на
-   * екрані здогадку. Форма з чотирьох станів уже готова прийняти справжню
-   * відповідь, коли стор почне її давати. */
-  final String pro;
+  /// Куди вести, коли людина без акаунта хоче купити: до профілю, де живе
+  /// вхід. Порожньо означає «просто закрити панель».
+  final VoidCallback? onSignIn;
 
   @override
   State<PlanPanel> createState() => _PlanPanelState();
@@ -137,7 +132,24 @@ class PlanPanel extends StatefulWidget {
  * Тепер немає відповіді, немає й числа: на місці ціни стоїть риска, а поруч
  * написано, що саме сказав магазин. */
 class _PlanPanelState extends State<PlanPanel> {
-  late String _plan = widget.pro == 'month' ? 'month' : 'year';
+  String _plan = 'year';
+
+  /* Чи знято лічильник. Єдине джерело це сервер, а тут його дзеркало: той
+     самий потік, що й у шапки чату, і сторінка міняється тієї ж миті, коли
+     сервер підтвердить покупку. Поки перша відповідь у дорозі (`syncedAt`
+     порожній), тариф вважається безкоштовним: інакше екран мигнув би «Pro»
+     тим, хто не платить. */
+  StreamSubscription<TokenStateData?>? _watch;
+  bool _has = false;
+
+  /* Який саме тариф, за словом магазину: 'month', 'year' або 'on', коли
+     підписка є, а строк невідомий. Сервер каже лише «лічильник знято» і не
+     каже, з якої підписки; це знає магазин, і в нього питаємо тільки напис. */
+  String? _kind;
+
+  /* Що показати: порожньо це безкоштовний, далі вид тарифу. Доступ вирішує
+     сервер, магазин лише уточнює назву; без його відповіді стоїть 'on'. */
+  String get _pro => !_has ? '' : (_kind ?? 'on');
 
   /// Тарифи, як їх віддав магазин. Порожньо означає «ще не приїхали» або
   /// «магазин не підключений», і тоді на екрані стоять базові числа.
@@ -153,6 +165,26 @@ class _PlanPanelState extends State<PlanPanel> {
     _load();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _watch ??= AppScope.maybeOf(context)?.db?.syncDao.watchTokens().listen((t) {
+      final has = t?.syncedAt != null && t?.unlimited == true;
+      if (has == _has) return;
+      setState(() {
+        _has = has;
+        if (!has) _kind = null;
+      });
+      if (has) unawaited(_loadKind());
+    });
+  }
+
+  @override
+  void dispose() {
+    _watch?.cancel();
+    super.dispose();
+  }
+
   /// Чому цін немає. Показується на екрані замість них, людською мовою.
   BillingTrouble _trouble = BillingTrouble.quiet;
 
@@ -162,6 +194,16 @@ class _PlanPanelState extends State<PlanPanel> {
     setState(() {
       _store = plans;
       _trouble = Billing.trouble;
+    });
+  }
+
+  Future<void> _loadKind() async {
+    final kind = await Billing.activeKind();
+    if (!mounted) return;
+    setState(() {
+      _kind = kind;
+      // Чинний тариф стає обраним: картка з «чинний» не має стояти без обведення.
+      if (kind == 'month' || kind == 'year') _plan = kind!;
     });
   }
 
@@ -219,6 +261,10 @@ class _PlanPanelState extends State<PlanPanel> {
    * Тому тут немає жодного запису в базу, тільки вікно магазину. */
   Future<void> _buy() async {
     final l = L.of(context);
+    if (!await _signedIn()) {
+      if (mounted) await _askSignIn();
+      return;
+    }
     final plan = _found(_plan);
 
     /* Магазин не відповів. Вдати покупку нема на чому, і чесніше сказати про це,
@@ -231,21 +277,68 @@ class _PlanPanelState extends State<PlanPanel> {
     setState(() => _busy = true);
     final result = await Billing.buy(plan);
     if (!mounted) return;
-    setState(() => _busy = false);
 
     switch (result) {
       case BuyResult.done:
-        /* Доступ дає сервер, а телефон про це дізнається з обміну. Черговий іде
-           за сорок пʼять секунд, і півхвилини з лічильником після оплати
-           читались би як «не спрацювало». Тому штовхаємо обмін одразу. */
-        unawaited(AppScope.of(context).sync?.now() ?? Future<void>.value());
-        _say(l.planThanks);
-        (widget.onBack ?? Navigator.of(context).pop)();
+        /* Доступ дає сервер, а телефон про це дізнається від нього. Черговий
+           обмін іде за сорок пʼять секунд, і півхвилини з лічильником після
+           оплати читались би як «не спрацювало». Тому питаємо сервер одразу, а
+           той сам звіряється з магазином. Сторінка лишається відкритою: її
+           зміна на «Pro» і є підтвердженням, яке людина бачить очима. */
+        await _confirm(l.planThanks);
       // Передумала, а не помилилась. Казати тут нічого не треба.
       case BuyResult.canceled:
         break;
       case BuyResult.failed:
         _say(l.planFailed);
+    }
+    if (mounted) setState(() => _busy = false);
+  }
+
+  /* Підписка привʼязується до облікового запису з поштою, і саме тому вхід
+     іде перед оплатою, а не після. Покупка на безіменному акаунті пристрою
+     живе рівно до першого входу в інший акаунт або до зміни телефона: чек у
+     магазині один, а акаунтів у нас уже два, і зіставляти їх доведеться руками
+     через підтримку. Простіше не створювати цю розвилку. */
+  Future<bool> _signedIn() async {
+    final db = AppScope.maybeOf(context)?.db;
+    // Без бази це демо або тест: там нема кого просити увійти.
+    if (db == null) return true;
+    return (await db.syncDao.state()).email != null;
+  }
+
+  /// Аркуш «спочатку увійди»: гучна кнопка веде до профілю, тиха закриває.
+  Future<void> _askSignIn() {
+    final l = L.of(context);
+    return calviSheet<void>(
+      context,
+      title: l.planSignInTitle,
+      doneLabel: l.planSignInGo,
+      cancelLabel: l.planLater,
+      onDone: () => (widget.onSignIn ?? widget.onBack)?.call(),
+      builder: (sheet) => Padding(
+        padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 4, CalviSize.gutter, 12),
+        child: Text(l.planSignInNote, style: sheet.t.bodyMedium),
+      ),
+    );
+  }
+
+  /* Спитати сервер про покупку і сказати людині правду.
+   *
+   * Магазин покупку прийняв, і «не пройшло» тут неможливе. Але й «готово» на
+   * екрані з лічильником було б неправдою: якщо сервер ще не в курсі або не
+   * відповів, кажемо, що доступ у дорозі, і штовхаємо обмін, який його
+   * привезе. */
+  Future<void> _confirm(String done) async {
+    final sync = AppScope.of(context).sync;
+    final confirmed = await sync?.confirmPurchase();
+    if (!mounted) return;
+    unawaited(_loadKind());
+    if (confirmed == true) {
+      _say(done);
+    } else {
+      unawaited(sync?.now() ?? Future<void>.value());
+      _say(L.of(context).planPending);
     }
   }
 
@@ -266,17 +359,29 @@ class _PlanPanelState extends State<PlanPanel> {
      телефон, має повернути оплачене без звернень у підтримку. */
   Future<void> _restore() async {
     final l = L.of(context);
+    // Відновлене теж має лягти на акаунт із поштою, а не на безіменний.
+    if (!await _signedIn()) {
+      if (mounted) await _askSignIn();
+      return;
+    }
     setState(() => _busy = true);
     final found = await Billing.restore();
     if (!mounted) return;
-    setState(() => _busy = false);
-    _say(found ? l.planRestored : l.planNothingToRestore);
+    /* Знайдене в магазині ще треба донести до сервера: при перенесенні на новий
+       акаунт RevenueCat шле вебхук без строку, і без цього запиту доступ
+       зʼявився б аж із наступним поновленням. */
+    if (found) {
+      await _confirm(l.planRestored);
+    } else {
+      _say(l.planNothingToRestore);
+    }
+    if (mounted) setState(() => _busy = false);
   }
 
   /* Що сказати про поточний стан. Рядок про дату поновлення тут не стоїть, хоч
      у демці він є: сервер віддає застосунку тільки `unlimited`, а вигадана
      дата на екрані підписки гірша за її відсутність. */
-  List<(String, String)> _now(L l) => switch (widget.pro) {
+  List<(String, String)> _now(L l) => switch (_pro) {
     '' => [(l.planPlan, l.planFree), (l.planTokens, l.planTokensFree)],
     'year' => [(l.planPlan, l.planYearly), (l.planTokens, l.planTokensPro)],
     'month' => [(l.planPlan, l.planMonthly), (l.planTokens, l.planTokensPro)],
@@ -287,7 +392,7 @@ class _PlanPanelState extends State<PlanPanel> {
   Widget build(BuildContext context) {
     final l = L.of(context);
     final c = context.c;
-    final has = widget.pro.isNotEmpty;
+    final has = _pro.isNotEmpty;
 
     return CalviScreen(
       trailing: const CalviMenuButton(),
@@ -345,10 +450,10 @@ class _PlanPanelState extends State<PlanPanel> {
                   child: _PlanCard(
                     name: l.planYear,
                     // Чинний тариф позначається спокійно, а не як знижка.
-                    save: widget.pro == 'year'
+                    save: _pro == 'year'
                         ? l.planCurrent
                         : (_saving == null ? null : '-$_saving%'),
-                    current: widget.pro == 'year',
+                    current: _pro == 'year',
                     price: _perMonth,
                     unit: _live ? l.planPerMonth : null,
                     note: _yearPrice == null ? null : l.planYearBilled(_yearPrice!),
@@ -360,8 +465,8 @@ class _PlanPanelState extends State<PlanPanel> {
                 Expanded(
                   child: _PlanCard(
                     name: l.planMonth,
-                    save: widget.pro == 'month' ? l.planCurrent : null,
-                    current: widget.pro == 'month',
+                    save: _pro == 'month' ? l.planCurrent : null,
+                    current: _pro == 'month',
                     price: _monthPrice,
                     unit: _live ? l.planPerMonth : null,
                     note: _live ? l.planMonthBilled : null,

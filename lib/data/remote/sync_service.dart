@@ -86,6 +86,23 @@ class SyncService with WidgetsBindingObserver {
     return review;
   }
 
+  /* Підтвердити покупку сервером.
+   *
+   * Доступ дає сервер, і після вікна магазину телефон питає його одразу, а не
+   * чекає чергового обміну: півхвилини з лічильником після оплати читаються
+   * як «не спрацювало». Повертає, чи сервер уже зняв лічильник. Порожньо,
+   * коли спитати не вдалось: тоді правда приїде обміном. */
+  Future<bool?> confirmPurchase() async {
+    if (!await SyncRepository(db, _api).ensureAccount()) return null;
+    try {
+      final now = await _api.refreshSubscription();
+      await db.syncDao.putTokens(balance: now.balance, unlimited: now.unlimited);
+      return now.unlimited;
+    } on ApiFailure {
+      return null;
+    }
+  }
+
   /// Минулі розбори, як їх востаннє віддав сервер. Null до першої відповіді.
   Future<List<WeekReviewData>?> weekReviewsSnapshot() async {
     final raw = await db.syncDao.snapshot(_reviewsKey);

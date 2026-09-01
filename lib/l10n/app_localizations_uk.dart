@@ -653,6 +653,9 @@ class LUk extends L {
       'Ні в нашій, ні у відкритій. Зніми таблицю поживності з упаковки, і я перепишу числа з неї. Це безкоштовно.';
 
   @override
+  String get chatPro => 'Pro';
+
+  @override
   String get deleteConfirm => 'Я розумію, що дані буде видалено назавжди і відновити їх не вийде.';
 
   @override
@@ -1430,7 +1433,7 @@ class LUk extends L {
   String get planMonthBilled => 'щомісячне списання';
 
   @override
-  String get planMonthly => 'Місячна підписка';
+  String get planMonthly => 'Pro місячна';
 
   @override
   String get planNothingToRestore => 'Покупок на цьому акаунті немає';
@@ -1439,7 +1442,10 @@ class LUk extends L {
   String get planNow => 'Зараз';
 
   @override
-  String get planOn => 'Активна';
+  String get planOn => 'Pro';
+
+  @override
+  String get planPending => 'Оплата пройшла. Доступ зʼявиться за хвилину';
 
   @override
   String get planPerMonth => '/міс';
@@ -1494,6 +1500,16 @@ class LUk extends L {
   String get planRestored => 'Підписку відновлено';
 
   @override
+  String get planSignInGo => 'Увійти';
+
+  @override
+  String get planSignInNote =>
+      'Підписка привʼязується до облікового запису з поштою. Так вона не загубиться при зміні телефона і буде на всіх твоїх пристроях.';
+
+  @override
+  String get planSignInTitle => 'Спочатку увійди в профіль';
+
+  @override
   String get planStoreOffline => 'Магазин не відповідає. Перевір підключення до інтернету';
 
   @override
@@ -1529,7 +1545,7 @@ class LUk extends L {
   }
 
   @override
-  String get planYearly => 'Річна підписка';
+  String get planYearly => 'Pro річна';
 
   @override
   String plateFor(int grams) {

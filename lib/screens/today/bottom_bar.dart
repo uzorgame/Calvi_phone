@@ -44,6 +44,7 @@ class BottomBar extends StatefulWidget {
     this.muteMic = false,
     this.away = false,
     this.tokensLeft,
+    this.pro = false,
   });
 
   /// Card the next entry lands in.
@@ -84,6 +85,10 @@ class BottomBar extends StatefulWidget {
    * ще ні разу не відповідав, і тоді таблетка не малюється зовсім: нуль на
    * старті виглядав би як «токени скінчились», а це неправда. */
   final int? tokensLeft;
+
+  /* Лічильник знято: підписка. Замість числа в таблетці стоїть слово, бо
+     порожнє місце читалось би як зламаний лічильник, а не як його відсутність. */
+  final bool pro;
 
   @override
   State<BottomBar> createState() => _BottomBarState();
@@ -386,6 +391,7 @@ class _BottomBarState extends State<BottomBar> {
                         onWeigh: widget.onWeigh,
                         onChoose: widget.onChoose,
                         tokensLeft: widget.tokensLeft,
+                        pro: widget.pro,
                       ),
                     ),
                   ),
@@ -420,6 +426,7 @@ class _Room extends StatelessWidget {
     this.onWeigh,
     this.onChoose,
     this.tokensLeft,
+    this.pro = false,
   });
 
   final ScrollController controller;
@@ -427,6 +434,7 @@ class _Room extends StatelessWidget {
   final void Function(String id, int grams)? onWeigh;
   final void Function(String id, String option)? onChoose;
   final int? tokensLeft;
+  final bool pro;
 
   @override
   Widget build(BuildContext context) {
@@ -458,7 +466,7 @@ class _Room extends StatelessWidget {
                    until the number starts to matter. One number, no cap after
                    the slash: the server's ceiling is its own business, and a
                    figure like 19/30 kept demanding an explanation of the 30. */
-                if (tokensLeft case final left?)
+                if (pro || tokensLeft != null)
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                     decoration: BoxDecoration(
@@ -466,7 +474,10 @@ class _Room extends StatelessWidget {
                       borderRadius: BorderRadius.circular(CalviSize.rPill),
                     ),
                     child: Text(
-                      '$left',
+                      /* Підписка каже слово замість числа: тому, хто заплатив,
+                         нема чого рахувати, але місце лічильника не має стояти
+                         порожнім, ніби він зламався. */
+                      pro ? L.of(context).chatPro : '$tokensLeft',
                       style: context.t.labelSmall?.copyWith(fontSize: CalviSize.fsMicro),
                     ),
                   ),
