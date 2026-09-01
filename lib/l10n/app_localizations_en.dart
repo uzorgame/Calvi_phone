@@ -1254,25 +1254,25 @@ class LEn extends L {
   String get menuAbout => 'About';
 
   @override
+  String get menuAllergy => 'Allergies';
+
+  @override
   String get menuAnalytics => 'Analytics';
 
   @override
   String get menuDiary => 'Diary';
 
   @override
-  String get menuNora => 'Meet Nora';
+  String get menuMeds => 'Medications';
 
   @override
-  String get menuPlan => 'Plans';
+  String get menuPlan => 'Subscription';
 
   @override
   String get menuRecipes => 'Recipes';
 
   @override
   String get menuSettings => 'Settings';
-
-  @override
-  String get menuSoon => 'soon';
 
   @override
   String get menuTitle => 'Menu';
@@ -1398,10 +1398,22 @@ class LEn extends L {
   String get planBuy => 'Subscribe';
 
   @override
+  String get planClose => 'Close';
+
+  @override
+  String get planCurrent => 'current';
+
+  @override
+  String get planFailed => 'The purchase did not go through';
+
+  @override
   String get planFree => 'Free';
 
   @override
   String get planLater => 'Not now';
+
+  @override
+  String get planManage => 'Manage in the store';
 
   @override
   String get planMonth => 'Month';
@@ -1410,35 +1422,80 @@ class LEn extends L {
   String get planMonthBilled => 'billed monthly';
 
   @override
-  String get planMonthPrice => '180 UAH';
+  String get planMonthly => 'Monthly subscription';
+
+  @override
+  String get planNothingToRestore => 'No purchases on this account';
 
   @override
   String get planNow => 'Now';
 
   @override
+  String get planOn => 'Active';
+
+  @override
+  String get planPerMonth => '/mo';
+
+  @override
   String get planPerkChat => 'Unlimited conversations with Nora';
 
   @override
-  String get planPerkHistory => 'History and analytics without limits';
+  String get planPerkChatSub => 'one message costs one token today';
 
   @override
-  String get planPerkReports => 'Reports for any period';
+  String get planPerkMemory => 'Nora remembers you';
 
   @override
-  String get planPerks => 'What Premium gives';
+  String get planPerkMemorySub => 'she learns new things in conversation, and that costs a token';
 
   @override
-  String get planPitch => 'Unlimited tokens, history without limits, and reports for any period.';
+  String get planPerkPhoto => 'Unlimited meal photos';
+
+  @override
+  String get planPerkPhotoSub => 'a photo costs two tokens today';
+
+  @override
+  String get planPerkRecipes => 'Unlimited recipes from Nora';
+
+  @override
+  String get planPerkRecipesSub => 'a suggestion costs one token today';
+
+  @override
+  String get planPerkWeek => 'Weekly review whenever you want';
+
+  @override
+  String get planPerkWeekSub => 'a review costs two tokens today';
+
+  @override
+  String get planPerks => 'What the subscription gives';
 
   @override
   String get planPlan => 'Plan';
 
   @override
-  String get planSave => '-17%';
+  String get planPrivacy => 'Privacy Policy';
 
   @override
-  String get planStoreNote =>
-      'Payment goes through the App Store or Google Play. You can cancel in the same place, in subscription settings, and Calvi has no say in it.';
+  String get planRenewal =>
+      'The subscription renews automatically until cancelled. You can cancel at any time in the settings of the store it was purchased from.';
+
+  @override
+  String get planRestore => 'Restore purchases';
+
+  @override
+  String get planRestored => 'Subscription restored';
+
+  @override
+  String get planStoreQuiet => 'The store is not responding. Try again later';
+
+  @override
+  String get planTariffs => 'Plans';
+
+  @override
+  String get planTerms => 'Terms of Use';
+
+  @override
+  String get planThanks => 'Done, Nora is unlimited now';
 
   @override
   String get planTitle => 'Subscription';
@@ -1450,16 +1507,18 @@ class LEn extends L {
   String get planTokensFree => '40 a month';
 
   @override
+  String get planTokensPro => 'Unlimited';
+
+  @override
   String get planYear => 'Year';
 
   @override
-  String get planYearBilled => '1,800 UAH once a year';
+  String planYearBilled(String price) {
+    return '$price once a year';
+  }
 
   @override
-  String get planYearHint => '150 UAH a month, charged once a year';
-
-  @override
-  String get planYearPrice => '150 UAH';
+  String get planYearly => 'Yearly subscription';
 
   @override
   String plateFor(int grams) {

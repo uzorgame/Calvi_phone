@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
+import 'data/billing/billing.dart';
 import 'data/evening.dart';
 import 'data/local/database.dart';
 import 'data/remote/sync_service.dart';
@@ -33,7 +35,24 @@ import 'screens/today/today_screen.dart';
 import 'data/meal.dart';
 import 'l10n/data_lang.dart';
 
-void main() => runApp(const CalviApp());
+/* Тільки портрет.
+ *
+ * Замок стоїть у трьох місцях, і це не перестраховка: маніфест і plist ловлять
+ * поворот ще до того, як Flutter запустився, тобто на заставці, а цей рядок
+ * тримає його далі, включно з тими системами, де застосунок може попросити
+ * орієнтацію сам.
+ *
+ * Портрет догори і все: перевернутий портрет на телефоні читається як збій, а
+ * не як положення, і жоден екран під нього не мальований. */
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations(const [DeviceOrientation.portraitUp]);
+  /* Магазин піднімається до першого кадру, бо ціни на екрані підписки приходять
+     від нього. Без ключів це тиха порожня операція, і застосунок стартує так
+     само: щоденник не має залежати від того, чи працює оплата. */
+  await Billing.start();
+  runApp(const CalviApp());
+}
 
 class CalviApp extends StatefulWidget {
   const CalviApp({super.key, this.storage = true, this.hello = true});

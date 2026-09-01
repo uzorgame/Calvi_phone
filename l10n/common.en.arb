@@ -101,9 +101,9 @@
   "menuAnalytics": "Analytics",
   "menuWeek": "Weekly review",
   "menuRecipes": "Recipes",
-  "menuNora": "Meet Nora",
-  "menuSoon": "soon",
-  "menuPlan": "Plans",
+  "menuMeds": "Medications",
+  "menuAllergy": "Allergies",
+  "menuPlan": "Subscription",
   "menuSettings": "Settings",
   "menuAbout": "About"
 }

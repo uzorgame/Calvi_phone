@@ -5,8 +5,6 @@
 
 library;
 
-import '../l10n/data_lang.dart';
-
 /// Пункт списку. Жирне завжди на початку, тому це два поля, а не розмітка.
 class LegalItem {
   const LegalItem({this.b, this.t});
@@ -47,513 +45,354 @@ class LegalDoc {
   final List<LegalPart> parts;
 }
 
-const _termsUk = LegalDoc(
-  title: 'Умови користування',
-  updated: '24 серпня 2026',
+const _terms = LegalDoc(
+  title: 'Terms of Use',
+  updated: '1 September 2026',
   lede:
-      'Коротко: щоденник безкоштовний, токени витрачаються тільки на помічника, числа є оцінкою і не є медичною порадою.',
+      'The diary is free of charge, the assistant runs on a token allowance, all nutritional figures are estimates, and Calvi is not a medical device.',
   parts: [
     LegalPart(
-      h: 'Що це',
-      p: 'Calvi це щоденник харчування і ваги. Ти описуєш словами або фотографуєш те, що з’їв, а застосунок розбирає це на страву і числа: калорії, білки, жири, вуглеводи. Сюди ж пишуться вода, тренування, заміри тіла і препарати, які ти приймаєш.',
-      tail:
-          'Користуючись Calvi, ти погоджуєшся з цими умовами. Якщо не погоджуєшся, просто не користуйся: іншого способу прийняти їх наполовину немає.',
+      h: 'Agreement to these Terms',
+      p: 'These Terms of Use (the "Terms") govern access to and use of the Calvi mobile application and the services provided through it (the "Service"). By installing, accessing or using the Service, you agree to be bound by these Terms. If you do not agree to them, do not use the Service.',
     ),
     LegalPart(
-      h: 'Це не медичний застосунок',
-      p: 'Це найважливіший розділ тут, і він написаний просто. Calvi створений для самоспостереження і загального добробуту. Він не є медичним виробом.',
+      h: 'Description of the Service',
+      p: 'Calvi is a self-tracking application for nutrition and body measurements. You describe in writing, dictate or photograph what you have consumed, and the Service estimates the corresponding food item together with its energy content and macronutrient composition. The Service additionally records water intake, physical activity, body measurements, allergies and medication schedules that you choose to enter.',
+    ),
+    LegalPart(
+      h: 'No medical purpose',
+      p: 'The Service is intended for general wellness and self-observation only. It is not a medical device and is not intended to diagnose, treat, cure, mitigate or prevent any disease or medical condition.',
       list: [
         LegalItem(
-          b: 'Не діагностує і не лікує.',
-          t: ' Не виявляє хвороб, не запобігає їм і не полегшує їх',
+          b: 'Estimates rather than measurements.',
+          t: ' Nutritional values are derived from your description or photograph and from public food reference databases. They are approximations and may be materially inaccurate.',
         ),
         LegalItem(
-          b: 'Числа це оцінка.',
-          t: ' Калорії й нутрієнти рахуються з твого опису або фото, і вони можуть бути неточними. Це орієнтир, а не вимірювання',
-        ),
-        LegalItem(b: 'Помічник не дає медичних порад.', t: ' І не замінює лікаря або дієтолога'),
-        LegalItem(
-          b: 'Препарати це щоденник, а не призначення.',
-          t: ' Застосунок не радить ліків, не рахує дозувань і не змінює схему прийому',
+          b: 'No clinical advice.',
+          t: ' The assistant does not provide medical, nutritional or pharmaceutical advice, and does not substitute for consultation with a qualified healthcare professional.',
         ),
         LegalItem(
-          b: 'Алергени це нагадування.',
-          t: ' Ми звіряємо склад продукту з тим, що ти вніс, але не гарантуємо, що знайдемо усе. При алергії читай склад сам, завжди',
+          b: 'Medication entries constitute a record only.',
+          t: ' The Service does not prescribe medication, calculate dosages, or recommend changes to any treatment regimen.',
+        ),
+        LegalItem(
+          b: 'Allergen indications are not exhaustive.',
+          t: ' Allergen matching is performed against public product data and against the description you provide, and may be incomplete or incorrect. You remain responsible for verifying ingredients yourself.',
         ),
       ],
       tail:
-          'Порадься з лікарем, перш ніж міняти харчування, і особливо при вагітності чи годуванні, діабеті, хворобах нирок або печінки, розладах харчової поведінки та при постійному прийомі ліків. У невідкладній ситуації телефонуй 103 або 112, а не відкривай застосунок.',
+          'Consult a qualified healthcare professional before making changes to your diet, and in particular if you are pregnant or breastfeeding, or if you have diabetes, kidney or liver disease, a history of disordered eating, or take medication on an ongoing basis. In a medical emergency, contact your local emergency services; do not rely on the Service.',
     ),
     LegalPart(
-      h: 'Вік',
-      p: 'Calvi для повнолітніх. Користуючись ним, ти підтверджуєш, що тобі виповнилось 18. Ми свідомо не заводимо записів для дітей, а якщо дізнаємось про такий, видалимо його.',
+      h: 'Eligibility',
+      p: 'The Service is available to individuals aged 13 years or over. By using the Service you represent that you meet this requirement. Accounts are not knowingly created or maintained for persons under 13, and any account identified as belonging to such a person will be deleted.',
       tail:
-          'Причина не формальна: підрахунок калорій і зниження ваги це чутлива тема для підлітків, і ми не хочемо бути її частиною.',
-    ),
-    LegalPart(
-      h: 'Обліковий запис',
-      p: 'Запис створюється сам при першому запуску, без пошти й реєстрації: застосунок має працювати з першої секунди. Вхід через Google робить одну річ, прив’язує цей самий запис до тебе, щоб його можна було повернути на іншому телефоні.',
-      list: [
-        LegalItem(
-          b: 'Один запис на людину.',
-          t: ' Ділити його з кимось не варто: щоденник рахує одну людину',
-        ),
-        LegalItem(
-          b: 'Без входу запис живе тільки на цьому телефоні.',
-          t: ' Втратив телефон, і повернути його нічим: ми не знаємо, чий він',
-        ),
-        LegalItem(
-          b: 'Видалити можна будь-коли.',
-          t: ' Разом із записом зникає все, що лежить на сервері. Як саме, написано в приватності',
-        ),
-        LegalItem(
-          b: 'Ми можемо закрити доступ,',
-          t: ' якщо запис використовують для навантаження на сервіс або для обходу лічильника токенів',
-        ),
-      ],
-    ),
-    LegalPart(
-      h: 'Скільки це коштує',
-      p: 'Сам щоденник безкоштовний і без обмеження за кількістю записів. Платного тарифу зараз немає взагалі: ні підписки, ні разових покупок, ні платіжних даних.',
-      tail:
-          'Помічник витрачає токени, і вони нараховуються безкоштовно. Скінчились токени, помічник мовчить до наступного нарахування, а щоденник працює далі як працював. Якщо колись з’явиться платний тариф, умови будуть описані тут заздалегідь.',
-    ),
-    LegalPart(
-      h: 'Чого не можна',
-      list: [
-        LegalItem(t: 'Вносити чужі дані про здоров’я і фотографії інших людей'),
-        LegalItem(t: 'Просити в помічника діагноз, призначення чи дозування'),
-        LegalItem(t: 'Навмисно вантажити сервіс або обходити лічильник токенів'),
-        LegalItem(t: 'Розбирати застосунок і звертатись до сервера повз нього'),
-      ],
-    ),
-    LegalPart(
-      h: 'Твої записи лишаються твоїми',
-      p: 'Усе, що ти вносиш, належить тобі. Ми не заявляємо на це прав і не продаємо це нікому. Дозвіл, який ти нам даєш, рівно один і рівно на одне: зберігати твої записи й показувати їх тобі, синхронізувати між твоїми пристроями і передавати те, що ти написав помічникові, моделі, яка це розбирає.',
-      tail: 'На своїх моделях ми на твоїх даних не навчаємось.',
-    ),
-    LegalPart(
-      h: 'Відповідальність',
-      p: 'Calvi надається як є. Ми стараємось, щоб числа були близькі до правди, а сервер працював, але не обіцяємо ні точності оцінок, ні безперервної роботи.',
-      tail:
-          'Це не знімає з нас відповідальності там, де закон її зняти не дозволяє: за шкоду життю і здоров’ю, за умисел і грубу необережність. Права споживача за законом України і, якщо ти в ЄС, за правом твоєї країни, лишаються з тобою повністю.',
-    ),
-    LegalPart(
-      h: 'Якщо умови зміняться',
-      p: 'Змінимо, скажемо. Дата редакції стоїть угорі, і суттєві зміни ми показуємо в застосунку до того, як вони почнуть діяти. Незгоден із новою редакцією, видали запис: це і є відмова.',
-    ),
-    LegalPart(
-      h: 'Право і суперечки',
-      p: 'До цих умов застосовується право України. Якщо ти споживач і живеш в іншій країні, це не позбавляє тебе захисту, який дають імперативні норми твоєї країни, і не забирає права звернутись до суду за місцем проживання.',
-      tail:
-          'Перш ніж судитись, напиши на calvi.labs@gmail.com. Більшість речей вирішується листом.',
-    ),
-    LegalPart(
-      h: 'Зв’язок',
-      p: 'Calvi веде Михайло Нагреба, приватна особа, Україна. Питання, скарги, запити щодо даних: calvi.labs@gmail.com.',
-    ),
-  ],
-);
-
-const _termsEn = LegalDoc(
-  title: 'Terms of use',
-  updated: '24 August 2026',
-  lede:
-      'In short: the diary is free, tokens are spent only on the assistant, and the figures are estimates rather than medical advice.',
-  parts: [
-    LegalPart(
-      h: 'What this is',
-      p: 'Calvi is a food and weight diary. You describe in words or photograph what you ate, and the app works it out into a dish and figures: calories, protein, fat, carbs. Water, workouts, body measurements and the medicines you take go in here too.',
-      tail:
-          'By using Calvi you agree to these terms. If you do not agree, do not use it: there is no way to accept them halfway.',
-    ),
-    LegalPart(
-      h: 'This is not a medical app',
-      p: 'This is the most important section here, and it is written plainly. Calvi is built for self-tracking and general wellbeing. It is not a medical device.',
-      list: [
-        LegalItem(
-          b: 'It does not diagnose or treat.',
-          t: ' It does not detect disease, prevent it or relieve it',
-        ),
-        LegalItem(
-          b: 'The figures are estimates.',
-          t: ' Calories and nutrients are worked out from your description or photo, and they can be wrong. Treat them as a guide, not a measurement',
-        ),
-        LegalItem(
-          b: 'The assistant gives no medical advice.',
-          t: ' And is no substitute for a doctor or a dietitian',
-        ),
-        LegalItem(
-          b: 'Medicines here are a diary, not a prescription.',
-          t: ' The app does not recommend medicines, calculate doses or change your regimen',
-        ),
-        LegalItem(
-          b: 'Allergens are a reminder.',
-          t: ' We match a product against what you entered, but we do not promise to catch everything. If you have an allergy, read the label yourself, every time',
-        ),
-      ],
-      tail:
-          'Talk to a doctor before changing how you eat, and especially if you are pregnant or breastfeeding, have diabetes, kidney or liver disease, an eating disorder, or take medicines regularly. In an emergency call your local emergency number, do not open the app.',
-    ),
-    LegalPart(
-      h: 'Age',
-      p: 'Calvi is for adults. By using it you confirm that you are 18 or older. We do not knowingly keep accounts for children, and we will delete one if we learn of it.',
-      tail:
-          'The reason is not a formality: counting calories and losing weight is a sensitive subject for teenagers, and we do not want to be part of it.',
+          'Where the law of your country sets a higher minimum age for consenting to online services on your own, that higher age applies to you, and below it the Service may only be used with the consent of a parent or guardian. Calorie tracking and weight management carry particular risks in adolescence, and the Service is not a substitute for the supervision of a physician.',
     ),
     LegalPart(
       h: 'Your account',
-      p: 'An account is created by itself on the first run, with no email and no sign-up: the app has to work from the first second. Signing in with Google does one thing, it ties that same account to you so it can be brought back on another phone.',
       list: [
         LegalItem(
-          b: 'One account per person.',
-          t: ' Sharing it is a bad idea: the diary counts one person',
+          b: 'Automatic creation.',
+          t: ' An account is created at first launch without an email address or registration step, so that the Service is usable immediately.',
         ),
         LegalItem(
-          b: 'Without signing in, the account lives only on this phone.',
-          t: ' Lose the phone and there is nothing to bring it back with: we do not know whose it is',
+          b: 'Optional sign-in.',
+          t: ' Signing in with Google or Apple links that same account to your identity provider, so that it can be restored on another device.',
         ),
         LegalItem(
-          b: 'You can delete it whenever you like.',
-          t: ' Everything on the server goes with it. How exactly is written in the privacy notice',
+          b: 'Single user per account.',
+          t: ' An account is intended for one individual. All entries are interpreted as relating to the same person.',
         ),
         LegalItem(
-          b: 'We may close access',
-          t: ' if an account is used to load the service or to get around the token counter',
+          b: 'Accounts without sign-in cannot be recovered.',
+          t: ' If you do not sign in, the account exists only on that device and cannot be restored if the device is lost or reset.',
+        ),
+        LegalItem(
+          b: 'Responsibility.',
+          t: ' You are responsible for all activity conducted through your account.',
         ),
       ],
-    ),
-    LegalPart(
-      h: 'What it costs',
-      p: 'The diary itself is free, with no limit on the number of entries. There is no paid tier at all right now: no subscription, no one-off purchases, no payment details.',
       tail:
-          'The assistant spends tokens, and tokens are granted for free. Run out and the assistant goes quiet until the next grant, while the diary carries on as before. If a paid tier ever appears, its terms will be described here in advance.',
+          'You may delete your account at any time from within the Service. The consequences of deletion are described in the Privacy Policy.',
     ),
     LegalPart(
-      h: 'What you may not do',
+      h: 'Charges and the assistant allowance',
+      p: 'The diary is provided free of charge and without any limit on the number of entries.',
       list: [
-        LegalItem(t: 'Enter other people’s health data or photographs of other people'),
-        LegalItem(t: 'Ask the assistant for a diagnosis, a prescription or a dose'),
-        LegalItem(t: 'Deliberately load the service or get around the token counter'),
-        LegalItem(t: 'Take the app apart and talk to the server around it'),
+        LegalItem(
+          b: 'Token allowance.',
+          t: ' Use of the assistant consumes tokens. Tokens are granted on registration and replenished periodically at no cost.',
+        ),
+        LegalItem(
+          b: 'Exhaustion of the allowance.',
+          t: ' When the allowance is exhausted, the assistant becomes unavailable until the next grant. The diary continues to operate without restriction.',
+        ),
+        LegalItem(
+          b: 'Paid plans.',
+          t: ' Where a paid plan is offered, it is purchased and billed through the Apple App Store or Google Play, and the terms of the relevant store govern payment, renewal, cancellation and refunds.',
+        ),
       ],
-    ),
-    LegalPart(
-      h: 'Your entries stay yours',
-      p: 'Everything you enter belongs to you. We claim no rights over it and we sell it to no one. The permission you give us is exactly one, and for exactly one thing: to store your entries and show them back to you, sync them between your devices, and pass what you write to the assistant to the model that works it out.',
-      tail: 'We do not train our own models on your data.',
-    ),
-    LegalPart(
-      h: 'Liability',
-      p: 'Calvi is provided as it is. We work to keep the figures close to the truth and the server running, but we do not promise the accuracy of estimates or uninterrupted service.',
       tail:
-          'This does not remove our liability where the law does not allow it to be removed: for death or personal injury, for intent and gross negligence. Your consumer rights under the law of your country stay with you in full.',
+          'Prices and the composition of any paid plan may change. Such changes do not apply to a subscription period already paid for.',
     ),
     LegalPart(
-      h: 'If these terms change',
-      p: 'If we change them, we will say so. The revision date is at the top, and we show material changes in the app before they take effect. If you disagree with a new revision, delete your account: that is how you decline.',
+      h: 'Acceptable use',
+      p: 'You agree that you will not:',
+      list: [
+        LegalItem(t: 'enter health information or photographs relating to another person;'),
+        LegalItem(
+          t: 'seek a diagnosis, prescription or dosage from the assistant, or rely upon its output as though it constituted one;',
+        ),
+        LegalItem(
+          t: 'place an unreasonable load on the Service, or circumvent or attempt to circumvent the token allowance;',
+        ),
+        LegalItem(
+          t: 'decompile or reverse engineer the application, or access the server other than through the application as provided;',
+        ),
+        LegalItem(
+          t: 'use the Service unlawfully or in a manner that infringes the rights of others.',
+        ),
+      ],
+      tail: 'Access to an account in breach of this section may be suspended or terminated.',
     ),
     LegalPart(
-      h: 'Law and disputes',
-      p: 'These terms are governed by the law of Ukraine. If you are a consumer living elsewhere, this does not deprive you of the protection of the mandatory rules of your own country, nor of the right to go to a court where you live.',
+      h: 'Your content',
+      p: 'You retain all rights in the information you enter. No ownership of it is claimed, and it is not sold to any third party.',
       tail:
-          'Before going to court, write to calvi.labs@gmail.com. Most things are settled by letter.',
+          'You grant a limited licence to store your entries, display them to you, synchronise them between your devices, and transmit content you address to the assistant to the model provider that processes it. That licence exists solely to operate the Service and ends when you delete your account. Your content is not used to train our own models.',
     ),
     LegalPart(
-      h: 'Contact',
-      p: 'Calvi is run by Mykhailo Nahreba, an individual, Ukraine. Questions, complaints, data requests: calvi.labs@gmail.com.',
+      h: 'Intellectual property',
+      p: 'The application, its interface, the design of the assistant and all associated materials remain the property of the operator or its licensors. These Terms grant you a personal, non-exclusive, non-transferable and revocable licence to use the Service, and transfer no intellectual property rights to you.',
+    ),
+    LegalPart(
+      h: 'Third-party services',
+      p: 'The Service depends on third parties, including a model provider that processes assistant requests, identity providers used for optional sign-in, and public food reference databases. Their availability, accuracy and continuity are outside the operator’s control, and their own terms govern their respective services.',
+    ),
+    LegalPart(
+      h: 'Availability and modification of the Service',
+      p: 'Any part of the Service may be modified, suspended or discontinued. Where a change materially reduces functionality on which you rely, notice will be given in the application where reasonably practicable. Uninterrupted or error-free operation is not guaranteed.',
+    ),
+    LegalPart(
+      h: 'Disclaimer of warranties',
+      p: 'To the fullest extent permitted by applicable law, the Service is provided on an "as is" and "as available" basis, without warranties of any kind, whether express, implied or statutory, including any implied warranties of merchantability, fitness for a particular purpose, accuracy or non-infringement. No warranty is given that nutritional estimates are accurate or that the Service will operate without interruption.',
+    ),
+    LegalPart(
+      h: 'Limitation of liability',
+      p: 'To the fullest extent permitted by applicable law, the operator shall not be liable for any indirect, incidental, special, consequential or punitive damages, nor for any loss of data, profits, revenue or goodwill, arising out of or in connection with the use of or inability to use the Service.',
+      tail:
+          'Nothing in these Terms excludes or limits liability for death or personal injury caused by negligence, for fraud or fraudulent misrepresentation, or for any other liability that cannot lawfully be excluded or limited.',
+    ),
+    LegalPart(
+      h: 'Consumer rights',
+      p: 'If you use the Service as a consumer, nothing in these Terms affects the mandatory rights available to you under the law of your country of residence, including your right to bring proceedings before the courts of that country.',
+    ),
+    LegalPart(
+      h: 'Amendments to these Terms',
+      p: 'These Terms may be amended. The date of the current revision appears at the head of this document, and material amendments will be notified within the application before they take effect. Continued use of the Service after the effective date constitutes acceptance of the amended Terms. If you do not accept a revised version, you may delete your account.',
+    ),
+    LegalPart(
+      h: 'Contact and dispute resolution',
+      p: 'Enquiries and complaints concerning these Terms may be addressed to calvi.labs@gmail.com.',
+      tail:
+          'The parties shall attempt in good faith to resolve any dispute arising out of these Terms by correspondence before commencing formal proceedings.',
     ),
   ],
 );
 
-const _privacyUk = LegalDoc(
-  title: 'Політика приватності',
-  updated: '24 серпня 2026',
-  lede:
-      'Коротко: ми збираємо те, що ти сам вносиш, фотографії не зберігаємо, аналітики й реклами немає, і все можна видалити.',
-  parts: [
-    LegalPart(
-      h: 'Хто відповідає',
-      p: 'Calvi веде Михайло Нагреба, приватна особа, Україна. Це та людина, яка вирішує, які дані збираються і навіщо, тобто володілець у розумінні закону. Написати можна на calvi.labs@gmail.com.',
-    ),
-    LegalPart(
-      h: 'Що ми зберігаємо',
-      p: 'Рівно те, що ти вносиш сам, і те, без чого не працює вхід.',
-      list: [
-        LegalItem(
-          b: 'Профіль.',
-          t: ' Стать, рік народження, зріст, ціль і темп, денна норма, як до тебе звертатись',
-        ),
-        LegalItem(
-          b: 'Щоденник.',
-          t: ' Страви з вагою і числами, вода, вага, заміри тіла, тренування',
-        ),
-        LegalItem(
-          b: 'Здоров’я.',
-          t: ' Препарати з дозами і годинами прийому, позначки про фактичний прийом, алергії',
-        ),
-        LegalItem(
-          b: 'Пам’ять помічника.',
-          t: ' Короткі нотатки про тебе, які ти сам попросив запам’ятати',
-        ),
-        LegalItem(
-          b: 'Вхід.',
-          t: ' Якщо ти входив через Google, ми зберігаємо твою пошту і сталий ідентифікатор Google. Ні імені, ні фото профілю ми не беремо',
-        ),
-        LegalItem(
-          b: 'Сесії.',
-          t: ' Відбиток токена доступу і рядок про пристрій, на кшталт «Pixel 8, Android 15», щоб ти бачив, звідки заходив',
-        ),
-        LegalItem(b: 'Токени помічника.', t: ' Скільки лишилось і на що витрачалось'),
-      ],
-    ),
-    LegalPart(
-      h: 'Чого ми не збираємо',
-      p: 'Це коротший список, і він важливіший за перший.',
-      list: [
-        LegalItem(b: 'Аналітики немає.', t: ' Жодної: ні своєї, ні чужої'),
-        LegalItem(b: 'Реклами немає,', t: ' і рекламних ідентифікаторів теж'),
-        LegalItem(b: 'Збору збоїв немає.', t: ' Застосунок не надсилає нам звітів про падіння'),
-        LegalItem(b: 'Місця немає.', t: ' Ми не питаємо і не отримуємо геолокацію'),
-        LegalItem(b: 'Контактів, календаря і файлів немає'),
-        LegalItem(b: 'Свого ідентифікатора пристрою застосунок не створює'),
-      ],
-    ),
-    LegalPart(
-      h: 'Фотографії',
-      p: 'Фото страви ніде не зберігається. Воно живе в пам’яті рівно стільки, скільки триває один запит: приходить на сервер, іде до моделі, яка його розбирає, і зникає. Ні в базі, ні на диску, ні в резервних копіях його немає.',
-      tail: 'Те саме з кадром на телефоні: він не потрапляє в галерею і не лишається у файлах.',
-    ),
-    LegalPart(
-      h: 'Розмова з помічником',
-      p: 'Текст розмови на сервері не зберігається. Він проходить крізь нього, щоб отримати відповідь, і лишається тільки на твоєму телефоні. Записаною лишається сама страва, яку ти в підсумку додав у щоденник.',
-    ),
-    LegalPart(
-      h: 'Голос',
-      p: 'Диктування виконує служба розпізнавання мови твого телефона, а не ми. До нас приходить уже готовий текст. Звук ми не отримуємо і не зберігаємо.',
-    ),
-    LegalPart(
-      h: 'Кому це передається',
-      p: 'Трьом, і кожному рівно стільки, скільки потрібно для його роботи.',
-      list: [
-        LegalItem(
-          b: 'Google Gemini,',
-          t: ' щоб розібрати твій опис або фото на страву і числа. Туди йде текст, який ти написав, фото, кілька попередніх реплік і короткий блок про тебе: звертання, стать, вік, зріст, вага, ціль, денна норма, алергії й закріплені нотатки. Пошта, ідентифікатори акаунта і будь-що, з чого можна дізнатись твоє ім’я поза межами того, як ти просив себе називати, туди не йдуть',
-        ),
-        LegalItem(
-          b: 'Open Food Facts і USDA,',
-          t: ' коли ти скануєш штрихкод. Туди йде тільки сам штрихкод і нічого більше',
-        ),
-        LegalItem(
-          b: 'Хостинг.',
-          t: ' Сервер і база стоять на орендованій машині, а перед нею стоїть Cloudflare, який пропускає трафік і бачить твою IP-адресу',
-        ),
-      ],
-      tail:
-          'Нікому іншому дані не передаються. Ми їх не продаємо, не обмінюємо і не віддаємо рекламним мережам.',
-    ),
-    LegalPart(
-      h: 'Що лишається в журналах сервера',
-      p: 'Метод запиту, адреса, код відповіді й IP, з якого прийшов запит. Вміст запитів у журнали не пишеться: ні текст, ні фото, ні числа щоденника. Ключі доступу з журналів вирізаються.',
-    ),
-    LegalPart(
-      h: 'На якій підставі',
-      p: 'Профіль, синхронізація і вхід обробляються, щоб виконати те, про що ми домовились: дати тобі щоденник, який працює. Дані про здоров’я, тобто вага, заміри, препарати й алергії, обробляються на підставі твоєї явної згоди, яку ти даєш, вносячи їх.',
-      tail: 'Згоду можна забрати назад: видали ці записи або видали весь акаунт.',
-    ),
-    LegalPart(
-      h: 'Скільки зберігається',
-      p: 'Поки живе твій запис. Видалив запис, дані зникають.',
-      list: [
-        LegalItem(b: 'Щоденник і профіль', t: ' лежать, поки ти їх не видалиш'),
-        LegalItem(b: 'Сесія', t: ' діє рік від останнього входу, потім протухає сама'),
-        LegalItem(b: 'Журнали сервера', t: ' зберігаються не довше за 30 днів'),
-        LegalItem(b: 'Резервні копії бази', t: ' перезаписуються протягом 30 днів'),
-      ],
-    ),
-    LegalPart(
-      h: 'Твої права',
-      p: 'Усе це робиться листом, і ми відповідаємо не пізніше ніж за 30 днів.',
-      list: [
-        LegalItem(t: 'Отримати копію всього, що ми про тебе зберігаємо'),
-        LegalItem(t: 'Виправити те, що записано неправильно'),
-        LegalItem(t: 'Видалити акаунт разом з усім, що на сервері'),
-        LegalItem(t: 'Стерти щоденник і лишити акаунт: почати з чистого аркуша, не втративши вхід'),
-        LegalItem(t: 'Заперечити проти обробки або попросити її обмежити'),
-        LegalItem(t: 'Поскаржитись до наглядового органу своєї країни'),
-      ],
-      tail:
-          'Напиши на calvi.labs@gmail.com з тієї пошти, якою входив, або з телефона, де стоїть застосунок. Користуватись щоденником без помічника теж можна: тоді назовні не йде жодного повідомлення.',
-    ),
-    LegalPart(
-      h: 'Автоматичний розбір',
-      p: 'Страву і числа визначає модель, автоматично. Це оцінка, а не рішення про тебе: жодних наслідків, крім цифри в щоденнику, вона не має, і будь-яке число можна виправити руками.',
-    ),
-    LegalPart(
-      h: 'Безпека',
-      p: 'Зв’язок із сервером іде тільки по захищеному з’єднанню. Токени доступу зберігаються у вигляді відбитків, а не самих значень. Доступ до бази має одна людина, яка веде сервіс.',
-      tail:
-          'Якщо станеться витік, який загрожує тобі, ми повідомимо тебе і наглядовий орган, щойно дізнаємось.',
-    ),
-    LegalPart(
-      h: 'Діти',
-      p: 'Calvi для повнолітніх. Ми свідомо не збираємо дані осіб, молодших за 18 років. Якщо ти батько або опікун і вважаєш, що дитина завела тут запис, напиши на calvi.labs@gmail.com, і ми його видалимо.',
-    ),
-    LegalPart(
-      h: 'Якщо ця сторінка зміниться',
-      p: 'Дата редакції стоїть угорі. Про суттєві зміни ми скажемо в застосунку до того, як вони почнуть діяти, а не після.',
-    ),
-  ],
-);
-
-const _privacyEn = LegalDoc(
+const _privacy = LegalDoc(
   title: 'Privacy Policy',
-  updated: '24 August 2026',
+  updated: '1 September 2026',
   lede:
-      'In short: we keep what you enter yourself, we do not store photographs, there is no analytics and no advertising, and everything can be deleted.',
+      'Only the data the diary requires is collected, health data is processed on the basis of your explicit consent, photographs and conversations are not kept on our servers, and no personal data is sold or used for advertising.',
   parts: [
     LegalPart(
-      h: 'Who is responsible',
-      p: 'Calvi is run by Mykhailo Nahreba, an individual, Ukraine. That is the person who decides what data is collected and why, the controller in the sense of the law. You can write to calvi.labs@gmail.com.',
+      h: 'Controller and contact details',
+      p: 'This Privacy Policy describes how personal data is processed in connection with the Calvi application and the services provided through it. The controller of that data is Mykhailo Nahreba, who may be contacted at calvi.labs@gmail.com.',
     ),
     LegalPart(
-      h: 'What we store',
-      p: 'Exactly what you enter yourself, and what signing in cannot work without.',
+      h: 'Categories of data processed',
       list: [
         LegalItem(
-          b: 'Profile.',
-          t: ' Sex, year of birth, height, goal and pace, daily target, how to address you',
+          b: 'Account data.',
+          t: ' An identifier generated at first launch and, where you choose to sign in, the email address supplied by Google or Apple together with the identifier that provider uses for you. Your time zone and interface language are stored so that days and reminders fall where you are. Each signed-in session is recorded as a hashed credential with the times at which it was created and last used.',
         ),
         LegalItem(
-          b: 'Diary.',
-          t: ' Dishes with weights and figures, water, weight, body measurements, workouts',
+          b: 'Profile data.',
+          t: ' Sex, year of birth, height, starting and target weight, the direction and pace of your goal, activity level, daily energy and macronutrient targets, water target, preferred form of address, interface theme, and the body measurements you have chosen to track.',
         ),
         LegalItem(
-          b: 'Health.',
-          t: ' Medicines with doses and times, marks that a dose was taken, allergies',
+          b: 'Diary data.',
+          t: ' Meals with their descriptions, weights and nutritional values, the time and category of each entry, water intake, weigh-ins, body measurements and recorded physical activity. Where an entry is waiting for a weight you have not yet stated, the words you used to describe the dish are held until the entry is completed or discarded.',
         ),
         LegalItem(
-          b: 'Assistant memory.',
-          t: ' Short notes about you that you asked it to remember',
+          b: 'Health data.',
+          t: ' Allergies you select and whether you have marked them as severe; medications with their form, dose, schedule and course dates, and the doses you record as taken.',
         ),
         LegalItem(
-          b: 'Sign-in.',
-          t: ' If you signed in with Google, we store your email address and a stable Google identifier. We take neither your name nor your profile picture',
+          b: 'Assistant data.',
+          t: ' The notes the assistant retains about you, which you can read and delete within the application, and the weekly reviews it has produced at your request.',
         ),
         LegalItem(
-          b: 'Sessions.',
-          t: ' A fingerprint of the access token and a line about the device, such as "Pixel 8, Android 15", so you can see where you signed in from',
-        ),
-        LegalItem(b: 'Assistant tokens.', t: ' How many are left and what they were spent on'),
-      ],
-    ),
-    LegalPart(
-      h: 'What we do not collect',
-      p: 'A shorter list, and a more important one than the first.',
-      list: [
-        LegalItem(b: 'There is no analytics.', t: ' None at all: neither ours nor anyone else’s'),
-        LegalItem(b: 'There is no advertising,', t: ' and no advertising identifiers'),
-        LegalItem(b: 'There is no crash reporting.', t: ' The app sends us no crash reports'),
-        LegalItem(b: 'There is no location.', t: ' We neither ask for it nor receive it'),
-        LegalItem(b: 'No contacts, no calendar, no files'),
-        LegalItem(b: 'The app creates no device identifier of its own'),
-      ],
-    ),
-    LegalPart(
-      h: 'Photographs',
-      p: 'A photo of a meal is not stored anywhere. It lives in memory for exactly as long as one request takes: it arrives at the server, goes to the model that reads it, and is gone. It is not in the database, not on disk, not in backups.',
-      tail:
-          'The same on the phone: the frame does not reach your gallery and does not stay in your files.',
-    ),
-    LegalPart(
-      h: 'Talking to the assistant',
-      p: 'The text of the conversation is not stored on the server. It passes through to get an answer and stays only on your phone. What is stored is the dish itself, once you add it to the diary.',
-    ),
-    LegalPart(
-      h: 'Voice',
-      p: 'Dictation is done by your phone’s own speech recognition, not by us. What reaches us is finished text. We neither receive nor store audio.',
-    ),
-    LegalPart(
-      h: 'Who it is passed to',
-      p: 'Three parties, each getting exactly as much as its job needs.',
-      list: [
-        LegalItem(
-          b: 'Google Gemini,',
-          t: ' to work your description or photo into a dish and figures. It receives the text you wrote, the photo, a few previous messages, and a short block about you: how to address you, sex, age, height, weight, goal, daily target, allergies and pinned notes. Your email, your account identifiers and anything that would reveal your name beyond what you asked to be called do not go there',
+          b: 'Recipes.',
+          t: ' Recipes saved to your account, whether composed by the assistant or entered by you.',
         ),
         LegalItem(
-          b: 'Open Food Facts and USDA,',
-          t: ' when you scan a barcode. Only the barcode itself goes there, nothing else',
+          b: 'Nutritional corrections.',
+          t: ' Where you correct the energy or macronutrients of a dish, or state the weight of a portion you use often, that correction is stored against your account so that it applies the next time the same dish is recorded.',
         ),
         LegalItem(
-          b: 'Hosting.',
-          t: ' The server and the database sit on a rented machine, with Cloudflare in front of it passing traffic through and seeing your IP address',
+          b: 'Allowance data.',
+          t: ' Your token balance and a record of grants and expenditure, and, where you hold a subscription, the period for which paid access applies.',
+        ),
+        LegalItem(
+          b: 'Technical data.',
+          t: ' Server request logs containing the time of the request, the endpoint addressed, the response status and the originating IP address. Request bodies are not written to the logs, and authorisation credentials are excluded from them.',
         ),
       ],
       tail:
-          'It goes to no one else. We do not sell it, trade it or hand it to advertising networks.',
+          'The application contains no advertising and uses no advertising identifiers, and no third-party analytics or crash-reporting component is embedded in it. Reminders are raised by your own device, so no push notification identifier is created or held.',
     ),
     LegalPart(
-      h: 'What stays in the server logs',
-      p: 'The request method, the address, the response code and the IP the request came from. Request bodies are not written to the logs: not the text, not the photo, not the figures in your diary. Access keys are stripped out of the logs.',
-    ),
-    LegalPart(
-      h: 'On what legal basis',
-      p: 'Your profile, syncing and sign-in are processed to do what we agreed on: give you a diary that works. Health data, that is weight, measurements, medicines and allergies, is processed on your explicit consent, which you give by entering it.',
-      tail: 'You can take that consent back: delete those entries, or delete the whole account.',
-    ),
-    LegalPart(
-      h: 'How long it is kept',
-      p: 'As long as your account lives. Delete the account and the data is gone.',
+      h: 'What is not retained',
       list: [
-        LegalItem(b: 'Diary and profile', t: ' stay until you delete them'),
-        LegalItem(b: 'A session', t: ' lasts a year from the last sign-in, then expires by itself'),
-        LegalItem(b: 'Server logs', t: ' are kept for no longer than 30 days'),
-        LegalItem(b: 'Database backups', t: ' are overwritten within 30 days'),
+        LegalItem(
+          b: 'Photographs.',
+          t: ' A photograph submitted for analysis is transmitted for processing and discarded once a reply has been produced. It is not written to the database and not saved to disk.',
+        ),
+        LegalItem(
+          b: 'Conversations.',
+          t: ' The text of your conversations with the assistant is held on your device. Each request carries the recent part of the conversation with it so that a reply can be produced in context, and that content is not retained on the server afterwards. What persists is only the notes described above, which you can read and delete.',
+        ),
+        LegalItem(
+          b: 'Audio.',
+          t: ' Dictation is performed by the speech recognition built into your device, which returns text. Audio is never transmitted to us. That recognition is governed by the terms of your device operating system.',
+        ),
+      ],
+    ),
+    LegalPart(
+      h: 'Purposes and legal bases of processing',
+      list: [
+        LegalItem(
+          b: 'Provision of the Service, Article 6(1)(b) GDPR.',
+          t: ' Storing your entries, displaying them to you, synchronising them between your devices, and producing the calculations shown in the application. This processing is necessary to perform the contract constituted by the Terms of Use.',
+        ),
+        LegalItem(
+          b: 'Operation of the assistant, Article 6(1)(b) GDPR.',
+          t: ' Transmitting the content you address to the assistant, together with the profile context required to answer it, so that a reply can be generated.',
+        ),
+        LegalItem(
+          b: 'Administration of paid access, Article 6(1)(b) GDPR.',
+          t: ' Recording that a subscription is active and for what period, so that the allowance limits do not apply to you.',
+        ),
+        LegalItem(
+          b: 'Security and reliability, Article 6(1)(f) GDPR.',
+          t: ' Retaining short-lived server logs and counting requests in aggregate in order to detect faults and abuse. The legitimate interest pursued is the secure and continuous operation of the Service.',
+        ),
+        LegalItem(
+          b: 'Health data, Article 9(2)(a) GDPR.',
+          t: ' Allergies and medication records are processed solely on the basis of your explicit consent, given by entering them. Consent may be withdrawn at any time by deleting those entries or your account.',
+        ),
+      ],
+    ),
+    LegalPart(
+      h: 'Processing by the assistant',
+      p: 'When you write to the assistant or submit a photograph, that content is transmitted to Google for processing by its Gemini models, together with the context required to produce a reply. That context comprises your daily targets, the allergies you have recorded, the notes the assistant retains, and the recent part of the conversation sent by your device.',
+      tail:
+          'The provider processes that content in order to return a reply, under the terms of the service tier through which the request is made, and those terms determine whether it may also be used to improve the services of that provider. No models are operated or trained by us. You should not submit information relating to other people to the assistant.',
+    ),
+    LegalPart(
+      h: 'Recipients and processors',
+      list: [
+        LegalItem(
+          b: 'Google.',
+          t: ' Processes assistant messages and submitted photographs through its Gemini models.',
+        ),
+        LegalItem(
+          b: 'Google and Apple.',
+          t: ' Only where you choose to sign in, and only for the purpose of verifying your identity and supplying the email address associated with that account.',
+        ),
+        LegalItem(
+          b: 'Apple and Google as store operators.',
+          t: ' Where you purchase a subscription, the transaction is concluded with the store from which the application was obtained.',
+        ),
+        LegalItem(
+          b: 'Hosting provider.',
+          t: ' Operates the infrastructure on which the server and database run.',
+        ),
+        LegalItem(
+          b: 'Public food reference databases.',
+          t: ' Open Food Facts and USDA FoodData Central are queried for product information. A barcode or a search term is transmitted; your identity is not.',
+        ),
+      ],
+      tail: 'Personal data is not sold and is not disclosed for advertising purposes.',
+    ),
+    LegalPart(
+      h: 'Subscriptions and payment',
+      p: 'Subscriptions are purchased through the store from which the application was obtained, and payment is handled entirely by that store. No card number, billing address or other payment detail is received or stored by us. What is recorded against your account is the period for which paid access applies.',
+    ),
+    LegalPart(
+      h: 'Aggregate data',
+      p: 'Counts of requests are kept in aggregate by hour, endpoint and response status, together with product barcodes that no reference database was able to name. These records carry no account identifier and cannot be attributed to a person. They are used to keep the Service running and to decide which products to describe next.',
+    ),
+    LegalPart(
+      h: 'International transfers',
+      p: 'Processing may take place outside your country of residence. Where personal data is transferred outside the European Economic Area, that transfer is made subject to the safeguards permitted by applicable data protection law, including standard contractual clauses concluded with the relevant processor.',
+    ),
+    LegalPart(
+      h: 'Retention',
+      list: [
+        LegalItem(
+          b: 'For the duration of the account.',
+          t: ' Profile, diary, health, assistant and recipe data are retained until you delete them individually or delete your account.',
+        ),
+        LegalItem(
+          b: 'Upon deletion.',
+          t: ' The corresponding records are removed from the operational database. Residual copies held in system backups are overwritten in the ordinary course of their rotation.',
+        ),
+        LegalItem(
+          b: 'Server logs.',
+          t: ' Retained for a short operational period and then discarded.',
+        ),
+        LegalItem(
+          b: 'Aggregate records.',
+          t: ' Kept without limitation of time, as they contain no personal data and deletion of an account does not make them attributable.',
+        ),
       ],
     ),
     LegalPart(
       h: 'Your rights',
-      p: 'All of this is done by letter, and we answer within 30 days.',
-      list: [
-        LegalItem(t: 'Get a copy of everything we store about you'),
-        LegalItem(t: 'Correct anything recorded wrongly'),
-        LegalItem(t: 'Delete the account along with everything on the server'),
-        LegalItem(
-          t: 'Wipe the diary and keep the account: start from a clean slate without losing the sign-in',
-        ),
-        LegalItem(t: 'Object to the processing, or ask us to restrict it'),
-        LegalItem(t: 'Complain to the supervisory authority in your country'),
-      ],
+      p: 'Where the General Data Protection Regulation applies to you, you have the right to obtain confirmation as to whether your personal data is processed and to receive a copy of it; to have inaccurate data rectified; to have your data erased; to restrict or object to processing; to receive your data in a structured, commonly used and machine-readable format; to withdraw consent at any time without affecting the lawfulness of processing carried out beforehand; and to lodge a complaint with your national supervisory authority.',
       tail:
-          'Write to calvi.labs@gmail.com from the address you signed in with, or from the phone the app is on. You can also use the diary without the assistant, in which case no message goes out at all.',
-    ),
-    LegalPart(
-      h: 'Automated reading',
-      p: 'The dish and the figures are determined by a model, automatically. That is an estimate, not a decision about you: it has no consequence beyond a number in your diary, and any number can be corrected by hand.',
+          'Most of these rights may be exercised directly within the application: entries can be edited or deleted individually, the notes the assistant retains can be read and removed, and the account together with all associated data can be deleted from the settings. For any other request, write to calvi.labs@gmail.com.',
     ),
     LegalPart(
       h: 'Security',
-      p: 'Traffic to the server goes over a secure connection only. Access tokens are stored as fingerprints rather than as the values themselves. One person, the one who runs the service, has access to the database.',
-      tail:
-          'If a breach happens that puts you at risk, we will tell you and the supervisory authority as soon as we know.',
+      p: 'Data is transmitted over encrypted connections and stored on access-controlled infrastructure. Session credentials are stored as hashes rather than in their original form, and authorisation headers are excluded from server logs. No system is entirely secure, and absolute security cannot be guaranteed.',
     ),
     LegalPart(
       h: 'Children',
-      p: 'Calvi is for adults. We do not knowingly collect data from anyone under 18. If you are a parent or guardian and believe a child has an account here, write to calvi.labs@gmail.com and we will delete it.',
+      p: 'The Service is not directed to persons under 13 years of age, and their personal data is not knowingly processed. Any account identified as belonging to such a person will be deleted.',
+      tail:
+          'Where the law of your country sets a higher age at which a person may consent to the processing of their personal data, processing below that age is carried out only with the consent of a parent or guardian, who may exercise the rights set out below on behalf of the person concerned by writing to calvi.labs@gmail.com.',
     ),
     LegalPart(
-      h: 'If this page changes',
-      p: 'The revision date is at the top. We will tell you about material changes in the app before they take effect, not after.',
+      h: 'Amendments to this Policy',
+      p: 'This Policy may be updated. The date of the current revision appears at the head of this document, and material amendments will be notified within the application before they take effect.',
+    ),
+    LegalPart(
+      h: 'Contact',
+      p: 'Enquiries and requests concerning personal data may be addressed to calvi.labs@gmail.com.',
     ),
   ],
 );
 
-/* Документ мовою застосунку.
+/* Одна редакція, англійською, незалежно від мови інтерфейсу.
  *
- * Дві редакції цілими, а не по рядку. Юридичний текст читають цілим, і речення,
- * зшите з двох мов по фрагменту, надто легко зробити таким, що англійською
- * обіцяє не те, що українською. */
-LegalDoc get terms => dataLang == 'uk' ? _termsUk : _termsEn;
+ * Дві мовні редакції розходяться першою ж правкою, після якої англійська
+ * обіцяє не те, що українська, і жодна з них уже не є документом. Юридичний
+ * текст читають цілим, тому він тут один. */
+const LegalDoc terms = _terms;
 
-LegalDoc get privacy => dataLang == 'uk' ? _privacyUk : _privacyEn;
+const LegalDoc privacy = _privacy;

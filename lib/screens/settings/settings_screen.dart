@@ -5,6 +5,7 @@ import '../../data/allergens.dart';
 import '../../data/legal.dart';
 import '../../data/settings.dart';
 import '../../data/app_scope.dart';
+import '../../data/local/database.dart' show TokenStateData;
 import '../meds/meds_route.dart';
 import '../menu.dart';
 import '../../design/icons.dart';
@@ -47,7 +48,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
      panel arrives exactly the way settings itself arrived. Pushing a route put
      a second screen over the first, with the old list still under it sliding
      its own way, and that is the entrance that read as unfinished. */
-  late String? _panel = widget.panel == 'plan' || widget.panel == 'about' ? widget.panel : null;
+  /* Меню веде на панель напряму, а не на корінь списку. Перелік замість
+     будь-якої назви навмисно: сюди приходить те, що прийшло ззовні, і незнайоме
+     ім'я має відкрити корінь, а не порожню сторінку. */
+  static const _fromMenu = {'plan', 'about', 'allergy'};
+
+  late String? _panel = _fromMenu.contains(widget.panel) ? widget.panel : null;
 
   /// Whether anything has been opened yet, so the list does not slide on
   /// arrival: the screen is already being carried in by the route that opened
@@ -102,7 +108,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
         onMeds: () => _openMeds(context),
         now: DateTime.now().millisecondsSinceEpoch,
       ),
-      'plan' => PlanPanel(onBack: _close),
+      /* Стан підписки живе в сервера, а не в налаштуваннях: єдине, що він каже
+         застосунку, це `unlimited`, і саме воно вирішує, показати «Активна» чи
+         «Безкоштовний». Поки перша відповідь у дорозі (`syncedAt` порожній),
+         тариф вважається безкоштовним: інакше екран мигне «Активна» тим, хто
+         не платить. */
+      'plan' => StreamBuilder<TokenStateData?>(
+        stream: AppScope.maybeOf(context)?.db?.syncDao.watchTokens(),
+        builder: (context, snap) => PlanPanel(
+          onBack: _close,
+          pro: snap.data?.syncedAt != null && snap.data?.unlimited == true ? 'on' : '',
+        ),
+      ),
       'theme' => ThemePanel(s: s, set: set, onBack: _close),
       'lang' => LangPanel(s: s, set: set, onBack: _close),
       'privacy' => PrivacyPanel(s: s, set: set, onBack: _close),

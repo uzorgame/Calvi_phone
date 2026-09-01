@@ -1,5 +1,12 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 
+import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../../data/app_scope.dart';
+import '../../data/billing/billing.dart';
+
+import '../../data/legal.dart';
 import '../../data/settings.dart';
 import '../../design/icons.dart';
 import '../../design/shell.dart';
@@ -8,6 +15,7 @@ import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/labels.dart';
+import 'panel_legal.dart';
 
 typedef SetSettings = void Function(SettingsState Function(SettingsState));
 
@@ -98,30 +106,207 @@ class LangPanel extends StatelessWidget {
 
 /// Subscription. Paid through the stores and nowhere else.
 class PlanPanel extends StatefulWidget {
-  const PlanPanel({super.key, this.onBack});
+  const PlanPanel({super.key, this.onBack, this.pro = ''});
 
   /// How the panel closes: settings puts its list back rather than a route
   /// popping, because the panel lives inside settings.
   final VoidCallback? onBack;
 
+  /* Який тариф діє. Порожньо це безкоштовний, 'on' це оплачений тариф
+     невідомого виду, 'month' і 'year' це відомий.
+   *
+   * Третій стан не зайвий, а єдино чесний: сервер каже застосунку лише
+   * `unlimited`, тобто «лічильник знято», і не каже, з якої підписки. Доки
+   * білінг не підключений, вибрати за нього вид тарифу означало б написати на
+   * екрані здогадку. Форма з чотирьох станів уже готова прийняти справжню
+   * відповідь, коли стор почне її давати. */
+  final String pro;
+
   @override
   State<PlanPanel> createState() => _PlanPanelState();
 }
 
+/* Ціни, як їх віддає стор.
+ *
+ * Жодного числа в коді: StoreKit і Play Billing повертають готовий рядок із
+ * валютою і місцевим форматом, бо ціну по країнах ставлять у консолі. Доти
+ * тут стояли «150 грн» і «180 грн» у перекладах, і це було двічі
+ * неправильно: ціна не переклад, а показувати не те, що стягне стор,
+ * заборонено правилами рев'ю.
+ *
+ * Поки білінга немає, значення підставні, але форма вже та сама: рядок для
+ * показу плюс число для розрахунків. Підключення стору замінить джерело, а
+ * не екран. */
+class StorePrice {
+  const StorePrice({required this.display, required this.amount});
+
+  /// Готовий рядок від стору: «$8.99», «199 ₴», «39,99 zł».
+  final String display;
+
+  /// Те саме числом, для власних підрахунків.
+  final double amount;
+}
+
+/* Запасні числа на випадок, коли магазин мовчить.
+ *
+ * Вони не вигадані: це базова ціна, заведена в консолях. Але базова означає
+ * «в доларах у США», а людина в Польщі побачить злоті й інше число. Тому щойно
+ * магазин відповість, ці константи не використовуються взагалі. */
+const _month = StorePrice(display: r'$9.99', amount: 9.99);
+const _year = StorePrice(display: r'$39.99', amount: 39.99);
+const _currency = r'$';
+
 class _PlanPanelState extends State<PlanPanel> {
-  String _plan = 'year';
+  late String _plan = widget.pro == 'month' ? 'month' : 'year';
+
+  /// Тарифи, як їх віддав магазин. Порожньо означає «ще не приїхали» або
+  /// «магазин не підключений», і тоді на екрані стоять базові числа.
+  List<StorePlan> _store = const [];
+
+  /// Поки триває покупка або відновлення. Другий дотик по кнопці в цей час
+  /// відкрив би друге вікно магазину поверх першого.
+  bool _busy = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final plans = await Billing.plans();
+    if (mounted && plans.isNotEmpty) setState(() => _store = plans);
+  }
+
+  /* Пошук за видом тарифу, а не за назвою товару: у кожній крамниці назва
+     своя, а місяць і рік скрізь місяць і рік. */
+  StorePlan? _found(String kind) {
+    for (final p in _store) {
+      if (p.kind == kind) return p;
+    }
+    return null;
+  }
+
+  StorePrice get _m {
+    final p = _found('month');
+    return p == null ? _month : StorePrice(display: p.display, amount: p.amount);
+  }
+
+  StorePrice get _y {
+    final p = _found('year');
+    return p == null ? _year : StorePrice(display: p.display, amount: p.amount);
+  }
+
+  /* Місячна вартість річної підписки, як її рахує людина в голові.
+   *
+   * Валюта береться з рядка магазину, а не підставляється своя: у ньому вже
+   * стоїть і символ, і місцевий формат, і вигадати їх удруге означало б
+   * показати «$3.33» тому, хто платить у злотих. */
+  String get _perMonth {
+    final y = _found('year');
+    if (y == null) return '$_currency${(_year.amount / 12).toStringAsFixed(2)}';
+    final per = (y.amount / 12).toStringAsFixed(2);
+    // Число в рядку магазину замінюється порахованим, решта лишається як є.
+    return y.display.replaceAll(RegExp(r'[\d.,]+'), per);
+  }
+
+  /// Наскільки річна дешевша. Рахується, а не пишеться руками: зміниться ціна
+  /// в консолі, зміниться і відсоток.
+  int get _saving => ((1 - _y.amount / 12 / _m.amount) * 100).round();
+
+  void _say(String text) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+  }
+
+  /* Купити обраний тариф.
+   *
+   * Доступ після цього дає не телефон, а сервер: магазин підтвердить покупку
+   * RevenueCat, той стукне на наш вебхук, і лічильник токенів зникне сам.
+   * Тому тут немає жодного запису в базу, тільки вікно магазину. */
+  Future<void> _buy() async {
+    final l = L.of(context);
+    final plan = _found(_plan);
+
+    /* Магазин не відповів. Вдати покупку нема на чому, і чесніше сказати про це,
+       ніж мовчки закрити сторінку. */
+    if (plan == null) {
+      _say(l.planStoreQuiet);
+      return;
+    }
+
+    setState(() => _busy = true);
+    final result = await Billing.buy(plan);
+    if (!mounted) return;
+    setState(() => _busy = false);
+
+    switch (result) {
+      case BuyResult.done:
+        /* Доступ дає сервер, а телефон про це дізнається з обміну. Черговий іде
+           за сорок пʼять секунд, і півхвилини з лічильником після оплати
+           читались би як «не спрацювало». Тому штовхаємо обмін одразу. */
+        unawaited(AppScope.of(context).sync?.now() ?? Future<void>.value());
+        _say(l.planThanks);
+        (widget.onBack ?? Navigator.of(context).pop)();
+      // Передумала, а не помилилась. Казати тут нічого не треба.
+      case BuyResult.canceled:
+        break;
+      case BuyResult.failed:
+        _say(l.planFailed);
+    }
+  }
+
+  /* Скасування і зміна тарифу живуть у магазині, так вимагають правила обох.
+     Якщо адреси немає, підписки в цього акаунта теж немає. */
+  Future<void> _manage() async {
+    final l = L.of(context);
+    final url = await Billing.manageUrl();
+    if (!mounted) return;
+    if (url == null) {
+      _say(l.planStoreQuiet);
+      return;
+    }
+    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+  }
+
+  /* Відновити покупки. Обовʼязкове за правилами сторів: людина, яка змінила
+     телефон, має повернути оплачене без звернень у підтримку. */
+  Future<void> _restore() async {
+    final l = L.of(context);
+    setState(() => _busy = true);
+    final found = await Billing.restore();
+    if (!mounted) return;
+    setState(() => _busy = false);
+    _say(found ? l.planRestored : l.planNothingToRestore);
+  }
+
+  /* Що сказати про поточний стан. Рядок про дату поновлення тут не стоїть, хоч
+     у демці він є: сервер віддає застосунку тільки `unlimited`, а вигадана
+     дата на екрані підписки гірша за її відсутність. */
+  List<(String, String)> _now(L l) => switch (widget.pro) {
+    '' => [(l.planPlan, l.planFree), (l.planTokens, l.planTokensFree)],
+    'year' => [(l.planPlan, l.planYearly), (l.planTokens, l.planTokensPro)],
+    'month' => [(l.planPlan, l.planMonthly), (l.planTokens, l.planTokensPro)],
+    _ => [(l.planPlan, l.planOn), (l.planTokens, l.planTokensPro)],
+  };
 
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
+    final c = context.c;
+    final has = widget.pro.isNotEmpty;
+
     return CalviScreen(
       trailing: const CalviMenuButton(),
       onBack: widget.onBack,
       title: l.planTitle,
+      /* Куплене не продають удруге: скасування і зміна тарифу живуть у
+         магазині, а не в застосунку, так вимагають правила обох сторів. */
       foot: CalviButton(
-        label: l.planBuy,
-        onTap: () => (widget.onBack ?? Navigator.of(context).pop)(),
-        second: l.planLater,
+        label: has ? l.planManage : l.planBuy,
+        busy: _busy,
+        onTap: has ? _manage : _buy,
+        second: has ? l.planClose : l.planLater,
         onSecond: () => (widget.onBack ?? Navigator.of(context).pop)(),
       ),
       children: [
@@ -129,29 +314,36 @@ class _PlanPanelState extends State<PlanPanel> {
           title: l.planNow,
           bare: true,
           trail: 0,
-          children: [
-            CalviFacts(
-              inset: false,
-              rows: [(l.planPlan, l.planFree), (l.planTokens, l.planTokensFree)],
-            ),
-          ],
+          children: [CalviFacts(inset: false, rows: _now(l))],
         ),
 
-        /* Переваги списком із галочками, а не реченням у примітці: екран
-           продає, і кожен рядок має читатись окремим «так». */
+        /* Кожен рядок правда і перевіряється по коду: прапорець unlimited
+           знімає лічильник, а він стоїть на розмовах, фото, розборі й
+           підборі рецептів. Під кожною перевагою написано, скільки це коштує
+           зараз, щоб людина бачила, за що платить, а не вірила на слово.
+
+           Памʼять сформульована через ріст, а не через доступ: вона не
+           заблокована тарифом, і те, що Нора вже знає, працює без токенів. А
+           от вивчити нове вона може лише в розмові, і саме розмова коштує. */
         CalviSection(
           title: l.planPerks,
           bare: true,
           trail: 0,
           children: [
-            _Perks(rows: [l.planPerkChat, l.planPerkHistory, l.planPerkReports]),
+            _Perks(
+              rows: [
+                (l.planPerkChat, l.planPerkChatSub),
+                (l.planPerkPhoto, l.planPerkPhotoSub),
+                (l.planPerkWeek, l.planPerkWeekSub),
+                (l.planPerkRecipes, l.planPerkRecipesSub),
+                (l.planPerkMemory, l.planPerkMemorySub),
+              ],
+            ),
           ],
         ),
 
-        /* Два плани двома картками, і вигода річного названа числом на чіпі, а
-           не захована в підказці, де про неї треба здогадатись. */
         CalviSection(
-          title: l.planPlan,
+          title: has ? l.planTariffs : l.planPlan,
           bare: true,
           children: [
             Row(
@@ -159,9 +351,12 @@ class _PlanPanelState extends State<PlanPanel> {
                 Expanded(
                   child: _PlanCard(
                     name: l.planYear,
-                    save: l.planSave,
-                    price: l.planYearPrice,
-                    note: l.planYearBilled,
+                    // Чинний тариф позначається спокійно, а не як знижка.
+                    save: widget.pro == 'year' ? l.planCurrent : '-$_saving%',
+                    current: widget.pro == 'year',
+                    price: _perMonth,
+                    unit: l.planPerMonth,
+                    note: l.planYearBilled(_y.display),
                     on: _plan == 'year',
                     onTap: () => setState(() => _plan = 'year'),
                   ),
@@ -170,7 +365,10 @@ class _PlanPanelState extends State<PlanPanel> {
                 Expanded(
                   child: _PlanCard(
                     name: l.planMonth,
-                    price: l.planMonthPrice,
+                    save: widget.pro == 'month' ? l.planCurrent : null,
+                    current: widget.pro == 'month',
+                    price: _m.display,
+                    unit: l.planPerMonth,
                     note: l.planMonthBilled,
                     on: _plan == 'month',
                     onTap: () => setState(() => _plan = 'month'),
@@ -180,10 +378,74 @@ class _PlanPanelState extends State<PlanPanel> {
             ),
           ],
         ),
-        CalviNote(l.planStoreNote),
+
+        /* Обовʼязкове за правилами обох сторів: відновлення покупок, чесний
+           рядок про автопоновлення і посилання на документи. Без цього
+           застосунок не проходить рев'ю, а людина не знає, на що підписалась. */
+        Padding(
+          padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 4, CalviSize.gutter, 8),
+          child: Column(
+            children: [
+              GestureDetector(
+                onTap: _restore,
+                behavior: HitTestBehavior.opaque,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Text(
+                    l.planRestore,
+                    style: context.t.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                l.planRenewal,
+                textAlign: TextAlign.center,
+                style: context.t.labelSmall?.copyWith(color: c.faint, height: 1.4),
+              ),
+              const SizedBox(height: 8),
+              /* Два посилання одним рядком, і саме одним: перенесене на другий
+                 рядок юридичне посилання читається як помилка верстки. Назви
+                 документів довгі й у деяких мовах ширші за телефон, тож рядок
+                 стискається цілком, а не ламається. */
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Row(
+                  children: [
+                    _Link(l.planTerms, () => legalSheet(context, terms)),
+                    Text('  ·  ', style: context.t.labelSmall?.copyWith(color: c.faint)),
+                    _Link(l.planPrivacy, () => legalSheet(context, privacy)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
+}
+
+/// Тихе підкреслене посилання на документ у хвості сторінки підписки.
+class _Link extends StatelessWidget {
+  const _Link(this.label, this.onTap);
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTap,
+    behavior: HitTestBehavior.opaque,
+    child: Text(
+      label,
+      style: context.t.labelSmall?.copyWith(
+        color: context.c.textSecondary,
+        decoration: TextDecoration.underline,
+        decorationColor: context.c.textSecondary,
+      ),
+    ),
+  );
 }
 
 /// Privacy.
@@ -373,7 +635,8 @@ class _Guarantees extends StatelessWidget {
 class _Perks extends StatelessWidget {
   const _Perks({required this.rows});
 
-  final List<String> rows;
+  /// Перевага і те, скільки вона коштує зараз. Друге пояснює перше.
+  final List<(String, String)> rows;
 
   @override
   Widget build(BuildContext context) {
@@ -391,6 +654,7 @@ class _Perks extends StatelessWidget {
           for (final (i, row) in rows.indexed) ...[
             if (i > 0) const SizedBox(height: 12),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
                   width: 22,
@@ -404,9 +668,16 @@ class _Perks extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: Text(
-                    row,
-                    style: context.t.bodyLarge?.copyWith(fontSize: CalviSize.fsCaption),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        row.$1,
+                        style: context.t.bodyLarge?.copyWith(fontSize: CalviSize.fsCaption),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(row.$2, style: context.t.labelSmall?.copyWith(height: 1.3)),
+                    ],
                   ),
                 ),
               ],
@@ -430,6 +701,8 @@ class _PlanCard extends StatelessWidget {
     required this.on,
     required this.onTap,
     this.save,
+    this.unit,
+    this.current = false,
   });
 
   final String name;
@@ -440,6 +713,13 @@ class _PlanCard extends StatelessWidget {
 
   /// Скільки економить річний, числом на чіпі. Порожньо в місячного.
   final String? save;
+
+  /// Дрібне після ціни: «/міс». Ціна приходить зі стору вже з валютою, тому
+  /// одиниця стоїть окремо, а не зшивається в рядок перекладу.
+  final String? unit;
+
+  /// Це чинний тариф. Чіп тоді не про знижку, а про стан, і фарбується тихо.
+  final bool current;
 
   @override
   Widget build(BuildContext context) {
@@ -485,8 +765,13 @@ class _PlanCard extends StatelessWidget {
                     Flexible(
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1),
+                        /* Чинний тариф позначається тихо: це констатація, а не
+                           вигода, і зелений чіп на ньому читався б як знижка,
+                           якої немає. */
                         decoration: BoxDecoration(
-                          color: c.success.withValues(alpha: 0.16),
+                          color: current
+                              ? c.fillSecondary
+                              : c.success.withValues(alpha: 0.16),
                           borderRadius: BorderRadius.circular(CalviSize.rPill),
                         ),
                         child: Text(
@@ -495,7 +780,7 @@ class _PlanCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: context.t.labelSmall?.copyWith(
                             fontSize: 11,
-                            color: c.success,
+                            color: current ? c.textSecondary : c.success,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -505,8 +790,20 @@ class _PlanCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 4),
-              Text(
-                price,
+              /* Ціна великим, одиниця дрібним поруч. Одиниця окремо, а не в
+                 рядку ціни: сам рядок приходить зі стору вже з валютою, і
+                 дописувати до нього щось у перекладі не можна. */
+              Text.rich(
+                TextSpan(
+                  text: price,
+                  children: [
+                    if (unit != null)
+                      TextSpan(
+                        text: unit,
+                        style: context.t.labelSmall?.copyWith(fontSize: 12),
+                      ),
+                  ],
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: context.t.headlineMedium?.copyWith(

@@ -10,6 +10,7 @@ import '../design/theme.dart';
 import '../design/tokens.dart';
 import '../l10n/app_localizations.dart';
 import 'analytics/analytics_screen.dart';
+import 'meds/meds_route.dart';
 import 'recipes/recipes_screen.dart';
 import 'settings/settings_screen.dart';
 import 'week/week_screen.dart';
@@ -17,7 +18,7 @@ import 'week/week_screen.dart';
 /* Меню застосунку: картка, що випадає з кнопки в шапці.
  *
  * Доти праворуч угорі скрізь стояли налаштування, і сторінкам без власного
- * входу (рецепти, тижневий аналіз, тарифи) не було де жити. Меню дає їм дім,
+ * входу (рецепти, тижневий аналіз, алергії) не було де жити. Меню дає їм дім,
  * а налаштування чесно опускає на глибину, де їм місце: їх відкривають рідко.
  *
  * Не нижній аркуш: аркуш це мова рішень, і меню в ньому виглядало як питання
@@ -35,13 +36,21 @@ Future<void> showCalviMenu(BuildContext context) {
     nav.push(slideRoute(page));
   }
 
-  final rows = <({String icon, String title, bool soon, VoidCallback? open})>[
+  /* Три групи, розділені тонкою рискою: день і його числа, потім те, що людина
+     про себе веде, потім службовий хвіст. Девʼять однакових рядків підряд
+     читались як список, у якому треба шукати; три купки по три читаються з
+     одного погляду.
+
+     `gap` означає «тут починається наступна група». Доти риску малював
+     порядковий номер рядка, тобто вона трималась на тому, скільки їх у меню,
+     і при кожній зміні переїжджала не туди.  */
+  final rows = <({String icon, String title, bool gap, VoidCallback open})>[
     /* Щоденник перший: це дім застосунку, і з будь-якої глибини меню веде
        туди одним рухом. З самого дому рядок просто закриває меню. */
     (
       icon: 'book',
       title: l.menuDiary,
-      soon: false,
+      gap: false,
       open: () {
         nav.pop();
         nav.popUntil((r) => r.isFirst);
@@ -50,35 +59,55 @@ Future<void> showCalviMenu(BuildContext context) {
     (
       icon: 'chart',
       title: l.menuAnalytics,
-      soon: false,
+      gap: false,
       open: () => go(AnalyticsScreen(measures: scope.stats.measures, onSettings: () {})),
     ),
     (
       icon: 'calendar',
       title: l.menuWeek,
-      soon: false,
+      gap: false,
       open: () => go(WeekScreen(summary: weekSummary(scope.stats, scope.s), onSettings: () {})),
     ),
-    (icon: 'utensils', title: l.menuRecipes, soon: false, open: () => go(const RecipesScreen())),
-    /* Сторінки ще немає, і рядок чесно каже «скоро» замість вести в нікуди:
-       мертвий пункт, який кудись веде, гірший за живий, який чекає. */
-    (icon: 'user', title: l.menuNora, soon: true, open: null),
+
+    /* Своє: книга рецептів, курси препаратів, алергії. Усе троє впливає на те,
+       що радить Нора, і доти лежало по різних кутах застосунку: препарати
+       відкривались лише з картки дня, алергії ховались за двома дотиками в
+       налаштуваннях. */
+    (
+      icon: 'utensils',
+      title: l.menuRecipes,
+      gap: true,
+      open: () => go(const RecipesScreen()),
+    ),
+    (
+      icon: 'pill',
+      title: l.menuMeds,
+      gap: false,
+      open: () => go(const MedsRoute()),
+    ),
+    (
+      icon: 'allergy',
+      title: l.menuAllergy,
+      gap: false,
+      open: () => go(const SettingsScreen(panel: 'allergy')),
+    ),
+
     (
       icon: 'card',
       title: l.menuPlan,
-      soon: false,
+      gap: true,
       open: () => go(const SettingsScreen(panel: 'plan')),
     ),
     (
       icon: 'settings',
       title: l.menuSettings,
-      soon: false,
+      gap: false,
       open: () => go(const SettingsScreen()),
     ),
     (
       icon: 'note',
       title: l.menuAbout,
-      soon: false,
+      gap: false,
       open: () => go(const SettingsScreen(panel: 'about')),
     ),
   ];
@@ -113,10 +142,9 @@ Future<void> showCalviMenu(BuildContext context) {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    for (final (i, r) in rows.indexed) ...[
-                      /* Тонка риска тільки перед службовим хвостом: меню
-                         читається як дві групи, а не сім однакових рядків. */
-                      if (i == rows.length - 2)
+                    for (final r in rows) ...[
+                      // Риска перед першим рядком групи, див. примітку в rows.
+                      if (r.gap)
                         Container(
                           height: 1,
                           margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -250,42 +278,33 @@ class MenuGlyph extends StatelessWidget {
 class _Row extends StatelessWidget {
   const _Row({required this.row});
 
-  final ({String icon, String title, bool soon, VoidCallback? open}) row;
+  final ({String icon, String title, bool gap, VoidCallback open}) row;
 
   @override
   Widget build(BuildContext context) {
     final c = context.c;
-    final l = L.of(context);
 
     return GestureDetector(
-      onTap: row.soon ? null : row.open,
+      onTap: row.open,
       behavior: HitTestBehavior.opaque,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         child: Row(
           children: [
-            Opacity(
-              opacity: row.soon ? 0.45 : 1,
-              child: Container(
-                width: 30,
-                height: 30,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(shape: BoxShape.circle, color: c.iconCircle),
-                child: CalviIcon(row.icon, size: 17),
-              ),
+            Container(
+              width: 30,
+              height: 30,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(shape: BoxShape.circle, color: c.iconCircle),
+              child: CalviIcon(row.icon, size: 17),
             ),
             const SizedBox(width: 11),
             Expanded(
-              child: Opacity(
-                opacity: row.soon ? 0.45 : 1,
-                child: Text(
-                  row.title,
-                  style: context.t.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
-                ),
+              child: Text(
+                row.title,
+                style: context.t.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
               ),
             ),
-            if (row.soon)
-              Text(l.menuSoon, style: context.t.labelSmall?.copyWith(color: c.faint)),
           ],
         ),
       ),

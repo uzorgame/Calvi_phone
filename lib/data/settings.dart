@@ -313,7 +313,11 @@ class ActivityLevel {
 }
 
 /// What the age and height drums offer, at the start and in the profile.
-final ages = List.generate(87, (i) => i + 14);
+///
+/// Від тринадцяти, як і сказано в умовах. Доти барабан починався з
+/// чотирнадцяти, а документи вимагали вісімнадцяти: застосунок пускав того,
+/// кому за власними правилами відмовляв.
+final ages = List.generate(88, (i) => i + 13);
 final heights = List.generate(91, (i) => i + 130);
 
 const activityLevels = <ActivityLevel>[

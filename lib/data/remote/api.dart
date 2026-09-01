@@ -76,6 +76,11 @@ class CalviApi {
       },
       changes: (body['changes'] as List<dynamic>).cast<Map<String, dynamic>>(),
       hasMore: body['has_more'] as bool? ?? false,
+      /* Стан токенів приїжджає разом зі щоденником. Порожньо означає «старіший
+         сервер про це не сказав», а не «нуль»: підставити нуль замість мовчання
+         означало б обнулити людині баланс на першому ж обміні. */
+      balance: (body['tokens'] as Map<String, dynamic>?)?['balance'] as int?,
+      unlimited: (body['tokens'] as Map<String, dynamic>?)?['unlimited'] as bool?,
     );
   }
 
@@ -550,6 +555,8 @@ class SyncAnswer {
     required this.accepted,
     required this.changes,
     required this.hasMore,
+    this.balance,
+    this.unlimited,
   });
 
   final int cursor;
@@ -559,6 +566,14 @@ class SyncAnswer {
   final Map<String, int> accepted;
   final List<Map<String, dynamic>> changes;
   final bool hasMore;
+
+  /* Скільки токенів лишилось і чи знято лічильник, станом на цей обмін.
+   *
+   * Порожньо означає, що сервер про це не сказав. Обмін іде кожні сорок пʼять
+   * секунд, тому саме він, а не відповідь Нори, тепер найшвидше приносить
+   * новину про ввімкнену підписку. */
+  final int? balance;
+  final bool? unlimited;
 }
 
 /// What Nora said, and what it changed.

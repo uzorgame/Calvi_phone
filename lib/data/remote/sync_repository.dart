@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../billing/billing.dart';
 import '../local/database.dart';
 import 'api.dart';
 import 'sync_mapping.dart';
@@ -63,6 +64,10 @@ class SyncRepository {
 
     if (state.userId != null && state.accessToken != null) {
       api.token = state.accessToken;
+      /* Магазин теж має знати цей акаунт, і саме тут, а не лише при вході:
+         більшість людей ніколи не входить, вони просто відкрили застосунок і
+         отримали акаунт пристрою. Купувати їм ніхто не забороняв. */
+      await Billing.identify(state.userId);
       return true;
     }
 
@@ -75,6 +80,7 @@ class SyncRepository {
       );
       await db.syncDao.putTokens(balance: account.balance, unlimited: account.unlimited);
       api.token = account.accessToken;
+      await Billing.identify(account.userId);
       return true;
     } on ApiFailure {
       return false;
@@ -125,6 +131,14 @@ class SyncRepository {
       pulled += answer.changes.length;
 
       await db.syncDao.setCursor(answer.cursor);
+
+      /* Токени приїхали разом зі щоденником. Саме цим рядком телефон дізнається
+         про ввімкнену підписку: покупку підтверджує магазин, доступ ставить
+         сервер із вебхука, і без обміну людина бачила б лічильник, поки не
+         написала б Норі. */
+      if (answer.balance != null) {
+        await db.syncDao.putTokens(balance: answer.balance!, unlimited: answer.unlimited);
+      }
 
       // Done when the server has nothing more and this device has nothing left.
       if (!answer.hasMore && outgoing.isEmpty) break;

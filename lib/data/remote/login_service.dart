@@ -1,3 +1,4 @@
+import '../billing/billing.dart';
 import '../local/database.dart';
 import 'api.dart';
 import 'apple_login.dart';
@@ -182,6 +183,8 @@ class LoginService {
     await apple.forget();
     await db.syncDao.clearAccount();
     api.token = null;
+    // Далі покупки цього пристрою рахуються анонімними, поки хтось не увійде.
+    await Billing.identify(null);
   }
 
   Future<void> _apply(GoogleAccount account) async {
@@ -195,5 +198,8 @@ class LoginService {
     );
     await db.syncDao.putTokens(balance: account.balance, unlimited: account.unlimited);
     api.token = account.accessToken;
+    /* Магазин має знати, чия це покупка. Наш `userId` їде в RevenueCat як
+       `app_user_id`, і саме за ним вебхук знайде людину на сервері. */
+    await Billing.identify(account.userId);
   }
 }

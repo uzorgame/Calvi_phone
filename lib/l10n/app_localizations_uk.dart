@@ -1007,7 +1007,7 @@ class LUk extends L {
 
   @override
   String legalUpdated(String date) {
-    return 'Оновлено $date';
+    return 'Updated $date';
   }
 
   @override
@@ -1262,25 +1262,25 @@ class LUk extends L {
   String get menuAbout => 'Про застосунок';
 
   @override
+  String get menuAllergy => 'Алергії';
+
+  @override
   String get menuAnalytics => 'Аналітика';
 
   @override
   String get menuDiary => 'Щоденник';
 
   @override
-  String get menuNora => 'Знайомство з Норою';
+  String get menuMeds => 'Препарати';
 
   @override
-  String get menuPlan => 'Тарифи';
+  String get menuPlan => 'Підписка';
 
   @override
   String get menuRecipes => 'Рецепти';
 
   @override
   String get menuSettings => 'Налаштування';
-
-  @override
-  String get menuSoon => 'скоро';
 
   @override
   String get menuTitle => 'Меню';
@@ -1406,10 +1406,22 @@ class LUk extends L {
   String get planBuy => 'Оформити';
 
   @override
+  String get planClose => 'Закрити';
+
+  @override
+  String get planCurrent => 'чинний';
+
+  @override
+  String get planFailed => 'Покупка не пройшла';
+
+  @override
   String get planFree => 'Безкоштовний';
 
   @override
   String get planLater => 'Не зараз';
+
+  @override
+  String get planManage => 'Керувати в магазині';
 
   @override
   String get planMonth => 'Місяць';
@@ -1418,35 +1430,80 @@ class LUk extends L {
   String get planMonthBilled => 'щомісячне списання';
 
   @override
-  String get planMonthPrice => '180 грн';
+  String get planMonthly => 'Місячна підписка';
+
+  @override
+  String get planNothingToRestore => 'Покупок на цьому акаунті немає';
 
   @override
   String get planNow => 'Зараз';
 
   @override
-  String get planPerkChat => 'Безлімітні розмови з Норою';
+  String get planOn => 'Активна';
 
   @override
-  String get planPerkHistory => 'Історія і аналітика без обмежень';
+  String get planPerMonth => '/міс';
 
   @override
-  String get planPerkReports => 'Звіти за будь-який період';
+  String get planPerkChat => 'Розмови з Норою без обмежень';
 
   @override
-  String get planPerks => 'Що дає Premium';
+  String get planPerkChatSub => 'зараз одне повідомлення це один токен';
 
   @override
-  String get planPitch => 'Безлімітні токени, історія без обмежень і звіти за будь-який період.';
+  String get planPerkMemory => 'Персоналізована памʼять Нори';
+
+  @override
+  String get planPerkMemorySub => 'нове вона запамʼятовує в розмові, а розмова коштує токен';
+
+  @override
+  String get planPerkPhoto => 'Фото страв без ліку';
+
+  @override
+  String get planPerkPhotoSub => 'зараз знімок коштує два токени';
+
+  @override
+  String get planPerkRecipes => 'Рецепти від Нори без ліку';
+
+  @override
+  String get planPerkRecipesSub => 'зараз підбір страв коштує один токен';
+
+  @override
+  String get planPerkWeek => 'Тижневий розбір коли завгодно';
+
+  @override
+  String get planPerkWeekSub => 'зараз розбір коштує два токени';
+
+  @override
+  String get planPerks => 'Що дає підписка';
 
   @override
   String get planPlan => 'План';
 
   @override
-  String get planSave => '-17%';
+  String get planPrivacy => 'Політика приватності';
 
   @override
-  String get planStoreNote =>
-      'Оплата проходить через App Store або Google Play. Скасувати можна там само, у налаштуваннях передплат, і Calvi на це не впливає.';
+  String get planRenewal =>
+      'Підписка поновлюється сама, доки її не скасувати. Скасувати можна будь-коли в налаштуваннях магазину, з якого вона оформлена.';
+
+  @override
+  String get planRestore => 'Відновити покупки';
+
+  @override
+  String get planRestored => 'Підписку відновлено';
+
+  @override
+  String get planStoreQuiet => 'Магазин не відповідає. Спробуй пізніше';
+
+  @override
+  String get planTariffs => 'Тарифи';
+
+  @override
+  String get planTerms => 'Умови користування';
+
+  @override
+  String get planThanks => 'Готово, Нора тепер без ліку';
 
   @override
   String get planTitle => 'Підписка';
@@ -1458,16 +1515,18 @@ class LUk extends L {
   String get planTokensFree => '40 на місяць';
 
   @override
+  String get planTokensPro => 'Без обмежень';
+
+  @override
   String get planYear => 'Рік';
 
   @override
-  String get planYearBilled => '1 800 грн раз на рік';
+  String planYearBilled(String price) {
+    return '$price раз на рік';
+  }
 
   @override
-  String get planYearHint => '150 грн на місяць, списується раз на рік';
-
-  @override
-  String get planYearPrice => '150 грн';
+  String get planYearly => 'Річна підписка';
 
   @override
   String plateFor(int grams) {

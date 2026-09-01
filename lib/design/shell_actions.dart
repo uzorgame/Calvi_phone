@@ -115,23 +115,39 @@ class _CalviButtonState extends State<CalviButton> {
     );
 
     if (widget.second == null) return button;
-    return Column(
+
+    /* Дві дії стають рядком, а не стосом: відмова ліворуч, згода праворуч, як у
+       нижніх аркушах. Одна над одною вони читались як список із двох пунктів, а
+       не як вибір, і головна кнопка втрачала вагу. Тиха отримує заливку: текст
+       без фону поруч із чорною таблеткою читається як підпис, а не як дія. */
+    return Row(
       children: [
-        button,
-        const SizedBox(height: 4),
-        GestureDetector(
-          onTap: widget.onSecond,
-          behavior: HitTestBehavior.opaque,
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            alignment: Alignment.center,
-            child: Text(
-              widget.second!,
-              style: context.t.bodyLarge?.copyWith(color: c.textSecondary),
+        Expanded(
+          child: GestureDetector(
+            onTap: widget.onSecond,
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              height: CalviSize.buttonH,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: c.fillSecondary,
+                borderRadius: BorderRadius.circular(CalviSize.rPill),
+              ),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  widget.second!,
+                  style: context.t.titleMedium?.copyWith(
+                    fontSize: CalviSize.fsBody,
+                    color: c.text,
+                  ),
+                ),
+              ),
             ),
           ),
         ),
+        const SizedBox(width: 10),
+        Expanded(child: button),
       ],
     );
   }

@@ -39,13 +39,14 @@ void main() {
     await tester.tapOnText(find.textRange.ofSubstring('умовами користування'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Умови користування'), findsOneWidget, reason: 'аркуш не піднявся');
+    // Заголовок документа англійський: редакція одна, незалежно від мови застосунку.
+    expect(find.text('Terms of Use'), findsOneWidget, reason: 'аркуш не піднявся');
     /* Найважливіший розділ документа, і саме його перевіряємо на місці. Тут
        стояв «Токени», тобто випадковий заголовок: він доводив, що аркуш не
        порожній, і мовчки зник разом із перейменуванням розділу. Медичне
        застереження перейменувати непомітно не вийде. */
     expect(
-      find.text('Це не медичний застосунок'),
+      find.text('No medical purpose'),
       findsOneWidget,
       reason: 'аркуш порожній або в ньому немає медичного застереження',
     );
@@ -61,7 +62,7 @@ void main() {
     await tester.tapOnText(find.textRange.ofSubstring('політикою приватності'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Політика приватності'), findsOneWidget);
-    expect(find.textContaining('Оновлено'), findsOneWidget);
+    expect(find.text('Privacy Policy'), findsOneWidget);
+    expect(find.textContaining('Updated'), findsOneWidget);
   });
 }

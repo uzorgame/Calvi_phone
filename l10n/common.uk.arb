@@ -40,9 +40,9 @@
   "menuAnalytics": "Аналітика",
   "menuWeek": "Тижневий аналіз",
   "menuRecipes": "Рецепти",
-  "menuNora": "Знайомство з Норою",
-  "menuSoon": "скоро",
-  "menuPlan": "Тарифи",
+  "menuMeds": "Препарати",
+  "menuAllergy": "Алергії",
+  "menuPlan": "Підписка",
   "menuSettings": "Налаштування",
   "menuAbout": "Про застосунок"
 }

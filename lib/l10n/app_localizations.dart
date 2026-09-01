@@ -2295,6 +2295,12 @@ abstract class L {
   /// **'About'**
   String get menuAbout;
 
+  /// No description provided for @menuAllergy.
+  ///
+  /// In en, this message translates to:
+  /// **'Allergies'**
+  String get menuAllergy;
+
   /// No description provided for @menuAnalytics.
   ///
   /// In en, this message translates to:
@@ -2307,16 +2313,16 @@ abstract class L {
   /// **'Diary'**
   String get menuDiary;
 
-  /// No description provided for @menuNora.
+  /// No description provided for @menuMeds.
   ///
   /// In en, this message translates to:
-  /// **'Meet Nora'**
-  String get menuNora;
+  /// **'Medications'**
+  String get menuMeds;
 
   /// No description provided for @menuPlan.
   ///
   /// In en, this message translates to:
-  /// **'Plans'**
+  /// **'Subscription'**
   String get menuPlan;
 
   /// No description provided for @menuRecipes.
@@ -2330,12 +2336,6 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Settings'**
   String get menuSettings;
-
-  /// No description provided for @menuSoon.
-  ///
-  /// In en, this message translates to:
-  /// **'soon'**
-  String get menuSoon;
 
   /// No description provided for @menuTitle.
   ///
@@ -2547,6 +2547,24 @@ abstract class L {
   /// **'Subscribe'**
   String get planBuy;
 
+  /// No description provided for @planClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get planClose;
+
+  /// No description provided for @planCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'current'**
+  String get planCurrent;
+
+  /// No description provided for @planFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The purchase did not go through'**
+  String get planFailed;
+
   /// No description provided for @planFree.
   ///
   /// In en, this message translates to:
@@ -2558,6 +2576,12 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Not now'**
   String get planLater;
+
+  /// No description provided for @planManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage in the store'**
+  String get planManage;
 
   /// No description provided for @planMonth.
   ///
@@ -2571,11 +2595,17 @@ abstract class L {
   /// **'billed monthly'**
   String get planMonthBilled;
 
-  /// No description provided for @planMonthPrice.
+  /// No description provided for @planMonthly.
   ///
   /// In en, this message translates to:
-  /// **'180 UAH'**
-  String get planMonthPrice;
+  /// **'Monthly subscription'**
+  String get planMonthly;
+
+  /// No description provided for @planNothingToRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'No purchases on this account'**
+  String get planNothingToRestore;
 
   /// No description provided for @planNow.
   ///
@@ -2583,35 +2613,83 @@ abstract class L {
   /// **'Now'**
   String get planNow;
 
+  /// No description provided for @planOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get planOn;
+
+  /// No description provided for @planPerMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'/mo'**
+  String get planPerMonth;
+
   /// No description provided for @planPerkChat.
   ///
   /// In en, this message translates to:
   /// **'Unlimited conversations with Nora'**
   String get planPerkChat;
 
-  /// No description provided for @planPerkHistory.
+  /// No description provided for @planPerkChatSub.
   ///
   /// In en, this message translates to:
-  /// **'History and analytics without limits'**
-  String get planPerkHistory;
+  /// **'one message costs one token today'**
+  String get planPerkChatSub;
 
-  /// No description provided for @planPerkReports.
+  /// No description provided for @planPerkMemory.
   ///
   /// In en, this message translates to:
-  /// **'Reports for any period'**
-  String get planPerkReports;
+  /// **'Nora remembers you'**
+  String get planPerkMemory;
+
+  /// No description provided for @planPerkMemorySub.
+  ///
+  /// In en, this message translates to:
+  /// **'she learns new things in conversation, and that costs a token'**
+  String get planPerkMemorySub;
+
+  /// No description provided for @planPerkPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited meal photos'**
+  String get planPerkPhoto;
+
+  /// No description provided for @planPerkPhotoSub.
+  ///
+  /// In en, this message translates to:
+  /// **'a photo costs two tokens today'**
+  String get planPerkPhotoSub;
+
+  /// No description provided for @planPerkRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited recipes from Nora'**
+  String get planPerkRecipes;
+
+  /// No description provided for @planPerkRecipesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'a suggestion costs one token today'**
+  String get planPerkRecipesSub;
+
+  /// No description provided for @planPerkWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly review whenever you want'**
+  String get planPerkWeek;
+
+  /// No description provided for @planPerkWeekSub.
+  ///
+  /// In en, this message translates to:
+  /// **'a review costs two tokens today'**
+  String get planPerkWeekSub;
 
   /// No description provided for @planPerks.
   ///
   /// In en, this message translates to:
-  /// **'What Premium gives'**
+  /// **'What the subscription gives'**
   String get planPerks;
-
-  /// No description provided for @planPitch.
-  ///
-  /// In en, this message translates to:
-  /// **'Unlimited tokens, history without limits, and reports for any period.'**
-  String get planPitch;
 
   /// No description provided for @planPlan.
   ///
@@ -2619,17 +2697,53 @@ abstract class L {
   /// **'Plan'**
   String get planPlan;
 
-  /// No description provided for @planSave.
+  /// No description provided for @planPrivacy.
   ///
   /// In en, this message translates to:
-  /// **'-17%'**
-  String get planSave;
+  /// **'Privacy Policy'**
+  String get planPrivacy;
 
-  /// No description provided for @planStoreNote.
+  /// No description provided for @planRenewal.
   ///
   /// In en, this message translates to:
-  /// **'Payment goes through the App Store or Google Play. You can cancel in the same place, in subscription settings, and Calvi has no say in it.'**
-  String get planStoreNote;
+  /// **'The subscription renews automatically until cancelled. You can cancel at any time in the settings of the store it was purchased from.'**
+  String get planRenewal;
+
+  /// No description provided for @planRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore purchases'**
+  String get planRestore;
+
+  /// No description provided for @planRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription restored'**
+  String get planRestored;
+
+  /// No description provided for @planStoreQuiet.
+  ///
+  /// In en, this message translates to:
+  /// **'The store is not responding. Try again later'**
+  String get planStoreQuiet;
+
+  /// No description provided for @planTariffs.
+  ///
+  /// In en, this message translates to:
+  /// **'Plans'**
+  String get planTariffs;
+
+  /// No description provided for @planTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Use'**
+  String get planTerms;
+
+  /// No description provided for @planThanks.
+  ///
+  /// In en, this message translates to:
+  /// **'Done, Nora is unlimited now'**
+  String get planThanks;
 
   /// No description provided for @planTitle.
   ///
@@ -2649,6 +2763,12 @@ abstract class L {
   /// **'40 a month'**
   String get planTokensFree;
 
+  /// No description provided for @planTokensPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited'**
+  String get planTokensPro;
+
   /// No description provided for @planYear.
   ///
   /// In en, this message translates to:
@@ -2658,20 +2778,14 @@ abstract class L {
   /// No description provided for @planYearBilled.
   ///
   /// In en, this message translates to:
-  /// **'1,800 UAH once a year'**
-  String get planYearBilled;
+  /// **'{price} once a year'**
+  String planYearBilled(String price);
 
-  /// No description provided for @planYearHint.
+  /// No description provided for @planYearly.
   ///
   /// In en, this message translates to:
-  /// **'150 UAH a month, charged once a year'**
-  String get planYearHint;
-
-  /// No description provided for @planYearPrice.
-  ///
-  /// In en, this message translates to:
-  /// **'150 UAH'**
-  String get planYearPrice;
+  /// **'Yearly subscription'**
+  String get planYearly;
 
   /// No description provided for @plateFor.
   ///
