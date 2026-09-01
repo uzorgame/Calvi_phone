@@ -123,6 +123,7 @@
   "planManage": "Manage in the store",
   "planClose": "Close",
   "planPerMonth": "/mo",
+  "planStoreOffline": "The store is not responding. Check your internet connection",
   "planStoreQuiet": "The store is not responding. Try again later",
   "planThanks": "Done, Nora is unlimited now",
   "planFailed": "The purchase did not go through",

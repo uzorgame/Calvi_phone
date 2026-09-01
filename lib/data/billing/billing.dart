@@ -83,6 +83,10 @@ class StorePlan {
 /// людина, яка передумала, не має бачити «щось пішло не так».
 enum BuyResult { done, canceled, failed }
 
+/// Чому магазин не дав тарифів. Рівно два стани, бо рівно два різні поради:
+/// перевірити інтернет або спробувати пізніше.
+enum BillingTrouble { none, offline, quiet }
+
 class Billing {
   Billing._();
 
@@ -111,8 +115,7 @@ class Billing {
       await Purchases.configure(PurchasesConfiguration(_key));
       _ready = true;
     } catch (e) {
-      note = 'SDK не піднявся: $e';
-      debugPrint('billing: $note');
+      debugPrint('billing: SDK не піднявся ($e)');
     }
   }
 
@@ -137,32 +140,32 @@ class Billing {
     }
   }
 
-  /* Що саме сталось під час останнього запиту тарифів.
+  /* Чому тарифів немає, настільки, наскільки це має знати людина.
    *
-   * Не для краси. Порожній список у відповідь на «дай тарифи» має три різні
-   * причини, і зовні вони виглядають однаково: не піднятий SDK, немає
-   * офферінга, магазин не віддав товари. Без цього рядка розрізнити їх можна
-   * лише здогадками, а вони коштували нам години. */
-  static String note = 'ще не питали';
+   * Технічний текст помилки сюди не потрапляє навмисно: `PlatformException` з
+   * кодами і стеком це мова розробника, і на екрані підписки вона лише лякає.
+   * Повний текст іде в лог, а сюди приходить причина, яку можна показати.
+   *
+   * Розрізняємо рівно те, на що людина може вплинути: немає інтернету це її
+   * справа, решта наша. */
+  static BillingTrouble trouble = BillingTrouble.quiet;
 
   /* Тарифи з магазину: місячний і річний.
    *
    * Порожньо означає «магазин не відповів або товарів ще немає». Екран у такому
    * разі показує сторінку без цін, а не вигадані числа. */
   static Future<List<StorePlan>> plans() async {
-    if (!configured) {
-      note = 'магазин не підключений';
-      return const [];
-    }
-    if (!_ready) {
-      note = 'SDK не піднявся';
+    if (!configured || !_ready) {
+      trouble = BillingTrouble.quiet;
+      debugPrint('billing: не готовий (configured=$configured, ready=$_ready)');
       return const [];
     }
     try {
       final offerings = await Purchases.getOfferings();
       final current = offerings.current;
       if (current == null) {
-        note = 'офферінга немає (усього: ${offerings.all.length})';
+        trouble = BillingTrouble.quiet;
+        debugPrint('billing: офферінга немає, усього ${offerings.all.length}');
         return const [];
       }
 
@@ -179,14 +182,20 @@ class Billing {
           ),
         );
       }
-      note = out.isEmpty
-          ? 'офферінг «${current.identifier}» без пакетів місяця і року'
-          : 'ok: ${out.map((p) => '${p.kind}=${p.productId} ${p.display}').join(', ')}';
-      debugPrint('billing: $note');
+      trouble = out.isEmpty ? BillingTrouble.quiet : BillingTrouble.none;
+      debugPrint(
+        out.isEmpty
+            ? 'billing: офферінг «${current.identifier}» без пакетів місяця і року'
+            : 'billing: ${out.map((p) => '${p.kind}=${p.productId} ${p.display}').join(', ')}',
+      );
       return out;
     } catch (e) {
-      note = 'помилка: $e';
-      debugPrint('billing: $note');
+      /* Немає мережі це єдина причина, яку людина може виправити сама, тому вона
+         єдина, яку варто відрізняти на екрані. Решта для неї однакова. */
+      trouble = '$e'.contains('OFFLINE_CONNECTION_ERROR')
+          ? BillingTrouble.offline
+          : BillingTrouble.quiet;
+      debugPrint('billing: тарифи не приїхали ($e)');
       return const [];
     }
   }

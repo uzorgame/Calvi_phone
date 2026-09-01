@@ -1494,6 +1494,9 @@ class LUk extends L {
   String get planRestored => 'Підписку відновлено';
 
   @override
+  String get planStoreOffline => 'Магазин не відповідає. Перевір підключення до інтернету';
+
+  @override
   String get planStoreQuiet => 'Магазин не відповідає. Спробуй пізніше';
 
   @override

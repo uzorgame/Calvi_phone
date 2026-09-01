@@ -1216,6 +1216,7 @@
   "planRenewal": "The subscription renews automatically until cancelled. You can cancel at any time in the settings of the store it was purchased from.",
   "planRestore": "Restore purchases",
   "planRestored": "Subscription restored",
+  "planStoreOffline": "The store is not responding. Check your internet connection",
   "planStoreQuiet": "The store is not responding. Try again later",
   "planTariffs": "Plans",
   "planTerms": "Terms of Use",

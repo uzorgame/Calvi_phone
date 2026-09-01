@@ -1486,6 +1486,9 @@ class LEn extends L {
   String get planRestored => 'Subscription restored';
 
   @override
+  String get planStoreOffline => 'The store is not responding. Check your internet connection';
+
+  @override
   String get planStoreQuiet => 'The store is not responding. Try again later';
 
   @override

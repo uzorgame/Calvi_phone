@@ -2721,6 +2721,12 @@ abstract class L {
   /// **'Subscription restored'**
   String get planRestored;
 
+  /// No description provided for @planStoreOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'The store is not responding. Check your internet connection'**
+  String get planStoreOffline;
+
   /// No description provided for @planStoreQuiet.
   ///
   /// In en, this message translates to:

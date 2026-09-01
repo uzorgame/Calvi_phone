@@ -153,15 +153,15 @@ class _PlanPanelState extends State<PlanPanel> {
     _load();
   }
 
-  /// Що відповів магазин минулого разу. Показується на екрані, коли цін немає.
-  String _note = '';
+  /// Чому цін немає. Показується на екрані замість них, людською мовою.
+  BillingTrouble _trouble = BillingTrouble.quiet;
 
   Future<void> _load() async {
     final plans = await Billing.plans();
     if (!mounted) return;
     setState(() {
       _store = plans;
-      _note = Billing.note;
+      _trouble = Billing.trouble;
     });
   }
 
@@ -379,7 +379,10 @@ class _PlanPanelState extends State<PlanPanel> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 10, CalviSize.gutter, 0),
                 child: Text(
-                  '${l.planStoreQuiet}\n$_note',
+                  /* Одне речення і жодного коду помилки. Текст `PlatformException`
+                     тут не місце: людині він нічого не каже, а лякає. Повний
+                     текст лишається в логах, для нас. */
+                  _trouble == BillingTrouble.offline ? l.planStoreOffline : l.planStoreQuiet,
                   style: context.t.labelSmall?.copyWith(color: c.faint, height: 1.4),
                 ),
               ),
