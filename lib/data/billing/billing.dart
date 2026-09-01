@@ -38,9 +38,6 @@ const _appleKey = String.fromEnvironment(
 /// Google підтвердить платіжний профіль.
 const _googleKey = String.fromEnvironment('RC_ANDROID_KEY');
 
-/// Ідентифікатор права доступу в RevenueCat. Одне на весь застосунок.
-const _entitlement = 'pro';
-
 /// Один тариф, як його віддав магазин.
 ///
 /// `display` це готовий рядок із валютою і місцевим форматом, і саме він іде на
@@ -202,17 +199,25 @@ class Billing {
 
   /* Купити.
    *
-   * Право доступу перевіряється одразу, щоб екран не завмер до наступної
-   * синхронізації. Але це лише вигляд: лічильник токенів зніме сервер, коли
-   * отримає вебхук. */
+   * **Успіх це відсутність винятку, а не назва права доступу.**
+   *
+   * Доти тут стояла перевірка `entitlements.active.containsKey('pro')`, і вона
+   * коштувала нам зіпсованого тесту: у RevenueCat право зветься `Pro`, з
+   * великої, а `containsKey` чутливий до регістру. Apple казала «покупка
+   * успішна», застосунок наступним кадром казав «покупка не пройшла».
+   *
+   * Але річ навіть не в регістрі. Долю покупки не можна вирішувати за рядком,
+   * який хтось міг написати інакше в чужій панелі, і тим паче не в застосунку:
+   * доступ у нас дає сервер, коли отримає вебхук. Магазин повернув керування
+   * без винятку, отже покупка відбулась. Далі не наша справа. */
   static Future<BuyResult> buy(StorePlan plan) async {
     final pack = plan.package;
     if (!_ready || pack == null) return BuyResult.failed;
     try {
       final result = await Purchases.purchase(PurchaseParams.package(pack));
-      return result.customerInfo.entitlements.active.containsKey(_entitlement)
-          ? BuyResult.done
-          : BuyResult.failed;
+      final active = result.customerInfo.entitlements.active.keys.join(', ');
+      debugPrint('billing: куплено ${plan.productId}, права: [$active]');
+      return BuyResult.done;
     } on PlatformException catch (e) {
       /* Скасування це не помилка. Людина передумала, і сказати їй «щось пішло
          не так» означало б звинуватити її у власному рішенні. */
@@ -235,7 +240,11 @@ class Billing {
     if (!_ready) return false;
     try {
       final info = await Purchases.restorePurchases();
-      return info.entitlements.active.containsKey(_entitlement);
+      /* Будь-яке активне право, а не одне за назвою: див. примітку в `buy`.
+         Тарифів у нас усього два, і обидва дають те саме. */
+      final active = info.entitlements.active;
+      debugPrint('billing: відновлено, права: [${active.keys.join(', ')}]');
+      return active.isNotEmpty;
     } catch (e) {
       debugPrint('billing: відновлення не вдалось ($e)');
       return false;
