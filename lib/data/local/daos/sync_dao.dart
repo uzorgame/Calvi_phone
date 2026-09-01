@@ -304,6 +304,21 @@ class SyncDao extends DatabaseAccessor<CalviDb> with _$SyncDaoMixin {
         ),
       );
 
+  /* Вихід з акаунта: дзеркало токенів очищається разом з ним.
+   *
+   * Число і прапорець «без ліку» належали акаунту, з якого вийшли. Лишити їх
+   * означало б показувати «Pro» людині без акаунта, доки новий безіменний не
+   * відповість, а це до хвилини. `syncedAt` порожній, тому екран знає, що
+   * відповіді ще не було, і не малює ні числа, ні тарифу. */
+  Future<void> clearTokens() => (update(tokenState)..where((t) => t.id.equals(1))).write(
+    const TokenStateCompanion(
+      balance: Value(0),
+      unlimited: Value(false),
+      nextGrantAt: Value(null),
+      syncedAt: Value(null),
+    ),
+  );
+
   Stream<TokenStateData?> watchTokens() => select(tokenState).watchSingleOrNull();
 
   /* «Видалити дані»: місцева половина чистого аркуша.

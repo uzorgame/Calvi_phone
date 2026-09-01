@@ -182,6 +182,9 @@ class LoginService {
     await google.forget();
     await apple.forget();
     await db.syncDao.clearAccount();
+    /* Разом з акаунтом іде і його баланс: інакше сторінка підписки ще хвилину
+       показувала б «Pro» тому, хто щойно вийшов. */
+    await db.syncDao.clearTokens();
     api.token = null;
     // Далі покупки цього пристрою рахуються анонімними, поки хтось не увійде.
     await Billing.identify(null);

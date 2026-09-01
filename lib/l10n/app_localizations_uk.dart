@@ -1445,9 +1445,6 @@ class LUk extends L {
   String get planOn => 'Pro';
 
   @override
-  String get planPending => 'Оплата пройшла. Доступ зʼявиться за хвилину';
-
-  @override
   String get planPerMonth => '/міс';
 
   @override
@@ -1497,9 +1494,6 @@ class LUk extends L {
   String get planRestore => 'Відновити покупки';
 
   @override
-  String get planRestored => 'Підписку відновлено';
-
-  @override
   String get planSignInGo => 'Увійти';
 
   @override
@@ -1520,9 +1514,6 @@ class LUk extends L {
 
   @override
   String get planTerms => 'Умови користування';
-
-  @override
-  String get planThanks => 'Готово, Нора тепер без ліку';
 
   @override
   String get planTitle => 'Підписка';

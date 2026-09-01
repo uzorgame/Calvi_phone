@@ -285,7 +285,7 @@ class _PlanPanelState extends State<PlanPanel> {
            оплати читались би як «не спрацювало». Тому питаємо сервер одразу, а
            той сам звіряється з магазином. Сторінка лишається відкритою: її
            зміна на «Pro» і є підтвердженням, яке людина бачить очима. */
-        await _confirm(l.planThanks);
+        await _confirm();
       // Передумала, а не помилилась. Казати тут нічого не треба.
       case BuyResult.canceled:
         break;
@@ -323,23 +323,18 @@ class _PlanPanelState extends State<PlanPanel> {
     );
   }
 
-  /* Спитати сервер про покупку і сказати людині правду.
+  /* Спитати сервер про покупку.
    *
-   * Магазин покупку прийняв, і «не пройшло» тут неможливе. Але й «готово» на
-   * екрані з лічильником було б неправдою: якщо сервер ще не в курсі або не
-   * відповів, кажемо, що доступ у дорозі, і штовхаємо обмін, який його
-   * привезе. */
-  Future<void> _confirm(String done) async {
+   * Жодного напису внизу: підтвердження це сама сторінка, яка перемикається на
+   * «Pro» тієї ж миті, коли сервер відповість. Доти тут стояв снекбар «Готово»,
+   * і він лише дублював те, що екран уже показує. Якщо сервер ще не в курсі або
+   * не відповів, штовхаємо обмін: він привезе правду за хвилину. */
+  Future<void> _confirm() async {
     final sync = AppScope.of(context).sync;
     final confirmed = await sync?.confirmPurchase();
     if (!mounted) return;
     unawaited(_loadKind());
-    if (confirmed == true) {
-      _say(done);
-    } else {
-      unawaited(sync?.now() ?? Future<void>.value());
-      _say(L.of(context).planPending);
-    }
+    if (confirmed != true) unawaited(sync?.now() ?? Future<void>.value());
   }
 
   /* Скасування і зміна тарифу живуть у магазині, так вимагають правила обох.
@@ -371,7 +366,7 @@ class _PlanPanelState extends State<PlanPanel> {
        акаунт RevenueCat шле вебхук без строку, і без цього запиту доступ
        зʼявився б аж із наступним поновленням. */
     if (found) {
-      await _confirm(l.planRestored);
+      await _confirm();
     } else {
       _say(l.planNothingToRestore);
     }

@@ -1437,9 +1437,6 @@ class LEn extends L {
   String get planOn => 'Pro';
 
   @override
-  String get planPending => 'Payment went through. Access arrives within a minute';
-
-  @override
   String get planPerMonth => '/mo';
 
   @override
@@ -1489,9 +1486,6 @@ class LEn extends L {
   String get planRestore => 'Restore purchases';
 
   @override
-  String get planRestored => 'Subscription restored';
-
-  @override
   String get planSignInGo => 'Sign in';
 
   @override
@@ -1512,9 +1506,6 @@ class LEn extends L {
 
   @override
   String get planTerms => 'Terms of Use';
-
-  @override
-  String get planThanks => 'Done, Nora is unlimited now';
 
   @override
   String get planTitle => 'Subscription';

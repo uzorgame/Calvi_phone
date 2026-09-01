@@ -4,6 +4,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show PlatformException;
 import 'package:purchases_flutter/purchases_flutter.dart';
 
+import 'apple_store.dart';
+import 'google_store.dart';
+import 'store_config.dart';
+
 /* Підписка: усе, що застосунок знає про магазин.
  *
  * Один шар на весь застосунок, і решта коду про RevenueCat не чує. Екран
@@ -17,26 +21,8 @@ import 'package:purchases_flutter/purchases_flutter.dart';
  * планшетах. Тому `isPro` тут використовується лише для швидкого вигляду
  * одразу після покупки, а правда приїде з сервера наступною синхронізацією. */
 
-/// Публічні ключі SDK, свій на кожен магазин.
-///
-/// Не секрет: вони їдуть усередині застосунку і видні в будь-якому розібраному
-/// APK, так і задумано. Секретний ключ RevenueCat має інший префікс і в
-/// застосунку не з'являється ніколи.
-///
-/// Порожньо означає «магазин не підключений»: усе нижче стає тихим, а екран
-/// підписки показує сторінку без цін. Так застосунок збирається і працює до
-/// того, як ключі з'являться, і не падає в тестах.
-/// Значення прямо тут, а не тільки через `--dart-define`: забутий прапорець
-/// збірки тихо вимикав би оплату, і помітили б це вже в сторі. Змінна лишається
-/// як спосіб підмінити ключ, не чіпаючи код.
-const _appleKey = String.fromEnvironment(
-  'RC_IOS_KEY',
-  defaultValue: 'appl_wnvJBVYjiDuTMlvcZMPeVeyxGvv',
-);
-
-/// Порожньо, поки в RevenueCat не заведений застосунок Play. А він чекає, поки
-/// Google підтвердить платіжний профіль.
-const _googleKey = String.fromEnvironment('RC_ANDROID_KEY');
+/* Ключі й особливості кожної крамниці живуть у своїх файлах: `apple_store.dart`
+   і `google_store.dart`. Тут вибирається лише та, що відповідає платформі. */
 
 /// Один тариф, як його віддав магазин.
 ///
@@ -89,16 +75,17 @@ class Billing {
 
   static bool _ready = false;
 
+  /// Крамниця цієї платформи. Порожня там, де крамниці немає: веб, тести.
+  static StoreConfig get store {
+    if (kIsWeb) return noStore;
+    if (Platform.isIOS || Platform.isMacOS) return appleStore;
+    if (Platform.isAndroid) return googleStore;
+    return noStore;
+  }
+
   /// Чи підключений магазин узагалі. Поки ключа немає, екран підписки живе без
   /// цін, а кнопка покупки не вдає, що працює.
-  static bool get configured => _key.isNotEmpty;
-
-  static String get _key {
-    if (kIsWeb) return '';
-    if (Platform.isIOS || Platform.isMacOS) return _appleKey;
-    if (Platform.isAndroid) return _googleKey;
-    return '';
-  }
+  static bool get configured => store.ready;
 
   /* Підняти SDK. Викликається один раз зі старту застосунку.
    *
@@ -109,8 +96,9 @@ class Billing {
     if (_ready || !configured) return;
     try {
       await Purchases.setLogLevel(kDebugMode ? LogLevel.debug : LogLevel.warn);
-      await Purchases.configure(PurchasesConfiguration(_key));
+      await Purchases.configure(PurchasesConfiguration(store.key));
       _ready = true;
+      debugPrint('billing: ${store.name} підключено');
     } catch (e) {
       debugPrint('billing: SDK не піднявся ($e)');
     }

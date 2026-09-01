@@ -2625,12 +2625,6 @@ abstract class L {
   /// **'Pro'**
   String get planOn;
 
-  /// No description provided for @planPending.
-  ///
-  /// In en, this message translates to:
-  /// **'Payment went through. Access arrives within a minute'**
-  String get planPending;
-
   /// No description provided for @planPerMonth.
   ///
   /// In en, this message translates to:
@@ -2727,12 +2721,6 @@ abstract class L {
   /// **'Restore purchases'**
   String get planRestore;
 
-  /// No description provided for @planRestored.
-  ///
-  /// In en, this message translates to:
-  /// **'Subscription restored'**
-  String get planRestored;
-
   /// No description provided for @planSignInGo.
   ///
   /// In en, this message translates to:
@@ -2774,12 +2762,6 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Terms of Use'**
   String get planTerms;
-
-  /// No description provided for @planThanks.
-  ///
-  /// In en, this message translates to:
-  /// **'Done, Nora is unlimited now'**
-  String get planThanks;
 
   /// No description provided for @planTitle.
   ///
