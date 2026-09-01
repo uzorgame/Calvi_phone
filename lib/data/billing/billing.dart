@@ -111,7 +111,8 @@ class Billing {
       await Purchases.configure(PurchasesConfiguration(_key));
       _ready = true;
     } catch (e) {
-      debugPrint('billing: не піднявся ($e)');
+      note = 'SDK не піднявся: $e';
+      debugPrint('billing: $note');
     }
   }
 
@@ -136,16 +137,34 @@ class Billing {
     }
   }
 
+  /* Що саме сталось під час останнього запиту тарифів.
+   *
+   * Не для краси. Порожній список у відповідь на «дай тарифи» має три різні
+   * причини, і зовні вони виглядають однаково: не піднятий SDK, немає
+   * офферінга, магазин не віддав товари. Без цього рядка розрізнити їх можна
+   * лише здогадками, а вони коштували нам години. */
+  static String note = 'ще не питали';
+
   /* Тарифи з магазину: місячний і річний.
    *
    * Порожньо означає «магазин не відповів або товарів ще немає». Екран у такому
    * разі показує сторінку без цін, а не вигадані числа. */
   static Future<List<StorePlan>> plans() async {
-    if (!_ready) return const [];
+    if (!configured) {
+      note = 'магазин не підключений';
+      return const [];
+    }
+    if (!_ready) {
+      note = 'SDK не піднявся';
+      return const [];
+    }
     try {
       final offerings = await Purchases.getOfferings();
       final current = offerings.current;
-      if (current == null) return const [];
+      if (current == null) {
+        note = 'офферінга немає (усього: ${offerings.all.length})';
+        return const [];
+      }
 
       final out = <StorePlan>[];
       for (final (kind, p) in [('month', current.monthly), ('year', current.annual)]) {
@@ -160,9 +179,14 @@ class Billing {
           ),
         );
       }
+      note = out.isEmpty
+          ? 'офферінг «${current.identifier}» без пакетів місяця і року'
+          : 'ok: ${out.map((p) => '${p.kind}=${p.productId} ${p.display}').join(', ')}';
+      debugPrint('billing: $note');
       return out;
     } catch (e) {
-      debugPrint('billing: тарифи не приїхали ($e)');
+      note = 'помилка: $e';
+      debugPrint('billing: $note');
       return const [];
     }
   }

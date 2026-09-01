@@ -126,36 +126,16 @@ class PlanPanel extends StatefulWidget {
   State<PlanPanel> createState() => _PlanPanelState();
 }
 
-/* Ціни, як їх віддає стор.
+/* Ціни приходять тільки з магазину.
  *
- * Жодного числа в коді: StoreKit і Play Billing повертають готовий рядок із
- * валютою і місцевим форматом, бо ціну по країнах ставлять у консолі. Доти
- * тут стояли «150 грн» і «180 грн» у перекладах, і це було двічі
- * неправильно: ціна не переклад, а показувати не те, що стягне стор,
- * заборонено правилами рев'ю.
+ * Своїх чисел тут немає жодного, і це принципово. Доти на випадок мовчання
+ * магазину стояли базові 9,99 і 39,99, і саме вони все й зіпсували: базова
+ * ціна це ціна американської вітрини, тобто заглушка виглядала точно так
+ * само, як справжня відповідь Apple. Відрізнити «працює» від «не працює»
+ * стало неможливо навіть із телефоном у руках.
  *
- * Поки білінга немає, значення підставні, але форма вже та сама: рядок для
- * показу плюс число для розрахунків. Підключення стору замінить джерело, а
- * не екран. */
-class StorePrice {
-  const StorePrice({required this.display, required this.amount});
-
-  /// Готовий рядок від стору: «$8.99», «199 ₴», «39,99 zł».
-  final String display;
-
-  /// Те саме числом, для власних підрахунків.
-  final double amount;
-}
-
-/* Запасні числа на випадок, коли магазин мовчить.
- *
- * Вони не вигадані: це базова ціна, заведена в консолях. Але базова означає
- * «в доларах у США», а людина в Польщі побачить злоті й інше число. Тому щойно
- * магазин відповість, ці константи не використовуються взагалі. */
-const _month = StorePrice(display: r'$9.99', amount: 9.99);
-const _year = StorePrice(display: r'$39.99', amount: 39.99);
-const _currency = r'$';
-
+ * Тепер немає відповіді, немає й числа: на місці ціни стоїть риска, а поруч
+ * написано, що саме сказав магазин. */
 class _PlanPanelState extends State<PlanPanel> {
   late String _plan = widget.pro == 'month' ? 'month' : 'year';
 
@@ -173,9 +153,16 @@ class _PlanPanelState extends State<PlanPanel> {
     _load();
   }
 
+  /// Що відповів магазин минулого разу. Показується на екрані, коли цін немає.
+  String _note = '';
+
   Future<void> _load() async {
     final plans = await Billing.plans();
-    if (mounted && plans.isNotEmpty) setState(() => _store = plans);
+    if (!mounted) return;
+    setState(() {
+      _store = plans;
+      _note = Billing.note;
+    });
   }
 
   /* Пошук за видом тарифу, а не за назвою товару: у кожній крамниці назва
@@ -187,32 +174,38 @@ class _PlanPanelState extends State<PlanPanel> {
     return null;
   }
 
-  StorePrice get _m {
-    final p = _found('month');
-    return p == null ? _month : StorePrice(display: p.display, amount: p.amount);
-  }
+  /* Чи магазин узагалі відповів.
+   *
+   * Доти екран малював базову ціну, коли магазин мовчав, і це була помилка:
+   * американські 9,99 і 39,99 виглядають точно так само, як справжня ціна
+   * американської вітрини. Відрізнити «працює» від «не працює» стало
+   * неможливо, і на цьому згоріла ціла година. Тепер немає відповіді, немає й
+   * чисел. */
+  bool get _live => _store.isNotEmpty;
 
-  StorePrice get _y {
-    final p = _found('year');
-    return p == null ? _year : StorePrice(display: p.display, amount: p.amount);
-  }
+  String? get _monthPrice => _found('month')?.display;
+  String? get _yearPrice => _found('year')?.display;
 
   /* Місячна вартість річної підписки, як її рахує людина в голові.
    *
    * Валюта береться з рядка магазину, а не підставляється своя: у ньому вже
    * стоїть і символ, і місцевий формат, і вигадати їх удруге означало б
    * показати «$3.33» тому, хто платить у злотих. */
-  String get _perMonth {
+  String? get _perMonth {
     final y = _found('year');
-    if (y == null) return '$_currency${(_year.amount / 12).toStringAsFixed(2)}';
+    if (y == null) return null;
     final per = (y.amount / 12).toStringAsFixed(2);
     // Число в рядку магазину замінюється порахованим, решта лишається як є.
     return y.display.replaceAll(RegExp(r'[\d.,]+'), per);
   }
 
-  /// Наскільки річна дешевша. Рахується, а не пишеться руками: зміниться ціна
-  /// в консолі, зміниться і відсоток.
-  int get _saving => ((1 - _y.amount / 12 / _m.amount) * 100).round();
+  /// Наскільки річна дешевша. Рахується з того, що прийшло, а не з наших чисел.
+  int? get _saving {
+    final m = _found('month');
+    final y = _found('year');
+    if (m == null || y == null || m.amount == 0) return null;
+    return ((1 - y.amount / 12 / m.amount) * 100).round();
+  }
 
   void _say(String text) {
     if (!mounted) return;
@@ -352,11 +345,13 @@ class _PlanPanelState extends State<PlanPanel> {
                   child: _PlanCard(
                     name: l.planYear,
                     // Чинний тариф позначається спокійно, а не як знижка.
-                    save: widget.pro == 'year' ? l.planCurrent : '-$_saving%',
+                    save: widget.pro == 'year'
+                        ? l.planCurrent
+                        : (_saving == null ? null : '-$_saving%'),
                     current: widget.pro == 'year',
                     price: _perMonth,
-                    unit: l.planPerMonth,
-                    note: l.planYearBilled(_y.display),
+                    unit: _live ? l.planPerMonth : null,
+                    note: _yearPrice == null ? null : l.planYearBilled(_yearPrice!),
                     on: _plan == 'year',
                     onTap: () => setState(() => _plan = 'year'),
                   ),
@@ -367,15 +362,27 @@ class _PlanPanelState extends State<PlanPanel> {
                     name: l.planMonth,
                     save: widget.pro == 'month' ? l.planCurrent : null,
                     current: widget.pro == 'month',
-                    price: _m.display,
-                    unit: l.planPerMonth,
-                    note: l.planMonthBilled,
+                    price: _monthPrice,
+                    unit: _live ? l.planPerMonth : null,
+                    note: _live ? l.planMonthBilled : null,
                     on: _plan == 'month',
                     onTap: () => setState(() => _plan = 'month'),
                   ),
                 ),
               ],
             ),
+
+            /* Магазин мовчить. Кажемо це прямо і показуємо, що саме він
+               відповів: без цього рядка «не працює» і «працює, просто ціна
+               така» виглядають однаково. */
+            if (!_live)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 10, CalviSize.gutter, 0),
+                child: Text(
+                  '${l.planStoreQuiet}\n$_note',
+                  style: context.t.labelSmall?.copyWith(color: c.faint, height: 1.4),
+                ),
+              ),
           ],
         ),
 
@@ -706,8 +713,11 @@ class _PlanCard extends StatelessWidget {
   });
 
   final String name;
-  final String price;
-  final String note;
+
+  /* Ціна від магазину. Порожньо означає, що магазин не відповів, і тоді на
+     її місці стоїть риска: вигадане число тут виглядало б як справжня ціна. */
+  final String? price;
+  final String? note;
   final bool on;
   final VoidCallback onTap;
 
@@ -795,7 +805,7 @@ class _PlanCard extends StatelessWidget {
                  дописувати до нього щось у перекладі не можна. */
               Text.rich(
                 TextSpan(
-                  text: price,
+                  text: price ?? '···',
                   children: [
                     if (unit != null)
                       TextSpan(
@@ -812,7 +822,8 @@ class _PlanCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 4),
-              Text(note, style: context.t.labelSmall?.copyWith(fontSize: 11)),
+              if (note != null)
+                Text(note!, style: context.t.labelSmall?.copyWith(fontSize: 11)),
             ],
           ),
         ),
