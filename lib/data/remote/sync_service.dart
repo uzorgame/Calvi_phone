@@ -97,11 +97,39 @@ class SyncService with WidgetsBindingObserver {
     try {
       final now = await _api.refreshSubscription();
       await db.syncDao.putTokens(balance: now.balance, unlimited: now.unlimited);
+      if (now.state != null) await _keepSubscription(now.state!);
       return now.unlimited;
     } on ApiFailure {
       return null;
     }
   }
+
+  /* Форма підписки для сторінки тарифу: знімок для першого кадру і свіжа
+     відповідь за ним. Тільки сервер знає все разом: який тариф діє, який
+     заплановано наступним, доки і чи поновиться. */
+  Future<SubscriptionState?> subscriptionSnapshot() async {
+    final raw = await db.syncDao.snapshot(subscriptionSnapshotKey);
+    if (raw == null || raw.isEmpty) return null;
+    try {
+      return SubscriptionState.fromWire(jsonDecode(raw) as Map<String, dynamic>);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<SubscriptionState?> subscription() async {
+    if (!await SyncRepository(db, _api).ensureAccount()) return null;
+    try {
+      final state = await _api.subscriptionState();
+      await _keepSubscription(state);
+      return state;
+    } on ApiFailure {
+      return null;
+    }
+  }
+
+  Future<void> _keepSubscription(SubscriptionState s) =>
+      db.syncDao.putSnapshot(subscriptionSnapshotKey, jsonEncode(s.toWire()));
 
   /// Минулі розбори, як їх востаннє віддав сервер. Null до першої відповіді.
   Future<List<WeekReviewData>?> weekReviewsSnapshot() async {

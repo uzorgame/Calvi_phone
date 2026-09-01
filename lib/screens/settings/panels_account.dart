@@ -6,6 +6,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../data/app_scope.dart';
 import '../../data/billing/billing.dart';
 import '../../data/local/database.dart' show TokenStateData;
+import '../../data/day.dart' show monthName;
+import '../../data/remote/api.dart' show SubscriptionState;
 
 import '../../data/legal.dart';
 import '../../data/settings.dart';
@@ -142,14 +144,16 @@ class _PlanPanelState extends State<PlanPanel> {
   StreamSubscription<TokenStateData?>? _watch;
   bool _has = false;
 
-  /* Який саме тариф, за словом магазину: 'month', 'year' або 'on', коли
-     підписка є, а строк невідомий. Сервер каже лише «лічильник знято» і не
-     каже, з якої підписки; це знає магазин, і в нього питаємо тільки напис. */
-  String? _kind;
+  /* Форма підписки від сервера: який тариф діє, який заплановано наступним,
+     доки і чи поновиться. Спершу знімок із минулого разу, потім свіжа відповідь.
+     Тільки сервер знає все разом: SDK магазину не показує запланованого
+     переходу, і саме через це сторінка казала «річна» людині, що щойно купила
+     місячну. */
+  SubscriptionState? _state;
 
   /* Що показати: порожньо це безкоштовний, далі вид тарифу. Доступ вирішує
-     сервер, магазин лише уточнює назву; без його відповіді стоїть 'on'. */
-  String get _pro => !_has ? '' : (_kind ?? 'on');
+     прапорець `unlimited`, вид береться з форми; без неї стоїть 'on'. */
+  String get _pro => !_has ? '' : (_state?.plan ?? 'on');
 
   /// Тарифи, як їх віддав магазин. Порожньо означає «ще не приїхали» або
   /// «магазин не підключений», і тоді на екрані стоять базові числа.
@@ -173,9 +177,9 @@ class _PlanPanelState extends State<PlanPanel> {
       if (has == _has) return;
       setState(() {
         _has = has;
-        if (!has) _kind = null;
+        if (!has) _state = null;
       });
-      if (has) unawaited(_loadKind());
+      if (has) unawaited(_loadState());
     });
   }
 
@@ -197,15 +201,30 @@ class _PlanPanelState extends State<PlanPanel> {
     });
   }
 
-  Future<void> _loadKind() async {
-    final kind = await Billing.activeKind();
+  Future<void> _loadState() async {
+    final sync = AppScope.maybeOf(context)?.sync;
+    if (sync == null) return;
+    final kept = await sync.subscriptionSnapshot();
     if (!mounted) return;
-    setState(() {
-      _kind = kind;
-      // Чинний тариф стає обраним: картка з «чинний» не має стояти без обведення.
-      if (kind == 'month' || kind == 'year') _plan = kind!;
-    });
+    if (kept != null) setState(() => _take(kept));
+    final fresh = await sync.subscription();
+    if (!mounted || fresh == null) return;
+    setState(() => _take(fresh));
   }
+
+  /// Чинний тариф стає обраним: картка з «чинний» не має стояти без обведення.
+  void _take(SubscriptionState s) {
+    _state = s;
+    if (s.plan == 'month' || s.plan == 'year') _plan = s.plan!;
+  }
+
+  /// «2 вересня»: доки оплачено, за словом сервера.
+  String? get _when {
+    final d = _state?.until;
+    return d == null ? null : '${d.day} ${monthName(d.month)}';
+  }
+
+  String _name(L l, String plan) => plan == 'year' ? l.planYearly : l.planMonthly;
 
   /* Пошук за видом тарифу, а не за назвою товару: у кожній крамниці назва
      своя, а місяць і рік скрізь місяць і рік. */
@@ -333,7 +352,7 @@ class _PlanPanelState extends State<PlanPanel> {
     final sync = AppScope.of(context).sync;
     final confirmed = await sync?.confirmPurchase();
     if (!mounted) return;
-    unawaited(_loadKind());
+    await _loadState();
     if (confirmed != true) unawaited(sync?.now() ?? Future<void>.value());
   }
 
@@ -373,21 +392,45 @@ class _PlanPanelState extends State<PlanPanel> {
     if (mounted) setState(() => _busy = false);
   }
 
-  /* Що сказати про поточний стан. Рядок про дату поновлення тут не стоїть, хоч
-     у демці він є: сервер віддає застосунку тільки `unlimited`, а вигадана
-     дата на екрані підписки гірша за її відсутність. */
-  List<(String, String)> _now(L l) => switch (_pro) {
-    '' => [(l.planPlan, l.planFree), (l.planTokens, l.planTokensFree)],
-    'year' => [(l.planPlan, l.planYearly), (l.planTokens, l.planTokensPro)],
-    'month' => [(l.planPlan, l.planMonthly), (l.planTokens, l.planTokensPro)],
-    _ => [(l.planPlan, l.planOn), (l.planTokens, l.planTokensPro)],
-  };
+  /* Що сказати про поточний стан. Дата тут справжня, з сервера: доти рядка не
+     було, бо сервер віддавав лише `unlimited`, а вигадана дата на екрані
+     підписки гірша за її відсутність. */
+  List<(String, String)> _now(L l) {
+    if (_pro.isEmpty) return [(l.planPlan, l.planFree), (l.planTokens, l.planTokensFree)];
+    final name = switch (_pro) { 'year' => l.planYearly, 'month' => l.planMonthly, _ => l.planOn };
+    final s = _state;
+    final when = _when;
+    return [
+      (l.planPlan, name),
+      (l.planTokens, l.planTokensPro),
+      /* Третій рядок про майбутнє: запланований перехід на інший тариф, дата
+         поновлення або дата кінця, якщо поновлення вимкнене в магазині. Людина,
+         що щойно купила місячну поверх річної, має прочитати тут, коли саме
+         місячна почнеться, а не гадати, чи пройшла оплата. */
+      if (s != null && when != null)
+        if (s.planNext != null)
+          (l.planNext, l.planFrom(_name(l, s.planNext!), when))
+        else if (s.renews)
+          (l.planRenews, when)
+        else
+          (l.planUntil, when),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
     final c = context.c;
     final has = _pro.isNotEmpty;
+    final s = _state;
+    final when = _when;
+
+    /* Перехід на інший тариф робиться тут, а не в магазині: обрана картка, що
+       не збігається ні з чинним тарифом, ні з уже запланованим, перетворює
+       кнопку на «Перейти». Магазин сам покаже, що і коли зміниться, і сам
+       перерахує гроші. Скасування лишається за магазином, так вимагають
+       правила обох. */
+    final switching = has && s?.plan != null && _plan != s!.plan && _plan != s.planNext;
 
     return CalviScreen(
       trailing: const CalviMenuButton(),
@@ -396,9 +439,13 @@ class _PlanPanelState extends State<PlanPanel> {
       /* Куплене не продають удруге: скасування і зміна тарифу живуть у
          магазині, а не в застосунку, так вимагають правила обох сторів. */
       foot: CalviButton(
-        label: has ? l.planManage : l.planBuy,
+        label: !has
+            ? l.planBuy
+            : switching
+            ? (_plan == 'year' ? l.planSwitchYear : l.planSwitchMonth)
+            : l.planManage,
         busy: _busy,
-        onTap: has ? _manage : _buy,
+        onTap: has && !switching ? _manage : _buy,
         second: has ? l.planClose : l.planLater,
         onSecond: () => (widget.onBack ?? Navigator.of(context).pop)(),
       ),
@@ -445,10 +492,13 @@ class _PlanPanelState extends State<PlanPanel> {
                   child: _PlanCard(
                     name: l.planYear,
                     // Чинний тариф позначається спокійно, а не як знижка.
+                    // Запланований тариф позначається так само тихо, як чинний.
                     save: _pro == 'year'
                         ? l.planCurrent
+                        : s?.planNext == 'year' && when != null
+                        ? l.planFromShort(when)
                         : (_saving == null ? null : '-$_saving%'),
-                    current: _pro == 'year',
+                    current: _pro == 'year' || s?.planNext == 'year',
                     price: _perMonth,
                     unit: _live ? l.planPerMonth : null,
                     note: _yearPrice == null ? null : l.planYearBilled(_yearPrice!),
@@ -460,8 +510,12 @@ class _PlanPanelState extends State<PlanPanel> {
                 Expanded(
                   child: _PlanCard(
                     name: l.planMonth,
-                    save: _pro == 'month' ? l.planCurrent : null,
-                    current: _pro == 'month',
+                    save: _pro == 'month'
+                        ? l.planCurrent
+                        : s?.planNext == 'month' && when != null
+                        ? l.planFromShort(when)
+                        : null,
+                    current: _pro == 'month' || s?.planNext == 'month',
                     price: _monthPrice,
                     unit: _live ? l.planPerMonth : null,
                     note: _live ? l.planMonthBilled : null,

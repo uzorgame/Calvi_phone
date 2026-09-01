@@ -2577,6 +2577,18 @@ abstract class L {
   /// **'Free'**
   String get planFree;
 
+  /// No description provided for @planFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'{plan} from {date}'**
+  String planFrom(String plan, String date);
+
+  /// No description provided for @planFromShort.
+  ///
+  /// In en, this message translates to:
+  /// **'from {date}'**
+  String planFromShort(String date);
+
   /// No description provided for @planLater.
   ///
   /// In en, this message translates to:
@@ -2606,6 +2618,12 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Pro monthly'**
   String get planMonthly;
+
+  /// No description provided for @planNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get planNext;
 
   /// No description provided for @planNothingToRestore.
   ///
@@ -2715,6 +2733,12 @@ abstract class L {
   /// **'The subscription renews automatically until cancelled. You can cancel at any time in the settings of the store it was purchased from.'**
   String get planRenewal;
 
+  /// No description provided for @planRenews.
+  ///
+  /// In en, this message translates to:
+  /// **'Renews'**
+  String get planRenews;
+
   /// No description provided for @planRestore.
   ///
   /// In en, this message translates to:
@@ -2751,6 +2775,18 @@ abstract class L {
   /// **'The store is not responding. Try again later'**
   String get planStoreQuiet;
 
+  /// No description provided for @planSwitchMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to monthly'**
+  String get planSwitchMonth;
+
+  /// No description provided for @planSwitchYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to yearly'**
+  String get planSwitchYear;
+
   /// No description provided for @planTariffs.
   ///
   /// In en, this message translates to:
@@ -2786,6 +2822,12 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Unlimited'**
   String get planTokensPro;
+
+  /// No description provided for @planUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Active until'**
+  String get planUntil;
 
   /// No description provided for @planYear.
   ///

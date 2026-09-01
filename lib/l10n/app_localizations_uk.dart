@@ -1421,6 +1421,16 @@ class LUk extends L {
   String get planFree => 'Безкоштовний';
 
   @override
+  String planFrom(String plan, String date) {
+    return '$plan з $date';
+  }
+
+  @override
+  String planFromShort(String date) {
+    return 'з $date';
+  }
+
+  @override
   String get planLater => 'Не зараз';
 
   @override
@@ -1434,6 +1444,9 @@ class LUk extends L {
 
   @override
   String get planMonthly => 'Pro місячна';
+
+  @override
+  String get planNext => 'Далі';
 
   @override
   String get planNothingToRestore => 'Покупок на цьому акаунті немає';
@@ -1491,6 +1504,9 @@ class LUk extends L {
       'Підписка поновлюється сама, доки її не скасувати. Скасувати можна будь-коли в налаштуваннях магазину, з якого вона оформлена.';
 
   @override
+  String get planRenews => 'Поновиться';
+
+  @override
   String get planRestore => 'Відновити покупки';
 
   @override
@@ -1510,6 +1526,12 @@ class LUk extends L {
   String get planStoreQuiet => 'Магазин не відповідає. Спробуй пізніше';
 
   @override
+  String get planSwitchMonth => 'Перейти на місячну';
+
+  @override
+  String get planSwitchYear => 'Перейти на річну';
+
+  @override
   String get planTariffs => 'Тарифи';
 
   @override
@@ -1526,6 +1548,9 @@ class LUk extends L {
 
   @override
   String get planTokensPro => 'Без обмежень';
+
+  @override
+  String get planUntil => 'Діє до';
 
   @override
   String get planYear => 'Рік';

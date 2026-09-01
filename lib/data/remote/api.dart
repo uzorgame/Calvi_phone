@@ -90,11 +90,24 @@ class CalviApi {
    * що їде в обміні. Викликається одразу після вікна магазину і після
    * відновлення покупок: чекати чергового обміну з лічильником на екрані
    * означало б, що людина читає «не спрацювало». */
-  Future<({int balance, bool unlimited})> refreshSubscription() async {
+  Future<({int balance, bool unlimited, SubscriptionState? state})> refreshSubscription() async {
     final body = await _post('/v1/subscriptions/refresh', const {});
     final t = body['tokens'] as Map<String, dynamic>;
-    return (balance: (t['balance'] as num).round(), unlimited: t['unlimited'] as bool? ?? false);
+    final s = body['state'] as Map<String, dynamic>?;
+    return (
+      balance: (t['balance'] as num).round(),
+      unlimited: t['unlimited'] as bool? ?? false,
+      state: s == null ? null : SubscriptionState.fromWire(s),
+    );
   }
+
+  /* Форма підписки для сторінки тарифу.
+   *
+   * Тільки сервер знає все разом: який товар діє, який заплановано наступним,
+   * доки і чи поновиться. SDK магазину запланованого переходу не показує, і
+   * саме через це сторінка казала «річна» людині, що щойно купила місячну. */
+  Future<SubscriptionState> subscriptionState() async =>
+      SubscriptionState.fromWire(await _get('/v1/subscriptions/state'));
 
   /* Профіль возиться своїм маршрутом, а не в загальному обміні.
    *
@@ -1307,6 +1320,53 @@ class LabelRead {
   /// Не вийшло з іншої причини: мережа, сесія, сервер. Слова для цього добирає
   /// екран, бо тільки він знає мову застосунку.
   final ApiFailure? failure;
+}
+
+/// Ключ знімка форми підписки в місцевій базі. Знімок, а не таблиця: це
+/// відповідь сервера цілком, і показувати її треба такою, якою вона прийшла.
+const subscriptionSnapshotKey = 'subscription';
+
+/// Форма підписки, як її знає сервер. Порожній вид тарифу означає «Pro, а який
+/// саме, сервер не розібрав»: сторінка тоді пише просто «Pro».
+class SubscriptionState {
+  const SubscriptionState({
+    required this.unlimited,
+    this.plan,
+    this.planNext,
+    this.until,
+    this.renews = true,
+  });
+
+  factory SubscriptionState.fromWire(Map<String, dynamic> w) => SubscriptionState(
+    unlimited: w['unlimited'] as bool? ?? false,
+    plan: w['plan'] as String?,
+    planNext: w['plan_next'] as String?,
+    until: w['until'] is String ? DateTime.tryParse(w['until'] as String)?.toLocal() : null,
+    renews: w['renews'] as bool? ?? true,
+  );
+
+  final bool unlimited;
+
+  /// 'month' або 'year'. Порожньо, коли вид невідомий.
+  final String? plan;
+
+  /// Тариф, на який заплановано перехід із наступного поновлення. Порожньо,
+  /// коли зміни немає. У Apple пониження набирає сили лише з наступного
+  /// поновлення, і доти чинним лишається старий тариф.
+  final String? planNext;
+
+  /// Доки оплачено: дата поновлення, або кінця, якщо поновлення вимкнене.
+  final DateTime? until;
+  final bool renews;
+
+  /// Те саме назад у дріт, для знімка в місцевій базі.
+  Map<String, dynamic> toWire() => {
+    'unlimited': unlimited,
+    'plan': plan,
+    'plan_next': planNext,
+    'until': until?.toUtc().toIso8601String(),
+    'renews': renews,
+  };
 }
 
 class ApiFailure implements Exception {

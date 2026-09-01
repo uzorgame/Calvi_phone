@@ -185,6 +185,8 @@ class LoginService {
     /* Разом з акаунтом іде і його баланс: інакше сторінка підписки ще хвилину
        показувала б «Pro» тому, хто щойно вийшов. */
     await db.syncDao.clearTokens();
+    // І форма підписки: вона теж належала акаунту, з якого вийшли.
+    await db.syncDao.putSnapshot(subscriptionSnapshotKey, '');
     api.token = null;
     // Далі покупки цього пристрою рахуються анонімними, поки хтось не увійде.
     await Billing.identify(null);

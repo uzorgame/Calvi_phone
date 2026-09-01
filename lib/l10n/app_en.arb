@@ -435,6 +435,23 @@
       }
     }
   },
+  "@planFrom": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@planFromShort": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "@planYearBilled": {
     "placeholders": {
       "price": {
@@ -1192,11 +1209,14 @@
   "planCurrent": "current",
   "planFailed": "The purchase did not go through",
   "planFree": "Free",
+  "planFrom": "{plan} from {date}",
+  "planFromShort": "from {date}",
   "planLater": "Not now",
   "planManage": "Manage in the store",
   "planMonth": "Month",
   "planMonthBilled": "billed monthly",
   "planMonthly": "Pro monthly",
+  "planNext": "Next",
   "planNothingToRestore": "No purchases on this account",
   "planNow": "Now",
   "planOn": "Pro",
@@ -1215,18 +1235,22 @@
   "planPlan": "Plan",
   "planPrivacy": "Privacy Policy",
   "planRenewal": "The subscription renews automatically until cancelled. You can cancel at any time in the settings of the store it was purchased from.",
+  "planRenews": "Renews",
   "planRestore": "Restore purchases",
   "planSignInGo": "Sign in",
   "planSignInNote": "The subscription is tied to an account with an email. That way it survives a new phone and works on all your devices.",
   "planSignInTitle": "Sign in first",
   "planStoreOffline": "The store is not responding. Check your internet connection",
   "planStoreQuiet": "The store is not responding. Try again later",
+  "planSwitchMonth": "Switch to monthly",
+  "planSwitchYear": "Switch to yearly",
   "planTariffs": "Plans",
   "planTerms": "Terms of Use",
   "planTitle": "Subscription",
   "planTokens": "Tokens",
   "planTokensFree": "40 a month",
   "planTokensPro": "Unlimited",
+  "planUntil": "Active until",
   "planYear": "Year",
   "planYearBilled": "{price} once a year",
   "planYearly": "Pro yearly",

@@ -1413,6 +1413,16 @@ class LEn extends L {
   String get planFree => 'Free';
 
   @override
+  String planFrom(String plan, String date) {
+    return '$plan from $date';
+  }
+
+  @override
+  String planFromShort(String date) {
+    return 'from $date';
+  }
+
+  @override
   String get planLater => 'Not now';
 
   @override
@@ -1426,6 +1436,9 @@ class LEn extends L {
 
   @override
   String get planMonthly => 'Pro monthly';
+
+  @override
+  String get planNext => 'Next';
 
   @override
   String get planNothingToRestore => 'No purchases on this account';
@@ -1483,6 +1496,9 @@ class LEn extends L {
       'The subscription renews automatically until cancelled. You can cancel at any time in the settings of the store it was purchased from.';
 
   @override
+  String get planRenews => 'Renews';
+
+  @override
   String get planRestore => 'Restore purchases';
 
   @override
@@ -1502,6 +1518,12 @@ class LEn extends L {
   String get planStoreQuiet => 'The store is not responding. Try again later';
 
   @override
+  String get planSwitchMonth => 'Switch to monthly';
+
+  @override
+  String get planSwitchYear => 'Switch to yearly';
+
+  @override
   String get planTariffs => 'Plans';
 
   @override
@@ -1518,6 +1540,9 @@ class LEn extends L {
 
   @override
   String get planTokensPro => 'Unlimited';
+
+  @override
+  String get planUntil => 'Active until';
 
   @override
   String get planYear => 'Year';

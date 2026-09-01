@@ -68,6 +68,23 @@
       }
     }
   },
+  "@planFrom": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@planFromShort": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "@planYearBilled": {
     "placeholders": {
       "price": {
@@ -615,11 +632,14 @@
   "planCurrent": "чинний",
   "planFailed": "Покупка не пройшла",
   "planFree": "Безкоштовний",
+  "planFrom": "{plan} з {date}",
+  "planFromShort": "з {date}",
   "planLater": "Не зараз",
   "planManage": "Керувати в магазині",
   "planMonth": "Місяць",
   "planMonthBilled": "щомісячне списання",
   "planMonthly": "Pro місячна",
+  "planNext": "Далі",
   "planNothingToRestore": "Покупок на цьому акаунті немає",
   "planNow": "Зараз",
   "planOn": "Pro",
@@ -638,18 +658,22 @@
   "planPlan": "План",
   "planPrivacy": "Політика приватності",
   "planRenewal": "Підписка поновлюється сама, доки її не скасувати. Скасувати можна будь-коли в налаштуваннях магазину, з якого вона оформлена.",
+  "planRenews": "Поновиться",
   "planRestore": "Відновити покупки",
   "planSignInGo": "Увійти",
   "planSignInNote": "Підписка привʼязується до облікового запису з поштою. Так вона не загубиться при зміні телефона і буде на всіх твоїх пристроях.",
   "planSignInTitle": "Спочатку увійди в профіль",
   "planStoreOffline": "Магазин не відповідає. Перевір підключення до інтернету",
   "planStoreQuiet": "Магазин не відповідає. Спробуй пізніше",
+  "planSwitchMonth": "Перейти на місячну",
+  "planSwitchYear": "Перейти на річну",
   "planTariffs": "Тарифи",
   "planTerms": "Умови користування",
   "planTitle": "Підписка",
   "planTokens": "Токени",
   "planTokensFree": "40 на місяць",
   "planTokensPro": "Без обмежень",
+  "planUntil": "Діє до",
   "planYear": "Рік",
   "planYearBilled": "{price} раз на рік",
   "planYearly": "Pro річна",
