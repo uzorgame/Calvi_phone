@@ -110,7 +110,7 @@ class DayReader {
   /// Підсумки багатьох днів одним запитом, для стрічки тижня і аналітики.
   ///
   /// Не цикл із [watch] по кожному дню: тримісячний період це дев'яносто днів, а
-  /// значить дев'яносто запитів на кожну перемальовку. Тут три запити на всю
+  /// значить дев'яносто запитів на кожну перемальовку. Тут пʼять запитів на всю
   /// картину, і вона оновлюється сама, щойно щось записали.
   ///
   /// Глибина покриває найдовше вікно аналітики: період «Рік» рахує 364 дні
@@ -122,7 +122,13 @@ class DayReader {
     return db.diaryDao.changes().asyncMap((_) => db.diaryDao.readSince(from)).map((rows) {
       final totals = <int, DayTotals>{};
       final water = <int, int>{};
+      final burned = <int, int>{};
       final weights = <int, double>{};
+
+      for (final w in rows.workouts) {
+        final key = _dayOffset(w.day);
+        burned[key] = (burned[key] ?? 0) + w.kcal;
+      }
 
       for (final m in rows.meals) {
         final key = _dayOffset(m.day);
@@ -162,6 +168,7 @@ class DayReader {
       return DayStats(
         totals: totals,
         water: water,
+        burned: burned,
         weights: weights,
         measures: measures,
         demo: false,

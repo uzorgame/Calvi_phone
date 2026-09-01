@@ -23,15 +23,18 @@ void main() {
     demo: false,
   );
 
+  /* Вікно одне на застосунок: те саме, що фарбує кружечки в стрічці
+     (`kcalSlack`). Доти серія мала власне, вужче, і тиждень зелених днів стояв
+     над кільцем із нулем. */
   group('вікно вдалого дня', () {
-    test('схуднути: від норми мінус 300 до самої норми', () {
+    test('схуднути: від норми мінус 400 до самої норми', () {
       const norm = 2000;
       for (final (kcal, want) in [
         (2000, true),
         (1700, true),
-        (1850, true),
+        (1600, true),
         (2001, false),
-        (1699, false),
+        (1599, false),
         (1200, false),
       ]) {
         expect(
@@ -42,14 +45,14 @@ void main() {
       }
     });
 
-    test('тримати: плюс-мінус 300', () {
+    test('тримати: плюс-мінус 400', () {
       const norm = 2000;
       for (final (kcal, want) in [
         (2000, true),
-        (2300, true),
-        (1700, true),
-        (2301, false),
-        (1699, false),
+        (2400, true),
+        (1600, true),
+        (2401, false),
+        (1599, false),
       ]) {
         expect(
           dayHit(kcal: kcal, norm: norm, direction: Direction.keep),
@@ -59,15 +62,23 @@ void main() {
       }
     });
 
-    test('набрати: від норми до плюс 500', () {
+    test('набрати: норма і все, що вище', () {
       const norm = 2000;
-      for (final (kcal, want) in [(2000, true), (2500, true), (2501, false), (1999, false)]) {
+      for (final (kcal, want) in [(2000, true), (2500, true), (3200, true), (1999, false)]) {
         expect(
           dayHit(kcal: kcal, norm: norm, direction: Direction.gain),
           want,
           reason: '$kcal ккал',
         );
       }
+    });
+
+    /* Тренування віднімається від зʼїденого, а норма стоїть на місці: день на
+       2600 із пробіжкою на 700 це день на 1900. */
+    test('спалене на тренуванні знімається зі зʼїденого', () {
+      expect(dayHit(kcal: 2600, norm: 2000, direction: Direction.lose), isFalse);
+      expect(dayHit(kcal: 2600, burned: 700, norm: 2000, direction: Direction.lose), isTrue);
+      expect(dayOver(kcal: 2600, burned: 700, norm: 2000, direction: Direction.lose), isFalse);
     });
   });
 
@@ -100,20 +111,39 @@ void main() {
     });
 
     test('те саме для тих, хто тримає вагу', () {
-      final stats = withDays({0: 2400, -1: 2000, -2: 2000});
+      final stats = withDays({0: 2500, -1: 2000, -2: 2000});
       expect(stats.streakOn(profile(direction: Direction.keep)), 0);
 
-      final ok = withDays({0: 2250, -1: 2000, -2: 2000});
-      expect(ok.streakOn(profile(direction: Direction.keep)), 2, reason: '2250 ще в межах +300');
+      final ok = withDays({0: 2400, -1: 2000, -2: 2000});
+      expect(ok.streakOn(profile(direction: Direction.keep)), 2, reason: '2400 ще в межах +400');
     });
 
-    /* Для набору верхня межа інша, але правило те саме: понад +500 необоротно. */
-    test('для набору обриває тільки понад плюс 500', () {
+    /* Для набору перебору не існує: більше за ціль це і є ціль, тому сьогодні
+       обірвати серію там нічим. */
+    test('для набору перебір серію не обриває', () {
       final under = withDays({0: 2400, -1: 2200, -2: 2200});
       expect(under.streakOn(profile(direction: Direction.gain)), 2);
 
-      final over = withDays({0: 2600, -1: 2200, -2: 2200});
-      expect(over.streakOn(profile(direction: Direction.gain)), 0);
+      final over = withDays({0: 3000, -1: 2200, -2: 2200});
+      expect(over.streakOn(profile(direction: Direction.gain)), 2);
+    });
+
+    /* Спалене рахується і тут: серія бачить день так само, як кружечок. */
+    test('тренування рятує день і в серії', () {
+      final plain = withDays({-1: 2600, -2: 1900});
+      expect(plain.streakOn(profile(direction: Direction.lose)), 0);
+
+      final trained = DayStats(
+        totals: {
+          -1: const DayTotals(kcal: 2600, protein: 0, fat: 0, carbs: 0),
+          -2: const DayTotals(kcal: 1900, protein: 0, fat: 0, carbs: 0),
+        },
+        burned: const {-1: 700},
+        water: const {},
+        weights: const {},
+        demo: false,
+      );
+      expect(trained.streakOn(profile(direction: Direction.lose)), 2);
     });
 
     /* Недобір оборотний: до півночі ще можна доїсти, тому мовчимо. */

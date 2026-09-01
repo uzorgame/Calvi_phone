@@ -162,13 +162,20 @@ void main() {
       );
     });
 
-    test('тренування піднімає норму дня', () {
+    test('тренування віднімається від зʼїденого, а норма стоїть', () {
       expect(
         withKcal(2600).stateOn(yesterday, goalKcal: 2000, direction: Direction.lose),
         DayState.over,
       );
+      final trained = DayStats(
+        totals: const {yesterday: DayTotals(kcal: 2600, protein: 0, fat: 0, carbs: 0)},
+        burned: const {yesterday: 700},
+        water: const {},
+        weights: const {},
+        demo: false,
+      );
       expect(
-        withKcal(2600).stateOn(yesterday, goalKcal: 2000, direction: Direction.lose, burned: 700),
+        trained.stateOn(yesterday, goalKcal: 2000, direction: Direction.lose),
         DayState.ok,
         reason: 'спалене на тренуванні не врахувалось',
       );

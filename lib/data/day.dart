@@ -29,26 +29,18 @@ class DayGoal {
   final int waterMl;
 }
 
-/// Наскільки можна промахнутись повз норму, і день усе одно вдалий.
-///
-/// Набрати рівно норму неможливо, тому це вікно, а не число. Ширина в кожної
-/// цілі своя, і несиметрична навмисно: тому, хто набирає, перебір допомагає, а
-/// тому, хто худне, недобір не шкодить настільки ж.
-///
-/// Вихід за вікно з будь-якого боку це невдалий день. Недоїсти на тисячу це не
-/// успіх худнення, а голодування, і рахувати його як успіх означало б хвалити
-/// за нього.
-({int under, int over}) _window(Direction d) => switch (d) {
-  Direction.lose => (under: 300, over: 0),
-  Direction.keep => (under: 300, over: 300),
-  Direction.gain => (under: 0, over: 500),
-};
-
-/// Чи день закінчився всередині вікна своєї цілі.
-bool dayHit({required int kcal, required int norm, required Direction direction}) {
-  final w = _window(direction);
-  return kcal >= norm - w.under && kcal <= norm + w.over;
-}
+/* Чи день закінчився всередині вікна своєї цілі.
+ *
+ * Обгортка над [verdictFor], а не власне правило. Доти тут жило друге вікно,
+ * на сто калорій вужче за те, що фарбує кружечки, і людина бачила тиждень
+ * зелених днів над кільцем із нулем: кружечок казав «вдалий», серія казала
+ * «промах». Правило вдалого дня одне на застосунок, і живе воно у [verdictFor]. */
+bool dayHit({
+  required int kcal,
+  int burned = 0,
+  required int norm,
+  required Direction direction,
+}) => verdictFor(eaten: kcal, burned: burned, norm: norm, direction: direction) == DayState.ok;
 
 /// Чи день уже вийшов за верхню межу вікна.
 ///
@@ -57,8 +49,14 @@ bool dayHit({required int kcal, required int norm, required Direction direction}
 /// уже не стане вдалим до вечора. Недобір оборотний: до півночі ще можна доїсти.
 ///
 /// Саме тому сьогоднішній день уміє серію обірвати, але не вміє її подовжити.
-bool dayOver({required int kcal, required int norm, required Direction direction}) =>
-    kcal > norm + _window(direction).over;
+bool dayOver({
+  required int kcal,
+  int burned = 0,
+  required int norm,
+  required Direction direction,
+}) =>
+    verdictFor(eaten: kcal, burned: burned, norm: norm, direction: direction, finished: false) ==
+    DayState.over;
 
 /// Everything logged on one day, plus which cards it carries.
 class DayModel {
@@ -85,10 +83,18 @@ class DayModel {
    * «прийнято» в кожному дні тижня, зокрема в майбутніх. */
   final Set<String> medTakes;
 
-  /// Calories spent on training. They come back into the norm, so this is a
+  /// Calories spent on training. They come off what was eaten, so this is a
   /// figure derived from the sessions rather than stored beside them: two places
   /// to write the same number is one place to get it wrong.
   int get burned => workouts.fold<int>(0, (s, w) => s + w.kcal);
+
+  /* Зʼїдене мінус спалене: число, з яким день порівнюється з нормою.
+   *
+   * Норма дня не росте від тренування. Доти спалене додавалось до норми, і
+   * підпис на картці казав «з 2 628», хоча людина ставила собі 2 220: число
+   * цілі пливло щодня. Тепер ціль стоїть на місці, а тренування зменшує те,
+   * що зараховано зʼїденим. Залишок той самий, читається чесніше. */
+  int get net => totals.kcal - burned;
 
   DayTotals get totals {
     var kcal = 0, protein = 0, fat = 0, carbs = 0;
@@ -197,8 +203,16 @@ const kcalSlack = 400;
 ///   * **утримання**: той самий запас, але в обидва боки.
 ///
 /// День без записів не оцінюється взагалі: порожній кружечок це не вирок.
+///
+/// **Це єдине правило вдалого дня на застосунок.** Кружечки в стрічці, серія в
+/// кільці, підсумок тижня і аналітика питають його, а не тримають по вікну на
+/// брата: два вікна вже розходились, і людина бачила зелений тиждень над нулем.
+///
+/// Тренування віднімається від зʼїденого, а норму не чіпає: [burned] це те, що
+/// пішло на рух, і день порівнюється з нормою тим, що лишилось.
 DayState verdictFor({
   required int eaten,
+  int burned = 0,
   required int norm,
   required Direction direction,
   bool logged = true,
@@ -207,17 +221,30 @@ DayState verdictFor({
   bool finished = true,
 }) {
   if (!logged || eaten <= 0) return DayState.empty;
+  final net = eaten - burned;
 
   final ceiling = direction == Direction.lose ? norm : norm + kcalSlack;
   // Перебрати можна й до вечора, і це вже факт, а не прогноз.
-  if (direction != Direction.gain && eaten > ceiling) return DayState.over;
+  if (direction != Direction.gain && net > ceiling) return DayState.over;
   if (!finished) return DayState.pending;
 
   return switch (direction) {
-    Direction.gain => eaten >= norm ? DayState.ok : DayState.under,
-    _ => eaten < norm - kcalSlack ? DayState.under : DayState.ok,
+    Direction.gain => net >= norm ? DayState.ok : DayState.under,
+    _ => net < norm - kcalSlack ? DayState.under : DayState.ok,
   };
 }
+
+/* Вікно вдалого дня числами: від і до, відносно норми.
+ *
+ * Те саме правило, що у [verdictFor], тільки як відрізок, для шкал: тиждень
+ * малює, де стоїть середнє відносно вікна, і зелена зона шкали має бути рівно
+ * цим відрізком. Для набору верхньої межі немає: більше за ціль там не помилка,
+ * а власне ціль, тому вгору шкала показує запас. */
+({int under, int over}) goalWindow(Direction d) => switch (d) {
+  Direction.lose => (under: kcalSlack, over: 0),
+  Direction.keep => (under: kcalSlack, over: kcalSlack),
+  Direction.gain => (under: 0, over: kcalSlack),
+};
 
 /* --- Сьогодні ---
  *

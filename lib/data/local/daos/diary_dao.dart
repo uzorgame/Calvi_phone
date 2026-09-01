@@ -611,7 +611,13 @@ class DiaryDao extends DatabaseAccessor<CalviDb> with _$DiaryDaoMixin {
 
   /// Усе, що записано з [from], одним знімком.
   Future<
-    ({List<MealRow> meals, List<WaterLog> water, List<Weight> weights, List<Measurement> measures})
+    ({
+      List<MealRow> meals,
+      List<WaterLog> water,
+      List<Weight> weights,
+      List<Measurement> measures,
+      List<WorkoutRow> workouts,
+    })
   >
   readSince(DateTime from) async => (
     meals: await (select(
@@ -619,6 +625,10 @@ class DiaryDao extends DatabaseAccessor<CalviDb> with _$DiaryDaoMixin {
     )..where((t) => t.at.isBiggerOrEqualValue(from) & t.deletedAt.isNull())).get(),
     water: await (select(
       waterLogs,
+    )..where((t) => t.at.isBiggerOrEqualValue(from) & t.deletedAt.isNull())).get(),
+    // Тренування теж: без них минулі дні судились би, ніби людина не рухалась.
+    workouts: await (select(
+      workouts,
     )..where((t) => t.at.isBiggerOrEqualValue(from) & t.deletedAt.isNull())).get(),
     weights:
         await (select(weights)

@@ -15,6 +15,7 @@ class WeekDay {
     required this.date,
     required this.label,
     required this.kcal,
+    this.burned = 0,
     required this.protein,
     required this.fat,
     required this.carbs,
@@ -28,7 +29,11 @@ class WeekDay {
   /// Дві літери, як їх друкує стрічка: «ПН», «ВТ».
   final String label;
 
+  /// Зʼїдене мінус спалене: те саме число, що на картці дня і в кружечку.
   final int kcal;
+
+  /// Скільки з зʼїденого пішло на тренування.
+  final int burned;
 
   /// Грами складників цього дня: стовпчик каже, з чого склались калорії.
   final int protein;
@@ -97,6 +102,34 @@ class WeekSummary {
   /// Наскільки середнє відхилилось від норми. Додатне означає перебір.
   int get offNorm => avgKcal - normKcal;
 
+  /* Де стоїть тиждень на шкалі недобору й перебору: від -1 до 1.
+   *
+   * Шкала та сама, що й вердикт дня. Середня третина шкали це вікно вдалого
+   * дня цілком: середнє всередині вікна стоїть у зеленому, і тільки за його
+   * межами позначка йде в червоне, доїжджаючи до краю за [_far] калорій поза
+   * вікном. Доти шкала мала свою власну міру, чотириста від норми до краю, і
+   * людина, що щодня їла норму мінус двісті п'ятдесят (усі кружечки зелені),
+   * бачила позначку на дві третини шляху до червоного. */
+  double meterOn(Direction direction) {
+    final w = goalWindow(direction);
+    final lo = -w.under.toDouble();
+    final hi = w.over.toDouble();
+    final center = (lo + hi) / 2;
+    final half = (hi - lo) / 2;
+    final off = offNorm - center;
+
+    // Усередині вікна: рівномірно по середній третині.
+    if (off.abs() <= half) return half == 0 ? 0 : off / half / 3;
+
+    // Поза вікном: решта шкали за [_far] калорій від краю вікна.
+    final beyond = (off.abs() - half) / _far;
+    return off.sign * (1 / 3 + (2 / 3) * (beyond > 1 ? 1 : beyond));
+  }
+
+  /// Скільки поза вікном це вже край шкали. Приблизно повноцінний прийом їжі:
+  /// далі за нього деталі не важливі, важливо тільки те, що людина далеко.
+  static const _far = 400.0;
+
   /// Скільки ваги пішло або прийшло за тиждень. Без двох зважувань `null`.
   double? get weightChange =>
       weightFrom == null || weightTo == null ? null : weightTo! - weightFrom!;
@@ -107,6 +140,14 @@ class WeekSummary {
 /// Середнє рахується **по записаних днях, а не по семи**. День, який людина
 /// забула записати, це не день, коли вона нічого не їла, і ділити на нього
 /// означало б занижувати середнє за те, що вона не відкрила застосунок.
+///
+/// **І без сьогодні.** День, що триває, це не день, а його початок: о десятій
+/// ранку в ньому лежить самий сніданок, і середнє з ним щоранку провалювалось
+/// у «недобір», а позначка на шкалі їхала вліво. Сьогодні входить у середнє
+/// лише тоді, коли інших записаних днів у тижні ще немає: інакше картка в
+/// понеділок мовчала б цілий день.
+///
+/// Калорії тут нетто: зʼїдене мінус спалене, як на картці дня і в кружечках.
 WeekSummary weekSummary(DayStats stats, SettingsState s) {
   final norm = dailyKcal(s);
 
@@ -121,6 +162,9 @@ WeekSummary weekSummary(DayStats stats, SettingsState s) {
 
   final byDay = <WeekDay>[];
 
+  bool hit(int date, DayTotals totals) =>
+      dayHit(kcal: totals.kcal, burned: stats.burnedOn(date), norm: norm, direction: s.direction);
+
   for (final date in weekDates) {
     final totals = stats.totalsOn(date);
     final has = stats.has(date);
@@ -129,30 +173,37 @@ WeekSummary weekSummary(DayStats stats, SettingsState s) {
       WeekDay(
         date: date,
         label: dayInfo(date).label,
-        kcal: totals.kcal,
+        kcal: stats.netOn(date),
+        burned: stats.burnedOn(date),
         protein: totals.protein,
         fat: totals.fat,
         carbs: totals.carbs,
         logged: has,
-        ok: !has || date >= 0
-            ? null
-            : dayHit(kcal: totals.kcal, norm: norm, direction: s.direction),
+        ok: !has || date >= 0 ? null : hit(date, totals),
       ),
     );
-    if (!has) continue;
+    // Сьогодні ще триває: ні в середнє, ні в норму його зараховувати зарано.
+    if (!has || date >= 0) continue;
 
-    kcal += totals.kcal;
+    kcal += stats.netOn(date);
     protein += totals.protein;
     fat += totals.fat;
     carbs += totals.carbs;
     water += stats.waterOn(date);
     logged++;
+    finished++;
+    if (hit(date, totals)) onGoal++;
+  }
 
-    // Сьогодні ще триває: у норму чи в перебір його зараховувати зарано.
-    if (date < 0) {
-      finished++;
-      if (dayHit(kcal: totals.kcal, norm: norm, direction: s.direction)) onGoal++;
-    }
+  // Тиждень щойно почався: сьогодні це все, що є, і мовчати гірше.
+  if (logged == 0 && stats.has(todayDate)) {
+    final totals = stats.totalsOn(todayDate);
+    kcal = stats.netOn(todayDate);
+    protein = totals.protein;
+    fat = totals.fat;
+    carbs = totals.carbs;
+    water = stats.waterOn(todayDate);
+    logged = 1;
   }
 
   /* Вага береться з тих самих зважувань, що й картка ваги, а не окремим рядом:

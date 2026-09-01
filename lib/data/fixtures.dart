@@ -441,7 +441,8 @@ DayState stateFor(int date, {Direction direction = Direction.lose}) {
   final d = dayFor(date);
   return verdictFor(
     eaten: d.totals.kcal,
-    norm: fixtureGoal.kcal + d.burned,
+    burned: d.burned,
+    norm: fixtureGoal.kcal,
     direction: direction,
     logged: hasDay(date),
     finished: date < 0,

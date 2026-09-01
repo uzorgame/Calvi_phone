@@ -485,9 +485,12 @@ class _Kcal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.c;
-    final eaten = day.totals.kcal;
-    final left = goal.kcal + burned - eaten;
-    final progress = eaten / (goal.kcal + burned);
+    /* Нетто: зʼїдене мінус спалене. Норма стоїть на місці, а тренування
+       зменшує зараховане, а не піднімає ціль. Доти було навпаки, і підпис казав
+       «з 2 628» при нормі 2 220: число цілі пливло щодня. */
+    final eaten = day.totals.kcal - burned;
+    final left = goal.kcal - eaten;
+    final progress = (eaten < 0 ? 0 : eaten) / goal.kcal;
 
     /* Серія рахується з тих самих підсумків, що малюють тиждень і аналітику, а
        не тримається окремим числом. Без області це нуль: показати вигадану
@@ -519,7 +522,7 @@ class _Kcal extends StatelessWidget {
         curve: CalviMotion.easeRise,
         builder: (context, value, _) {
           final shownEaten = value.round();
-          final shownLeft = goal.kcal + burned - shownEaten;
+          final shownLeft = goal.kcal - shownEaten;
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -554,14 +557,14 @@ class _Kcal extends StatelessWidget {
                         text: thousands(shownLeft),
                         style: TextStyle(color: c.text, fontWeight: FontWeight.w600),
                       ),
-                      TextSpan(text: L.of(context).heroOf(thousands(goal.kcal + burned))),
+                      TextSpan(text: L.of(context).heroOf(thousands(goal.kcal))),
                     ] else ...[
                       TextSpan(text: L.of(context).heroOver),
                       TextSpan(
                         text: thousands(shownLeft.abs()),
                         style: TextStyle(color: c.protein, fontWeight: FontWeight.w600),
                       ),
-                      TextSpan(text: L.of(context).heroFrom(thousands(goal.kcal + burned))),
+                      TextSpan(text: L.of(context).heroFrom(thousands(goal.kcal))),
                     ],
                   ],
                 ),
@@ -571,8 +574,8 @@ class _Kcal extends StatelessWidget {
            *
            * Мінус, бо тренування спалило калорії. Число пояснює себе саме:
            * «-310 спалено» лишало питання, звідки воно взялось, а «за
-           * тренування» відповідає на нього і показує, чому норма сьогодні
-           * більша. */
+           * тренування» відповідає на нього і показує, чому велике число
+           * менше за суму страв у картках. */
               if (burned > 0) ...[
                 const SizedBox(height: 6),
                 Container(
@@ -645,16 +648,14 @@ class _Week extends StatelessWidget {
   final WeekSummary summary;
   final VoidCallback onOpen;
 
-  /// Наскільки далеко від норми позначка доїжджає до краю шкали. Чотириста це
-  /// приблизно повноцінний прийом їжі: далі за нього деталі вже не важливі,
-  /// важливо тільки те, що людина далеко.
-  static const _span = 400.0;
-
   @override
   Widget build(BuildContext context) {
     final c = context.c;
-    final off = summary.offNorm;
-    final k = (off / _span).clamp(-1.0, 1.0);
+    /* Позначка стоїть за тим самим вікном, що фарбує кружечки: середня третина
+       шкали це вікно цілі, червоне тільки поза ним. Шкала зі своєю мірою
+       казала «недобір» тижню із самих зелених днів. */
+    final direction = AppScope.maybeOf(context)?.s.direction ?? Direction.lose;
+    final k = summary.meterOn(direction);
 
     return _Shell(
       dot: 2,

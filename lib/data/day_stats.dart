@@ -16,6 +16,7 @@ class DayStats {
     required this.totals,
     required this.water,
     required this.weights,
+    this.burned = const {},
     this.measures = const [],
     required this.demo,
   });
@@ -28,6 +29,7 @@ class DayStats {
   factory DayStats.demo() => DayStats(
     totals: {for (final d in weekDates) d: totalsFor(d)},
     water: {for (final d in weekDates) d: dayFor(d).waterMl},
+    burned: {for (final d in weekDates) d: dayFor(d).burned},
     weights: {
       for (final m in demoMeasures)
         if (m['weightKg'] != null) m.date: m['weightKg']!,
@@ -38,6 +40,10 @@ class DayStats {
 
   final Map<int, DayTotals> totals;
   final Map<int, int> water;
+
+  /// Спалене на тренуваннях за днями. Без нього минулі дні судились би так,
+  /// ніби людина не рухалась, а сьогоднішній інакше.
+  final Map<int, int> burned;
 
   /// Ранкова вага за днями, коли вона є. Порожньо там, де не важились.
   final Map<int, double> weights;
@@ -54,7 +60,11 @@ class DayStats {
 
   DayTotals totalsOn(int date) => totals[date] ?? _zero;
   int waterOn(int date) => water[date] ?? 0;
+  int burnedOn(int date) => burned[date] ?? 0;
   double? weightOn(int date) => weights[date];
+
+  /// Зʼїдене мінус спалене: те, з чим день порівнюється з нормою.
+  int netOn(int date) => totalsOn(date).kcal - burnedOn(date);
 
   /// Скільки днів поспіль людина завершила всередині вікна своєї цілі.
   ///
@@ -76,14 +86,19 @@ class DayStats {
     final norm = dailyKcal(s);
 
     final today = totals[todayDate];
-    if (today != null && dayOver(kcal: today.kcal, norm: norm, direction: s.direction)) return 0;
+    if (today != null &&
+        dayOver(kcal: today.kcal, burned: burnedOn(todayDate), norm: norm, direction: s.direction)) {
+      return 0;
+    }
 
     var days = 0;
 
     for (var at = -1; at > -400; at--) {
       final logged = totals[at];
       if (logged == null) break;
-      if (!dayHit(kcal: logged.kcal, norm: norm, direction: s.direction)) break;
+      if (!dayHit(kcal: logged.kcal, burned: burnedOn(at), norm: norm, direction: s.direction)) {
+        break;
+      }
       days++;
     }
 
@@ -96,16 +111,11 @@ class DayStats {
   /// Як день читається в стрічці. Саме правило живе в [verdictFor]: воно одне
   /// на застосунок, бо кружечок у стрічці і будь-яка інша оцінка дня мають
   /// говорити те саме.
-  DayState stateOn(
-    int date, {
-    required int goalKcal,
-    required Direction direction,
-    int burned = 0,
-  }) => verdictFor(
+  DayState stateOn(int date, {required int goalKcal, required Direction direction}) => verdictFor(
     eaten: totalsOn(date).kcal,
-    // Тренування піднімає норму дня: спалене повертається в неї, як і на
-    // головній картці.
-    norm: goalKcal + burned,
+    // Тренування зменшує зʼїдене, а норма стоїть на місці, як і на головній картці.
+    burned: burnedOn(date),
+    norm: goalKcal,
     direction: direction,
     logged: has(date),
     // Нуль це сьогодні, і сьогодні ще не закінчилось.

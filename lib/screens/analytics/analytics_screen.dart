@@ -128,11 +128,14 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
      * Тут стояв `totalsOf` із фікстур, і графік макросів малював демонстраційний
      * тиждень завжди: зверху чесні нулі, знизу різнокольорові стовпчики з чужого
      * життя. Найгірший різновид помилки, бо виглядає як робочий екран. */
+    /* Калорії нетто, зʼїдене мінус спалене: те саме число, що на картці дня і
+       в кружечках. Стовпчик над лінією норми має означати перебір, а не
+       тренування. Грами складників лишаються тим, що зʼїдено. */
     DayTotals totalsOver(Iterable<int> days) {
       var kcal = 0, protein = 0, fat = 0, carbs = 0;
       for (final d in days) {
         final t = stats.totalsOn(d);
-        kcal += t.kcal;
+        kcal += stats.netOn(d);
         protein += t.protein;
         fat += t.fat;
         carbs += t.carbs;
@@ -141,7 +144,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     }
 
     final logged = dates.where((d) => stats.totalsOn(d).kcal > 0).length;
-    final total = dates.fold<int>(0, (a, d) => a + stats.totalsOn(d).kcal);
+    final total = dates.fold<int>(0, (a, d) => a + stats.netOn(d));
     // Averaged over the days actually logged, not over the calendar: a week
     // opened on Friday is not a week of two hundred calories a day.
     final avg = (total / (logged == 0 ? 1 : logged)).round();
