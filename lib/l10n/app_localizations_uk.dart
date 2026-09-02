@@ -656,6 +656,20 @@ class LUk extends L {
   String get chatPro => 'Pro';
 
   @override
+  String get deleteAskBody1 =>
+      'Цей телефон стане чистим одразу: щоденник, профіль, розмова з Норою, вхід. Застосунок повернеться на перший екран.';
+
+  @override
+  String get deleteAskBody2 =>
+      'На сервері акаунт стане в чергу на остаточне видалення. Доки ми його не підтвердимо, вхід тим самим акаунтом поверне все назад і скасує запит.';
+
+  @override
+  String get deleteAskCta => 'Так, видалити';
+
+  @override
+  String get deleteAskTitle => 'Видалити акаунт?';
+
+  @override
   String get deleteConfirm => 'Я розумію, що дані буде видалено назавжди і відновити їх не вийде.';
 
   @override
@@ -663,6 +677,11 @@ class LUk extends L {
 
   @override
   String get deleteEntries => 'Записів у щоденнику';
+
+  @override
+  String deleteFailed(String why) {
+    return 'Не вдалось видалити: $why';
+  }
 
   @override
   String get deleteForever => 'Видалити назавжди';
@@ -1955,6 +1974,20 @@ class LUk extends L {
 
   @override
   String get repWeekly => 'раз на тиждень';
+
+  @override
+  String get restoredBody1 =>
+      'Цей акаунт чекав на видалення. Вхід це скасував: щоденник, профіль і налаштування знову на цьому телефоні.';
+
+  @override
+  String get restoredBody2 =>
+      'Якщо акаунт усе ж треба видалити, попроси про це ще раз у налаштуваннях. Будь-який вхід до нашого підтвердження так само скасує запит.';
+
+  @override
+  String get restoredOk => 'Зрозуміло';
+
+  @override
+  String get restoredTitle => 'Дані відновлено';
 
   @override
   String get setAbout => 'Про застосунок';

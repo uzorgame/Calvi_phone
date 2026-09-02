@@ -20,6 +20,7 @@ import '../../design/wheel.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/labels.dart';
 import '../settings/panel_legal.dart';
+import '../settings/restored_sheet.dart';
 import '../../format.dart';
 
 /* Скільки кроків у першому запуску.
@@ -1035,6 +1036,12 @@ class _SignInState extends State<_SignIn> {
     switch (result) {
       case LoginResult.done:
       case LoginResult.partial:
+        /* Акаунт стояв у черзі на видалення, і цей вхід зняв його з черги.
+           Сказати про це треба тут, до того, як екран зміниться: людина має
+           знати, що записи повернулись, а видалення доведеться просити знову. */
+        if (sync.login.restored) await showRestoredSheet(context);
+        if (!mounted) return;
+
         /* Вхід відбувся; недовезений щоденник забере наступний обмін. За
            акаунтом іде обмін, і він не миттєвий, тому кнопка лишається зайнятою
            до кінця: інакше екран виглядав би так, ніби нічого не сталось. */

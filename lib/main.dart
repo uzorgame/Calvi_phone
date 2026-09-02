@@ -416,6 +416,30 @@ class _CalviAppState extends State<CalviApp> {
     await _loadMeds();
   }
 
+  /* «Видалити акаунт і дані»: після сервера і бази лишається робота кореня.
+   *
+   * Профіль повертається до заводського, препарати й нагадування зникають,
+   * усі відкриті екрани закриваються, і застосунок показує вітання, як після
+   * встановлення. Помилка запиту летить нагору: панель скаже про неї, і нічого
+   * місцевого стерто не буде. */
+  Future<void> _deleteAccount() async {
+    final sync = _sync;
+    if (sync == null) return;
+
+    await sync.deleteAccount();
+    if (!mounted) return;
+
+    _saveLater?.cancel();
+    setState(() {
+      _s = emptySettings();
+      _meds = const [];
+      _onboarding = true;
+      _era++;
+    });
+    _replan();
+    _nav.currentState?.popUntil((route) => route.isFirst);
+  }
+
   /* Кожна зміна списку одразу лягає на диск і стає в чергу на сервер.
    *
    * Порівнюється те, що було, з тим, що стало: екран віддає весь список, а не
@@ -648,6 +672,7 @@ class _CalviAppState extends State<CalviApp> {
       setReal: _setReal,
       // Тільки коли є кому стирати: у демо без бази кнопка чесно мовчить.
       eraseAll: _sync == null ? null : _eraseAll,
+      deleteAccount: _sync == null ? null : _deleteAccount,
       child: MaterialApp(
         navigatorKey: _nav,
         title: 'Calvi',

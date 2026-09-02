@@ -7,6 +7,7 @@ import '../../data/app_scope.dart';
 import '../../data/billing/billing.dart';
 import '../../data/local/database.dart' show TokenStateData;
 import '../../data/day.dart' show monthName;
+import '../../data/day_stats.dart';
 import '../../data/remote/api.dart' show SubscriptionState;
 
 import '../../data/legal.dart';
@@ -687,7 +688,14 @@ class PrivacyPanel extends StatelessWidget {
   }
 }
 
-/// Deleting the account.
+/* Видалення акаунта.
+ *
+ * Дві двері, як і в «Видалити дані»: галочка на сторінці і аркуш після
+ * червоної кнопки. Аркуш каже не «ви впевнені?», а що саме станеться: телефон
+ * порожній одразу, акаунт у черзі на сервері, вхід до підтвердження повертає
+ * все назад. Саму роботу робить корінь застосунку через [AppScope.deleteAccount]:
+ * запит на сервер, стирання бази, повернення на вітання. Доти ця панель була
+ * заглушкою: кнопка закривала її і більше нічого. */
 class DeletePanel extends StatefulWidget {
   const DeletePanel({super.key, this.onBack});
 
@@ -702,9 +710,75 @@ class DeletePanel extends StatefulWidget {
 class _DeletePanelState extends State<DeletePanel> {
   bool _sure = false;
 
+  /// Запит уже пішов. Друга кнопка в цей час відкрила б другий аркуш.
+  bool _busy = false;
+
+  /* Числа на сторінці справжні, зі зведення днів: скільки днів із записами,
+     скільки зважувань і скільки днів минуло з першого запису. Доти тут стояли
+     412, 37 і 94 з макета, і людина читала про чужий щоденник. */
+  List<(String, String)> _facts(L l, DayStats stats) {
+    final days = stats.totals.length;
+    final weighings = stats.weights.length;
+    final first = stats.totals.keys.fold<int>(0, (m, k) => k < m ? k : m);
+    return [
+      (l.deleteEntries, '$days'),
+      (l.deleteWeighings, '$weighings'),
+      (l.deleteDays, '${days == 0 ? 0 : 1 - first}'),
+    ];
+  }
+
+  void _ask() {
+    final l = L.of(context);
+    calviSheet<void>(
+      context,
+      title: l.deleteAskTitle,
+      doneLabel: l.deleteAskCta,
+      danger: true,
+      /* Після кадру, як і в «Видалити дані»: аркуш після `onDone` знімає
+         верхній маршрут, і робота, почата з нього ж, лишилась би без екрана. */
+      onDone: () => WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) unawaited(_delete());
+      }),
+      builder: (sheet) => Padding(
+        padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 4, CalviSize.gutter, 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(l.deleteAskBody1, style: sheet.t.bodyMedium),
+            const SizedBox(height: 10),
+            Text(l.deleteAskBody2, style: sheet.t.bodyMedium),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _delete() async {
+    final go = AppScope.maybeOf(context)?.deleteAccount;
+    // Без бази це демо або тест: видаляти нема чого, панель просто закривається.
+    if (go == null) return (widget.onBack ?? Navigator.of(context).pop)();
+
+    setState(() => _busy = true);
+    try {
+      /* Далі екран прибирає корінь: він повертає застосунок на вітання, і ця
+         панель зникає разом із налаштуваннями. */
+      await go();
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _busy = false);
+      /* Причина в тексті: без неї «не вдалось» це порада нічого не робити.
+         Найчастіше це мережа, і після її появи можна натиснути ще раз. */
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(L.of(context).deleteFailed('$e')), duration: const Duration(seconds: 8)),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
+    final stats = AppScope.maybeOf(context)?.stats ?? DayStats.empty;
     return CalviScreen(
       trailing: const CalviMenuButton(),
       onBack: widget.onBack,
@@ -712,9 +786,9 @@ class _DeletePanelState extends State<DeletePanel> {
       hint: l.deleteNote,
       foot: CalviButton(
         label: l.deleteForever,
-        enabled: _sure,
+        enabled: _sure && !_busy,
         danger: true,
-        onTap: () => (widget.onBack ?? Navigator.of(context).pop)(),
+        onTap: _ask,
         second: l.actionCancel,
         onSecond: () => (widget.onBack ?? Navigator.of(context).pop)(),
       ),
@@ -722,12 +796,7 @@ class _DeletePanelState extends State<DeletePanel> {
         CalviSection(
           bare: true,
           trail: 0,
-          children: [
-            CalviFacts(
-              inset: false,
-              rows: [(l.deleteEntries, '412'), (l.deleteWeighings, '37'), (l.deleteDays, '94')],
-            ),
-          ],
+          children: [CalviFacts(inset: false, rows: _facts(l, stats))],
         ),
         CalviCheck(
           on: _sure,

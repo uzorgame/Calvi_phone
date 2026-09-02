@@ -196,6 +196,7 @@ class CalviApi {
       accessToken: body['access_token'] as String,
       refreshToken: body['refresh_token'] as String,
       outcome: body['outcome'] as String? ?? 'returned',
+      restored: body['restored'] as bool? ?? false,
       provider: body['provider'] as String?,
       previousUserId: body['previous_user_id'] as String?,
       email: body['email'] as String?,
@@ -499,6 +500,13 @@ class CalviApi {
     return jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
   }
 
+  /* «Видалити акаунт і дані»: запит, а не саме видалення.
+   *
+   * Сервер позначає акаунт і гасить сесії; рядки з бази прибирає адмін, коли
+   * підтвердить запит у себе. Вхід тим самим акаунтом до того часу знімає
+   * запит. Телефон після цієї відповіді стирає все місцеве сам. */
+  Future<void> requestDeletion() => _post('/v1/account/delete', const {});
+
   Future<Map<String, dynamic>> _put(String path, Map<String, dynamic> body) async {
     final http.Response res;
     try {
@@ -631,6 +639,7 @@ class GoogleAccount {
     required this.refreshToken,
     required this.outcome,
     required this.balance,
+    this.restored = false,
     this.unlimited,
     this.provider,
     this.previousUserId,
@@ -646,6 +655,11 @@ class GoogleAccount {
      наявного щоденника, `returned` це повернення до старого. Застосунок питає
      про місцеві записи тільки в третьому випадку. */
   final String outcome;
+
+  /* Акаунт стояв у черзі на видалення, і цей вхід зняв його з черги. Людині
+     про це кажуть окремим аркушем: записи повернулись, а видалення доведеться
+     просити знову. */
+  final bool restored;
 
   /// Ким увійшли: 'google' або 'apple'. Порожньо на старому сервері.
   final String? provider;

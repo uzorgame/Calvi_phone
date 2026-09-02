@@ -47,7 +47,7 @@ class LegalDoc {
 
 const _terms = LegalDoc(
   title: 'Terms of Use',
-  updated: '1 September 2026',
+  updated: '3 September 2026',
   lede:
       'The diary is free of charge, the assistant runs on a token allowance, all nutritional figures are estimates, and Calvi is not a medical device.',
   parts: [
@@ -203,7 +203,7 @@ const _terms = LegalDoc(
 
 const _privacy = LegalDoc(
   title: 'Privacy Policy',
-  updated: '1 September 2026',
+  updated: '3 September 2026',
   lede:
       'Only the data the diary requires is collected, health data is processed on the basis of your explicit consent, photographs and conversations are not kept on our servers, and no personal data is sold or used for advertising.',
   parts: [
@@ -348,8 +348,12 @@ const _privacy = LegalDoc(
           t: ' Profile, diary, health, assistant and recipe data are retained until you delete them individually or delete your account.',
         ),
         LegalItem(
+          b: 'Upon a deletion request.',
+          t: ' When you ask to delete your account from the settings, all data held on your device is removed immediately and your sessions are ended. On the server the account is marked for deletion and placed in a queue; its records are neither used nor shown while it waits. Signing in with the same account before the deletion is carried out cancels the request and restores the account together with its data; a new request is then needed to delete it.',
+        ),
+        LegalItem(
           b: 'Upon deletion.',
-          t: ' The corresponding records are removed from the operational database. Residual copies held in system backups are overwritten in the ordinary course of their rotation.',
+          t: ' Deletion is carried out by us after the request is reviewed, normally within 30 days of the request. All records associated with the account are then removed from the operational database: the account itself, sign-in identifiers, sessions, the diary, body measurements, workouts, medications, the assistant conversation and its notes, recipes and the assistant allowance. Residual copies held in system backups are overwritten in the ordinary course of their rotation.',
         ),
         LegalItem(
           b: 'Server logs.',
@@ -365,7 +369,7 @@ const _privacy = LegalDoc(
       h: 'Your rights',
       p: 'Where the General Data Protection Regulation applies to you, you have the right to obtain confirmation as to whether your personal data is processed and to receive a copy of it; to have inaccurate data rectified; to have your data erased; to restrict or object to processing; to receive your data in a structured, commonly used and machine-readable format; to withdraw consent at any time without affecting the lawfulness of processing carried out beforehand; and to lodge a complaint with your national supervisory authority.',
       tail:
-          'Most of these rights may be exercised directly within the application: entries can be edited or deleted individually, the notes the assistant retains can be read and removed, and the account together with all associated data can be deleted from the settings. For any other request, write to calvi.labs@gmail.com.',
+          'Most of these rights may be exercised directly within the application: entries can be edited or deleted individually, the notes the assistant retains can be read and removed, and the deletion of the account together with all associated data can be requested from the settings, as described under Retention. For any other request, write to calvi.labs@gmail.com.',
     ),
     LegalPart(
       h: 'Security',

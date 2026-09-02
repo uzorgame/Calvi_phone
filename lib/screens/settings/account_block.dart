@@ -12,6 +12,7 @@ import '../../design/shell.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import '../../l10n/app_localizations.dart';
+import 'restored_sheet.dart';
 
 /// Обліковий запис у профілі.
 ///
@@ -95,6 +96,10 @@ class _AccountBlockState extends State<AccountBlock> {
 
     switch (result) {
       case LoginResult.done:
+        await _load();
+        /* Акаунт стояв у черзі на видалення, і цей вхід зняв його з черги:
+           записи повернулись, а видалення доведеться просити знову. */
+        if (login.restored && mounted) await showRestoredSheet(context);
       case LoginResult.canceled:
         await _load();
       case LoginResult.partial:

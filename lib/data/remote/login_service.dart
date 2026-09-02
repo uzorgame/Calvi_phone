@@ -76,6 +76,13 @@ class LoginService {
   String? get error => _lastError;
   String? _lastError;
 
+  /* Останній вхід зняв акаунт із черги на видалення. Екран, що кликав вхід,
+     дивиться сюди одразу після `done` і показує аркуш «дані відновлено»:
+     людина має знати, що записи повернулись і що видалення доведеться просити
+     знову. Скидається на кожній новій спробі входу. */
+  bool get restored => _restored;
+  bool _restored = false;
+
   Future<LoginResult> signIn({String? deviceName}) => _signIn(
     window: google.idToken,
     windowError: () => google.lastError,
@@ -100,6 +107,7 @@ class LoginService {
     required Future<GoogleAccount> Function(String idToken) exchange,
   }) async {
     _lastError = null;
+    _restored = false;
 
     /* Вікно провайдера поза замком навмисно: людина може дивитись на нього
        хвилину, і морозити на цей час фонову синхронізацію нема за що. */
@@ -140,6 +148,7 @@ class LoginService {
         }
 
         final account = await exchange(idToken);
+        _restored = account.restored;
 
         /* Акаунт інший: сервер уже перевіз туди записи безіменного. Місцева
            копія тепер чужа за номерами черги, тому чистий аркуш і повний

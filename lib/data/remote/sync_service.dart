@@ -289,6 +289,23 @@ class SyncService with WidgetsBindingObserver {
     await SyncRepository(db, _api).run();
   });
 
+  /* «Видалити акаунт і дані»: від запиту на сервер до порожнього телефона.
+   *
+   * Порядок важливий. Спершу запит, поки токен ще живий: без відповіді сервера
+   * нічого не стирається, бо інакше акаунт лишився б живим у базі, а людина
+   * була б певна, що його немає. Потім вихід: він забуває Google і Apple,
+   * акаунт, токени й підписку. І лише тоді місцева база: щоденник, профіль,
+   * розмова, знімки, курсор. Після цього застосунок не знає нічого і починає
+   * з вітання, як після встановлення.
+   *
+   * Під тим самим замком, що обмін: обмін, який вилетів під час стирання,
+   * довіз би рядки на акаунт, що вже в черзі на видалення. */
+  Future<void> deleteAccount() => _gate.run(() async {
+    await _api.requestDeletion();
+    await login.signOut();
+    await db.syncDao.wipe();
+  });
+
   /// One round, and never two at once: a second run while the first is in the
   /// air would push the same rows twice and fight over the cursor.
   Future<SyncOutcome> now() async {

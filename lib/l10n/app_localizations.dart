@@ -1233,6 +1233,30 @@ abstract class L {
   /// **'Pro'**
   String get chatPro;
 
+  /// No description provided for @deleteAskBody1.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone is wiped right away: the diary, the profile, the conversation with Nora, the sign-in. The app goes back to the first screen.'**
+  String get deleteAskBody1;
+
+  /// No description provided for @deleteAskBody2.
+  ///
+  /// In en, this message translates to:
+  /// **'On the server the account is queued for permanent deletion. Until we confirm it, signing in with the same account brings everything back and cancels the request.'**
+  String get deleteAskBody2;
+
+  /// No description provided for @deleteAskCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, delete'**
+  String get deleteAskCta;
+
+  /// No description provided for @deleteAskTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the account?'**
+  String get deleteAskTitle;
+
   /// No description provided for @deleteConfirm.
   ///
   /// In en, this message translates to:
@@ -1250,6 +1274,12 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Entries in the diary'**
   String get deleteEntries;
+
+  /// No description provided for @deleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete: {why}'**
+  String deleteFailed(String why);
 
   /// No description provided for @deleteForever.
   ///
@@ -3560,6 +3590,30 @@ abstract class L {
   /// In en, this message translates to:
   /// **'once a week'**
   String get repWeekly;
+
+  /// No description provided for @restoredBody1.
+  ///
+  /// In en, this message translates to:
+  /// **'This account was waiting to be deleted. Signing in cancelled that: the diary, the profile and the settings are on this phone again.'**
+  String get restoredBody1;
+
+  /// No description provided for @restoredBody2.
+  ///
+  /// In en, this message translates to:
+  /// **'If you still want the account gone, ask for deletion again in Settings. Any sign-in before we confirm it cancels the request the same way.'**
+  String get restoredBody2;
+
+  /// No description provided for @restoredOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Understood'**
+  String get restoredOk;
+
+  /// No description provided for @restoredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data is back'**
+  String get restoredTitle;
 
   /// No description provided for @setAbout.
   ///

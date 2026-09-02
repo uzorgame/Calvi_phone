@@ -648,6 +648,20 @@ class LEn extends L {
   String get chatPro => 'Pro';
 
   @override
+  String get deleteAskBody1 =>
+      'This phone is wiped right away: the diary, the profile, the conversation with Nora, the sign-in. The app goes back to the first screen.';
+
+  @override
+  String get deleteAskBody2 =>
+      'On the server the account is queued for permanent deletion. Until we confirm it, signing in with the same account brings everything back and cancels the request.';
+
+  @override
+  String get deleteAskCta => 'Yes, delete';
+
+  @override
+  String get deleteAskTitle => 'Delete the account?';
+
+  @override
   String get deleteConfirm =>
       'I understand the data will be deleted forever and cannot be brought back.';
 
@@ -656,6 +670,11 @@ class LEn extends L {
 
   @override
   String get deleteEntries => 'Entries in the diary';
+
+  @override
+  String deleteFailed(String why) {
+    return 'Could not delete: $why';
+  }
 
   @override
   String get deleteForever => 'Delete forever';
@@ -1941,6 +1960,20 @@ class LEn extends L {
 
   @override
   String get repWeekly => 'once a week';
+
+  @override
+  String get restoredBody1 =>
+      'This account was waiting to be deleted. Signing in cancelled that: the diary, the profile and the settings are on this phone again.';
+
+  @override
+  String get restoredBody2 =>
+      'If you still want the account gone, ask for deletion again in Settings. Any sign-in before we confirm it cancels the request the same way.';
+
+  @override
+  String get restoredOk => 'Understood';
+
+  @override
+  String get restoredTitle => 'Your data is back';
 
   @override
   String get setAbout => 'About the app';

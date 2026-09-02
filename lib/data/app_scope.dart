@@ -25,6 +25,7 @@ class AppScope extends InheritedWidget {
     this.setReal = _keepDemo,
     this.stats = DayStats.empty,
     this.eraseAll,
+    this.deleteAccount,
     required super.child,
   });
 
@@ -56,6 +57,11 @@ class AppScope extends InheritedWidget {
      якого на екрані лишаються старі бульбашки і таблетки, виглядає як таке, що
      не спрацювало. Порожньо в демо і в тестах: там стирати нема звідки. */
   final Future<void> Function()? eraseAll;
+
+  /* «Видалити акаунт і дані»: запит на сервер, порожній телефон і повернення на
+     вітання. Теж у корені, бо після стирання треба забути профіль, препарати й
+     нагадування і перезібрати екрани з нуля. Порожньо в демо і в тестах. */
+  final Future<void> Function()? deleteAccount;
 
   /// Whether the screens are showing the demo day or what is actually stored.
   ///

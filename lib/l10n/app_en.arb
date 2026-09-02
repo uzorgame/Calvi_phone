@@ -160,6 +160,13 @@
       }
     }
   },
+  "@deleteFailed": {
+    "placeholders": {
+      "why": {
+        "type": "String"
+      }
+    }
+  },
   "@doseTabOne": {
     "description": "Dose forms. Three each, because Ukrainian picks between them by the number in front; English uses the same word for the last two."
   },
@@ -985,9 +992,14 @@
   "camUnknownCode": "This product is not in any base",
   "camUnknownCodeNote": "Not in ours, and not in the open one. Photograph the nutrition table on the packet and I will copy the figures from it. This is free.",
   "chatPro": "Pro",
+  "deleteAskBody1": "This phone is wiped right away: the diary, the profile, the conversation with Nora, the sign-in. The app goes back to the first screen.",
+  "deleteAskBody2": "On the server the account is queued for permanent deletion. Until we confirm it, signing in with the same account brings everything back and cancels the request.",
+  "deleteAskCta": "Yes, delete",
+  "deleteAskTitle": "Delete the account?",
   "deleteConfirm": "I understand the data will be deleted forever and cannot be brought back.",
   "deleteDays": "Days with Calvi",
   "deleteEntries": "Entries in the diary",
+  "deleteFailed": "Could not delete: {why}",
   "deleteForever": "Delete forever",
   "deleteNote": "Everything goes: the diary, weight, measurements, allergies, medications, conversation history. There is no undoing it.",
   "deleteSubNote": "If it is about the subscription, that can be cancelled separately in the App Store or Google Play without deleting the account.",
@@ -1373,6 +1385,10 @@
   "repWeekdays": "on weekdays",
   "repWeekends": "at weekends",
   "repWeekly": "once a week",
+  "restoredBody1": "This account was waiting to be deleted. Signing in cancelled that: the diary, the profile and the settings are on this phone again.",
+  "restoredBody2": "If you still want the account gone, ask for deletion again in Settings. Any sign-in before we confirm it cancels the request the same way.",
+  "restoredOk": "Understood",
+  "restoredTitle": "Your data is back",
   "setAbout": "About the app",
   "setAllergies": "Allergies",
   "setAssistantLine": "{name}, {count} in memory",
