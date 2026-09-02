@@ -2,11 +2,10 @@ import 'store_config.dart';
 
 /* Google Play: Android.
  *
- * Порожньо, доки Google не підтвердить платіжний профіль і в RevenueCat не
- * зʼявиться застосунок Play зі своїм ключем `goog_...`. Тоді ключ ставиться
- * сюди в `defaultValue`, і більше в коді нічого не міняється: SDK один на
- * обидві крамниці, `Billing` бере тариф за видом пакета, а сервер уже розбирає
- * події з `store: PLAY_STORE`.
+ * Ключ публічний, як і в Apple: він їде всередині APK і видний у розібраному.
+ * Застосунок «Calvi (Play Store)» у RevenueCat заведено 2 вересня 2026, коли
+ * Google підтвердив платіжний профіль. SDK один на обидві крамниці, `Billing`
+ * бере тариф за видом пакета, а сервер уже розбирає події з `store: PLAY_STORE`.
  *
  * Що ще треба до першої покупки на Android, крім ключа:
  *   1. У Play Console підписка `calvi_pro` з базовими планами `monthly` і
@@ -23,5 +22,8 @@ import 'store_config.dart';
  * Store один на обидві платформи. */
 const googleStore = StoreConfig(
   name: 'Google Play',
-  key: String.fromEnvironment('RC_ANDROID_KEY'),
+  key: String.fromEnvironment(
+    'RC_ANDROID_KEY',
+    defaultValue: 'goog_BaspRxVFJJIbbEeeOfSEZIXkABA',
+  ),
 );
