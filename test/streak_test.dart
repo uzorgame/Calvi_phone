@@ -88,15 +88,24 @@ void main() {
       expect(stats.streakOn(profile(direction: Direction.lose)), 3);
     });
 
-    /* Сьогодні ще триває, тому подовжити серію воно не може: інакше число
-       стрибало б після кожного обіду. */
-    test('сьогоднішній день не подовжує серію', () {
+    /* Сьогодні рахується, щойно воно у вікні: перший день із застосунком має
+       показати «1» того ж вечора, а не наступного ранку. */
+    test('сьогоднішній день у вікні подовжує серію одразу', () {
       final stats = withDays({0: 1900, -1: 1900, -2: 1900});
-      expect(
-        stats.streakOn(profile(direction: Direction.lose)),
-        2,
-        reason: 'сьогодні дорахувалось до серії, хоч день ще не скінчився',
-      );
+      expect(stats.streakOn(profile(direction: Direction.lose)), 3);
+
+      final first = withDays({0: 1900});
+      expect(first.streakOn(profile(direction: Direction.lose)), 1, reason: 'перший день, норма набрана');
+    });
+
+    /* Наступного ранку число не падає: день ще триває, і вчорашня серія стоїть,
+       доки сьогодні не скінчиться. */
+    test('вранці наступного дня серія не падає', () {
+      final morning = withDays({0: 300, -1: 1900, -2: 1900});
+      expect(morning.streakOn(profile(direction: Direction.lose)), 2);
+
+      final nothingYet = withDays({-1: 1900, -2: 1900});
+      expect(nothingYet.streakOn(profile(direction: Direction.lose)), 2);
     });
 
     /* А от обірвати вміє. Перебір необоротний: зʼїдене не роззʼїдається, і день,
@@ -115,17 +124,17 @@ void main() {
       expect(stats.streakOn(profile(direction: Direction.keep)), 0);
 
       final ok = withDays({0: 2400, -1: 2000, -2: 2000});
-      expect(ok.streakOn(profile(direction: Direction.keep)), 2, reason: '2400 ще в межах +400');
+      expect(ok.streakOn(profile(direction: Direction.keep)), 3, reason: '2400 ще в межах +400, і сьогодні вже в серії');
     });
 
     /* Для набору перебору не існує: більше за ціль це і є ціль, тому сьогодні
-       обірвати серію там нічим. */
+       обірвати серію там нічим, а от подовжити може. */
     test('для набору перебір серію не обриває', () {
       final under = withDays({0: 2400, -1: 2200, -2: 2200});
-      expect(under.streakOn(profile(direction: Direction.gain)), 2);
+      expect(under.streakOn(profile(direction: Direction.gain)), 3);
 
       final over = withDays({0: 3000, -1: 2200, -2: 2200});
-      expect(over.streakOn(profile(direction: Direction.gain)), 2);
+      expect(over.streakOn(profile(direction: Direction.gain)), 3);
     });
 
     /* Спалене рахується і тут: серія бачить день так само, як кружечок. */
