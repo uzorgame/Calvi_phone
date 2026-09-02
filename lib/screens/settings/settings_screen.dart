@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../data/allergens.dart';
 import '../../data/legal.dart';
+import '../../data/local/database.dart' show TokenStateData;
 import '../../data/settings.dart';
 import '../../data/app_scope.dart';
 import '../meds/meds_route.dart';
@@ -27,6 +30,70 @@ import 'panels_body.dart';
    only address in the app and it will change with the developer, not with the
    screen. */
 const devTelegram = 'calvi_dev';
+
+/* Рядок «Підписка» у списку налаштувань.
+ *
+ * Доти тут стояло «Безкоштовно» назавжди, і людина з оплаченою підпискою
+ * бачила його за крок від сторінки, яка казала «Pro». Джерело те саме, що й у
+ * тієї сторінки: дзеркало токенів каже, чи є доступ, а знімок форми підписки,
+ * який сторінка тарифу тримає в базі, каже, який саме тариф. Без бази це демо
+ * або тест, і рядок лишається безкоштовним. */
+class _PlanRow extends StatefulWidget {
+  const _PlanRow({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  State<_PlanRow> createState() => _PlanRowState();
+}
+
+class _PlanRowState extends State<_PlanRow> {
+  StreamSubscription<TokenStateData?>? _watch;
+  bool _has = false;
+
+  /// 'month', 'year', або порожньо, коли вид тарифу невідомий.
+  String? _plan;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final scope = AppScope.maybeOf(context);
+    final sync = scope?.sync;
+    _watch ??= scope?.db?.syncDao.watchTokens().listen((t) async {
+      final has = t?.syncedAt != null && t?.unlimited == true;
+      /* Знімок перечитується на кожну зміну дзеркала, а не раз: покупка
+         оновлює обидва, і рядок має перемкнутись разом зі сторінкою тарифу.
+         Без знімка (одразу після входу: вихід його стирає) вид тарифу
+         питається в сервера, інакше рядок казав би просто «Pro» до першого
+         відкриття сторінки тарифу. */
+      String? plan;
+      if (has) {
+        final kept = await sync?.subscriptionSnapshot();
+        plan = kept != null ? kept.plan : (await sync?.subscription())?.plan;
+      }
+      if (!mounted || (has == _has && plan == _plan)) return;
+      setState(() {
+        _has = has;
+        _plan = plan;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _watch?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final value = !_has
+        ? l.setPlanFree
+        : switch (_plan) { 'year' => l.planYearly, 'month' => l.planMonthly, _ => l.planOn };
+    return CalviRow(icon: 'card', title: l.setPlan, first: true, value: value, onTap: widget.onTap);
+  }
+}
 
 /// Settings, and the sub-screens behind each row. Every row opens something:
 /// a row that leads nowhere teaches people to stop tapping rows.
@@ -247,13 +314,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 CalviSection(
                   title: l.setGroupAccount,
                   children: [
-                    CalviRow(
-                      icon: 'card',
-                      title: l.setPlan,
-                      first: true,
-                      value: l.setPlanFree,
-                      onTap: () => _open('plan'),
-                    ),
+                    _PlanRow(onTap: () => _open('plan')),
                     // Under the row it belongs to, and itself the way in: it
                     // names who pays nothing and says how to arrange that.
                     _FreeLine(onTap: () => _promo(context)),

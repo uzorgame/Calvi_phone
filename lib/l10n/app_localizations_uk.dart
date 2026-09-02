@@ -1520,6 +1520,9 @@ class LUk extends L {
   String get planSignInTitle => 'Спочатку увійди в профіль';
 
   @override
+  String get planStoreAsking => 'Питаю в магазину ціни…';
+
+  @override
   String get planStoreOffline => 'Магазин не відповідає. Перевір підключення до інтернету';
 
   @override

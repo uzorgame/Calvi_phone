@@ -192,12 +192,19 @@ class _PlanPanelState extends State<PlanPanel> {
   /// Чому цін немає. Показується на екрані замість них, людською мовою.
   BillingTrouble _trouble = BillingTrouble.quiet;
 
+  /* Ще чекаємо на магазин. Доти сторінка з першого кадру писала «магазин не
+     відповідає», хоча відповідь просто ще не приїхала: помилка й очікування
+     виглядали однаково, і відрізнити зламане від повільного було нічим. */
+  bool _asking = true;
+
   Future<void> _load() async {
+    if (mounted) setState(() => _asking = true);
     final plans = await Billing.plans();
     if (!mounted) return;
     setState(() {
       _store = plans;
       _trouble = Billing.trouble;
+      _asking = false;
     });
   }
 
@@ -255,9 +262,7 @@ class _PlanPanelState extends State<PlanPanel> {
   String? get _perMonth {
     final y = _found('year');
     if (y == null) return null;
-    final per = (y.amount / 12).toStringAsFixed(2);
-    // Число в рядку магазину замінюється порахованим, решта лишається як є.
-    return y.display.replaceAll(RegExp(r'[\d.,]+'), per);
+    return Billing.perMonthOf(y.display, y.amount);
   }
 
   /// Наскільки річна дешевша. Рахується з того, що прийшло, а не з наших чисел.
@@ -526,9 +531,9 @@ class _PlanPanelState extends State<PlanPanel> {
               ],
             ),
 
-            /* Магазин мовчить. Кажемо це прямо і показуємо, що саме він
-               відповів: без цього рядка «не працює» і «працює, просто ціна
-               така» виглядають однаково. */
+            /* Магазин мовчить або ще думає. Кажемо це прямо і показуємо, що
+               саме він відповів: без цього рядка «не працює», «ще вантажиться»
+               і «працює, просто ціна така» виглядають однаково. */
             if (!_live)
               Padding(
                 padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 10, CalviSize.gutter, 0),
@@ -536,7 +541,11 @@ class _PlanPanelState extends State<PlanPanel> {
                   /* Одне речення і жодного коду помилки. Текст `PlatformException`
                      тут не місце: людині він нічого не каже, а лякає. Повний
                      текст лишається в логах, для нас. */
-                  _trouble == BillingTrouble.offline ? l.planStoreOffline : l.planStoreQuiet,
+                  _asking
+                      ? l.planStoreAsking
+                      : _trouble == BillingTrouble.offline
+                      ? l.planStoreOffline
+                      : l.planStoreQuiet,
                   style: context.t.labelSmall?.copyWith(color: c.faint, height: 1.4),
                 ),
               ),

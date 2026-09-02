@@ -125,6 +125,7 @@
   "planPerMonth": "/mo",
   "planStoreOffline": "The store is not responding. Check your internet connection",
   "planStoreQuiet": "The store is not responding. Try again later",
+  "planStoreAsking": "Asking the store for prices…",
   "planSignInTitle": "Sign in first",
   "planSignInNote": "The subscription is tied to an account with an email. That way it survives a new phone and works on all your devices.",
   "planSignInGo": "Sign in",

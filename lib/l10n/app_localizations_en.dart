@@ -1512,6 +1512,9 @@ class LEn extends L {
   String get planSignInTitle => 'Sign in first';
 
   @override
+  String get planStoreAsking => 'Asking the store for prices…';
+
+  @override
   String get planStoreOffline => 'The store is not responding. Check your internet connection';
 
   @override

@@ -135,6 +135,30 @@ class Billing {
    * справа, решта наша. */
   static BillingTrouble trouble = BillingTrouble.quiet;
 
+  /* Місячна вартість річної підписки у форматі рядка магазину.
+   *
+   * Рядок магазину знає більше за нас: символ чи код валюти, з якого боку він
+   * стоїть, яка кома десяткова. Тому з нього виймається одне число цілком, а
+   * не кожна група цифр окремо. Доти заміна «всіх чисел» на рядку Play
+   * «1 399,99 грн» (пробіл між тисячами) давала «116.67 116.67 грн».
+   *
+   * Десятковий знак береться з того ж рядка: остання кома чи крапка, після
+   * якої рівно дві цифри. Якщо такої немає, валюта без копійок, і число
+   * округлюється до цілого. */
+  static String perMonthOf(String display, double yearAmount) {
+    // Між тисячами магазин ставить звичайний або нерозривний пробіл (U+00A0,
+    // вузький U+202F), тому в клас символів входять усі три.
+    final number = RegExp(r'\d[\d\s\u00A0\u202F.,]*\d|\d').firstMatch(display);
+    if (number == null) return display;
+
+    final dec = RegExp(r'([.,])\d{2}$').firstMatch(number.group(0)!);
+    final per = yearAmount / 12;
+    final text = dec == null
+        ? per.round().toString()
+        : per.toStringAsFixed(2).replaceFirst('.', dec.group(1)!);
+    return display.replaceRange(number.start, number.end, text);
+  }
+
   /* Тарифи з магазину: місячний і річний.
    *
    * Порожньо означає «магазин не відповів або товарів ще немає». Екран у такому
@@ -146,7 +170,12 @@ class Billing {
       return const [];
     }
     try {
-      final offerings = await Purchases.getOfferings();
+      /* З межею часу. Сервіс оплат самого Play на телефоні може лежати (ми
+         бачили це на Pixel: він упав від іншого застосунку, і система
+         відкладала його перезапуск), і тоді SDK чекає на зʼєднання вічно, а
+         сторінка тарифу так само вічно «думає». Двадцять секунд це багато для
+         нормальної відповіді і мало для людини, яка дивиться на порожні ціни. */
+      final offerings = await Purchases.getOfferings().timeout(const Duration(seconds: 20));
       final current = offerings.current;
       if (current == null) {
         trouble = BillingTrouble.quiet;

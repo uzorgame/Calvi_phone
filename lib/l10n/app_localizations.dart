@@ -2763,6 +2763,12 @@ abstract class L {
   /// **'Sign in first'**
   String get planSignInTitle;
 
+  /// No description provided for @planStoreAsking.
+  ///
+  /// In en, this message translates to:
+  /// **'Asking the store for prices…'**
+  String get planStoreAsking;
+
   /// No description provided for @planStoreOffline.
   ///
   /// In en, this message translates to:
