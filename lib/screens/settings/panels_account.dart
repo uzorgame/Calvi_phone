@@ -713,6 +713,40 @@ class _DeletePanelState extends State<DeletePanel> {
   /// Запит уже пішов. Друга кнопка в цей час відкрила б другий аркуш.
   bool _busy = false;
 
+  /* Чи діє платна підписка. Потрібне рівно для одного: попередити платного, що
+     видалення акаунта її не скасовує, бо живе вона в магазині, а не в нас.
+     Джерело те саме, що й на сторінці тарифу: два різні джерела однієї
+     відповіді розійдуться на першій же правці. */
+  bool _pro = false;
+  StreamSubscription<TokenStateData?>? _watch;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _watch ??= AppScope.maybeOf(context)?.db?.syncDao.watchTokens().listen((t) {
+      final has = t?.syncedAt != null && t?.unlimited == true;
+      if (has != _pro && mounted) setState(() => _pro = has);
+    });
+  }
+
+  @override
+  void dispose() {
+    _watch?.cancel();
+    super.dispose();
+  }
+
+  /// Чия каса списує гроші. Порожньо лише там, де крамниці немає зовсім.
+  String _store(L l) => Billing.store.name.isEmpty ? l.deleteProStoreAny : Billing.store.name;
+
+  /* Скасування живе в магазині, і повести туди має той самий екран, що
+     попередив. Адреси немає лише в того, у кого немає й підписки, тому мовчазне
+     повернення тут доречне. */
+  Future<void> _manage() async {
+    final url = await Billing.manageUrl();
+    if (!mounted || url == null) return;
+    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+  }
+
   /* Числа на сторінці справжні, зі зведення днів: скільки днів із записами,
      скільки зважувань і скільки днів минуло з першого запису. Доти тут стояли
      412, 37 і 94 з макета, і людина читала про чужий щоденник. */
@@ -803,7 +837,22 @@ class _DeletePanelState extends State<DeletePanel> {
           onToggle: () => setState(() => _sure = !_sure),
           text: l.deleteConfirm,
         ),
-        CalviNote(l.deleteSubNote, lead: 12),
+        /* Що сказати про підписку, залежить від того, чи вона є.
+
+           Безкоштовному доречна підказка: якщо він прийшов сюди через гроші,
+           видаляти акаунт не обов'язково. Платному потрібне попередження, і це
+           не ввічливість, а вимога Apple: акаунт зникне, а списання лишиться,
+           бо підписка живе в магазині. Тому тут і сказано, що зробити, і дано,
+           чим це зробити. */
+        if (!_pro)
+          CalviNote(l.deleteSubNote, lead: 12)
+        else ...[
+          CalviNote(l.deleteProNote(_store(l)), lead: 12),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 8, CalviSize.gutter, 0),
+            child: Align(alignment: Alignment.centerLeft, child: _Link(l.deleteProManage, _manage)),
+          ),
+        ],
       ],
     );
   }

@@ -56,15 +56,19 @@
 
 	     На iOS без цих рядків застосунок не питає дозволу, а падає на першому ж
 	     зверненні, і рев'ю відхиляє збірку. Текст бачить людина в системному
-	     вікні, тому він написаний для неї, а не для перевіряльника: сказано, що
-	     саме береться і навіщо. -->
+	     вікні, тому він написаний для неї: сказано, що саме береться і навіщо.
+
+	     Англійською, хоч застосунок і український. iOS бере ці рядки з файлу як
+	     є, нічого не перекладаючи, і той самий текст читає рев'ювер Apple.
+	     Українською він побачив би слова, яких не розуміє, і мав би повне право
+	     сказати, що призначення дозволу не пояснене. -->
 	<key>NSCameraUsageDescription</key>
-	<string>Щоб сфотографувати страву або зчитати штрихкод. Знімок не зберігається ні на телефоні, ні в нас.</string>
+	<string>Calvi uses the camera to photograph a meal or scan a barcode. The picture is analysed and never stored, on this phone or on our servers.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Щоб надиктувати, що ви з'їли, замість набирати. Розпізнає мову сам телефон, звук нам не надсилається.</string>
+	<string>Calvi uses the microphone so you can dictate what you ate instead of typing it. Your phone turns the speech into text itself, and the audio is never sent to us.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Щоб узяти вже готове фото страви з галереї.</string>
+	<string>Calvi opens your photo library so you can pick a picture of a meal you have already taken.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Щоб перетворити надиктоване на текст запису.</string>
+	<string>Calvi uses speech recognition to turn what you dictate into the text of a diary entry.</string>
 </dict>
 </plist>

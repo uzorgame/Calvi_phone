@@ -353,7 +353,7 @@ const _privacy = LegalDoc(
         ),
         LegalItem(
           b: 'Upon deletion.',
-          t: ' Deletion is carried out by us after the request is reviewed, normally within 30 days of the request. All records associated with the account are then removed from the operational database: the account itself, sign-in identifiers, sessions, the diary, body measurements, workouts, medications, the assistant conversation and its notes, recipes and the assistant allowance. Residual copies held in system backups are overwritten in the ordinary course of their rotation.',
+          t: ' Deletion is carried out by us after the request is reviewed, within 30 business days of the request. All records associated with the account are then removed from the operational database: the account itself, sign-in identifiers, sessions, the diary, body measurements, workouts, medications, the assistant conversation and its notes, recipes and the assistant allowance. Residual copies held in system backups are overwritten in the ordinary course of their rotation.',
         ),
         LegalItem(
           b: 'Server logs.',

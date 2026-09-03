@@ -167,6 +167,13 @@
       }
     }
   },
+  "@deleteProNote": {
+    "placeholders": {
+      "store": {
+        "type": "String"
+      }
+    }
+  },
   "@doseTabOne": {
     "description": "Dose forms. Three each, because Ukrainian picks between them by the number in front; English uses the same word for the last two."
   },
@@ -819,8 +826,8 @@
   "accountSignOut": "Sign out",
   "accountSignOutAction": "Sign out",
   "accountSignOutAsk": "Sign out?",
-  "accountSignOutBack": "You can sign back in with the same account any time, right here.",
-  "accountSignOutNote": "The entries stay on this phone: signing out does not wipe the diary. What stops is the rest, syncing with other devices and the ability to get the data back if the phone is lost.",
+  "accountSignOutBack": "Sign back in with the same account and everything comes back. Anything written offline that has not reached the server yet cannot be recovered.",
+  "accountSignOutNote": "This phone is wiped: the diary, the profile, the medications and the conversation with Nora all go. Your entries stay on the server, under your account.",
   "accountSince": "With Calvi since",
   "accountTitle": "Account",
   "accountVia": "Signed in with Google",
@@ -993,7 +1000,7 @@
   "camUnknownCodeNote": "Not in ours, and not in the open one. Photograph the nutrition table on the packet and I will copy the figures from it. This is free.",
   "chatPro": "Pro",
   "deleteAskBody1": "This phone is wiped right away: the diary, the profile, the conversation with Nora, the sign-in. The app goes back to the first screen.",
-  "deleteAskBody2": "On the server the account is queued for permanent deletion. Until we confirm it, signing in with the same account brings everything back and cancels the request.",
+  "deleteAskBody2": "On the server the account is queued for permanent deletion, which takes up to 30 business days. Until we confirm it, signing in with the same account brings everything back and cancels the request.",
   "deleteAskCta": "Yes, delete",
   "deleteAskTitle": "Delete the account?",
   "deleteConfirm": "I understand the data will be deleted forever and cannot be brought back.",
@@ -1002,6 +1009,9 @@
   "deleteFailed": "Could not delete: {why}",
   "deleteForever": "Delete forever",
   "deleteNote": "Everything goes: the diary, weight, measurements, allergies, medications, conversation history. There is no undoing it.",
+  "deleteProManage": "Manage subscription",
+  "deleteProNote": "Deleting the account does not cancel Calvi Pro. {store} keeps billing until the subscription itself is cancelled, so cancel it before deleting the account.",
+  "deleteProStoreAny": "The store",
   "deleteSubNote": "If it is about the subscription, that can be cancelled separately in the App Store or Google Play without deleting the account.",
   "deleteTitle": "Delete account",
   "deleteWeighings": "Weight readings",

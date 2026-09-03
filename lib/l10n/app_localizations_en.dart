@@ -66,11 +66,11 @@ class LEn extends L {
 
   @override
   String get accountSignOutBack =>
-      'You can sign back in with the same account any time, right here.';
+      'Sign back in with the same account and everything comes back. Anything written offline that has not reached the server yet cannot be recovered.';
 
   @override
   String get accountSignOutNote =>
-      'The entries stay on this phone: signing out does not wipe the diary. What stops is the rest, syncing with other devices and the ability to get the data back if the phone is lost.';
+      'This phone is wiped: the diary, the profile, the medications and the conversation with Nora all go. Your entries stay on the server, under your account.';
 
   @override
   String get accountSince => 'With Calvi since';
@@ -653,7 +653,7 @@ class LEn extends L {
 
   @override
   String get deleteAskBody2 =>
-      'On the server the account is queued for permanent deletion. Until we confirm it, signing in with the same account brings everything back and cancels the request.';
+      'On the server the account is queued for permanent deletion, which takes up to 30 business days. Until we confirm it, signing in with the same account brings everything back and cancels the request.';
 
   @override
   String get deleteAskCta => 'Yes, delete';
@@ -682,6 +682,17 @@ class LEn extends L {
   @override
   String get deleteNote =>
       'Everything goes: the diary, weight, measurements, allergies, medications, conversation history. There is no undoing it.';
+
+  @override
+  String get deleteProManage => 'Manage subscription';
+
+  @override
+  String deleteProNote(String store) {
+    return 'Deleting the account does not cancel Calvi Pro. $store keeps billing until the subscription itself is cancelled, so cancel it before deleting the account.';
+  }
+
+  @override
+  String get deleteProStoreAny => 'The store';
 
   @override
   String get deleteSubNote =>

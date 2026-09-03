@@ -198,13 +198,13 @@ abstract class L {
   /// No description provided for @accountSignOutBack.
   ///
   /// In en, this message translates to:
-  /// **'You can sign back in with the same account any time, right here.'**
+  /// **'Sign back in with the same account and everything comes back. Anything written offline that has not reached the server yet cannot be recovered.'**
   String get accountSignOutBack;
 
   /// No description provided for @accountSignOutNote.
   ///
   /// In en, this message translates to:
-  /// **'The entries stay on this phone: signing out does not wipe the diary. What stops is the rest, syncing with other devices and the ability to get the data back if the phone is lost.'**
+  /// **'This phone is wiped: the diary, the profile, the medications and the conversation with Nora all go. Your entries stay on the server, under your account.'**
   String get accountSignOutNote;
 
   /// No description provided for @accountSince.
@@ -1242,7 +1242,7 @@ abstract class L {
   /// No description provided for @deleteAskBody2.
   ///
   /// In en, this message translates to:
-  /// **'On the server the account is queued for permanent deletion. Until we confirm it, signing in with the same account brings everything back and cancels the request.'**
+  /// **'On the server the account is queued for permanent deletion, which takes up to 30 business days. Until we confirm it, signing in with the same account brings everything back and cancels the request.'**
   String get deleteAskBody2;
 
   /// No description provided for @deleteAskCta.
@@ -1292,6 +1292,24 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Everything goes: the diary, weight, measurements, allergies, medications, conversation history. There is no undoing it.'**
   String get deleteNote;
+
+  /// No description provided for @deleteProManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage subscription'**
+  String get deleteProManage;
+
+  /// No description provided for @deleteProNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting the account does not cancel Calvi Pro. {store} keeps billing until the subscription itself is cancelled, so cancel it before deleting the account.'**
+  String deleteProNote(String store);
+
+  /// No description provided for @deleteProStoreAny.
+  ///
+  /// In en, this message translates to:
+  /// **'The store'**
+  String get deleteProStoreAny;
 
   /// No description provided for @deleteSubNote.
   ///

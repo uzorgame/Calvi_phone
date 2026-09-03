@@ -418,17 +418,32 @@ class _CalviAppState extends State<CalviApp> {
 
   /* «Видалити акаунт і дані»: після сервера і бази лишається робота кореня.
    *
-   * Профіль повертається до заводського, препарати й нагадування зникають,
-   * усі відкриті екрани закриваються, і застосунок показує вітання, як після
-   * встановлення. Помилка запиту летить нагору: панель скаже про неї, і нічого
-   * місцевого стерто не буде. */
+   * Помилка запиту летить нагору: панель скаже про неї, і нічого місцевого
+   * стерто не буде. */
   Future<void> _deleteAccount() async {
     final sync = _sync;
     if (sync == null) return;
 
     await sync.deleteAccount();
-    if (!mounted) return;
+    if (mounted) _toWelcome();
+  }
 
+  /* «Вийти з акаунта»: те саме, що після видалення, тільки акаунт лишається
+     жити на сервері і вхід ним же привозить щоденник назад. */
+  Future<void> _signOut() async {
+    final sync = _sync;
+    if (sync == null) return;
+
+    await sync.signOut();
+    if (mounted) _toWelcome();
+  }
+
+  /* Спільний кінець виходу і видалення: застосунок забуває все, що тримав у
+     памʼяті, і починається з вітання, як після встановлення.
+     Бази це не стосується, її вже спорожнив шар даних; тут лише те, що живе в
+     памʼяті кореня: профіль, препарати з нагадуваннями, відкриті екрани і
+     розмова з Норою, яку тримає екран дня. */
+  void _toWelcome() {
     _saveLater?.cancel();
     setState(() {
       _s = emptySettings();
@@ -673,6 +688,7 @@ class _CalviAppState extends State<CalviApp> {
       // Тільки коли є кому стирати: у демо без бази кнопка чесно мовчить.
       eraseAll: _sync == null ? null : _eraseAll,
       deleteAccount: _sync == null ? null : _deleteAccount,
+      signOut: _sync == null ? null : _signOut,
       child: MaterialApp(
         navigatorKey: _nav,
         title: 'Calvi',

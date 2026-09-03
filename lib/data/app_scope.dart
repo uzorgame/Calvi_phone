@@ -26,6 +26,7 @@ class AppScope extends InheritedWidget {
     this.stats = DayStats.empty,
     this.eraseAll,
     this.deleteAccount,
+    this.signOut,
     required super.child,
   });
 
@@ -62,6 +63,12 @@ class AppScope extends InheritedWidget {
      вітання. Теж у корені, бо після стирання треба забути профіль, препарати й
      нагадування і перезібрати екрани з нуля. Порожньо в демо і в тестах. */
   final Future<void> Function()? deleteAccount;
+
+  /* «Вийти з акаунта»: дотиснути незіслане, забути акаунт і стерти місцеву
+     копію щоденника, а тоді повернутись на вітання. Теж у корені, з тієї ж
+     причини, що й видалення: половина роботи це памʼять екранів, а не база.
+     Порожньо в демо і в тестах. */
+  final Future<void> Function()? signOut;
 
   /// Whether the screens are showing the demo day or what is actually stored.
   ///

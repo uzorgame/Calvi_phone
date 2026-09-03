@@ -134,11 +134,19 @@ class _AccountBlockState extends State<AccountBlock> {
     final login = _login;
     if (login == null) return;
 
+    /* Вихід робить корінь застосунку: крім акаунта і бази треба забути профіль,
+       препарати з нагадуваннями і розмову, яку тримає в памʼяті екран дня, а
+       тоді повернутись на вітання. Ця панель до того часу вже зникне разом із
+       налаштуваннями, тому оновлювати картку після виходу нема кому і нащо.
+       Порожньо в демо-запуску без бази: там просто забуваємо акаунт. */
+    final go = AppScope.maybeOf(context)?.signOut;
+
     await calviSheet<void>(
       context,
       title: L.of(context).accountSignOutAsk,
       doneLabel: L.of(context).accountSignOut,
       onDone: () async {
+        if (go != null) return go();
         await login.signOut();
         await _load();
       },
