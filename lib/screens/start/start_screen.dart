@@ -402,20 +402,14 @@ class _StartScreenState extends State<StartScreen> {
     children: [
       _Block(
         title: l.startSex,
+        /* Дві відповіді, бо питання тут не про людину, а про формулу.
+           Міффлін-Сан Жеор має рівно два коефіцієнти, і третій варіант
+           однаково рахувався б за чоловічий: вибір, який ні на що не впливає,
+           це вибір, який вводить в оману. */
         child: CalviSegments(
-          labels: [l.startSexMale, l.startSexFemale, l.startSexOther],
-          index: switch (_sex) {
-            Sex.m => 0,
-            Sex.f => 1,
-            Sex.x => 2,
-          },
-          onPick: (i) => setState(
-            () => _sex = switch (i) {
-              0 => Sex.m,
-              1 => Sex.f,
-              _ => Sex.x,
-            },
-          ),
+          labels: [l.startSexMale, l.startSexFemale],
+          index: _sex == Sex.f ? 1 : 0,
+          onPick: (i) => setState(() => _sex = i == 1 ? Sex.f : Sex.m),
         ),
       ),
       _Block(

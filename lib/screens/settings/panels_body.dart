@@ -78,22 +78,15 @@ class ProfilePanel extends StatelessWidget {
           bare: true,
           trail: 0,
           children: [
+            /* Дві відповіді, бо питання тут не про людину, а про формулу.
+               Міффлін-Сан Жеор має рівно два коефіцієнти, і третій варіант
+               однаково рахувався б за чоловічий: вибір, який ні на що не
+               впливає, це вибір, який вводить в оману. [Sex.x] лишається в
+               перерахунку заради записів, зроблених до цієї зміни. */
             CalviSegments(
-              labels: [l.startSexMale, l.startSexFemale, l.startSexOther],
-              index: switch (s.sex) {
-                Sex.m => 0,
-                Sex.f => 1,
-                Sex.x => 2,
-              },
-              onPick: (i) => set(
-                (v) => v.copyWith(
-                  sex: switch (i) {
-                    0 => Sex.m,
-                    1 => Sex.f,
-                    _ => Sex.x,
-                  },
-                ),
-              ),
+              labels: [l.startSexMale, l.startSexFemale],
+              index: s.sex == Sex.f ? 1 : 0,
+              onPick: (i) => set((v) => v.copyWith(sex: i == 1 ? Sex.f : Sex.m)),
             ),
           ],
         ),
