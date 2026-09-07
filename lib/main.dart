@@ -33,7 +33,6 @@ import 'screens/settings/settings_screen.dart';
 import 'screens/start/hello.dart';
 import 'screens/start/start_screen.dart';
 import 'screens/today/today_screen.dart';
-import 'package:speech_to_text/speech_to_text.dart'; // TEMP
 import 'data/meal.dart';
 import 'l10n/data_lang.dart';
 
@@ -53,26 +52,7 @@ Future<void> main() async {
      від нього. Без ключів це тиха порожня операція, і застосунок стартує так
      само: щоденник не має залежати від того, чи працює оплата. */
   await Billing.start();
-  await _probeSpeech(); // TEMP
   runApp(const CalviApp());
-}
-
-// TEMP probe: what the device really offers for speech recognition.
-Future<void> _probeSpeech() async {
-  try {
-    final s = SpeechToText();
-    final ok = await s.initialize(onError: (e) => debugPrint('PROBE err ${e.errorMsg}'));
-    debugPrint('PROBE init=$ok');
-    final list = await s.locales();
-    debugPrint('PROBE count=${list.length}');
-    for (final l in list) {
-      debugPrint('PROBE locale ${l.localeId} | ${l.name}');
-    }
-    final sys = await s.systemLocale();
-    debugPrint('PROBE system=${sys?.localeId}');
-  } catch (e) {
-    debugPrint('PROBE threw $e');
-  }
 }
 
 class CalviApp extends StatefulWidget {
