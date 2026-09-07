@@ -2204,6 +2204,9 @@ class LIt extends L {
   String get setLang => 'Lingua';
 
   @override
+  String get setMedical => 'Avviso medico';
+
+  @override
   String get setMeds => 'Farmaci';
 
   @override

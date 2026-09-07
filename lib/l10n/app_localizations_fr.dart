@@ -2214,6 +2214,9 @@ class LFr extends L {
   String get setLang => 'Langue';
 
   @override
+  String get setMedical => 'Avertissement médical';
+
+  @override
   String get setMeds => 'Médicaments';
 
   @override

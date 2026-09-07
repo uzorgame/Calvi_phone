@@ -1460,6 +1460,7 @@
   "setGroupDocs": "Documents",
   "setGroupHealth": "Santé",
   "setLang": "Langue",
+  "setMedical": "Avertissement médical",
   "setMeds": "Médicaments",
   "setNorm": "Repère",
   "setNormLine": "{kcal} kcal",

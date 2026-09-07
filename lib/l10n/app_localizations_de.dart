@@ -2210,6 +2210,9 @@ class LDe extends L {
   String get setLang => 'Sprache';
 
   @override
+  String get setMedical => 'Medizinischer Hinweis';
+
+  @override
   String get setMeds => 'Medikamente';
 
   @override

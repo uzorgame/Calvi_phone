@@ -182,6 +182,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       'privacy' => PrivacyPanel(s: s, set: set, onBack: _close),
       'terms' => LegalPanel(doc: terms, onBack: _close),
       'policy' => LegalPanel(doc: privacy, onBack: _close),
+      /* Медичне застереження третім документом, а не розділом усередині Умов:
+         на нього треба посилатись з екранів, а не з абзацу. */
+      'medical' => LegalPanel(doc: medical, onBack: _close),
       'about' => AboutPanel(onBack: _close),
       'delete' => DeletePanel(onBack: _close),
       _ => const SizedBox.shrink(),
@@ -357,6 +360,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onTap: () => _open('terms'),
                     ),
                     CalviRow(icon: 'shield', title: l.setPolicy, onTap: () => _open('policy')),
+                    CalviRow(
+                      icon: 'allergy',
+                      title: l.setMedical,
+                      onTap: () => _open('medical'),
+                    ),
                     CalviRow(icon: 'settings', title: l.setAbout, onTap: () => _open('about')),
                   ],
                 ),

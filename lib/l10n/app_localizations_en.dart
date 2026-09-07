@@ -2198,6 +2198,9 @@ class LEn extends L {
   String get setLang => 'Language';
 
   @override
+  String get setMedical => 'Medical disclaimer';
+
+  @override
   String get setMeds => 'Medications';
 
   @override

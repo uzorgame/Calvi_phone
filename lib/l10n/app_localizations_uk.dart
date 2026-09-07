@@ -2212,6 +2212,9 @@ class LUk extends L {
   String get setLang => 'Мова';
 
   @override
+  String get setMedical => 'Медичне застереження';
+
+  @override
   String get setMeds => 'Препарати';
 
   @override

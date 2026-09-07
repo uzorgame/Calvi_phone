@@ -2203,6 +2203,9 @@ class LPt extends L {
   String get setLang => 'Idioma';
 
   @override
+  String get setMedical => 'Aviso médico';
+
+  @override
   String get setMeds => 'Medicamentos';
 
   @override

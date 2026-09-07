@@ -47,7 +47,7 @@ class LegalDoc {
 
 const _terms = LegalDoc(
   title: 'Terms of Use',
-  updated: '3 September 2026',
+  updated: '7 September 2026',
   lede:
       'The diary is free of charge, the assistant runs on a token allowance, all nutritional figures are estimates, and Calvi is not a medical device.',
   parts: [
@@ -61,27 +61,9 @@ const _terms = LegalDoc(
     ),
     LegalPart(
       h: 'No medical purpose',
-      p: 'The Service is intended for general wellness and self-observation only. It is not a medical device and is not intended to diagnose, treat, cure, mitigate or prevent any disease or medical condition.',
-      list: [
-        LegalItem(
-          b: 'Estimates rather than measurements.',
-          t: ' Nutritional values are derived from your description or photograph and from public food reference databases. They are approximations and may be materially inaccurate.',
-        ),
-        LegalItem(
-          b: 'No clinical advice.',
-          t: ' The assistant does not provide medical, nutritional or pharmaceutical advice, and does not substitute for consultation with a qualified healthcare professional.',
-        ),
-        LegalItem(
-          b: 'Medication entries constitute a record only.',
-          t: ' The Service does not prescribe medication, calculate dosages, or recommend changes to any treatment regimen.',
-        ),
-        LegalItem(
-          b: 'Allergen indications are not exhaustive.',
-          t: ' Allergen matching is performed against public product data and against the description you provide, and may be incomplete or incorrect. You remain responsible for verifying ingredients yourself.',
-        ),
-      ],
+      p: 'The Service is intended for general wellness and self-observation only. It is not a medical device and is not intended to diagnose, treat, cure, mitigate or prevent any disease or medical condition. Nutritional figures are estimates, the assistant does not give clinical advice, and neither substitutes for a qualified healthcare professional.',
       tail:
-          'Consult a qualified healthcare professional before making changes to your diet, and in particular if you are pregnant or breastfeeding, or if you have diabetes, kidney or liver disease, a history of disordered eating, or take medication on an ongoing basis. In a medical emergency, contact your local emergency services; do not rely on the Service.',
+          'The Medical Disclaimer sets out these limits in full and forms part of these Terms. Read it before relying on anything the Service tells you. In a medical emergency, contact your local emergency services; do not rely on the Service.',
     ),
     LegalPart(
       h: 'Eligibility',
@@ -203,7 +185,7 @@ const _terms = LegalDoc(
 
 const _privacy = LegalDoc(
   title: 'Privacy Policy',
-  updated: '3 September 2026',
+  updated: '7 September 2026',
   lede:
       'Only the data the diary requires is collected, health data is processed on the basis of your explicit consent, photographs and conversations are not kept on our servers, and no personal data is sold or used for advertising.',
   parts: [
@@ -392,6 +374,90 @@ const _privacy = LegalDoc(
   ],
 );
 
+const _medical = LegalDoc(
+  title: 'Medical Disclaimer',
+  updated: '7 September 2026',
+  lede:
+      'Calvi keeps a record and estimates numbers. It does not diagnose, does not prescribe, and does not replace a doctor.',
+  parts: [
+    LegalPart(
+      h: 'What this document is',
+      p: 'This disclaimer forms part of the Terms of Use and applies to every part of the Service, including the diary, the analysis screens and the assistant. Where the Terms and this document address the same subject, both are to be read together.',
+    ),
+    LegalPart(
+      h: 'Not a medical device',
+      p: 'Calvi is a self-tracking application for nutrition and body measurements. It is not a medical device and is not intended to diagnose, treat, cure, mitigate or prevent any disease or medical condition. It does not prescribe diets, does not adjust treatment, and does not replace a doctor or a dietitian.',
+    ),
+    LegalPart(
+      h: 'Estimates, not measurements',
+      p: 'Nutritional values are derived from your description or photograph and from public food reference databases. They are approximations and may be materially inaccurate. Daily targets for energy and macronutrients are calculated from a general population formula using the figures you enter; they are a starting point, not a prescription, and they are not adjusted to any medical condition you may have.',
+    ),
+    LegalPart(
+      h: 'Allergens are a hint, not a guarantee',
+      p: 'Allergen indications are built from public product data and from the description you provide. Those sources can be incomplete, changed by the manufacturer without notice, or silent about cross-contamination in production. An absent warning is not evidence that a product is safe for you.',
+      tail:
+          'Where an allergy is severe, the packaging in your hand remains the final word, and the Service is not a substitute for reading it.',
+    ),
+    LegalPart(
+      h: 'Medication and injections',
+      p: 'The medication log records what you tell it: the substance, the amount and the time. That record is yours, and the Service draws no clinical conclusion from it.',
+      list: [
+        LegalItem(
+          b: 'No dose is ever chosen for you.',
+          t: ' No part of the Service prescribes, selects, suggests or titrates a dose, and no figure it displays is a recommendation to take that amount. Choosing a dose belongs to a qualified prescriber who knows your history.',
+        ),
+        LegalItem(
+          b: 'Arithmetic converts, it does not decide.',
+          t: ' Where the Service performs any calculation on a dose, it converts a figure you already have into another unit. The figure you start from must come from your prescriber or from the product instructions, and the result is only as correct as what you entered.',
+        ),
+        LegalItem(
+          b: 'Reference information is not a protocol.',
+          t: ' Any description of a substance, its regulatory status or the amounts reported for it in published sources is a reference, not an instruction to use it. Many substances people track are not approved as medicines by any regulator.',
+        ),
+      ],
+      tail:
+          'Do not start, stop or change any medication or injection on the basis of anything in the Service. An injection carries risk, and substances interact with each other and with existing conditions. Speak to a qualified healthcare professional first.',
+    ),
+    LegalPart(
+      h: 'Disordered eating',
+      p: 'Counting calories does not suit everyone. For some people the counting itself is harmful: it can sustain restriction, turn eating into arithmetic, and make a number on a screen feel like a verdict on the day.',
+      tail:
+          'If you have an eating disorder, are recovering from one, or suspect you may have one, speak to a qualified professional before using the calorie, weight or measurement features. Calvi is not a treatment for eating disorders and does not replace professional care. You can use the diary without weight or measurements, and you can delete either at any time.',
+    ),
+    LegalPart(
+      h: 'About the assistant',
+      p: 'Nora is an automated assistant built on a language model. It can be inaccurate or incomplete, it can misread a photograph, and it can state something confidently and be wrong.',
+      list: [
+        LegalItem(
+          b: 'It gives no clinical advice.',
+          t: ' The assistant does not provide medical, nutritional or pharmaceutical advice and does not substitute for consultation with a qualified professional.',
+        ),
+        LegalItem(
+          b: 'Do not ask it for a diagnosis or a dose.',
+          t: ' Nor should you treat anything it says as though it were one, even where it answers the question.',
+        ),
+        LegalItem(
+          b: 'Check what matters.',
+          t: ' Where a decision touches your health or your safety, verify it with a qualified professional rather than with the assistant.',
+        ),
+      ],
+      tail:
+          'How the assistant processes what you send it, and what is retained afterwards, is described in the Privacy Policy.',
+    ),
+    LegalPart(
+      h: 'When to speak to a professional',
+      p: 'Consult a qualified healthcare professional before making significant changes to your diet, physical activity, supplements or medication. This applies in particular if you are pregnant or breastfeeding, are under eighteen, or live with a condition such as diabetes, or heart, kidney, liver, thyroid or metabolic disease.',
+      tail:
+          'Sudden weight loss or gain that you did not intend, and any symptom that worries you, belong to a doctor rather than to a diary. In a medical emergency, contact your local emergency services; do not rely on the Service.',
+    ),
+    LegalPart(
+      h: 'Your responsibility',
+      p: 'You use the Service at your own discretion and remain responsible for your own health decisions. To the fullest extent permitted by applicable law, the operator is not liable for any consequence of relying on information obtained from the Service. Nothing here excludes liability that cannot lawfully be excluded, and the Limitation of liability section of the Terms applies in full.',
+      tail: 'Questions about this document may be addressed to calvi.labs@gmail.com.',
+    ),
+  ],
+);
+
 /* Одна редакція, англійською, незалежно від мови інтерфейсу.
  *
  * Дві мовні редакції розходяться першою ж правкою, після якої англійська
@@ -400,3 +466,7 @@ const _privacy = LegalDoc(
 const LegalDoc terms = _terms;
 
 const LegalDoc privacy = _privacy;
+
+/* Медичне застереження. Третій документ, і він частина Умов: тримати текст
+   окремо можна, а от згода на Умови накриває і його. */
+const LegalDoc medical = _medical;

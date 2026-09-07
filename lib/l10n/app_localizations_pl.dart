@@ -2217,6 +2217,9 @@ class LPl extends L {
   String get setLang => 'Język';
 
   @override
+  String get setMedical => 'Zastrzeżenie medyczne';
+
+  @override
   String get setMeds => 'Leki';
 
   @override

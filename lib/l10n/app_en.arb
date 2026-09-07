@@ -1515,6 +1515,7 @@
   "setGroupDocs": "Documents",
   "setGroupHealth": "Health",
   "setLang": "Language",
+  "setMedical": "Medical disclaimer",
   "setMeds": "Medications",
   "setNorm": "Norm",
   "setNormLine": "{kcal} kcal",

@@ -4032,6 +4032,12 @@ abstract class L {
   /// **'Language'**
   String get setLang;
 
+  /// No description provided for @setMedical.
+  ///
+  /// In en, this message translates to:
+  /// **'Medical disclaimer'**
+  String get setMedical;
+
   /// No description provided for @setMeds.
   ///
   /// In en, this message translates to:
