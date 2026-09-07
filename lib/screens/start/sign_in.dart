@@ -80,6 +80,7 @@ class SignIn extends StatefulWidget {
     required this.onNew,
     required this.onEntered,
     this.returning = false,
+    this.skip = true,
   });
 
   final AuthPage page;
@@ -93,6 +94,11 @@ class SignIn extends StatefulWidget {
 
   /// Сюди прийшли з наміром повернутись, а не завести акаунт.
   final bool returning;
+
+  /* Чи показувати «Далі без акаунту». На першому запуску так: застосунок
+     працює і без входу, і сказати про це треба. У профілі ні: людина вже
+     користується ним без акаунта і прийшла сюди саме по акаунт. */
+  final bool skip;
 
   @override
   State<SignIn> createState() => _SignInState();
@@ -491,26 +497,29 @@ class _SignInState extends State<SignIn> {
         ),
       ),
 
-      const SizedBox(height: 20),
       /* Застосунок працює і без акаунта. Рядок тихий, але він є: це не запасний
-         вихід, а наш спосіб починати. */
-      Center(
-        child: GestureDetector(
-          onTap: _busy ? null : widget.onNew,
-          behavior: HitTestBehavior.opaque,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Text(
-              l.startSignInSkip,
-              style: context.t.bodyMedium?.copyWith(
-                fontSize: CalviSize.fsCaption,
-                color: context.c.textSecondary,
-                decoration: TextDecoration.underline,
+         вихід, а наш спосіб починати. У профілі його немає: людина вже
+         користується застосунком без акаунта і прийшла сюди саме по акаунт. */
+      if (widget.skip) ...[
+        const SizedBox(height: 20),
+        Center(
+          child: GestureDetector(
+            onTap: _busy ? null : widget.onNew,
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text(
+                l.startSignInSkip,
+                style: context.t.bodyMedium?.copyWith(
+                  fontSize: CalviSize.fsCaption,
+                  color: context.c.textSecondary,
+                  decoration: TextDecoration.underline,
+                ),
               ),
             ),
           ),
         ),
-      ),
+      ],
 
       const SizedBox(height: 18),
       _terms(),
