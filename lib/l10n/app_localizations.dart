@@ -2106,6 +2106,12 @@ abstract class L {
   /// **'Device language'**
   String get langSystem;
 
+  /// DO NOT TRANSLATE. Sits inside the legal documents, which exist in English only, and the address under it is English too. A translated label above an English address would read half in one language and half in another. Every language repeats this string as it stands, Ukrainian included.
+  ///
+  /// In en, this message translates to:
+  /// **'Open on the web'**
+  String get legalOnTheWeb;
+
   /// DO NOT TRANSLATE. The one line of ours inside the legal documents, and they exist in English only: `lib/data/legal.dart` holds a single version of the Terms and of the Privacy Policy, which every language shows. A translated «Updated» put one word of the reader's language into an English legal text and made the date line read half in one language and half in another. Every language repeats this string as it stands, Ukrainian included.
   ///
   /// In en, this message translates to:

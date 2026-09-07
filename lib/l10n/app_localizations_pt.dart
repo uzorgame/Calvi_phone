@@ -1130,6 +1130,9 @@ class LPt extends L {
   String get langSystem => 'Idioma do aparelho';
 
   @override
+  String get legalOnTheWeb => 'Open on the web';
+
+  @override
   String legalUpdated(String date) {
     return 'Updated $date';
   }

@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../data/legal.dart';
+import '../../design/icons.dart';
 import '../../design/shell.dart';
 import '../menu.dart';
 import '../../design/theme.dart';
@@ -37,9 +41,96 @@ class LegalPanel extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 0, CalviSize.gutter, 8),
-          child: LegalText(doc: doc),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              LegalText(doc: doc),
+              const SizedBox(height: 28),
+              _OnTheWeb(doc: doc),
+            ],
+          ),
         ),
       ],
+    );
+  }
+}
+
+/// Та сама редакція на сайті, посиланням у кінці документа.
+///
+/// Не «повна версія»: повна вона й тут, слово в слово з одного джерела. Адреса
+/// потрібна для того, чого застосунок не вміє. Її можна переслати,
+/// роздрукувати, відкрити на комп'ютері й комусь показати; на неї посилаються
+/// магазини і листи. Документ, який існує лише всередині застосунку, не можна
+/// нікому дати.
+///
+/// **У кінці, а не вгорі.** Посилання на початку читається як «справжній текст
+/// десь там», і людина йде в браузер, не прочитавши того, що вже перед нею. У
+/// кінці воно зустрічає того, хто дочитав.
+///
+/// **Карткою, а не підкресленим словом.** Після трьох екранів суцільної прози
+/// око вже не бачить підкресленого рядка, а картка з рамкою читається як дія,
+/// тобто саме тим, чим вона є. Той самий крій, що в рядках налаштувань.
+class _OnTheWeb extends StatelessWidget {
+  const _OnTheWeb({required this.doc});
+
+  final LegalDoc doc;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => unawaited(
+        launchUrl(Uri.parse(doc.url), mode: LaunchMode.externalApplication),
+      ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: c.fillSecondary,
+          border: Border.all(color: c.cardBorder),
+          borderRadius: BorderRadius.circular(CalviSize.rCard),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    L.of(context).legalOnTheWeb,
+                    style: context.t.bodyLarge?.copyWith(
+                      fontSize: CalviSize.fsBody,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  /* Адреса видима навмисно: посилання, під яким не видно, куди
+                     воно веде, у юридичному документі виглядає рівно так, як не
+                     треба. Без «https://»: воно нічого не додає і забирає
+                     місце, якого на телефоні немає. */
+                  Text(
+                    doc.url.replaceFirst('https://', ''),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.t.labelSmall?.copyWith(color: c.textSecondary),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            Container(
+              width: 26,
+              height: 26,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(shape: BoxShape.circle, color: c.card),
+              child: CalviIcon('chevron', size: 15, color: c.textSecondary),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -613,6 +613,7 @@
   "kcalUnit": "{kcal} ккал",
   "langSection": "Мова інтерфейсу",
   "langSystem": "Мова пристрою",
+  "legalOnTheWeb": "Open on the web",
   "legalUpdated": "Updated {date}",
   "loginNoToken": "Google не віддав токен",
   "loginNotConfigured": "вхід не налаштований у цій збірці",

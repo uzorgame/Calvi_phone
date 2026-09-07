@@ -279,6 +279,9 @@
       }
     }
   },
+  "@legalOnTheWeb": {
+    "description": "DO NOT TRANSLATE. Sits inside the legal documents, which exist in English only, and the address under it is English too. A translated label above an English address would read half in one language and half in another. Every language repeats this string as it stands, Ukrainian included."
+  },
   "@legalUpdated": {
     "placeholders": {
       "date": {
@@ -1139,6 +1142,7 @@
   "kcalUnit": "{kcal} kcal",
   "langSection": "Idioma de la interfaz",
   "langSystem": "Idioma del dispositivo",
+  "legalOnTheWeb": "Open on the web",
   "legalUpdated": "Updated {date}",
   "loginNoToken": "Google no devolvió un token",
   "loginNotConfigured": "el inicio de sesión no está configurado en esta compilación",

@@ -381,6 +381,7 @@
   "kcalUnit": "{kcal} kcal",
   "langSection": "Język interfejsu",
   "langSystem": "Język urządzenia",
+  "legalOnTheWeb": "Open on the web",
   "legalUpdated": "Updated {date}",
   "loginNoToken": "Google nie oddał tokena",
   "loginNotConfigured": "logowanie nie jest skonfigurowane w tej wersji",

@@ -1137,6 +1137,9 @@ class LUk extends L {
   String get langSystem => 'Мова пристрою';
 
   @override
+  String get legalOnTheWeb => 'Open on the web';
+
+  @override
   String legalUpdated(String date) {
     return 'Updated $date';
   }

@@ -31,6 +31,7 @@ class LegalDoc {
     required this.title,
     required this.updated,
     required this.lede,
+    required this.url,
     required this.parts,
   });
 
@@ -42,6 +43,13 @@ class LegalDoc {
   /// Один рядок замість усього тексту, для тих, хто далі не читатиме.
   final String lede;
 
+  /* Та сама редакція на сайті.
+   *
+   * Не запасний варіант і не «повніша версія»: текст один, і тут він повний.
+   * Адресу можна переслати, роздрукувати й відкрити на комп'ютері, а документ,
+   * який існує тільки всередині застосунку, не можна нікому дати. */
+  final String url;
+
   final List<LegalPart> parts;
 }
 
@@ -50,6 +58,7 @@ const _terms = LegalDoc(
   updated: '7 September 2026',
   lede:
       'The diary is free of charge, the assistant runs on a token allowance, all nutritional figures are estimates, and Calvi is not a medical device.',
+  url: 'https://calvi.uk/terms/',
   parts: [
     LegalPart(
       h: 'Agreement to these Terms',
@@ -188,6 +197,7 @@ const _privacy = LegalDoc(
   updated: '7 September 2026',
   lede:
       'Only the data the diary requires is collected, health data is processed on the basis of your explicit consent, photographs and conversations are not kept on our servers, and no personal data is sold or used for advertising.',
+  url: 'https://calvi.uk/privacy/',
   parts: [
     LegalPart(
       h: 'Controller and contact details',
@@ -379,6 +389,7 @@ const _medical = LegalDoc(
   updated: '7 September 2026',
   lede:
       'Calvi keeps a record and estimates numbers. It does not diagnose, does not prescribe, and does not replace a doctor.',
+  url: 'https://calvi.uk/medical/',
   parts: [
     LegalPart(
       h: 'What this document is',

@@ -1128,6 +1128,9 @@ class LEn extends L {
   String get langSystem => 'Device language';
 
   @override
+  String get legalOnTheWeb => 'Open on the web';
+
+  @override
   String legalUpdated(String date) {
     return 'Updated $date';
   }

@@ -269,6 +269,11 @@
     "placeholders": { "date": { "type": "String" } }
   },
 
+  "legalOnTheWeb": "Open on the web",
+  "@legalOnTheWeb": {
+    "description": "DO NOT TRANSLATE. Sits inside the legal documents, which exist in English only, and the address under it is English too. A translated label above an English address would read half in one language and half in another. Every language repeats this string as it stands, Ukrainian included."
+  },
+
   "goalDiff": "{kg} kg d'écart",
   "@goalDiff": {"placeholders":{"kg":{"type":"String"}}},
   "goalFromStart": " depuis {kg} kg au départ. ",

@@ -1132,6 +1132,9 @@ class LIt extends L {
   String get langSystem => 'Lingua del dispositivo';
 
   @override
+  String get legalOnTheWeb => 'Open on the web';
+
+  @override
   String legalUpdated(String date) {
     return 'Updated $date';
   }
