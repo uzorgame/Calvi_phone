@@ -212,6 +212,7 @@
   "accountSignOutBack": "Rientra con lo stesso account e torna tutto. Quello che hai scritto offline e non è ancora arrivato al server non si può recuperare.",
   "accountVia": "Accesso con Google",
   "accountViaApple": "Accesso con Apple",
+  "accountViaEmail": "Accesso con e-mail",
   "accountSince": "Su Calvi da",
   "accountSignOutAction": "Esci",
   "accountNoAccountNote": "Il diario vive solo su questo telefono. Cambia telefono o togli l'app e non ci sarà con che riportare le voci: non sappiamo di chi sono.",

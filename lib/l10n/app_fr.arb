@@ -829,6 +829,7 @@
   "accountTitle": "Compte",
   "accountVia": "Connecté avec Google",
   "accountViaApple": "Connecté avec Apple",
+  "accountViaEmail": "Connecté avec l'e-mail",
   "accountWhichDiary": "Quel journal on garde ?",
   "accountWhichDiaryNote": "Ce compte a déjà des entrées, et le téléphone aussi. Un seul peut rester : celui du compte ou celui du téléphone. L'autre part.",
   "actBasketball": "Basket",

@@ -11,7 +11,10 @@ import '../../design/icons.dart';
 import '../../design/shell.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
+import '../../design/slide.dart';
 import '../../l10n/app_localizations.dart';
+import '../start/auth_route.dart';
+import '../start/sign_in.dart';
 import 'restored_sheet.dart';
 
 /// Обліковий запис у профілі.
@@ -37,13 +40,6 @@ class _AccountBlockState extends State<AccountBlock> {
      відповіла, і це кадр або два. */
   SyncMetaData? _meta;
 
-  /* Хто саме зараз заходить, а не просто «хтось заходить».
-   *
-   * Тут стояв один прапорець на дві кнопки, і напис «Заходимо» зʼявлявся на
-   * кнопці Google, коли людина тиснула Apple. Зайнятість має знати, чия вона:
-   * інакше екран показує роботу не в тому місці, де вона йде. */
-  String? _busyWith;
-
   /// Чи вже питали базу. Залежності можуть змінитись не раз, а акаунт один.
   bool _asked = false;
 
@@ -68,61 +64,23 @@ class _AccountBlockState extends State<AccountBlock> {
 
   LoginService? get _login => AppScope.maybeOf(context)?.sync?.login;
 
-  Future<void> _signIn() => _enter('google', (login, device) => login.signIn(deviceName: device));
-
-  Future<void> _signInApple() =>
-      _enter('apple', (login, device) => login.signInApple(deviceName: device));
-
-  /* Обидва входи проходять одним шляхом навмисно: оновлення картки і текст
-     помилки не мають залежати від того, якою кнопкою людина скористалась.
-     Різниця лише в тому, чия кнопка показує зайнятість. */
-  Future<void> _enter(
-    String who,
-    Future<LoginResult> Function(LoginService login, String device) go,
-  ) async {
-    final login = _login;
-    if (login == null) return;
-
-    setState(() => _busyWith = who);
-    final LoginResult result;
-    try {
-      result = await go(login, L.of(context).accountSettingsDevice);
-    } finally {
-      /* У `finally`, бо між підняттям і опусканням стоїть чекання: один виняток
-         лишав екран входу зайнятим назавжди, до перезаходу в застосунок. */
-      if (mounted) setState(() => _busyWith = null);
-    }
+  /* Вхід відкривається екраном, а не робиться тут.
+   *
+   * Доти картка входила сама, і всі правила про те, що робити після входу,
+   * лежали в ній другою копією поруч із такими самими правилами «Старту». Тепер
+   * копія одна: [AuthRoute] показує ту саму форму і той самий її кінець.
+   *
+   * Аркуш «дані відновлено» лишається тут, бо показувати його має той екран,
+   * який лишається на місці: [AuthRoute] у цю мить уже закривається. */
+  Future<void> _openAuth(AuthPage page) async {
+    final signedIn = await Navigator.of(context).push<bool>(slideRoute(AuthRoute(page: page)));
     if (!mounted) return;
 
-    switch (result) {
-      case LoginResult.done:
-        await _load();
-        /* Акаунт стояв у черзі на видалення, і цей вхід зняв його з черги:
-           записи повернулись, а видалення доведеться просити знову. */
-        if (login.restored && mounted) await showRestoredSheet(context);
-      case LoginResult.canceled:
-        await _load();
-      case LoginResult.partial:
-        /* Вхід відбувся, просто щоденник цього разу не доїхав. Картку
-           оновлюємо, кнопку не пропонуємо вдруге. */
-        await _load();
-      case LoginResult.failed:
-        if (!mounted) return;
-        /* Причина в тексті навмисно. «Спробуй ще раз» без неї це порада нічого
-           не робити: людина тисне вдруге і отримує те саме, а ми лишаємось без
-           жодної зачіпки, бо до сервера такий збій не доходить. */
-        final why = login.error;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              why == null
-                  ? L.of(context).accountSignInFailed
-                  : L.of(context).accountSignInFailedWhy(why),
-            ),
-            duration: const Duration(seconds: 10),
-          ),
-        );
-    }
+    await _load();
+    if (signedIn != true) return;
+
+    final login = _login;
+    if (login != null && login.restored && mounted) await showRestoredSheet(context);
   }
 
   /* Питання «який щоденник лишити» тут більше немає, і це не спрощення екрана,
@@ -175,7 +133,7 @@ class _AccountBlockState extends State<AccountBlock> {
       trail: 0,
       children: [
         email == null
-            ? _SignedOut(busyWith: _busyWith, onTap: _signIn, onApple: _signInApple)
+            ? _SignedOut(onEnter: _openAuth)
             : _SignedIn(
                 email: email,
                 joinedAt: _meta?.joinedAt,
@@ -235,6 +193,11 @@ class _SignedIn extends StatelessWidget {
                 child: switch (provider) {
                   'apple' => AppleMark(size: 21, color: c.text),
                   'google' => const GoogleMark(size: 19),
+                  /* Вхід поштою і невідомий провайдер діляться першою літерою
+                     адреси. Знака в нас для них немає і вигадувати його нема
+                     за чим: у Google і Apple свої марки саме тому, що людина
+                     впізнає їх, а конверт нічого не каже, крім «пошта», яка й
+                     так написана поруч. */
                   _ => Text(
                     email.substring(0, 1).toUpperCase(),
                     style: context.t.titleMedium?.copyWith(color: c.textSecondary),
@@ -252,13 +215,18 @@ class _SignedIn extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: context.t.titleMedium,
                     ),
-                    const SizedBox(height: 3),
-                    Text(
-                      provider == 'apple'
-                          ? L.of(context).accountViaApple
-                          : L.of(context).accountVia,
-                      style: context.t.labelSmall,
-                    ),
+                    /* Підпис називає того, ким справді зайшли, і мовчить, коли
+                       не знає.
+                       Тут стояло «або Apple, або Google», і Google був
+                       відповіддю на все інше. Через це людина, яка зайшла
+                       поштою, читала про себе неправду. Порожньо для
+                       невідомого провайдера краще за здогад: такі записи
+                       лишились від входів, зроблених до того, як сервер почав
+                       відповідати, ким саме зайшли, і вгадати це нізвідки. */
+                    if (_via(context, provider) case final via?) ...[
+                      const SizedBox(height: 3),
+                      Text(via, style: context.t.labelSmall),
+                    ],
                   ],
                 ),
               ),
@@ -312,22 +280,24 @@ class _SignedIn extends StatelessWidget {
   }
 }
 
+/// Ким зайшли, словами. Порожньо, коли сервер цього не сказав.
+String? _via(BuildContext context, String? provider) => switch (provider) {
+  'apple' => L.of(context).accountViaApple,
+  'google' => L.of(context).accountVia,
+  'email' => L.of(context).accountViaEmail,
+  _ => null,
+};
+
 /// Картка того, хто не входив: чому це варто зробити, і кнопка.
 class _SignedOut extends StatelessWidget {
-  const _SignedOut({required this.busyWith, required this.onTap, required this.onApple});
+  const _SignedOut({required this.onEnter});
 
-  /// Чия саме кнопка зараз працює: 'google', 'apple' або порожньо.
-  final String? busyWith;
-  bool get busy => busyWith != null;
-  final VoidCallback onTap;
-  final VoidCallback onApple;
+  /// Куди веде дотик: на екран входу, одразу на потрібну сторінку.
+  final void Function(AuthPage) onEnter;
 
   @override
   Widget build(BuildContext context) {
     final c = context.c;
-    final login = AppScope.maybeOf(context)?.sync?.login;
-    final can = login?.available ?? false;
-    final canApple = login?.appleAvailable ?? false;
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -342,38 +312,29 @@ class _SignedOut extends StatelessWidget {
         children: [
           Text(L.of(context).accountNoAccountNote, style: context.t.bodyMedium),
 
-          /* Кнопка є тільки тоді, коли за нею щось стоїть. Порожній
-             ідентифікатор означає, що вхід не налаштований у цій збірці, і
-             кнопка, яка нічого не робить, гірша за її відсутність. */
-          if (can) ...[
-            const SizedBox(height: 14),
-            CalviButton(
-              label: busyWith == 'google' ? L.of(context).accountBusy : L.of(context).accountGoogle,
-              enabled: !busy,
-              onTap: onTap,
-            ),
-          ],
-
-          /* Apple там, де Apple: на Android цей шлях нікуди не веде, і вхід,
-             яким не можна пройти, гірший за один шлях менше. */
-          if (canApple) ...[
-            const SizedBox(height: 10),
-            CalviGhost(
-              label: busyWith == 'apple'
-                  ? L.of(context).accountBusy
-                  : L.of(context).startSignInApple,
-              enabled: !busy,
-              onTap: onApple,
-            ),
-          ],
-
-          if (can) ...[
-            const SizedBox(height: 12),
-            Text(
-              L.of(context).accountScopeNote,
-              style: context.t.labelSmall?.copyWith(color: c.faint),
-            ),
-          ],
+          /* Дві дії замість двох провайдерів.
+           *
+           * Тут стояли «Продовжити з Google» і «Продовжити з Apple», і картка
+           * входила сама. Відколи зʼявився вхід поштою, вона показувала два
+           * способи з чотирьох і мовчала про решту, а місця під усі чотири в
+           * ній немає і бути не має: профіль це не екран входу.
+           *
+           * Тепер картка не входить, а веде туди, де вхід і живе. Один екран
+           * на всі способи, один на весь застосунок, і будь-який новий спосіб
+           * зʼявляється там сам собою.
+           *
+           * Вагою дві дії різні навмисно: хто дійшов до профілю, найчастіше вже
+           * має акаунт і просто не входив на цьому телефоні. */
+          const SizedBox(height: 14),
+          CalviButton(
+            label: L.of(context).authSignInAction,
+            onTap: () => onEnter(AuthPage.in_),
+          ),
+          const SizedBox(height: 10),
+          CalviGhost(
+            label: L.of(context).authSignUpLink,
+            onTap: () => onEnter(AuthPage.up),
+          ),
         ],
       ),
     );

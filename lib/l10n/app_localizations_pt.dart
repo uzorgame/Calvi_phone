@@ -85,6 +85,9 @@ class LPt extends L {
   String get accountViaApple => 'Entrou com a Apple';
 
   @override
+  String get accountViaEmail => 'Entrou com e-mail';
+
+  @override
   String get accountWhichDiary => 'Com qual diário a gente fica?';
 
   @override

@@ -829,6 +829,7 @@
   "accountTitle": "Cuenta",
   "accountVia": "Sesión iniciada con Google",
   "accountViaApple": "Sesión iniciada con Apple",
+  "accountViaEmail": "Sesión iniciada con correo",
   "accountWhichDiary": "¿Con qué diario nos quedamos?",
   "accountWhichDiaryNote": "Esta cuenta ya tiene registros, y el teléfono también. Solo puede quedarse uno: el de la cuenta o el del teléfono. El otro se va.",
   "actBasketball": "Baloncesto",

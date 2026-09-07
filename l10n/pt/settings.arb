@@ -212,6 +212,7 @@
   "accountSignOutBack": "Entre de novo com a mesma conta e tudo volta. O que foi escrito sem internet e ainda não chegou ao servidor não dá para recuperar.",
   "accountVia": "Entrou com o Google",
   "accountViaApple": "Entrou com a Apple",
+  "accountViaEmail": "Entrou com e-mail",
   "accountSince": "No Calvi desde",
   "accountSignOutAction": "Sair",
   "accountNoAccountNote": "O diário vive só neste telefone. Troque de telefone ou apague o app e não vai haver com o que trazer os registros de volta: a gente não sabe de quem eles são.",

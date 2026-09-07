@@ -212,6 +212,7 @@
   "accountSignOutBack": "Vuelve a iniciar sesión con la misma cuenta y regresa todo. Lo escrito sin conexión que aún no haya llegado al servidor no se puede recuperar.",
   "accountVia": "Sesión iniciada con Google",
   "accountViaApple": "Sesión iniciada con Apple",
+  "accountViaEmail": "Sesión iniciada con correo",
   "accountSince": "En Calvi desde",
   "accountSignOutAction": "Cerrar sesión",
   "accountNoAccountNote": "El diario vive solo en este teléfono. Cambia de teléfono o quita la app y no habrá con qué recuperar los registros: no sabemos de quién son.",

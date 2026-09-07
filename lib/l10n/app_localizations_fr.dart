@@ -85,6 +85,9 @@ class LFr extends L {
   String get accountViaApple => 'Connecté avec Apple';
 
   @override
+  String get accountViaEmail => 'Connecté avec l\'e-mail';
+
+  @override
   String get accountWhichDiary => 'Quel journal on garde ?';
 
   @override

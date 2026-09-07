@@ -71,6 +71,7 @@
   "accountTitle": "Konto",
   "accountVia": "Logowanie przez Google",
   "accountViaApple": "Logowanie przez Apple",
+  "accountViaEmail": "Logowanie przez e-mail",
   "accountWhichDiary": "Który dziennik zostawiamy?",
   "accountWhichDiaryNote": "Na tym koncie są już wpisy, i na telefonie też. Zostawić można tylko jeden: ten z konta albo ten z telefonu. Drugi zniknie.",
   "actBasketball": "Koszykówka",

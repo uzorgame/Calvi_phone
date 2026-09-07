@@ -213,6 +213,7 @@
   "accountSignOutBack": "Sign back in with the same account and everything comes back. Anything written offline that has not reached the server yet cannot be recovered.",
   "accountVia": "Signed in with Google",
   "accountViaApple": "Signed in with Apple",
+  "accountViaEmail": "Signed in with email",
   "accountSince": "With Calvi since",
   "accountSignOutAction": "Sign out",
   "accountNoAccountNote": "The diary lives only on this phone. Change the phone or remove the app and there is nothing to bring the entries back with: we do not know whose they are.",

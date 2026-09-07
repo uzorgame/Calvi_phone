@@ -85,6 +85,9 @@ class LUk extends L {
   String get accountViaApple => 'Вхід через Apple';
 
   @override
+  String get accountViaEmail => 'Вхід через пошту';
+
+  @override
   String get accountWhichDiary => 'Який щоденник лишаємо?';
 
   @override

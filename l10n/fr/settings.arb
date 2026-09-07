@@ -212,6 +212,7 @@
   "accountSignOutBack": "Reconnecte-toi avec le même compte et tout revient. Ce qui a été écrit hors ligne et n'est pas encore arrivé au serveur ne peut pas être récupéré.",
   "accountVia": "Connecté avec Google",
   "accountViaApple": "Connecté avec Apple",
+  "accountViaEmail": "Connecté avec l'e-mail",
   "accountSince": "Sur Calvi depuis le",
   "accountSignOutAction": "Se déconnecter",
   "accountNoAccountNote": "Le journal ne vit que sur ce téléphone. Change de téléphone ou supprime l'app et il n'y aura rien pour ramener les entrées : nous ne savons pas à qui elles sont.",

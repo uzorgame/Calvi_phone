@@ -884,6 +884,7 @@
   "accountTitle": "Account",
   "accountVia": "Signed in with Google",
   "accountViaApple": "Signed in with Apple",
+  "accountViaEmail": "Signed in with email",
   "accountWhichDiary": "Which diary do we keep?",
   "accountWhichDiaryNote": "This account already has entries, and so does the phone. Only one can stay: the one in the account, or the one on the phone. The other one goes.",
   "actBasketball": "Basketball",

@@ -85,6 +85,9 @@ class LIt extends L {
   String get accountViaApple => 'Accesso con Apple';
 
   @override
+  String get accountViaEmail => 'Accesso con e-mail';
+
+  @override
   String get accountWhichDiary => 'Quale diario teniamo?';
 
   @override

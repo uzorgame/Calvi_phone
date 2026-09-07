@@ -212,6 +212,7 @@
   "accountSignOutBack": "Melde dich mit demselben Konto wieder an, dann ist alles zurück. Was offline geschrieben wurde und den Server noch nicht erreicht hat, lässt sich nicht zurückholen.",
   "accountVia": "Angemeldet mit Google",
   "accountViaApple": "Angemeldet mit Apple",
+  "accountViaEmail": "Angemeldet mit E-Mail",
   "accountSince": "Bei Calvi seit",
   "accountSignOutAction": "Abmelden",
   "accountNoAccountNote": "Das Tagebuch lebt nur auf diesem Telefon. Wechsel das Telefon oder lösch die App, und es gibt nichts, womit man die Einträge zurückholt: wir wissen nicht, wem sie gehören.",

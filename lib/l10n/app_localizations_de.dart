@@ -85,6 +85,9 @@ class LDe extends L {
   String get accountViaApple => 'Angemeldet mit Apple';
 
   @override
+  String get accountViaEmail => 'Angemeldet mit E-Mail';
+
+  @override
   String get accountWhichDiary => 'Welches Tagebuch behalten wir?';
 
   @override

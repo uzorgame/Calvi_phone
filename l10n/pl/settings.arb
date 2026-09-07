@@ -192,6 +192,7 @@
   "accountSignOutBack": "Zaloguj się tym samym kontem, a wszystko wróci na miejsce. Tego, co zapisano bez internetu i jeszcze nie dojechało na serwer, nie da się odzyskać.",
   "accountVia": "Logowanie przez Google",
   "accountViaApple": "Logowanie przez Apple",
+  "accountViaEmail": "Logowanie przez e-mail",
   "accountSince": "W Calvi od",
   "accountSignOutAction": "Wyloguj się z konta",
   "accountNoAccountNote": "Dziennik żyje tylko na tym telefonie. Zmienisz telefon albo skasujesz aplikację i nie będzie czym przywrócić wpisów: nie wiemy, czyje są.",

@@ -85,6 +85,9 @@ class LEn extends L {
   String get accountViaApple => 'Signed in with Apple';
 
   @override
+  String get accountViaEmail => 'Signed in with email';
+
+  @override
   String get accountWhichDiary => 'Which diary do we keep?';
 
   @override

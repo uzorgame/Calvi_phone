@@ -85,6 +85,9 @@ class LPl extends L {
   String get accountViaApple => 'Logowanie przez Apple';
 
   @override
+  String get accountViaEmail => 'Logowanie przez e-mail';
+
+  @override
   String get accountWhichDiary => 'Który dziennik zostawiamy?';
 
   @override

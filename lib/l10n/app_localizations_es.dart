@@ -85,6 +85,9 @@ class LEs extends L {
   String get accountViaApple => 'Sesión iniciada con Apple';
 
   @override
+  String get accountViaEmail => 'Sesión iniciada con correo';
+
+  @override
   String get accountWhichDiary => '¿Con qué diario nos quedamos?';
 
   @override
