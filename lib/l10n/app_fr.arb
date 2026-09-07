@@ -1,0 +1,1692 @@
+{
+  "@@locale": "fr",
+  "@accountSignInFailedWhy": {
+    "placeholders": {
+      "why": {
+        "type": "String"
+      }
+    }
+  },
+  "@agoDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@agoWeeks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@allergySearch": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@anChartGoal": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@anDonePercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "@anEtaHead": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@anMacroGoal": {
+    "placeholders": {
+      "grams": {
+        "type": "int"
+      }
+    }
+  },
+  "@anMeasuresChange": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "@anShareOfNorm": {
+    "placeholders": {
+      "share": {
+        "type": "int"
+      }
+    }
+  },
+  "@anWaterGoal": {
+    "placeholders": {
+      "ml": {
+        "type": "String"
+      }
+    }
+  },
+  "@assistantHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@assistantPinned": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "pinned": {
+        "type": "int"
+      }
+    }
+  },
+  "@authAgainIn": {
+    "placeholders": {
+      "sec": {
+        "type": "int"
+      }
+    }
+  },
+  "@authCodeHint": {
+    "placeholders": {
+      "mail": {
+        "type": "String"
+      }
+    }
+  },
+  "@barGrams": {
+    "placeholders": {
+      "grams": {
+        "type": "int"
+      }
+    }
+  },
+  "@camAllergyContains": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "@camAllergyTraces": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "@camIngredients": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "@camIntoSlot": {
+    "placeholders": {
+      "slot": {
+        "type": "String"
+      }
+    }
+  },
+  "@camKcalFor": {
+    "placeholders": {
+      "grams": {
+        "type": "int"
+      }
+    }
+  },
+  "@camKcalPer": {
+    "placeholders": {
+      "grams": {
+        "type": "int"
+      }
+    }
+  },
+  "@camLogInto": {
+    "placeholders": {
+      "slotInto": {
+        "type": "String"
+      }
+    }
+  },
+  "@camPortionPack": {
+    "placeholders": {
+      "g": {
+        "type": "int"
+      }
+    }
+  },
+  "@deleteFailed": {
+    "placeholders": {
+      "why": {
+        "type": "String"
+      }
+    }
+  },
+  "@deleteProNote": {
+    "placeholders": {
+      "store": {
+        "type": "String"
+      }
+    }
+  },
+  "@entries": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@eraseFailed": {
+    "placeholders": {
+      "why": {
+        "type": "String"
+      }
+    }
+  },
+  "@eveningLogged": {
+    "placeholders": {
+      "slot": {
+        "type": "String"
+      }
+    }
+  },
+  "@eveningMissing": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "@goalDiff": {
+    "placeholders": {
+      "kg": {
+        "type": "String"
+      }
+    }
+  },
+  "@goalFromStart": {
+    "placeholders": {
+      "kg": {
+        "type": "String"
+      }
+    }
+  },
+  "@goalRange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "@gramsUnit": {
+    "placeholders": {
+      "grams": {
+        "type": "int"
+      }
+    }
+  },
+  "@heroBurned": {
+    "placeholders": {
+      "kcal": {
+        "type": "int"
+      }
+    }
+  },
+  "@heroFrom": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      }
+    }
+  },
+  "@heroOf": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      }
+    }
+  },
+  "@heroWeightFrom": {
+    "placeholders": {
+      "kg": {
+        "type": "String"
+      }
+    }
+  },
+  "@kcalUnit": {
+    "placeholders": {
+      "kcal": {
+        "type": "int"
+      }
+    }
+  },
+  "@legalUpdated": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@loginServer": {
+    "placeholders": {
+      "why": {
+        "type": "String"
+      }
+    }
+  },
+  "@macroCShort": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "@macroFShort": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "@macroOfGrams": {
+    "placeholders": {
+      "goal": {
+        "type": "int"
+      }
+    }
+  },
+  "@macroPShort": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "@mealGrams": {
+    "placeholders": {
+      "grams": {
+        "type": "int"
+      }
+    }
+  },
+  "@measureCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@measureLast": {
+    "placeholders": {
+      "ago": {
+        "type": "String"
+      }
+    }
+  },
+  "@medsFirstDose": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "day": {
+        "type": "String"
+      },
+      "at": {
+        "type": "String"
+      }
+    }
+  },
+  "@medsSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@medsUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@menuHintKcal": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@menuHintMore": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@menuHintOnGoal": {
+    "placeholders": {
+      "ok": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@normAutoHint": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      }
+    }
+  },
+  "@normGrams": {
+    "placeholders": {
+      "grams": {
+        "type": "int"
+      }
+    }
+  },
+  "@normKcalOf": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      }
+    }
+  },
+  "@normMacroSplit": {
+    "placeholders": {
+      "protein": {
+        "type": "int"
+      },
+      "fat": {
+        "type": "int"
+      },
+      "carbs": {
+        "type": "int"
+      }
+    }
+  },
+  "@normOf": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      }
+    }
+  },
+  "@normOffOver": {
+    "placeholders": {
+      "sum": {
+        "type": "String"
+      },
+      "off": {
+        "type": "int"
+      }
+    }
+  },
+  "@normOffUnder": {
+    "placeholders": {
+      "sum": {
+        "type": "String"
+      },
+      "off": {
+        "type": "int"
+      }
+    }
+  },
+  "@normWaterPerKg": {
+    "placeholders": {
+      "ml": {
+        "type": "int"
+      }
+    }
+  },
+  "@planFrom": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@planFromShort": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@planYearBilled": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "@plateFor": {
+    "placeholders": {
+      "grams": {
+        "type": "int"
+      }
+    }
+  },
+  "@rcAllergyWarn": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcChatGreet": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@rcCountFew": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@rcDeleteBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@rcItemsTotal": {
+    "placeholders": {
+      "g": {
+        "type": "int"
+      }
+    }
+  },
+  "@rcMinutes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@rcOfDay": {
+    "placeholders": {
+      "p": {
+        "type": "int"
+      }
+    }
+  },
+  "@rcPortion": {
+    "placeholders": {
+      "g": {
+        "type": "int"
+      }
+    }
+  },
+  "@rcServingsFew": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@rcServingsMany": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@rcWhole": {
+    "placeholders": {
+      "kcal": {
+        "type": "int"
+      },
+      "g": {
+        "type": "int"
+      }
+    }
+  },
+  "@repEveryN": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@setAssistantLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@setGoalLine": {
+    "placeholders": {
+      "kg": {
+        "type": "String"
+      },
+      "pace": {
+        "type": "String"
+      }
+    }
+  },
+  "@setNormLine": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      }
+    }
+  },
+  "@setProfileLine": {
+    "placeholders": {
+      "sex": {
+        "type": "String"
+      },
+      "age": {
+        "type": "int"
+      },
+      "height": {
+        "type": "int"
+      }
+    }
+  },
+  "@slotEraseBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@slotIntoOther": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@startAgeYears": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@startPaceWeeks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@startSignInFailedWhy": {
+    "placeholders": {
+      "why": {
+        "type": "String"
+      }
+    }
+  },
+  "@todayCodeTalk": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "@todayHowManyGrams": {
+    "placeholders": {
+      "dish": {
+        "type": "String"
+      }
+    }
+  },
+  "@todayLoggedAskWeight": {
+    "placeholders": {
+      "slotInto": {
+        "type": "String"
+      }
+    }
+  },
+  "@todayLoggedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@todayLoggedInto": {
+    "placeholders": {
+      "slotInto": {
+        "type": "String"
+      },
+      "dish": {
+        "type": "String"
+      }
+    }
+  },
+  "@todayLoggedIntoWithNumbers": {
+    "placeholders": {
+      "slotInto": {
+        "type": "String"
+      },
+      "dish": {
+        "type": "String"
+      },
+      "kcal": {
+        "type": "int"
+      },
+      "grams": {
+        "type": "int"
+      }
+    }
+  },
+  "@waterGlasses": {
+    "placeholders": {
+      "glasses": {
+        "type": "int"
+      }
+    }
+  },
+  "@waterLess": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      }
+    }
+  },
+  "@waterMore": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      }
+    }
+  },
+  "@waterOf": {
+    "placeholders": {
+      "ml": {
+        "type": "String"
+      }
+    }
+  },
+  "@waterShare": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "@wfMin": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "@wkLoggedValue": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@wkNoraFailed": {
+    "placeholders": {
+      "why": {
+        "type": "String"
+      }
+    }
+  },
+  "@wkOffNorm": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "@wkPastRow": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "@wkWaterValue": {
+    "placeholders": {
+      "l": {
+        "type": "String"
+      }
+    }
+  },
+  "@workoutBurned": {
+    "placeholders": {
+      "kcal": {
+        "type": "int"
+      }
+    }
+  },
+  "@workoutSessions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "aboutContact": "Contact",
+  "aboutDeveloper": "Développeur",
+  "aboutText": "Un journal alimentaire qui comprend les phrases normales. Nora fait les calculs, les décisions restent les tiennes.",
+  "aboutTitle": "À propos de l'app",
+  "aboutVersion": "Version",
+  "aboutWrite": "Écris-nous",
+  "accountBusy": "Connexion…",
+  "accountGoogle": "Continuer avec Google",
+  "accountKeepCloud": "Celui du compte",
+  "accountNoAccountNote": "Le journal ne vit que sur ce téléphone. Change de téléphone ou supprime l'app et il n'y aura rien pour ramener les entrées : nous ne savons pas à qui elles sont.",
+  "accountScopeNote": "Nous demandons seulement l'adresse e-mail. Google ne nous transmet ni le nom, ni la photo de profil, ni les contacts.",
+  "accountSettingsDevice": "réglages",
+  "accountSignInFailed": "La connexion n'a pas marché.",
+  "accountSignInFailedWhy": "La connexion n'a pas marché. {why}",
+  "accountSignOut": "Se déconnecter",
+  "accountSignOutAction": "Se déconnecter",
+  "accountSignOutAsk": "Se déconnecter ?",
+  "accountSignOutBack": "Reconnecte-toi avec le même compte et tout revient. Ce qui a été écrit hors ligne et n'est pas encore arrivé au serveur ne peut pas être récupéré.",
+  "accountSignOutNote": "Ce téléphone est vidé : le journal, le profil, les médicaments et la conversation avec Nora partent. Tes entrées restent sur le serveur, sous ton compte.",
+  "accountSince": "Sur Calvi depuis le",
+  "accountTitle": "Compte",
+  "accountVia": "Connecté avec Google",
+  "accountViaApple": "Connecté avec Apple",
+  "accountWhichDiary": "Quel journal on garde ?",
+  "accountWhichDiaryNote": "Ce compte a déjà des entrées, et le téléphone aussi. Un seul peut rester : celui du compte ou celui du téléphone. L'autre part.",
+  "actBasketball": "Basket",
+  "actBike": "Vélo",
+  "actDance": "Danse",
+  "actFootball": "Football",
+  "actGym": "Salle de sport",
+  "actHiit": "HIIT",
+  "actJumprope": "Corde à sauter",
+  "actRun": "Course",
+  "actSki": "Ski",
+  "actStretch": "Étirements",
+  "actSwim": "Natation",
+  "actTennis": "Tennis",
+  "actWalk": "Marche",
+  "actYoga": "Yoga",
+  "actionAdd": "Ajouter",
+  "actionBack": "Retour",
+  "actionCancel": "Annuler",
+  "actionClose": "Fermer",
+  "actionDelete": "Supprimer",
+  "actionDone": "Terminé",
+  "actionNext": "Suivant",
+  "actionSave": "Enregistrer",
+  "activityHigh": "Élevé",
+  "activityHighHint": "5-6 séances",
+  "activityLight": "Peu actif",
+  "activityLightHint": "1-2 séances par semaine",
+  "activityModerate": "Modéré",
+  "activityModerateHint": "3-4 séances",
+  "activitySedentary": "Sédentaire",
+  "activitySedentaryHint": "presque aucun mouvement",
+  "activityVeryHigh": "Très élevé",
+  "activityVeryHighHint": "travail physique ou sport tous les jours",
+  "agoDays": "{count, plural, =1{il y a 1 jour} other{il y a {count} jours}}",
+  "agoToday": "aujourd'hui",
+  "agoWeek": "il y a une semaine",
+  "agoWeeks": "{count, plural, other{il y a {count} semaines}}",
+  "agoYesterday": "hier",
+  "allergyConfirm": "Confirmer",
+  "allergyMild": "Légère",
+  "allergyMildHint": "Je te préviens dans le texte, sans bloquer l'entrée.",
+  "allergyMildShort": "légère",
+  "allergyNote": "Si la composition d'un produit n'est pas dans le référentiel, je ne me tais pas et je ne considère pas que c'est sans risque : je te dis à part que la composition est inconnue.",
+  "allergyNothing": "Rien trouvé. Si l'allergène n'est pas dans la liste, dis-le à Nora : nous l'ajouterons au référentiel pour que ça marche pour tout le monde, au lieu de rester du texte pour une seule personne.",
+  "allergyRemove": "Retirer",
+  "allergySearch": "Chercher parmi {count} allergènes",
+  "allergySevere": "Sévère",
+  "allergySevereHint": "Je m'arrête avant de le noter et je te le dis clairement.",
+  "allergySevereShort": "sévère",
+  "allergyTitle": "Allergies",
+  "anChartGoal": "objectif {value}",
+  "anDaysInNorm": "jours dans l'objectif",
+  "anDonePercent": "{percent}% fait",
+  "anEtaHead": "À ce rythme tu atteins l'objectif vers le *{date}*",
+  "anForMonth": "sur le mois",
+  "anForQuarter": "sur 3 mois",
+  "anForYear": "sur l'année",
+  "anGoalProgress": "Progression vers l'objectif",
+  "anKcal": "Calories",
+  "anKcalAvg": "en moyenne par jour",
+  "anKcalEmpty": "Rien n'est encore noté sur cette période. Dis à Nora ce que tu as mangé et le graphique se construit tout seul.",
+  "anKcalTotal": "sur la période, kcal",
+  "anMacroGoal": "repère {grams} g",
+  "anMacrosAvg": "Macros en moyenne",
+  "anMacrosEmpty": "La moyenne apparaît dès qu'il y a de quoi la faire : note au moins une journée.",
+  "anMeasures": "Mesures",
+  "anMeasuresChange": "évolution {period}",
+  "anMeasuresEmpty": "Pas encore de mesures.",
+  "anMeasuresEmptyHint": "Mesure-toi une fois par mois et je te montre ce qui bouge",
+  "anMonth": "Mois",
+  "anNow": "maintenant",
+  "anNowKg": "maintenant, kg",
+  "anOneReading": "une mesure",
+  "anOneWeighing": "Pour l'instant il n'y a qu'une mesure. La deuxième donne la direction, et la ligne part de là.",
+  "anPerDay": "par jour",
+  "anQuarter": "3 mois",
+  "anShareOfNorm": "{share}% du repère",
+  "anStartKg": "départ, kg",
+  "anTargetKg": "objectif, kg",
+  "anTitle": "Statistiques",
+  "anWater": "Hydratation",
+  "anWaterAvg": "en moyenne, ml",
+  "anWaterGoal": "repère {ml} ml",
+  "anWeek": "Semaine",
+  "anWeightEmpty": "La courbe apparaît à la deuxième pesée. Dis ton poids à Nora, elle le note elle-même.",
+  "anYear": "Année",
+  "assistantAddMemory": "Ajouter à la mémoire",
+  "assistantCollapse": "Replier",
+  "assistantExample": "Par exemple, je ne mange pas de champignons",
+  "assistantForget": "Oublier",
+  "assistantHint": "{name} tient le journal avec toi et retient ce que tu lui as dit sur toi.",
+  "assistantMemory": "Mémoire",
+  "assistantMemoryEmpty": "Rien de retenu pour l'instant.",
+  "assistantMemoryEmptyHint": "La mémoire vient des conversations, ou ajoute quelque chose toi-même",
+  "assistantPinned": "{count}, {pinned} épinglées",
+  "assistantTitle": "Assistante",
+  "assistantWhatToRemember": "Quoi retenir",
+  "authAgain": "Confirmer le mot de passe",
+  "authAgainDiffers": "Les mots de passe ne correspondent pas",
+  "authAgainEmpty": "Répète le mot de passe",
+  "authAgainHint": "encore une fois",
+  "authAgainIn": "Tu peux redemander dans {sec} s",
+  "authCode": "Code du courriel",
+  "authCodeAction": "Confirmer",
+  "authCodeBad": "Ce code ne convient pas ou a expiré",
+  "authCodeHint": "Nous avons envoyé un code à {mail}. Saisis les six chiffres.",
+  "authCodeShort": "Le code a 6 chiffres",
+  "authCodeTitle": "Confirme ton e-mail",
+  "authForgotAction": "Envoyer le code",
+  "authForgotHint": "Nous enverrons un code par e-mail, puis tu choisiras un nouveau mot de passe.",
+  "authForgotLink": "Oublié ?",
+  "authForgotTitle": "Nouveau mot de passe",
+  "authMail": "E-mail",
+  "authMailBad": "Cette adresse semble incorrecte",
+  "authOr": "ou",
+  "authPass": "Mot de passe",
+  "authPassEmpty": "Saisis ton mot de passe",
+  "authPassHint": "5 lettres et un signe",
+  "authPassNew": "Nouveau mot de passe",
+  "authPassWeak": "Mot de passe faible : au moins 5 lettres et un chiffre ou un signe",
+  "authResetAction": "Enregistrer",
+  "authSendAgain": "Renvoyer",
+  "authSignInAction": "Se connecter",
+  "authSignInTitle": "Connexion",
+  "authSignUpAction": "Créer le compte",
+  "authSignUpLink": "S'inscrire",
+  "authSignUpTitle": "Créons un compte",
+  "barCamera": "Caméra",
+  "barGrams": "{grams} g",
+  "barHint": "Écris comme tu parles.",
+  "barHintBorscht": "Soupe de lentilles 300 g au déjeuner",
+  "barHintDelete": "Supprime la dernière entrée",
+  "barHintEggs": "Deux œufs et une tartine",
+  "barHintMore": "«deux œufs et une tartine», «bu 300 d'eau», «couru 40 minutes» : je m'en occupe et je le mets dans la bonne carte",
+  "barHintProtein": "Combien de protéines il me reste ?",
+  "barHintRun": "Couru 40 minutes",
+  "barHintWater": "Bu 500 ml d'eau",
+  "barHintWeighed": "Poids : 78,8",
+  "barHintYesterday": "Qu'est-ce que j'ai mangé hier ?",
+  "barLogsInto": "Je note dans ",
+  "barMic": "Micro",
+  "barSend": "Envoyer",
+  "camAgain": "Encore",
+  "camAllergen": "Allergène !",
+  "camAllergyContains": "Contient ton allergène : {list}",
+  "camAllergyTraces": "Peut contenir des traces de : {list}",
+  "camAskNoraInstead": "Pas d'étiquette, demande à Nora",
+  "camBarcode": "Code-barres",
+  "camBusy": "La caméra ne s'est pas ouverte. En général une autre app la retient.",
+  "camCouldNotRead": "Je n'ai pas pu lire la photo",
+  "camDish": "Photo",
+  "camEstimate": " kcal, estimation",
+  "camFlash": "Flash",
+  "camFromPack": "Chiffres de l'emballage. L'enregistrer ne coûte aucun jeton.",
+  "camGallery": "Depuis la galerie",
+  "camGapNote": "Aucune base ne connaît ce chiffre. Photographie l'étiquette et je le complète.",
+  "camHintBarcode": "le code dans le cadre",
+  "camHintDish": "vise une assiette ou un paquet",
+  "camIngredients": "Ingrédients : {text}",
+  "camIntoSlot": "dans {slot}",
+  "camKcalFor": " kcal sur {grams} g",
+  "camKcalPer": " kcal pour {grams} g",
+  "camLabelAim": "vise le tableau nutritionnel",
+  "camLabelNoShot": "La photo n'a pas marché. Réessaie l'étiquette.",
+  "camLabelReading": "Je recopie les chiffres du paquet…",
+  "camLogInto": "L'enregistrer {slotInto}",
+  "camNoPermission": "Pas d'autorisation pour la caméra. Tu peux la donner dans les réglages du téléphone.",
+  "camNoScanner": "Ce téléphone ne sait pas lire les codes avec la caméra.",
+  "camNoTokens": "Plus de jetons",
+  "camNotAProduct": "Ce n'est pas un code-barres de produit",
+  "camNotAProductNote": "C'est un lien ou un code interne qui a été lu. Vise les barres avec les chiffres en dessous.",
+  "camNotRead": "Je n'ai pas réussi à distinguer",
+  "camOffline": "Le code a été lu, mais il n'y a personne à qui demander. Réessaie quand tu seras en ligne.",
+  "camOfflineShot": "Pas de connexion. Tu pourras envoyer la photo à Nora plus tard",
+  "camOfflineTitle": "Pas de réseau",
+  "camPer100": "Pas de poids exact sur l'emballage : les chiffres sont pour 100 g.",
+  "camPortionPack": "Portion de l'emballage : {g} g. Les chiffres sont par portion.",
+  "camReading": "Je lis…",
+  "camSendToNora": "Envoyer à Nora",
+  "camServerDown": "Ce n'est ni le code ni la caméra. Réessaie dans une minute.",
+  "camServerDownTitle": "Notre serveur n'a pas répondu",
+  "camShoot": "Prendre une photo",
+  "camShootLabel": "Photographier l'étiquette",
+  "camShotFailed": "La photo n'a pas marché",
+  "camShotReady": "La photo est prête",
+  "camShotReadyNote": "Nora la lit et répond dans le chat : elle nomme le plat, estime la portion et montre d'où vient le chiffre. Cela coûte deux jetons.",
+  "camSignedOut": "La session ne vaut plus, donc la base ne nous reconnaît pas. Reconnecte-toi et le scanner marchera.",
+  "camSignedOutTitle": "Reconnecte-toi",
+  "camSlow": "Le code a été lu et la base a pris trop de temps. Réessaie.",
+  "camSlowTitle": "La réponse n'est pas arrivée",
+  "camStillWorks": "Les photos de plats et la galerie marchent comme d'habitude.",
+  "camTitle": "Scanner",
+  "camTookTooLong": "La lecture a pris trop de temps. Réessaie",
+  "camUnknownCode": "Ce produit n'est dans aucune base",
+  "camUnknownCodeNote": "Ni dans la nôtre ni dans l'ouverte. Photographie le tableau nutritionnel sur le paquet et je recopie les chiffres. C'est gratuit.",
+  "chatPro": "Pro",
+  "deleteAskBody1": "Ce téléphone est vidé tout de suite : le journal, le profil, la conversation avec Nora et la connexion. L'app revient au premier écran.",
+  "deleteAskBody2": "Sur le serveur, le compte entre dans la file pour la suppression définitive, ce qui prend jusqu'à 30 jours ouvrés. Tant que nous ne l'avons pas confirmée, se connecter avec le même compte ramène tout et annule la demande.",
+  "deleteAskCta": "Oui, supprimer",
+  "deleteAskTitle": "Supprimer le compte ?",
+  "deleteConfirm": "Je comprends que les données seront supprimées pour toujours et qu'on ne pourra pas les récupérer.",
+  "deleteDays": "Jours avec Calvi",
+  "deleteEntries": "Entrées dans le journal",
+  "deleteFailed": "La suppression n'a pas marché : {why}",
+  "deleteForever": "Supprimer pour toujours",
+  "deleteNote": "Tout part : le journal, le poids, les mesures, les allergies, les médicaments et l'historique des conversations. Il n'y a pas de retour en arrière.",
+  "deleteProManage": "Gérer l'abonnement",
+  "deleteProNote": "Supprimer le compte n'annule pas Calvi Pro. {store} continue de prélever tant que l'abonnement lui-même n'est pas annulé, alors annule-le avant de supprimer le compte.",
+  "deleteProStoreAny": "Le store",
+  "deleteSubNote": "Si c'est une question d'abonnement, il peut être annulé à part dans l'App Store ou sur Google Play, sans supprimer le compte.",
+  "deleteTitle": "Supprimer le compte",
+  "deleteWeighings": "Pesées",
+  "dictationBusy": "Le micro est occupé. Réessaie",
+  "dictationFailed": "La dictée n'a pas marché",
+  "dictationNoMatch": "Je n'ai rien entendu de compréhensible",
+  "dictationNoNetwork": "La reconnaissance a besoin du réseau",
+  "dictationNoPermission": "Pas d'autorisation pour le micro",
+  "dictationSilence": "Silence. Réessaie, plus près du micro",
+  "dictationUnavailable": "La dictée n'est pas disponible sur ce téléphone",
+  "doseCapFew": "gélules",
+  "doseCapMany": "gélules",
+  "doseCapOne": "gélule",
+  "doseDropFew": "gouttes",
+  "doseDropMany": "gouttes",
+  "doseDropOne": "goutte",
+  "doseMlFew": "ml",
+  "doseMlMany": "ml",
+  "doseMlOne": "ml",
+  "doseShotFew": "injections",
+  "doseShotMany": "injections",
+  "doseShotOne": "injection",
+  "doseTabFew": "comprimés",
+  "doseTabMany": "comprimés",
+  "doseTabOne": "comprimé",
+  "entries": "{count, plural, =0{0 entrée} =1{1 entrée} other{{count} entrées}}",
+  "eraseAskBody1": "Tout le journal part, sur toute la période : repas, eau, poids, mesures, entraînements, médicaments et la conversation avec Nora. Sur tous les appareils, parce que la copie du serveur est effacée aussi.",
+  "eraseAskBody2": "Ce qui reste : le compte, la connexion, les jetons avec leur solde et les réglages du profil. Ce n'est pas une déconnexion, c'est repartir de zéro dans le même compte.",
+  "eraseAskCta": "Tout supprimer",
+  "eraseAskTitle": "Supprimer toutes les entrées ?",
+  "eraseDataTitle": "Supprimer les données",
+  "eraseDone": "Le journal est effacé. On repart de zéro.",
+  "eraseFailed": "L'effacement n'a pas marché : {why}",
+  "eraseNoNet": "pas de réseau. Active internet et réessaie",
+  "eraseSlow": "le serveur prend trop de temps. Réessaie dans une minute",
+  "eraseSureBody": "C'est irréversible. Le journal disparaît pour toujours, et ni toi ni nous ne pourrons le ramener.",
+  "eraseSureCta": "Oui, supprimer pour toujours",
+  "eraseSureTitle": "Vraiment supprimer ?",
+  "eveningAnd": " et ",
+  "eveningBreakfastAcc": "le petit-déjeuner",
+  "eveningDinnerAcc": "le dîner",
+  "eveningEmptyDay": "La journée est vide. Qu'est-ce que tu as mangé aujourd'hui ?",
+  "eveningLogged": "Tu as noté {slot} ?",
+  "eveningLunchAcc": "le déjeuner",
+  "eveningMissing": "{list} ne sont pas encore notés. Lesquels ont eu lieu ?",
+  "eveningWater": "La journée est montée à combien d'eau ?",
+  "fieldBiceps": "Biceps",
+  "fieldChest": "Poitrine",
+  "fieldHips": "Hanches",
+  "fieldNeck": "Cou",
+  "fieldThigh": "Cuisse",
+  "fieldWaist": "Taille",
+  "fieldWeight": "Poids",
+  "fieldWrist": "Poignet",
+  "goalBecomes": "Devient",
+  "goalCurrent": "Objectif actuel ",
+  "goalDailyNorm": "Repère journalier",
+  "goalDiff": "{kg} kg d'écart",
+  "goalDirection": "Direction",
+  "goalEta": "Objectif vers le",
+  "goalFromStart": " depuis {kg} kg au départ. ",
+  "goalFromToday": "Le nouvel objectif part du poids d'aujourd'hui.",
+  "goalKeepNote": "Le repère tient ton poids actuel : tu remets exactement ce que tu dépenses.",
+  "goalKeepShort": "Garder",
+  "goalNew": "Définir un nouvel objectif",
+  "goalNewTitle": "Nouvel objectif",
+  "goalPace": "Rythme",
+  "goalPaceFast": "Rapide",
+  "goalPaceOk": "C'est le rythme que la plupart tiennent sans que ça casse.",
+  "goalPaceSlow": "Lent",
+  "goalPaceUnit": "kg par semaine",
+  "goalPaceUsual": "Conseillé",
+  "goalRange": "{from} → {to} kg",
+  "goalReplaceNote": "Un objectif ne se modifie pas, il se remplace. La progression comptera à partir du poids d'aujourd'hui, et l'ancien objectif reste dans l'historique. Confirmer le remplacement ?",
+  "goalSet": "Définir",
+  "goalTarget": "Poids visé",
+  "goalWas": "Avant",
+  "gramsUnit": "{grams} g",
+  "helloDishBread": "Pain de seigle",
+  "helloDishEggs": "Œufs brouillés",
+  "helloSaid": "deux œufs et une tartine",
+  "helloSlotSub": "deux entrées",
+  "helloStepCount": "Je compte les calories",
+  "helloStepLog": "Je le note dans ta journée",
+  "helloStepSay": "Dis ce que tu as mangé",
+  "heroBurned": "-{kcal} kcal grâce à l'entraînement",
+  "heroDays": "jours",
+  "heroFrom": " sur {kcal}",
+  "heroGoalKg": "objectif, kg",
+  "heroKcal": " kcal",
+  "heroKg": " kg",
+  "heroLeft": "reste ",
+  "heroOf": " sur {kcal}",
+  "heroOver": "dépassé de ",
+  "heroWeekOpen": "La semaine entière",
+  "heroWeightFrom": "maintenant, depuis {kg} kg au début de l'objectif",
+  "kcalUnit": "{kcal} kcal",
+  "langSection": "Langue de l'interface",
+  "langSystem": "Langue de l'appareil",
+  "legalUpdated": "Updated {date}",
+  "loginNoToken": "Google n'a pas renvoyé de jeton",
+  "loginNotConfigured": "la connexion n'est pas configurée dans cette build",
+  "loginNotSynced": "Toutes les entrées ne sont pas encore arrivées au serveur. Réessaie dans une minute : se connecter n'efface rien tant que tout n'est pas sauvegardé",
+  "loginServer": "serveur : {why}",
+  "loginSlow": "Google n'a pas répondu en une minute. Réessaie",
+  "macroCNone": "G ?",
+  "macroCShort": "G {value}",
+  "macroCarbs": "Glucides",
+  "macroCarbsCaps": "GLUCIDES",
+  "macroCarbsLetter": "G",
+  "macroFNone": "L ?",
+  "macroFShort": "L {value}",
+  "macroFat": "Lipides",
+  "macroFatCaps": "LIPIDES",
+  "macroFatLetter": "L",
+  "macroMedsCaps": "MÉDICAMENTS",
+  "macroOfGrams": " / {goal}g",
+  "macroPNone": "P ?",
+  "macroPShort": "P {value}",
+  "macroProtein": "Protéines",
+  "macroProteinCaps": "PROTÉINES",
+  "macroProteinLetter": "P",
+  "mealAuto": "auto ",
+  "mealEditDelete": "Supprimer l'entrée",
+  "mealEditKcal": "kcal",
+  "mealEditSave": "Enregistrer",
+  "mealEmpty": "Il n'y a rien ici pour l'instant. Écris ce que c'était et je le note.",
+  "mealGrams": "{grams} g",
+  "mealThinking": "Nora compte…",
+  "measureAdd": "Ajouter une mesure",
+  "measureCollapse": "Replier",
+  "measureCount": "{count, plural, =1{1 mesure} other{{count} mesures}}",
+  "measureLast": "la dernière {ago}",
+  "measureNever": "pas encore mesuré",
+  "measureNothing": "rien pour l'instant",
+  "measurePick": "Choisis ce que tu vas mesurer. Une seule suffit si le reste ne t'intéresse pas.",
+  "measureSave": "Enregistrer les mesures",
+  "measureStats": "Statistiques des mesures",
+  "measureTitle": "Mesures",
+  "medsAdd": "Ajouter un médicament",
+  "medsAllTaken": "Tout est pris pour aujourd'hui",
+  "medsAt": "À",
+  "medsCourse": "Cure",
+  "medsDose": "Dose",
+  "medsEmpty": "Il n'y a rien ici pour l'instant. Ajoute un médicament et je te rappelle à l'heure.",
+  "medsEmptyHint": "Je tiens le journal des prises, je ne calcule pas la dose",
+  "medsFinish": "Terminer la cure",
+  "medsFirstDose": "{name}, première prise {day} à {at}",
+  "medsHours": "Heures",
+  "medsHowOften": "À quelle fréquence",
+  "medsMine": "Mes médicaments",
+  "medsName": "Nom",
+  "medsNameExample": "Par exemple, Magnésium B6",
+  "medsNew": "Nouveau médicament",
+  "medsNextAt": "Ensuite à ",
+  "medsNoneToday": "Aucune prise aujourd'hui",
+  "medsNote": "Note",
+  "medsNow": "MAINTENANT",
+  "medsOne": "Médicament",
+  "medsPast": "Terminés",
+  "medsPastEmpty": "Ici viendront les cures que tu ne suis plus. Un médicament retiré de la liste reste dans les jours où tu l'as pris.",
+  "medsPerTake": "Combien par prise",
+  "medsRemind": "Me rappeler",
+  "medsRemindHint": "aux heures choisies",
+  "medsResume": "Reprendre la cure",
+  "medsSchedule": "Horaire",
+  "medsSince": "depuis le {date}",
+  "medsTime": "Heure",
+  "medsTitle": "Médicaments",
+  "medsTomorrow": "demain",
+  "medsUnmarked": "Pas encore coché : ",
+  "medsUntil": "jusqu'au {date}",
+  "menuAbout": "À propos",
+  "menuAllergy": "Allergies",
+  "menuAnalytics": "Statistiques",
+  "menuDiary": "Journal",
+  "menuHintFree": "gratuit",
+  "menuHintKcal": "aujourd'hui {n} kcal",
+  "menuHintMore": "+{n}",
+  "menuHintNoAllergy": "aucune",
+  "menuHintNoMeds": "aucune cure",
+  "menuHintNothing": "rien de noté pour l'instant",
+  "menuHintOnGoal": "dans l'objectif {ok} sur {total}",
+  "menuHintRecipes": "de Nora, adaptées à ta norme",
+  "menuHintWeekFriday": "dès vendredi, 18:00",
+  "menuHintWeekOpen": "ouvert jusqu'à dimanche",
+  "menuHintWeekYoung": "la semaine vient de commencer",
+  "menuMeds": "Médicaments",
+  "menuPlan": "Abonnement",
+  "menuRecipes": "Recettes",
+  "menuSettings": "Réglages",
+  "menuTitle": "Menu",
+  "menuWeek": "Bilan de la semaine",
+  "noraName": "Nora",
+  "normAuto": "Le calculer automatiquement",
+  "normAutoFrom": "À partir du poids au début de l'objectif, de la taille, de l'âge, de l'activité et du rythme : ",
+  "normAutoHint": "à partir du poids, de la taille, de l'âge, de l'activité et de l'objectif : {kcal} kcal",
+  "normAutoShort": "Automatique",
+  "normByHand": "Le définir à la main",
+  "normByHandHint": "les statistiques compteront contre ce chiffre",
+  "normByHandShort": "À la main",
+  "normCalculatedHead": "La valeur calculée est ",
+  "normCalculatedTail": ". Tu peux y revenir en choisissant «Automatique».",
+  "normFitCarbs": "Ajuster les glucides au repère",
+  "normFits": "La répartition colle au repère",
+  "normGrams": "{grams} g",
+  "normKcalOf": "{kcal} kcal",
+  "normMacroSplit": "{protein} / {fat} / {carbs} g",
+  "normMacros": "Macros",
+  "normManual": "défini à la main",
+  "normOf": "sur {kcal} kcal",
+  "normOffOver": "La répartition donne {sum} kcal, {off} au-dessus du repère",
+  "normOffUnder": "La répartition donne {sum} kcal, {off} sous le repère",
+  "normPerDay": "kcal par jour",
+  "normTitle": "Repère",
+  "normWater": "Eau",
+  "normWaterHead": "Cela fait ",
+  "normWaterPerKg": "{ml} ml",
+  "normWaterTail": " par kilo de poids. La fourchette habituelle va de 30 à 40 ml, mais cela dépend de la chaleur et des entraînements, donc le chiffre ici n'est pas rigide.",
+  "normWhere": "D'où vient ce chiffre",
+  "notifyChannel": "Rappels",
+  "notifyChannelHint": "Rappels pour les repas, l'eau, les médicaments et les pesées",
+  "notifyDenied": "Le téléphone a refusé les notifications. Active-les dans les réglages système et les rappels marcheront.",
+  "photoDish": "Plat",
+  "photoNotRecognized": "Je n'ai pas réussi à reconnaître le plat sur cette photo",
+  "planBuy": "S'abonner",
+  "planClose": "Fermer",
+  "planCurrent": "en cours",
+  "planFailed": "L'achat n'est pas passé",
+  "planFree": "Gratuit",
+  "planFrom": "{plan} à partir du {date}",
+  "planFromShort": "à partir du {date}",
+  "planLater": "Pas maintenant",
+  "planManage": "Gérer dans le store",
+  "planMonth": "Mois",
+  "planMonthBilled": "prélèvement mensuel",
+  "planMonthly": "Pro mensuel",
+  "planNext": "Ensuite",
+  "planNothingToRestore": "Aucun achat sur ce compte",
+  "planNow": "Maintenant",
+  "planOn": "Pro",
+  "planPerMonth": "/mois",
+  "planPerkChat": "Conversations avec Nora sans limite",
+  "planPerkChatSub": "aujourd'hui un message coûte un jeton",
+  "planPerkMemory": "Nora se souvient de toi",
+  "planPerkMemorySub": "elle apprend des choses dans la conversation, et cela coûte un jeton",
+  "planPerkPhoto": "Photos de repas sans limite",
+  "planPerkPhotoSub": "aujourd'hui une photo coûte deux jetons",
+  "planPerkRecipes": "Recettes de Nora sans limite",
+  "planPerkRecipesSub": "aujourd'hui une proposition coûte un jeton",
+  "planPerkWeek": "Bilan de la semaine quand tu veux",
+  "planPerkWeekSub": "aujourd'hui un bilan coûte deux jetons",
+  "planPerks": "Ce que donne l'abonnement",
+  "planPlan": "Formule",
+  "planPrivacy": "Politique de confidentialité",
+  "planRenewal": "L'abonnement se renouvelle tout seul tant que tu ne l'annules pas. Tu peux l'annuler quand tu veux dans les réglages du store où tu l'as pris.",
+  "planRenews": "Se renouvelle",
+  "planRestore": "Restaurer les achats",
+  "planSignInGo": "Se connecter",
+  "planSignInNote": "L'abonnement est lié à un compte avec une adresse e-mail. Comme ça il survit à un nouveau téléphone et marche sur tous tes appareils.",
+  "planSignInTitle": "Connecte-toi d'abord",
+  "planStoreAsking": "Je demande les prix au store…",
+  "planStoreOffline": "Le store ne répond pas. Vérifie ta connexion internet",
+  "planStoreQuiet": "Le store ne répond pas. Réessaie plus tard",
+  "planSwitchMonth": "Passer au mensuel",
+  "planSwitchYear": "Passer à l'annuel",
+  "planTariffs": "Formules",
+  "planTerms": "Conditions d'utilisation",
+  "planTitle": "Abonnement",
+  "planTokens": "Jetons",
+  "planTokensFree": "40 par mois",
+  "planTokensPro": "Sans limite",
+  "planUntil": "Actif jusqu'au",
+  "planYear": "An",
+  "planYearBilled": "{price} une fois par an",
+  "planYearly": "Pro annuel",
+  "plateFor": "sur {grams} g",
+  "plateGrams": " g",
+  "plateKcal": "kcal",
+  "plateThinking": "je réfléchis",
+  "plateTotal": "total",
+  "privacyCrash": "Rapports de plantage",
+  "privacyCrashHint": "la trace de l'erreur, sans les données du journal",
+  "privacyDiaryHead": "Ton journal reste à toi",
+  "privacyDiarySub": "ni les repas ni le poids ne vont dans les statistiques",
+  "privacyHealthHead": "Les données de santé ne vont à personne",
+  "privacyHealthSub": "les allergies et les médicaments ne quittent pas l'app",
+  "privacyNoPhotosHead": "Les photos de repas ne sont pas conservées",
+  "privacyNoPhotosSub": "la photo est lue puis disparaît",
+  "privacyNotCollected": "Ce que nous ne collectons pas",
+  "privacyOptional": "Ce que tu peux désactiver",
+  "privacyPhotosBold": "ne sont pas conservées",
+  "privacyPhotosHead": "Les photos de repas ",
+  "privacyPhotosTail": " : la photo part en traitement et disparaît. Les statistiques ne voient jamais les plats, le poids, les allergies ni les médicaments. C'est une catégorie particulière de données personnelles, et la donner à un tiers est hors de question, aussi pratique que ce serait.",
+  "privacyStats": "Statistiques anonymes",
+  "privacyStatsHint": "quels écrans sont ouverts, sans le contenu des entrées",
+  "privacyTitle": "Confidentialité",
+  "profileActivity": "Activité",
+  "profileAge": "Âge",
+  "profileHeight": "Taille",
+  "profileSex": "Sexe",
+  "rcAllergyWarn": "Contient {names}, qui est sur ta liste d'allergies. Fais attention avec celle-là.",
+  "rcAsk": "Demander une recette à Nora",
+  "rcAskAbout": "Interroger Nora sur cette recette",
+  "rcAskCancel": "Annuler",
+  "rcAskGo": "Demander",
+  "rcAskPlaceholder": "poulet, brocoli, riz",
+  "rcAskTitle": "Qu'est-ce qu'il y a dans la cuisine ?",
+  "rcAsking": "Je réfléchis…",
+  "rcChatGreet": "Pose tes questions sur «{name}» : quoi remplacer, comment ne pas la rater, quoi préparer à l'avance.",
+  "rcChatPlaceholder": "Pose une question sur cette recette",
+  "rcCount": "{n} recettes",
+  "rcCountFew": "{n} recettes",
+  "rcCountOne": "1 recette",
+  "rcDeleteBody": "«{name}» quitte le carnet. Les entrées du journal faites à partir d'elle restent.",
+  "rcDeleteCta": "Supprimer",
+  "rcDeleteFailed": "La suppression n'a pas marché. Réessaie.",
+  "rcDeleteTitle": "Supprimer cette recette ?",
+  "rcEmpty": "Il n'y a rien ici pour l'instant. Dis à Nora ce qu'il y a dans la cuisine et la première recette apparaît.",
+  "rcEmptyMine": "Pas encore de recettes à toi. Dicte-en une à Nora et elle atterrit ici.",
+  "rcEyebrow": "La cuisine",
+  "rcFromMine": "À moi",
+  "rcFromNora": "De Nora",
+  "rcHeroA": "Quoi cuisiner",
+  "rcHeroB": "aujourd'hui",
+  "rcHeroLede": "Dis ce que tu as à la maison. Nora propose et calcule la portion ; ta propre recette marche aussi.",
+  "rcItemsHead": "Ingrédients",
+  "rcItemsTotal": "au total {g} g",
+  "rcJustNow": "à l'instant",
+  "rcLoadFailed": "Le carnet de recettes n'a pas chargé. Tire pour réessayer.",
+  "rcMinutes": "{n} min",
+  "rcNoTools": "Rien de plus qu'un couteau et un saladier",
+  "rcOfDay": "soit {p}% du repère journalier",
+  "rcPerServing": "par portion",
+  "rcPerServingHead": "Par portion",
+  "rcPickTitle": "Choisis un plat",
+  "rcPortion": "portion {g} g",
+  "rcServingsFew": "{n} portions",
+  "rcServingsMany": "{n} portions",
+  "rcServingsOne": "1 portion",
+  "rcStepsHead": "Comment la faire",
+  "rcSuggestFailed": "Nora n'a pas pu composer de recettes. Réessaie.",
+  "rcTabAll": "Toutes",
+  "rcTabMine": "Les miennes",
+  "rcTabNora": "De Nora",
+  "rcTitle": "Recettes",
+  "rcToolBlender": "Blender",
+  "rcToolGrill": "Gril",
+  "rcToolMixer": "Batteur",
+  "rcToolOven": "Four",
+  "rcToolPan": "Poêle",
+  "rcToolPot": "Casserole",
+  "rcToolsHead": "Ce qu'il faut en cuisine",
+  "rcWhole": "Plat entier : {kcal} kcal, {g} g",
+  "remAbout": "À quel sujet",
+  "remAdd": "Ajouter un rappel",
+  "remAt": "À",
+  "remDelete": "Supprimer le rappel",
+  "remEdit": "Rappel",
+  "remEmpty": "Pas encore de rappels.",
+  "remEmptyHint": "Ajoute la seule chose que tu oublies vraiment, pas tout d'un coup",
+  "remHowOften": "À quelle fréquence",
+  "remName": "Nom",
+  "remNew": "Nouveau rappel",
+  "remOpenMeds": "Ouvrir les médicaments",
+  "remTime": "Heure",
+  "remTitle": "Rappels",
+  "reminderBodyMeal": "Note ce que c'était",
+  "reminderBodyMeds": "Selon l'horaire",
+  "reminderBodySummary": "Qu'est-ce que tu n'as pas noté aujourd'hui ?",
+  "reminderBodyWater": "C'est l'heure de boire",
+  "reminderBodyWeigh": "Le matin, avant de manger",
+  "reminderBodyWorkout": "Note-le si ça a eu lieu",
+  "reminderMeal": "Repas",
+  "reminderMealHint": "je te rappelle de noter le repas",
+  "reminderMeds": "Médicaments",
+  "reminderMedsHint": "selon l'horaire du journal",
+  "reminderSummary": "Bilan du jour",
+  "reminderSummaryHint": "en bref sur la journée avant de dormir",
+  "reminderWater": "Eau",
+  "reminderWaterHint": "je te rappelle de boire",
+  "reminderWeigh": "Pesée",
+  "reminderWeighHint": "pour que la courbe du poids ne se coupe pas",
+  "reminderWorkout": "Entraînement",
+  "reminderWorkoutHint": "je te rappelle celui qui est prévu",
+  "repDaily": "tous les jours",
+  "repEveryN": "{count, plural, other{tous les {count} jours}}",
+  "repEveryOther": "un jour sur deux",
+  "repPickDaily": "Tous les jours",
+  "repPickFromToday": "Compté à partir d'aujourd'hui.",
+  "repPickInterval": "Un jour sur deux",
+  "repPickNoDays": "Aucun jour n'est choisi, le rappel ne se déclenchera donc jamais.",
+  "repPickWeekdays": "Jours de la semaine",
+  "repWeekdays": "en semaine",
+  "repWeekends": "le week-end",
+  "repWeekly": "une fois par semaine",
+  "restoredBody1": "Ce compte attendait d'être supprimé. La connexion a annulé cela : le journal, le profil et les réglages sont de nouveau sur ce téléphone.",
+  "restoredBody2": "Si tu veux quand même que le compte disparaisse, redemande la suppression dans les Réglages. Toute connexion avant notre confirmation annule la demande de la même façon.",
+  "restoredOk": "Compris",
+  "restoredTitle": "Tes données sont revenues",
+  "setAbout": "À propos de l'app",
+  "setAllergies": "Allergies",
+  "setAssistantLine": "{name}, {count} en mémoire",
+  "setDeleteAccount": "Supprimer le compte et les données",
+  "setFreeTierHead": "Pour les défenseurs de l'Ukraine, et pour celles et ceux qui servent dans les Forces armées, au Service national d'urgence, chez DTEK, pour le personnel médical, les bénévoles et les enseignants des zones proches du front, l'offre payante est ",
+  "setFreeTierHow": " Comment l'obtenir",
+  "setFreeTierShort": "Pour les défenseurs de l'Ukraine, et pour celles et ceux qui servent dans les Forces armées, au Service national d'urgence, chez DTEK, pour le personnel médical, les bénévoles et les enseignants des zones proches du front, l'offre payante est GRATUITE",
+  "setFreeTierTelegram": "Écrire sur Telegram",
+  "setFreeTierTitle": "Offre gratuite",
+  "setFreeTierWord": "GRATUITE",
+  "setFreeTierWrite": "Écris au développeur et l'offre payante est activée le jour même.",
+  "setGoal": "Objectif",
+  "setGoalKeep": "garder le poids",
+  "setGoalLine": "{kg} kg, {pace}/semaine",
+  "setGroupAbout": "À propos de toi",
+  "setGroupAccount": "Compte",
+  "setGroupAssistant": "Assistante",
+  "setGroupDocs": "Documents",
+  "setGroupHealth": "Santé",
+  "setLang": "Langue",
+  "setMeds": "Médicaments",
+  "setNorm": "Repère",
+  "setNormLine": "{kcal} kcal",
+  "setPlan": "Abonnement",
+  "setPlanFree": "Gratuit",
+  "setPolicy": "Politique de confidentialité",
+  "setPrivacy": "Données et statistiques",
+  "setProfile": "Profil",
+  "setProfileLine": "{sex}, {age}, {height} cm",
+  "setReminders": "Rappels",
+  "setRemindersOff": "désactivés",
+  "setTerms": "Conditions d'utilisation",
+  "setTheme": "Thème",
+  "setTitle": "Réglages",
+  "setUnset": "non défini",
+  "sexOther": "Autre",
+  "sexShortFemale": "F",
+  "sexShortMale": "H",
+  "slotBreakfast": "Petit-déjeuner",
+  "slotByHand": "Mets les chiffres toi-même",
+  "slotCancel": "Annuler",
+  "slotDinner": "Dîner",
+  "slotEraseBody": "«{name}» n'a pas encore de chiffres. La ligne quitte la journée.",
+  "slotEraseDo": "Retirer",
+  "slotEraseTitle": "Retirer le brouillon ?",
+  "slotGrams": "POIDS, G",
+  "slotIntoBreakfast": "au petit-déjeuner",
+  "slotIntoDinner": "au dîner",
+  "slotIntoLunch": "au déjeuner",
+  "slotIntoOther": "dans «{name}»",
+  "slotIntoSnack": "dans la collation",
+  "slotKcal": "KCAL",
+  "slotLog": "Noter",
+  "slotLunch": "Déjeuner",
+  "slotSnack": "Collation",
+  "slotWriteWhat": "Écris ce que c'était",
+  "startAbout": "À propos de toi",
+  "startAge": "Âge",
+  "startAgeYears": "{count, plural, =1{1 an} other{{count} ans}}",
+  "startAgreeAnd": " et la ",
+  "startAgreeHead": "J'accepte les ",
+  "startAgreePrivacy": "politique de confidentialité",
+  "startAgreeTerms": "conditions d'utilisation",
+  "startAllergies": "Allergies",
+  "startDeviceFirstRun": "premier lancement",
+  "startGoal": "Où on va",
+  "startGoalGain": "Prendre du poids",
+  "startGoalGainHint": "un surplus au rythme que tu choisis",
+  "startGoalKeep": "Garder le poids",
+  "startGoalKeepHint": "tu remets exactement ce que tu dépenses",
+  "startGoalLose": "Perdre du poids",
+  "startGoalLoseHint": "un déficit au rythme que tu choisis",
+  "startHeight": "Taille",
+  "startLife": "Mode de vie",
+  "startNorm": "Ton repère",
+  "startNormHold": "à tenir",
+  "startNormNora": "C'est calculé. À partir d'ici, c'est plus simple.",
+  "startNormNoraHint": "Écris-le ou dis-le comme ça vient : «deux œufs et une tartine», «bu 300 d'eau». Ce qu'il me manque, je te le demande dans la conversation.",
+  "startNormNote": "C'est la formule de Mifflin-St Jeor, pas un avis médical. Si tu as une pathologie, si tu es enceinte ou si tu suis un régime prescrit, parles-en à ton médecin.",
+  "startNormPerDay": "kcal par jour",
+  "startNormWeeks": "semaines",
+  "startPace": "À quel rythme",
+  "startPaceEtaHead": "Objectif vers le ",
+  "startPaceEtaTail": ", soit ",
+  "startPaceFast": "rapide",
+  "startPaceSlow": "lent",
+  "startPaceUnit": "kg par semaine",
+  "startPaceUsual": "régulier",
+  "startPaceWarning": "Un rythme pareil est dur à tenir et casse en général. En dessous de 0,8 kg par semaine le résultat vient plus lentement, mais il reste.",
+  "startPaceWeeks": "{count, plural, =1{1 semaine} other{{count} semaines}}",
+  "startSex": "Sexe",
+  "startSexFemale": "Femme",
+  "startSexMale": "Homme",
+  "startSexOther": "Autre",
+  "startSignInApple": "Continuer avec Apple",
+  "startSignInBackText": "Connecte-toi avec le même compte et tout revient : le journal, l'objectif, le repère et les mesures. Rien à remplir de nouveau.",
+  "startSignInBackTitle": "Content de te revoir",
+  "startSignInBusy": "Connexion…",
+  "startSignInFailed": "La connexion n'a pas marché. Réessaie, ou continue sans compte.",
+  "startSignInFailedWhy": "La connexion n'a pas marché. {why}",
+  "startSignInGoogle": "Continuer avec Google",
+  "startSignInSkip": "Continuer sans compte",
+  "startSignInText": "Le repère est calculé. Connecte-toi pour le garder : l'historique, les mesures et les entrées seront sur tous tes appareils, pas seulement ici.",
+  "startSignInTitle": "Gardons tout ça",
+  "startTargetWeight": "Poids visé",
+  "startWeightNow": "Poids actuel",
+  "startYearsShort": "ans",
+  "storageBroken": "Je n'ai pas pu ouvrir le stockage. Tes entrées sont en sécurité, mais là il n'y a rien pour les afficher.",
+  "themeAquarelle": "Aquarelle",
+  "themeAquarelleHint": "claire, avec des nuages pastel en fond",
+  "themeDark": "Sombre",
+  "themeDarkHint": "toujours l'interface sombre",
+  "themeDawn": "Aube",
+  "themeDawnHint": "claire, avec une lumière chaude de côté",
+  "themeLight": "Clair",
+  "themeLightHint": "toujours l'interface claire",
+  "themeSectionLook": "Apparence",
+  "themeSystem": "Thème de l'appareil",
+  "themeSystemHint": "suit le réglage du système",
+  "todayBarcode": "Code-barres",
+  "todayCodeTalk": "J'ai scanné le code-barres {code} et aucune base ne le connaît. Ne note rien : demande-moi ce qu'est ce produit ou dis-moi comment le compter.",
+  "todayDone": "Terminé.",
+  "todayFailedRetry": "Ça n'a pas marché. Réessaie dans une minute.",
+  "todayHowManyGrams": "Ça faisait combien de grammes, {dish} ?",
+  "todayLogFailed": "Je n'ai pas pu le noter. Réessaie.",
+  "todayLogged": "Noté.",
+  "todayLoggedAskWeight": "Noté {slotInto}. Dis-moi le poids si tu le veux précis.",
+  "todayLoggedAskWeightShort": "Noté. Dis-moi le poids si tu le veux précis.",
+  "todayLoggedCount": "{count} notés",
+  "todayLoggedInto": "Noté {slotInto} : {dish}.",
+  "todayLoggedIntoWithNumbers": "Noté {slotInto} : {dish}, {kcal} kcal pour {grams} g.",
+  "todayNoraSlow": "Nora réfléchit plus longtemps que d'habitude. Réessaie, le jeton n'a pas été dépensé.",
+  "todayOffline": "Pas de connexion. Réessaie quand elle revient.",
+  "todayOfflineSaved": "Pas de connexion. L'entrée reste sur le téléphone et monte dès qu'elle revient.",
+  "todayOutOfTokens": "Plus de jetons. Noter à la main marche toujours.",
+  "todayPhotoMeal": "Photo",
+  "todayQuestionClosed": "Cette question est déjà close. Dis le poids avec des mots si besoin.",
+  "tourCamera": "Appareil photo",
+  "tourCameraHow": "une assiette, une étiquette ou un code-barres",
+  "tourDiary": "Mémoire du journal",
+  "tourDiaryHow": "dis « bortsch » et elle prend ta portion habituelle",
+  "tourGuide": "Guide de l'app",
+  "tourGuideHow": "demande où se trouve quoi et comment faire",
+  "tourMemory": "Mémoire durable",
+  "tourMemoryHow": "« je ne mange pas de porc » suffit une fois",
+  "tourMore": "Pas seulement la nourriture",
+  "tourMoreHow": "eau, séances, mesures, recettes",
+  "tourTitle": "Ce que Nora sait faire",
+  "tourVoice": "Voix ou texte",
+  "tourVoiceHow": "« deux œufs et un toast », et c'est noté",
+  "tourWeek": "Bilan du jour et de la semaine",
+  "tourWeekHow": "ce qui a marché et ce qu'il faut ajuster",
+  "unitCm": "cm",
+  "unitG": "g",
+  "unitKcal": "kcal",
+  "unitKg": "kg",
+  "unitKj": "kJ",
+  "unitMl": "ml",
+  "unitsEnergy": "Énergie",
+  "unitsLength": "Taille et mensurations",
+  "unitsMass": "Poids du corps",
+  "unitsPortion": "Portions",
+  "unitsTitle": "Quelles unités",
+  "unitsVolume": "Eau",
+  "waterGlasses": "environ {glasses} verres",
+  "waterLess": "{step} ml de moins",
+  "waterMore": "{step} ml de plus",
+  "waterNone": "rien bu",
+  "waterOf": " / {ml} ml",
+  "waterShare": "{pct}% de l'objectif du jour",
+  "waterTitle": "Eau",
+  "wcNoTime": "sans durée",
+  "wdFri": "Ven",
+  "wdMon": "Lun",
+  "wdSat": "Sam",
+  "wdSun": "Dim",
+  "wdThu": "Jeu",
+  "wdTue": "Mar",
+  "wdWed": "Mer",
+  "weightHint": "Ce que tu pèses aujourd'hui. L'objectif et le rythme pour y aller vivent ailleurs.",
+  "weightNote": "Pèse-toi le matin, avant de manger : comme ça les écarts de la journée ne transforment pas le graphique en bruit. Une mesure par semaine, c'est déjà une tendance.",
+  "weightTitle": "Poids",
+  "welEggs": "Deux œufs au plat",
+  "welEggsGrams": "120 g",
+  "welHaveAccount": "J'ai déjà un compte",
+  "welLead": "Compte les calories à partir de tes propres mots",
+  "welSaid": "J'ai mangé deux œufs et une tartine",
+  "welStart": "C'est parti",
+  "welToast": "Tartine avec du beurre",
+  "welToastGrams": "50 g",
+  "welTotal": "Au total",
+  "wfBurned": "Brûlées, kcal",
+  "wfDuration": "Durée",
+  "wfDurationCap": "Durée, min",
+  "wfEstimate": "Une estimation à partir de ton poids et du type d'activité",
+  "wfFromWatch": "D'une montre ou d'une machine",
+  "wfKcal": " kcal",
+  "wfLog": "Noter",
+  "wfManualKcal": "kcal à la main",
+  "wfMin": "{min} min",
+  "wfMinutes": "Minutes",
+  "wfNote": "Note",
+  "wfNoteExample": "Jambes, dur",
+  "wfOptional": "  facultatif",
+  "wheelLess": "Moins",
+  "wheelMore": "Plus",
+  "wkDaysOk": "jours dans l'objectif",
+  "wkEmpty": "Rien n'est encore noté cette semaine. Note le premier jour et l'image apparaît.",
+  "wkFactsHead": "La semaine au total",
+  "wkKcalHead": "Calories",
+  "wkLoggedCap": "jours notés",
+  "wkLoggedValue": "{n} sur 7",
+  "wkMacroHead": "Macros",
+  "wkNoWeight": "poids : aucune pesée",
+  "wkNoraBtn": "Créer le bilan",
+  "wkNoraFailed": "Je n'ai pas pu créer le bilan : {why}",
+  "wkNoraGreet": "Demande ce que tu veux sur cette lecture : un plat, une habitude, ou ce qu'il faut corriger en premier.",
+  "wkNoraLoading": "Nora lit la semaine…",
+  "wkNoraLocked": "Le bilan s'ouvre vendredi",
+  "wkNoraNoNet": "pas de réseau",
+  "wkNoraNoTokens": "plus de jetons",
+  "wkNoraP1": "Ta base est saine, et c'est rare : presque tout est fait maison. Soupe, œufs brouillés, flocons d'avoine : sur une base pareille, le reste se corrige vite.",
+  "wkNoraP2": "Maintenant, franchement. Les légumes ne sont presque pas apparus de la semaine, alors que le sucré revenait chaque jour : crêpes au miel, compote. Les protéines manquent non parce que tu manges peu, mais parce que l'assiette est lourde en glucides et légère en viande, poisson ou fromage. Et trois dîners sur sept sont tombés après vingt-deux heures.",
+  "wkNoraP3": "Rien de grave pour l'instant, mais c'est exactement l'alimentation qui surprend aux analyses à quarante ans. Un pas pour la semaine prochaine, sans rien changer d'autre : quelque chose de vert à chaque déjeuner, et de l'eau à la place de la compote.",
+  "wkNoraPlaceholder": "Pose une question sur cette semaine",
+  "wkNoraPromise": "Une lecture honnête de ta semaine : ce qui a marché, ce qui a glissé, et un pas pour la suivante.",
+  "wkNoraReply1": "L'échange le plus facile cette semaine : de l'eau à la place de la compote. Une cuillère de sucre en moins à chaque fois, et la soupe n'y perd rien.",
+  "wkNoraReply2": "Du vert au déjeuner, ce n'est pas forcément une salade. Un concombre ou un demi-poivron à côté de l'assiette font déjà l'affaire.",
+  "wkNoraSlow": "le serveur prend trop de temps",
+  "wkNoraTalk": "En parler avec Nora",
+  "wkNoraTitle": "Nora sur ta semaine",
+  "wkNorm": "objectif",
+  "wkOffNorm": "{n} hors objectif",
+  "wkPastEmpty": "Pas encore de bilans passés. Le premier apparaîtra ici lundi prochain.",
+  "wkPastRow": "Semaine du {day}",
+  "wkPastTitle": "Semaines passées",
+  "wkPerDay": "kcal par jour en moyenne",
+  "wkPerDayAside": "par jour en moyenne",
+  "wkTitle": "La semaine",
+  "wkTotalCap": "kcal dans la semaine",
+  "wkWaterCap": "d'eau par jour",
+  "wkWaterValue": "{l} l",
+  "wkWeightCap": "poids cette semaine",
+  "workoutAdd": "Ajouter un entraînement",
+  "workoutBurned": "−{kcal} kcal",
+  "workoutCollapse": "Replier",
+  "workoutMinUnit": "min",
+  "workoutNone": "rien de noté",
+  "workoutSessions": "{count, plural, =1{1 séance} other{{count} séances}}",
+  "workoutTitle": "Entraînement"
+}

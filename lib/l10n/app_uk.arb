@@ -1,5 +1,19 @@
 {
   "@@locale": "uk",
+  "@authAgainIn": {
+    "placeholders": {
+      "sec": {
+        "type": "int"
+      }
+    }
+  },
+  "@authCodeHint": {
+    "placeholders": {
+      "mail": {
+        "type": "String"
+      }
+    }
+  },
   "@camAllergyContains": {
     "placeholders": {
       "list": {
@@ -59,6 +73,30 @@
       },
       "at": {
         "type": "String"
+      }
+    }
+  },
+  "@menuHintKcal": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@menuHintMore": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@menuHintOnGoal": {
+    "placeholders": {
+      "ok": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
       }
     }
   },
@@ -179,6 +217,16 @@
   "@rcServingsMany": {
     "placeholders": {
       "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@rcWhole": {
+    "placeholders": {
+      "kcal": {
+        "type": "int"
+      },
+      "g": {
         "type": "int"
       }
     }
@@ -353,6 +401,36 @@
   "assistantPinned": "{count}, закріплено {pinned}",
   "assistantTitle": "Помічник",
   "assistantWhatToRemember": "Що памʼятати",
+  "authAgain": "Підтвердження пароля",
+  "authAgainDiffers": "Паролі не збігаються",
+  "authAgainEmpty": "Повтори пароль",
+  "authAgainHint": "ще раз",
+  "authAgainIn": "Надіслати ще раз можна через {sec} с",
+  "authCode": "Код із листа",
+  "authCodeAction": "Підтвердити",
+  "authCodeBad": "Код не підходить або вже застарів",
+  "authCodeHint": "Надіслали код на {mail}. Введи шість цифр із листа.",
+  "authCodeShort": "Код із 6 цифр",
+  "authCodeTitle": "Підтверди пошту",
+  "authForgotAction": "Надіслати код",
+  "authForgotHint": "Надішлемо код на пошту, а тоді придумаєш новий пароль.",
+  "authForgotLink": "Забули пароль?",
+  "authForgotTitle": "Новий пароль",
+  "authMail": "Пошта",
+  "authMailBad": "Схоже, в адресі помилка",
+  "authOr": "або",
+  "authPass": "Пароль",
+  "authPassEmpty": "Введи пароль",
+  "authPassHint": "від 5 літер і знак",
+  "authPassNew": "Новий пароль",
+  "authPassWeak": "Пароль ненадійний: щонайменше 5 літер і одна цифра або знак",
+  "authResetAction": "Зберегти пароль",
+  "authSendAgain": "Надіслати ще раз",
+  "authSignInAction": "Увійти",
+  "authSignInTitle": "Вхід",
+  "authSignUpAction": "Створити акаунт",
+  "authSignUpLink": "Зареєструватись",
+  "authSignUpTitle": "Заведімо акаунт",
   "barCamera": "Камера",
   "barGrams": "{grams} г",
   "barHint": "Пиши як кажеш.",
@@ -408,7 +486,7 @@
   "camServerDown": "Це не через код і не через камеру. Спробуй за хвилину.",
   "camServerDownTitle": "Наш сервер не відповів",
   "camShoot": "Зняти",
-  "camShootLabel": "Зняти етикетку",
+  "camShootLabel": "Сфотографувати етикетку",
   "camShotFailed": "Кадр не вийшов",
   "camShotReady": "Знімок готовий",
   "camShotReadyNote": "Нора розбере його і відповість у чаті: назве страву, оцінить порцію і покаже, звідки взялося число. Коштує два токени.",
@@ -611,6 +689,17 @@
   "menuAllergy": "Алергії",
   "menuAnalytics": "Аналітика",
   "menuDiary": "Щоденник",
+  "menuHintFree": "безкоштовний",
+  "menuHintKcal": "сьогодні {n} ккал",
+  "menuHintMore": "ще {n}",
+  "menuHintNoAllergy": "немає",
+  "menuHintNoMeds": "без курсів",
+  "menuHintNothing": "ще нічого не записано",
+  "menuHintOnGoal": "у нормі {ok} із {total}",
+  "menuHintRecipes": "від Нори під твою норму",
+  "menuHintWeekFriday": "з пʼятниці, 18:00",
+  "menuHintWeekOpen": "відкрито до неділі",
+  "menuHintWeekYoung": "тиждень щойно почався",
   "menuMeds": "Препарати",
   "menuPlan": "Підписка",
   "menuRecipes": "Рецепти",
@@ -704,6 +793,7 @@
   "plateGrams": " г",
   "plateKcal": "ккал",
   "plateThinking": "думаю",
+  "plateTotal": "разом",
   "privacyCrash": "Звіти про збої",
   "privacyCrashHint": "стек помилки, без даних щоденника",
   "privacyDiaryHead": "Щоденник лишається у тебе",
@@ -776,6 +866,7 @@
   "rcToolPan": "Сковорода",
   "rcToolPot": "Каструля",
   "rcToolsHead": "Потрібно на кухні",
+  "rcWhole": "Уся страва: {kcal} ккал, {g} г",
   "remAbout": "Про що",
   "remAdd": "Додати нагадування",
   "remAt": "О котрій",
@@ -923,7 +1014,7 @@
   "startSignInFailed": "Не вдалось увійти. Спробуй ще раз або продовж без входу.",
   "startSignInFailedWhy": "Не вдалось увійти. {why}",
   "startSignInGoogle": "Продовжити з Google",
-  "startSignInSkip": "Увійти без акаунту",
+  "startSignInSkip": "Далі без акаунту",
   "startSignInText": "Норма порахована. Увійди, щоб вона лишилась при собі: історія, заміри й записи будуть на всіх пристроях, а не тільки тут.",
   "startSignInTitle": "Збережімо це",
   "startTargetWeight": "Цільова вага",
@@ -959,11 +1050,33 @@
   "todayOutOfTokens": "Токени скінчились. Записати вручну можна завжди.",
   "todayPhotoMeal": "Фото",
   "todayQuestionClosed": "Це питання вже закрите. Скажи вагу словами, якщо треба.",
+  "tourCamera": "Камера",
+  "tourCameraHow": "тарілка, етикетка або штрих-код",
+  "tourDiary": "Памʼять щоденника",
+  "tourDiaryHow": "сказав «борщ», візьме звичну порцію",
+  "tourGuide": "Гід по додатку",
+  "tourGuideHow": "спитай, де що лежить і як це зробити",
+  "tourMemory": "Постійна памʼять",
+  "tourMemoryHow": "«не їм свинини» досить сказати раз",
+  "tourMore": "Не лише їжа",
+  "tourMoreHow": "вода, тренування, заміри, рецепти",
+  "tourTitle": "Що вміє Нора",
+  "tourVoice": "Голос або текст",
+  "tourVoiceHow": "«два яйця і тост», і запис готовий",
+  "tourWeek": "Аналіз дня і тижня",
+  "tourWeekHow": "що вийшло і що варто підправити",
   "unitCm": "см",
   "unitG": "г",
   "unitKcal": "ккал",
   "unitKg": "кг",
+  "unitKj": "кДж",
   "unitMl": "мл",
+  "unitsEnergy": "Енергія",
+  "unitsLength": "Зріст і обхвати",
+  "unitsMass": "Вага тіла",
+  "unitsPortion": "Порції їжі",
+  "unitsTitle": "Які одиниці виміру",
+  "unitsVolume": "Вода",
   "waterGlasses": "близько {glasses} склянок",
   "waterLess": "Менше на {step} мл",
   "waterMore": "Більше на {step} мл",

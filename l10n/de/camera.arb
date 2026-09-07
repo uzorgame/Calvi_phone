@@ -1,0 +1,76 @@
+{
+  "camDish": "Foto",
+  "camBarcode": "Barcode",
+  "camTitle": "Scanner",
+  "camShoot": "Foto machen",
+  "camFlash": "Blitz",
+  "camGallery": "Aus der Galerie",
+  "camIntoSlot": "zu {slot}",
+  "@camIntoSlot": {
+    "placeholders": { "slot": { "type": "String" } }
+  },
+
+  "camReading": "Lese…",
+  "camHintDish": "halte drauf: Teller oder Packung",
+  "camHintBarcode": "der Code im Rahmen",
+
+  "camShotFailed": "Das Foto ist nichts geworden",
+  "camTookTooLong": "Das Lesen hat zu lange gedauert. Versuch es noch einmal",
+  "camCouldNotRead": "Ich konnte das Foto nicht lesen",
+
+  "camNoPermission": "Keine Kameraberechtigung. Du kannst sie in den Einstellungen des Telefons geben.",
+  "camNoScanner": "Dieses Telefon kann mit der Kamera keine Codes lesen.",
+  "camBusy": "Die Kamera ging nicht auf. Meist hält sie gerade eine andere App.",
+  "camStillWorks": "Fotos von Gerichten und die Galerie funktionieren wie immer.",
+
+  "camFromPack": "Werte von der Verpackung. Das Eintragen kostet keine Tokens.",
+  "camIngredients": "Zutaten: {text}",
+  "camAllergen": "Allergen!",
+  "camPortionPack": "Portion laut Verpackung: {g} g. Die Werte gelten pro Portion.",
+  "@camPortionPack": { "placeholders": { "g": { "type": "int" } } },
+  "camPer100": "Auf der Verpackung steht kein genaues Gewicht: die Werte gelten pro 100 g.",
+  "camAllergyContains": "Enthält dein Allergen: {list}",
+  "@camAllergyContains": { "placeholders": { "list": { "type": "String" } } },
+  "camAllergyTraces": "Kann Spuren enthalten von: {list}",
+  "@camAllergyTraces": { "placeholders": { "list": { "type": "String" } } },
+  "@camIngredients": { "placeholders": { "text": { "type": "String" } } },
+  "camUnknownCode": "Dieses Produkt steht in keiner Datenbank",
+  "camUnknownCodeNote": "Weder in unserer noch in der offenen. Fotografier die Nährwerttabelle auf der Packung, dann übernehme ich die Werte von dort. Das ist kostenlos.",
+
+  "camNotAProduct": "Das ist kein Produktbarcode",
+  "camNotAProductNote": "Gelesen wurde ein Link oder ein interner Code. Halt auf die Striche mit den Ziffern darunter.",
+
+  "camOfflineTitle": "Kein Netz",
+  "camOffline": "Der Code wurde gelesen, aber es ist niemand da, den man fragen könnte. Versuch es wieder, wenn du online bist.",
+  "camSlowTitle": "Die Antwort kam nicht",
+  "camSlow": "Der Code wurde gelesen, die Datenbank hat zu lange gebraucht. Versuch es noch einmal.",
+  "camSignedOutTitle": "Bitte melde dich neu an",
+  "camSignedOut": "Die Sitzung gilt nicht mehr, deshalb erkennt uns die Datenbank nicht. Melde dich neu an, dann funktioniert der Scanner.",
+  "camServerDownTitle": "Unser Server hat nicht geantwortet",
+  "camServerDown": "Das liegt nicht am Code und nicht an der Kamera. Versuch es in einer Minute.",
+
+  "camGapNote": "Diesen Wert kennt keine Datenbank. Fotografier das Etikett, dann trage ich ihn nach.",
+  "camShootLabel": "Etikett fotografieren",
+  "camAskNoraInstead": "Kein Etikett, dann frag Nora",
+  "camLabelAim": "halte auf die Nährwerttabelle",
+  "camLabelReading": "Übernehme die Werte von der Packung…",
+  "camLabelNoShot": "Das Foto ist nichts geworden. Versuch das Etikett noch einmal.",
+  "camEstimate": " kcal, geschätzt",
+  "camNotRead": "Ich konnte es nicht erkennen",
+  "camShotReady": "Das Foto ist fertig",
+  "camShotReadyNote": "Nora liest es und antwortet im Chat: sie nennt das Gericht, schätzt die Portion und zeigt, woher die Zahl kommt. Das kostet zwei Tokens.",
+  "camAgain": "Noch einmal",
+  "camLogInto": "Eintragen {slotInto}",
+  "@camLogInto": {
+    "placeholders": { "slotInto": { "type": "String" } }
+  },
+  "camSendToNora": "An Nora schicken",
+
+  "camOfflineShot": "Keine Verbindung. Du kannst das Foto später an Nora schicken",
+  "camNoTokens": "Keine Tokens mehr",
+
+  "camKcalPer": " kcal pro {grams} g",
+  "@camKcalPer": {"placeholders":{"grams":{"type":"int"}}},
+  "camKcalFor": " kcal für {grams} g",
+  "@camKcalFor": {"placeholders":{"grams":{"type":"int"}}}
+}

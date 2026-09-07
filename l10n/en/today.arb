@@ -112,6 +112,7 @@
   "plateThinking": "thinking",
   "plateKcal": "kcal",
   "plateGrams": " g",
+  "plateTotal": "total",
   "slotWriteWhat": "Write what it was",
   "slotLog": "Log it",
   "waterTitle": "Water",

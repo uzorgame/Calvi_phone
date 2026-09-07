@@ -1,0 +1,43 @@
+{
+  "authSignInTitle": "Logowanie",
+  "authSignInAction": "Zaloguj się",
+  "authSignUpTitle": "Załóżmy konto",
+  "authSignUpAction": "Utwórz konto",
+  "authSignUpLink": "Zarejestruj się",
+  "authOr": "lub",
+
+  "authMail": "E-mail",
+  "authPass": "Hasło",
+  "authPassNew": "Nowe hasło",
+  "authPassHint": "5 liter i znak",
+  "authAgain": "Potwierdzenie hasła",
+  "authAgainHint": "jeszcze raz",
+
+  "authMailBad": "Ten adres wygląda na błędny",
+  "authPassEmpty": "Wpisz hasło",
+  "authPassWeak": "Słabe hasło: co najmniej 5 liter i jedna cyfra lub znak",
+  "authAgainEmpty": "Powtórz hasło",
+  "authAgainDiffers": "Hasła nie są takie same",
+
+  "authCode": "Kod z listu",
+  "authCodeTitle": "Potwierdź e-mail",
+  "authCodeHint": "Wysłaliśmy kod na {mail}. Wpisz sześć cyfr z listu.",
+  "@authCodeHint": {
+    "placeholders": { "mail": { "type": "String" } }
+  },
+  "authCodeAction": "Potwierdź",
+  "authCodeShort": "Kod ma 6 cyfr",
+  "authCodeBad": "Kod nie pasuje albo już wygasł",
+
+  "authSendAgain": "Wyślij ponownie",
+  "authAgainIn": "Ponownie można za {sec} s",
+  "@authAgainIn": {
+    "placeholders": { "sec": { "type": "int" } }
+  },
+
+  "authForgotLink": "Nie pamiętasz?",
+  "authForgotTitle": "Nowe hasło",
+  "authForgotHint": "Wyślemy kod na e-mail, a potem wybierzesz nowe hasło.",
+  "authForgotAction": "Wyślij kod",
+  "authResetAction": "Zapisz hasło"
+}

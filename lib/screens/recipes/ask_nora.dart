@@ -199,6 +199,16 @@ class _AskBodyState extends State<_AskBody> {
                             '${l.rcMinutes(r.minutes)} · ${r.kcal} ${l.unitKcal} ${l.rcPerServing}',
                             style: context.t.labelSmall,
                           ),
+                          /* Алерген у складі не ховає страву, а підписує її.
+                             Той самий рядок, що показує камера над етикеткою:
+                             людина сама вирішує, чи це для неї. */
+                          if (r.allergen != null) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              l.camAllergyContains(r.allergen!),
+                              style: context.t.labelSmall?.copyWith(color: c.protein),
+                            ),
+                          ],
                         ],
                       ),
                     ),

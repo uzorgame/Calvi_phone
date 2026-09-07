@@ -27,6 +27,7 @@ class MealPlate {
     required this.fat,
     required this.carbs,
     this.grams,
+    this.items = const [],
   });
 
   final String name;
@@ -35,6 +36,25 @@ class MealPlate {
   final int protein;
   final int fat;
   final int carbs;
+
+  /* Страви окремо, коли їх у повідомленні кілька.
+   *
+   * Голосом кажуть «борщ і три скибки хліба» одним духом, і сума «2 записано»
+   * не відповідає на єдине питання, яке тут виникає: що саме Нора вгадала для
+   * кожної. Рядок на страву з вагою і калоріями видно з одного погляду, а
+   * підсумок під ними лишається тим самим, що й для однієї страви. Порожньо або
+   * одна страва: малюється звичайна смужка. Кожна страва при цьому лягає в
+   * щоденник окремим рядком, як і раніше: це картка в чаті, а не запис. */
+  final List<PlateItem> items;
+}
+
+/// Одна страва в картці на кілька страв.
+class PlateItem {
+  const PlateItem({required this.name, required this.kcal, this.grams});
+
+  final String name;
+  final double? grams;
+  final int kcal;
 }
 
 class Msg {

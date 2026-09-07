@@ -1,0 +1,52 @@
+{
+  "sexShortMale": "U",
+  "sexShortFemale": "D",
+  "sexOther": "Altro",
+
+  "activitySedentary": "Sedentario",
+  "activitySedentaryHint": "quasi nessun movimento",
+  "activityLight": "Poco attivo",
+  "activityLightHint": "1-2 allenamenti a settimana",
+  "activityModerate": "Moderato",
+  "activityModerateHint": "3-4 allenamenti",
+  "activityHigh": "Alto",
+  "activityHighHint": "5-6 allenamenti",
+  "activityVeryHigh": "Molto alto",
+  "activityVeryHighHint": "lavoro fisico o sport ogni giorno",
+
+  "themeLight": "Chiaro",
+  "themeLightHint": "sempre l'interfaccia chiara",
+  "themeAquarelle": "Acquerello",
+  "themeAquarelleHint": "chiara, con nuvole pastello sullo sfondo",
+  "themeDawn": "Alba",
+  "themeDawnHint": "chiara, con luce calda di lato",
+  "themeDark": "Scuro",
+  "themeDarkHint": "sempre l'interfaccia scura",
+  "themeSystem": "Tema del dispositivo",
+  "themeSystemHint": "segue l'impostazione di sistema",
+
+  "langSystem": "Lingua del dispositivo",
+
+  "reminderMeal": "Cibo",
+  "reminderMealHint": "ti ricordo di registrare il pasto",
+  "reminderWater": "Acqua",
+  "reminderWaterHint": "ti ricordo di bere",
+  "reminderMeds": "Farmaci",
+  "reminderMedsHint": "secondo l'orario del registro",
+  "reminderWorkout": "Allenamento",
+  "reminderWorkoutHint": "ti ricordo quello in programma",
+  "reminderWeigh": "Pesata",
+  "reminderWeighHint": "così la curva del peso non si spezza",
+  "reminderSummary": "Riepilogo del giorno",
+  "reminderSummaryHint": "in breve sulla giornata prima di dormire",
+
+  "reminderBodyMeal": "Registra che cos'era",
+  "reminderBodyWater": "È ora di bere",
+  "reminderBodyWorkout": "Registralo se c'è stato",
+  "reminderBodyWeigh": "Al mattino, prima di mangiare",
+  "reminderBodySummary": "Che cosa non hai registrato oggi?",
+  "reminderBodyMeds": "Secondo l'orario",
+
+  "notifyChannel": "Promemoria",
+  "notifyChannelHint": "Promemoria su cibo, acqua, farmaci e pesate"
+}

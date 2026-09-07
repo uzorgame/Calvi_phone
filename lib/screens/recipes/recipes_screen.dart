@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../data/app_scope.dart';
 import '../../data/chat.dart';
-import '../../data/day.dart' show monthName;
+import '../../data/day.dart' show dayMonth;
 import '../../data/recipes_demo.dart';
 import '../../data/allergens.dart';
 import '../../data/settings.dart' show Allergy, goalOf;
@@ -75,13 +75,13 @@ String _when(L l, DateTime? at) {
   final d = at.toLocal();
   final now = DateTime.now();
   if (d.year == now.year && d.month == now.month && d.day == now.day) return l.rcJustNow;
-  return '${d.day} ${monthName(d.month)}';
+  return dayMonth(d.day, d.month);
 }
 
 /* Алерген у рецепті шукається словами складників: назва і синоніми з
    реєстру, обома мовами одразу. Щедро, як і скрізь у нас: зайва мітка коштує
    один погляд, пропущена коштує здоровʼя. */
-List<String> _allergenWords(Allergen a) => [a.nameUk, a.nameEn, ...a.aka];
+List<String> _allergenWords(Allergen a) => [...a.names.values, ...a.aka];
 
 bool _itemHasAllergen(String name, List<Allergen> warn) {
   final hay = name.toLowerCase();
@@ -146,8 +146,11 @@ class _RecipesScreenState extends State<RecipesScreen> {
     if (snap != null) setState(() => _book = snap);
 
     /* Мережа чекає, поки сторінка доїде: перебудова списку посеред переходу
-       і є той самий «лаг». Пів секунди свіжості книга рецептів переживе. */
-    await Future<void>.delayed(const Duration(milliseconds: 450));
+       і є той самий «лаг». Пів секунди свіжості книга рецептів переживе.
+       Але тільки коли є що показувати: без знімка на екрані порожньо, і чекати
+       посеред порожнечі нема заради чого. Саме так буває одразу після зміни
+       мови, коли знімка цією мовою ще немає. */
+    if (snap != null) await Future<void>.delayed(const Duration(milliseconds: 450));
     if (!mounted) return;
     try {
       final rows = await scope.sync!.recipes();
@@ -425,9 +428,16 @@ class _Card extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 10),
+                      /* У списку числа на ВСЮ страву, у самому рецепті на
+                         порцію.
+                       *
+                       * Список це вибір, що готувати, і там питання «скільки
+                       * вийде з цієї каструлі». Порція стає важливою потім, на
+                       * сторінці рецепта, коли страва вже обрана і треба
+                       * покласти собі в тарілку. */
                       Text.rich(
                         TextSpan(
-                          text: '${r.kcal} ',
+                          text: '${r.kcal * r.servings} ',
                           children: [
                             TextSpan(
                               text: l.unitKcal,
@@ -467,11 +477,21 @@ class _Card extends StatelessWidget {
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      _Mac(letter: l.macroProteinLetter, value: r.protein, colour: c.protein),
+                      // БЖВ теж на всю страву: поруч із калоріями всієї страви
+                      // числа на порцію читались би як її ж частина.
+                      _Mac(
+                        letter: l.macroProteinLetter,
+                        value: r.protein * r.servings,
+                        colour: c.protein,
+                      ),
                       const SizedBox(width: 10),
-                      _Mac(letter: l.macroFatLetter, value: r.fat, colour: c.fats),
+                      _Mac(letter: l.macroFatLetter, value: r.fat * r.servings, colour: c.fats),
                       const SizedBox(width: 10),
-                      _Mac(letter: l.macroCarbsLetter, value: r.carbs, colour: c.carbs),
+                      _Mac(
+                        letter: l.macroCarbsLetter,
+                        value: r.carbs * r.servings,
+                        colour: c.carbs,
+                      ),
                     ],
                   ),
                   /* Алерген видно ще зі списку: тихий рядок, а не плашка, але

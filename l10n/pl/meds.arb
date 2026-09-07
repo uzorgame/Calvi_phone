@@ -1,0 +1,38 @@
+{
+  "medsTitle": "Leki",
+  "medsMine": "Moje leki",
+  "medsEmpty": "Tu jest pusto. Dodaj lek, a przypomnę o nim w odpowiedniej chwili.",
+  "medsEmptyHint": "Prowadzę dziennik przyjęć, dawkowania nie wyliczam",
+  "medsNoneToday": "Dziś nie ma nic do przyjęcia",
+  "medsAllTaken": "Na dziś wszystko przyjęte",
+  "medsNextAt": "Następne o ",
+  "medsAdd": "Dodaj lek",
+  "medsPast": "Zakończone",
+  "medsPastEmpty": "Tu będą kuracje, których już nie bierzesz. Lek usunięty z listy zostaje w dniach, w których go brałeś.",
+  "medsSince": "od {date}",
+  "medsUnmarked": "Jeszcze nie oznaczono: ",
+  "medsFirstDose": "{name}, pierwsza dawka {day} o {at}",
+  "medsTomorrow": "jutro",
+  "medsNow": "TERAZ",
+
+  "medsDose": "Dawka",
+  "medsHours": "Godziny",
+  "medsSchedule": "Harmonogram",
+  "medsCourse": "Kuracja",
+  "medsNote": "Notatka",
+  "medsResume": "Wznów kurację",
+
+  "medsNew": "Nowy lek",
+  "medsOne": "Lek",
+  "medsTime": "Godzina",
+  "medsName": "Nazwa",
+  "medsNameExample": "Na przykład Magnez B6",
+  "medsPerTake": "Ile na raz",
+  "medsAt": "O której",
+  "medsHowOften": "Jak często",
+  "medsRemind": "Przypominaj",
+  "medsRemindHint": "o wybranych godzinach",
+  "medsFinish": "Zakończ kurację",
+
+  "medsUntil": "do {date}"
+}

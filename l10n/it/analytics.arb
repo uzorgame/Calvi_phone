@@ -1,0 +1,63 @@
+{
+  "anTitle": "Statistiche",
+  "anWeek": "Settimana",
+  "anMonth": "Mese",
+  "anQuarter": "3 mesi",
+  "anYear": "Anno",
+
+  "anForYear": "nell'anno",
+  "anForQuarter": "in 3 mesi",
+  "anForMonth": "nel mese",
+
+  "anGoalProgress": "Avanzamento verso l'obiettivo",
+  "anStartKg": "inizio, kg",
+  "anNowKg": "ora, kg",
+  "anTargetKg": "obiettivo, kg",
+  "anWeightEmpty": "La curva compare dalla seconda pesata. Di' il tuo peso a Nora e lo annota lei.",
+  "anEtaHead": "Di questo passo arrivi all'obiettivo verso il *{date}*",
+  "@anEtaHead": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+
+  "anKcal": "Calorie",
+  "anShareOfNorm": "{share}% della soglia",
+  "@anShareOfNorm": {
+    "placeholders": { "share": { "type": "int" } }
+  },
+  "anKcalTotal": "nel periodo, kcal",
+  "anKcalAvg": "in media al giorno",
+  "anKcalEmpty": "In questo periodo non c'è ancora niente. Di' a Nora che cosa hai mangiato e il grafico si costruisce da solo.",
+
+  "anWater": "Idratazione",
+  "anWaterAvg": "in media, ml",
+
+  "anMeasures": "Misure",
+  "anMeasuresChange": "variazione {period}",
+  "@anMeasuresChange": {
+    "placeholders": { "period": { "type": "String" } }
+  },
+  "anMeasuresEmpty": "Ancora nessuna misura.",
+  "anMeasuresEmptyHint": "Misurati una volta al mese e ti mostro che cosa si muove",
+  "anNow": "ora",
+  "anOneReading": "una misura",
+
+  "anMacrosAvg": "Macro in media",
+  "anMacrosEmpty": "La media compare appena c'è qualcosa da mediare: registra almeno un giorno.",
+  "anPerDay": "al giorno",
+  "anMacroGoal": "soglia {grams} g",
+  "@anMacroGoal": {
+    "placeholders": { "grams": { "type": "int" } }
+  },
+
+  "anOneWeighing": "Per ora c'è una sola misura. La seconda mostra la direzione, e la linea parte da lì.",
+  "anChartGoal": "obiettivo {value}",
+  "@anChartGoal": {
+    "placeholders": { "value": { "type": "String" } }
+  },
+
+  "anWaterGoal": "soglia {ml} ml",
+  "@anWaterGoal": {"placeholders":{"ml":{"type":"String"}}},
+  "anDaysInNorm": "giorni in obiettivo",
+  "anDonePercent": "{percent}% fatto",
+  "@anDonePercent": {"placeholders":{"percent":{"type":"int"}}}
+}

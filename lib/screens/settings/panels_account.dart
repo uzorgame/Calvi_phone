@@ -6,7 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../data/app_scope.dart';
 import '../../data/billing/billing.dart';
 import '../../data/local/database.dart' show TokenStateData;
-import '../../data/day.dart' show monthName;
+import '../../data/day.dart' show dayMonth;
 import '../../data/day_stats.dart';
 import '../../data/remote/api.dart' show SubscriptionState;
 
@@ -229,7 +229,7 @@ class _PlanPanelState extends State<PlanPanel> {
   /// «2 вересня»: доки оплачено, за словом сервера.
   String? get _when {
     final d = _state?.until;
-    return d == null ? null : '${d.day} ${monthName(d.month)}';
+    return d == null ? null : dayMonth(d.day, d.month);
   }
 
   String _name(L l, String plan) => plan == 'year' ? l.planYearly : l.planMonthly;

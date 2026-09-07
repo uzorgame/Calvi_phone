@@ -83,3 +83,31 @@ const baseSlots = <String, SlotDef>{
 /// A card that only appears once it has content cannot be tapped to add the
 /// first thing, which is exactly when it is needed.
 const alwaysSlots = ['breakfast', 'lunch', 'dinner'];
+
+/* Ніч закінчується о пів на пʼяту.
+ *
+ * До того наступний запис іде в перекус, а не в сніданок. За самою годиною
+ * найближчою карткою о другій ночі виходив сніданок (його година восьма, до
+ * решти ще далі), і те, що їдять уночі, лягало в ранок. Пів на пʼяту це межа,
+ * з якої ранній підйом уже рахується ранком, і сніданок о пʼятій лишається
+ * сніданком. */
+const nightEndsMinute = 4 * 60 + 30;
+
+/// Картка, у яку піде наступний запис о цій порі.
+///
+/// Уночі перекус, коли він у дня є; далі найближча за своєю годиною картка.
+/// Порівнюється з годиною картки, а не з останнім дотиком: людина відкриває
+/// застосунок, щоб записати те, що їсть зараз.
+SlotDef? nearestSlot(Iterable<SlotDef> slots, DateTime now) {
+  if (now.hour * 60 + now.minute < nightEndsMinute) {
+    for (final s in slots) {
+      if (s.id == 'snack') return s;
+    }
+  }
+
+  SlotDef? best;
+  for (final s in slots) {
+    if (best == null || (s.order - now.hour).abs() < (best.order - now.hour).abs()) best = s;
+  }
+  return best;
+}

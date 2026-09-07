@@ -280,7 +280,7 @@ class _SignedIn extends StatelessWidget {
                 children: [
                   Text(L.of(context).accountSince, style: context.t.labelSmall),
                   Text(
-                    '${joinedAt!.day} ${monthName(joinedAt!.month)} ${joinedAt!.year}',
+                    '${dayMonth(joinedAt!.day, joinedAt!.month)} ${joinedAt!.year}',
                     style: context.t.labelSmall?.copyWith(
                       color: c.text,
                       fontWeight: FontWeight.w500,

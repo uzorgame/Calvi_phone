@@ -4,6 +4,7 @@ import '../billing/billing.dart';
 import '../local/database.dart';
 import 'api.dart';
 import 'sync_mapping.dart';
+import 'zone.dart';
 
 /* Одна черга на все, що чіпає обліковий запис і курсор.
  *
@@ -72,7 +73,8 @@ class SyncRepository {
     }
 
     try {
-      final account = await api.registerDevice(tz: DateTime.now().timeZoneName, device: deviceName);
+      // The zone by its IANA name: «EEST» told the server nothing about the day.
+      final account = await api.registerDevice(tz: await localZone(), device: deviceName);
       await db.syncDao.setAccount(
         userId: account.userId,
         accessToken: account.accessToken,

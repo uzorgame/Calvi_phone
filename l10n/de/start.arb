@@ -1,0 +1,89 @@
+{
+  "startGoalLose": "Abnehmen",
+  "startGoalLoseHint": "ein Defizit im Tempo deiner Wahl",
+  "startGoalKeep": "Gewicht halten",
+  "startGoalKeepHint": "du holst genau das zurück, was du verbrauchst",
+  "startGoalGain": "Zunehmen",
+  "startGoalGainHint": "ein Überschuss im Tempo deiner Wahl",
+
+  "startAbout": "Über dich",
+  "startSex": "Geschlecht",
+  "startSexMale": "Mann",
+  "startSexFemale": "Frau",
+  "startSexOther": "Divers",
+  "startAge": "Alter",
+  "startAgeYears": "{count, plural, =1{1 Jahr} other{{count} Jahre}}",
+  "@startAgeYears": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "startYearsShort": "Jahre",
+  "startHeight": "Größe",
+
+  "startWeightNow": "Gewicht jetzt",
+
+  "startGoal": "Wohin geht es",
+  "startTargetWeight": "Zielgewicht",
+
+  "startPace": "Wie schnell",
+  "startPaceUnit": "kg pro Woche",
+  "startPaceSlow": "langsam",
+  "startPaceUsual": "gleichmäßig",
+  "startPaceFast": "schnell",
+  "startPaceEtaHead": "Ziel um den ",
+  "startPaceEtaTail": ", also ",
+  "startPaceWeeks": "{count, plural, =1{1 Woche} other{{count} Wochen}}",
+  "@startPaceWeeks": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "startPaceWarning": "So ein Tempo hält man schwer durch, meistens reißt es ab. Unter 0,8 kg pro Woche kommt das Ergebnis langsamer, bleibt aber.",
+
+  "startLife": "Lebensweise",
+  "startAllergies": "Allergien",
+
+  "startNorm": "Dein Richtwert",
+  "startNormPerDay": "kcal am Tag",
+  "startNormWeeks": "Wochen",
+  "startNormHold": "halten",
+  "startNormNora": "Gerechnet. Ab hier wird es leichter.",
+  "startNormNoraHint": "Schreib oder sag es, wie es dir passt: «zwei Eier und ein Toast», «300 Wasser getrunken». Was mir fehlt, frage ich im Gespräch.",
+  "startNormNote": "Das ist die Mifflin-St-Jeor-Formel, kein medizinischer Rat. Wenn du eine Erkrankung hast, schwanger bist oder eine verordnete Diät hältst, sprich mit deiner Ärztin oder deinem Arzt.",
+
+  "startDeviceFirstRun": "erster Start",
+  "startSignInFailed": "Anmelden hat nicht geklappt. Versuch es noch einmal oder mach ohne Konto weiter.",
+  "startSignInFailedWhy": "Anmelden hat nicht geklappt. {why}",
+  "@startSignInFailedWhy": {
+    "placeholders": { "why": { "type": "String" } }
+  },
+  "startSignInTitle": "Lass uns das behalten",
+  "startSignInText": "Der Richtwert steht. Melde dich an, damit er bleibt: Verlauf, Maße und Einträge sind dann auf jedem Gerät, nicht nur hier.",
+  "startSignInBusy": "Melde an…",
+  "startSignInGoogle": "Weiter mit Google",
+  "startSignInApple": "Weiter mit Apple",
+  "startSignInSkip": "Ohne Konto weiter",
+
+  "startAgreeHead": "Ich stimme den ",
+  "startAgreeTerms": "Nutzungsbedingungen",
+  "startAgreeAnd": " und der ",
+  "startAgreePrivacy": "Datenschutzerklärung zu",
+
+  "helloSaid": "zwei Eier und ein Toast",
+  "helloSlotSub": "zwei Einträge",
+  "helloDishEggs": "Rührei",
+  "helloDishBread": "Roggenbrot",
+
+  "helloStepSay": "Sag, was du gegessen hast",
+  "helloStepCount": "Ich zähle die Kalorien",
+  "helloStepLog": "Ich trage es in deinen Tag ein",
+
+  "welLead": "Zählt Kalorien aus deinen eigenen Worten",
+  "welSaid": "Zwei Eier und ein Toast gegessen",
+  "welEggs": "Zwei Spiegeleier",
+  "welEggsGrams": "120 g",
+  "welToast": "Toast mit Butter",
+  "welToastGrams": "50 g",
+  "welTotal": "Zusammen",
+  "welStart": "Los geht's",
+  "welHaveAccount": "Ich habe schon ein Konto",
+  "startSignInBackTitle": "Willkommen zurück",
+  "startSignInBackText": "Melde dich mit demselben Konto an, dann ist alles wieder da: Tagebuch, Ziel, Richtwert und Maße. Du musst nichts noch einmal ausfüllen."
+}

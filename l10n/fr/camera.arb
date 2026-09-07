@@ -1,0 +1,76 @@
+{
+  "camDish": "Photo",
+  "camBarcode": "Code-barres",
+  "camTitle": "Scanner",
+  "camShoot": "Prendre une photo",
+  "camFlash": "Flash",
+  "camGallery": "Depuis la galerie",
+  "camIntoSlot": "dans {slot}",
+  "@camIntoSlot": {
+    "placeholders": { "slot": { "type": "String" } }
+  },
+
+  "camReading": "Je lis…",
+  "camHintDish": "vise une assiette ou un paquet",
+  "camHintBarcode": "le code dans le cadre",
+
+  "camShotFailed": "La photo n'a pas marché",
+  "camTookTooLong": "La lecture a pris trop de temps. Réessaie",
+  "camCouldNotRead": "Je n'ai pas pu lire la photo",
+
+  "camNoPermission": "Pas d'autorisation pour la caméra. Tu peux la donner dans les réglages du téléphone.",
+  "camNoScanner": "Ce téléphone ne sait pas lire les codes avec la caméra.",
+  "camBusy": "La caméra ne s'est pas ouverte. En général une autre app la retient.",
+  "camStillWorks": "Les photos de plats et la galerie marchent comme d'habitude.",
+
+  "camFromPack": "Chiffres de l'emballage. L'enregistrer ne coûte aucun jeton.",
+  "camIngredients": "Ingrédients : {text}",
+  "camAllergen": "Allergène !",
+  "camPortionPack": "Portion de l'emballage : {g} g. Les chiffres sont par portion.",
+  "@camPortionPack": { "placeholders": { "g": { "type": "int" } } },
+  "camPer100": "Pas de poids exact sur l'emballage : les chiffres sont pour 100 g.",
+  "camAllergyContains": "Contient ton allergène : {list}",
+  "@camAllergyContains": { "placeholders": { "list": { "type": "String" } } },
+  "camAllergyTraces": "Peut contenir des traces de : {list}",
+  "@camAllergyTraces": { "placeholders": { "list": { "type": "String" } } },
+  "@camIngredients": { "placeholders": { "text": { "type": "String" } } },
+  "camUnknownCode": "Ce produit n'est dans aucune base",
+  "camUnknownCodeNote": "Ni dans la nôtre ni dans l'ouverte. Photographie le tableau nutritionnel sur le paquet et je recopie les chiffres. C'est gratuit.",
+
+  "camNotAProduct": "Ce n'est pas un code-barres de produit",
+  "camNotAProductNote": "C'est un lien ou un code interne qui a été lu. Vise les barres avec les chiffres en dessous.",
+
+  "camOfflineTitle": "Pas de réseau",
+  "camOffline": "Le code a été lu, mais il n'y a personne à qui demander. Réessaie quand tu seras en ligne.",
+  "camSlowTitle": "La réponse n'est pas arrivée",
+  "camSlow": "Le code a été lu et la base a pris trop de temps. Réessaie.",
+  "camSignedOutTitle": "Reconnecte-toi",
+  "camSignedOut": "La session ne vaut plus, donc la base ne nous reconnaît pas. Reconnecte-toi et le scanner marchera.",
+  "camServerDownTitle": "Notre serveur n'a pas répondu",
+  "camServerDown": "Ce n'est ni le code ni la caméra. Réessaie dans une minute.",
+
+  "camGapNote": "Aucune base ne connaît ce chiffre. Photographie l'étiquette et je le complète.",
+  "camShootLabel": "Photographier l'étiquette",
+  "camAskNoraInstead": "Pas d'étiquette, demande à Nora",
+  "camLabelAim": "vise le tableau nutritionnel",
+  "camLabelReading": "Je recopie les chiffres du paquet…",
+  "camLabelNoShot": "La photo n'a pas marché. Réessaie l'étiquette.",
+  "camEstimate": " kcal, estimation",
+  "camNotRead": "Je n'ai pas réussi à distinguer",
+  "camShotReady": "La photo est prête",
+  "camShotReadyNote": "Nora la lit et répond dans le chat : elle nomme le plat, estime la portion et montre d'où vient le chiffre. Cela coûte deux jetons.",
+  "camAgain": "Encore",
+  "camLogInto": "L'enregistrer {slotInto}",
+  "@camLogInto": {
+    "placeholders": { "slotInto": { "type": "String" } }
+  },
+  "camSendToNora": "Envoyer à Nora",
+
+  "camOfflineShot": "Pas de connexion. Tu pourras envoyer la photo à Nora plus tard",
+  "camNoTokens": "Plus de jetons",
+
+  "camKcalPer": " kcal pour {grams} g",
+  "@camKcalPer": {"placeholders":{"grams":{"type":"int"}}},
+  "camKcalFor": " kcal sur {grams} g",
+  "@camKcalFor": {"placeholders":{"grams":{"type":"int"}}}
+}

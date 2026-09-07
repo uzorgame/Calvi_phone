@@ -1,0 +1,86 @@
+{
+  "fieldWeight": "Peso",
+  "fieldChest": "Pecho",
+  "fieldWaist": "Cintura",
+  "fieldHips": "Cadera",
+  "fieldThigh": "Muslo",
+  "fieldWrist": "Muñeca",
+  "fieldNeck": "Cuello",
+  "fieldBiceps": "Bíceps",
+  "agoToday": "hoy",
+  "agoYesterday": "ayer",
+  "agoDays": "{count, plural, =1{hace 1 día} other{hace {count} días}}",
+  "@agoDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "agoWeeks": "{count, plural, other{hace {count} semanas}}",
+  "@agoWeeks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "actGym": "Gimnasio",
+  "actRun": "Correr",
+  "actBike": "Ciclismo",
+  "actWalk": "Caminar",
+  "actSwim": "Natación",
+  "actYoga": "Yoga",
+  "actHiit": "HIIT",
+  "actJumprope": "Salto de cuerda",
+  "actStretch": "Estiramientos",
+  "actFootball": "Fútbol",
+  "actBasketball": "Baloncesto",
+  "actTennis": "Tenis",
+  "actDance": "Baile",
+  "actSki": "Esquí",
+  "wdMon": "Lun",
+  "wdTue": "Mar",
+  "wdWed": "Mié",
+  "wdThu": "Jue",
+  "wdFri": "Vie",
+  "wdSat": "Sáb",
+  "wdSun": "Dom",
+  "repDaily": "todos los días",
+  "repWeekdays": "entre semana",
+  "repWeekends": "los fines de semana",
+  "repEveryOther": "un día sí y otro no",
+  "repWeekly": "una vez por semana",
+  "repEveryN": "{count, plural, other{cada {count} días}}",
+  "@repEveryN": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "repPickDaily": "Todos los días",
+  "repPickWeekdays": "Días de la semana",
+  "repPickNoDays": "No hay ningún día elegido, así que el aviso no sonará nunca.",
+  "repPickFromToday": "Se cuenta desde hoy.",
+  "wheelLess": "Menos",
+  "wheelMore": "Más",
+  "doseTabOne": "comprimido",
+  "doseTabFew": "comprimidos",
+  "doseTabMany": "comprimidos",
+  "doseCapOne": "cápsula",
+  "doseCapFew": "cápsulas",
+  "doseCapMany": "cápsulas",
+  "doseDropOne": "gota",
+  "doseDropFew": "gotas",
+  "doseDropMany": "gotas",
+  "doseMlOne": "ml",
+  "doseMlFew": "ml",
+  "doseMlMany": "ml",
+  "doseShotOne": "inyección",
+  "doseShotFew": "inyecciones",
+  "doseShotMany": "inyecciones",
+  "agoWeek": "hace una semana",
+
+  "repPickInterval": "Un día sí y otro no"
+}

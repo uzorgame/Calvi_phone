@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show Platform;
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 import '../../l10n/data_lang.dart';
+import 'zone.dart';
 
 /// The one server this app talks to.
 ///
@@ -33,7 +36,22 @@ class CalviApi {
    * Сервер рахує навантаження окремо по клієнтах, і здогадка по user-agent
    * ламається на першому ж оновленні системи. Заголовок дешевший і чесніший:
    * телефон представляється сам. */
-  static const _client_ = {'x-calvi-client': 'mobile'};
+  /* І на чому саме телефон.
+   *
+   * Заднім числом платформу взяти нізвідки: назва пристрою це вільний підпис
+   * людини, а user-agent у Dart однаковий на обох системах. Тому вона теж
+   * називається сама, тим самим способом, що й клієнт. */
+  static final _client_ = {
+    'x-calvi-client': 'mobile',
+    'x-calvi-platform': _platform,
+  };
+
+  static String get _platform {
+    if (kIsWeb) return 'web';
+    if (Platform.isIOS) return 'ios';
+    if (Platform.isAndroid) return 'android';
+    return 'other';
+  }
 
   /// The access token, once this device has an account. Kept by the caller and
   /// handed back in, so the api holds no session of its own.
@@ -140,6 +158,7 @@ class CalviApi {
     List<Map<String, String>> history = const [],
     String place = 'today',
     bool card = false,
+    bool voice = false,
   }) async {
     final body = await _post('/v1/chat', {
       'text': text,
@@ -149,8 +168,9 @@ class CalviApi {
          бриф тижня і власний розбір: там вона бачить більше. */
       if (place != 'today') 'place': place,
       /* Написане в поле картки, а не в чат: сервер кладе запис рівно в цю
-         картку і не питає ваги, а бере звичну порцію, коли її не названо. */
-      if (card) 'entry': 'card',
+         картку і не питає ваги, а бере звичну порцію, коли її не названо.
+         Продиктоване в чат: те саме про вагу, решта як у розмові. */
+      if (card) 'entry': 'card' else if (voice) 'entry': 'voice',
       /* Кілька попередніх реплік, щоб розмова була розмовою.
        *
        * Доти кожне повідомлення йшло саме по собі, і Нора не памʼятала навіть
@@ -184,10 +204,68 @@ class CalviApi {
   Future<GoogleAccount> signInWithApple({required String idToken, String? device}) =>
       _signIn('/v1/auth/apple', idToken: idToken, device: device);
 
-  Future<GoogleAccount> _signIn(String path, {required String idToken, String? device}) async {
+  /* Вхід поштою і паролем.
+   *
+   * Той самий кінець, що в Google: сервер відповідає однаково, якою дорогою
+   * людина б не зайшла. Через це застосунок далі не розрізняє способів входу
+   * взагалі, і кожен новий не додає йому жодної гілки. */
+  Future<GoogleAccount> signInWithEmail({
+    required String email,
+    required String password,
+    String? device,
+  }) => _account('/v1/auth/email', {'email': email, 'password': password}, device: device);
+
+  /* Крок перший реєстрації: адреса й пароль летять на сервер, звідти на пошту
+     йде код. Акаунта ще немає, тому й повертати нема чого. */
+  Future<void> registerByEmail({required String email, required String password}) =>
+      _post('/v1/auth/email/register', {'email': email, 'password': password});
+
+  /// Крок другий: код зійшовся, акаунт є.
+  Future<GoogleAccount> confirmEmail({
+    required String email,
+    required String code,
+    String? device,
+  }) => _account('/v1/auth/email/verify', {'email': email, 'code': code}, device: device);
+
+  /* Забули пароль. Відповідь однакова на знайому адресу і на незнайому, тому
+     повертати тут теж нічого: «прийняли» і все. */
+  Future<void> forgotPassword(String email) =>
+      _post('/v1/auth/email/forgot', {'email': email});
+
+  /// Новий пароль за кодом. Решту сесій сервер гасить сам.
+  Future<GoogleAccount> resetPassword({
+    required String email,
+    required String code,
+    required String password,
+    String? device,
+  }) => _account('/v1/auth/email/reset', {
+    'email': email,
+    'code': code,
+    'password': password,
+  }, device: device);
+
+  /// Ще один лист із кодом. Намір сервер бере з попереднього коду.
+  Future<void> resendCode({required String email, required bool reset}) => _post(
+    '/v1/auth/email/resend',
+    {'email': email, 'purpose': reset ? 'reset' : 'verify'},
+  );
+
+  Future<GoogleAccount> _signIn(String path, {required String idToken, String? device}) =>
+      _account(path, {'id_token': idToken}, device: device);
+
+  /* Спільний хвіст усіх входів: пояс, назва пристрою і розбір відповіді.
+   *
+   * Заголовок із нашим токеном іде разом із запитом, якщо він уже є. Це не
+   * формальність: саме за ним сервер розуміє, що людина приходить зі своїм
+   * пристроєм, і підписує наявний щоденник, а не заводить другий порожній. */
+  Future<GoogleAccount> _account(
+    String path,
+    Map<String, dynamic> fields, {
+    String? device,
+  }) async {
     final body = await _post(path, {
-      'id_token': idToken,
-      'tz': DateTime.now().timeZoneName,
+      ...fields,
+      'tz': await localZone(),
       if (device != null) 'device': device,
     }, auth: token != null);
 
@@ -250,8 +328,13 @@ class CalviApi {
   }
 
   /// Книга рецептів людини, найновіший перший.
+  ///
+  /// Мова їде разом із запитом, і це не зайве поле. Чотири стартові рецепти це
+  /// вміст застосунку, а не записи людини: доки вона їх не зачепила, вони
+  /// переїжджають за мовою екрана. Вирішує це сервер, і без мови в запиті він
+  /// засіяв би книгу англійською незалежно від того, що вибрано в налаштуваннях.
   Future<List<RecipeData>> recipes() async {
-    final body = await _get('/v1/recipes');
+    final body = await _get('/v1/recipes?lang=$dataLang');
     return [
       for (final r in (body['recipes'] as List<dynamic>? ?? []).whereType<Map<String, dynamic>>())
         RecipeData.fromWire(r),
@@ -298,6 +381,9 @@ class CalviApi {
     final body = await _post('/v1/recipes/suggest', {
       'what': what,
       'idempotency_key': idempotencyKey,
+      // Рецепт лягає в книгу і читатиметься потім, тому пишеться мовою екрана,
+      // а не мовою прохання.
+      'lang': dataLang,
     }, wait: _thinking);
     return RecipeSuggestions(
       options: [
@@ -467,8 +553,11 @@ class CalviApi {
     }
 
     if (res.statusCode >= 400) {
-      final code = _errorCode(res.body);
-      throw ApiFailure(code: code, status: res.statusCode);
+      throw ApiFailure(
+        code: _errorCode(res.body),
+        status: res.statusCode,
+        message: _errorText(res.body),
+      );
     }
 
     return jsonDecode(res.body) as Map<String, dynamic>;
@@ -554,6 +643,18 @@ class CalviApi {
       return code;
     } catch (_) {
       return 'unknown';
+    }
+  }
+
+  /// Те, що сервер написав людині. Порожньо, якщо відповідь не про людину.
+  String? _errorText(String body) {
+    try {
+      final json = jsonDecode(body) as Map<String, dynamic>;
+      final error = json['error'] as Map<String, dynamic>;
+      final text = error['message'] as String?;
+      return text != null && text.isNotEmpty ? text : null;
+    } catch (_) {
+      return null;
     }
   }
 }
@@ -734,7 +835,17 @@ class RecipeData {
     this.steps = const [],
     this.why,
     this.createdAt,
+    this.allergen,
   });
+
+  /* Алерген людини, знайдений сервером у складі страви, її ж мовою.
+   *
+   * Приходить тільки з підбору Нори і тільки як підпис: страва показується, а
+   * вибирає людина. Так само поводиться етикетка в камері.
+   *
+   * Назад у `toWire` не їде навмисно: це не частина рецепта, а зауваження до
+   * нього, і в книзі йому місця немає. */
+  final String? allergen;
 
   factory RecipeData.fromWire(Map<String, dynamic> b) => RecipeData(
     id: b['id'] as String? ?? '',
@@ -756,6 +867,7 @@ class RecipeData {
     steps: [for (final s in (b['steps'] as List<dynamic>? ?? [])) s.toString()],
     why: b['why'] as String?,
     createdAt: DateTime.tryParse(b['created_at'] as String? ?? ''),
+    allergen: b['allergen'] as String?,
   );
 
   Map<String, dynamic> toWire() => {
@@ -1384,14 +1496,24 @@ class SubscriptionState {
 }
 
 class ApiFailure implements Exception {
-  const ApiFailure({required this.code, required this.status});
-  const ApiFailure.offline() : code = 'offline', status = 0;
+  const ApiFailure({required this.code, required this.status, this.message});
+  const ApiFailure.offline() : code = 'offline', status = 0, message = null;
 
   /// Мережа була, відповіді не дочекались.
-  const ApiFailure.slow() : code = 'slow', status = 0;
+  const ApiFailure.slow() : code = 'slow', status = 0, message = null;
 
   final String code;
   final int status;
+
+  /* Що сервер сказав словами, якщо це слова для людини.
+   *
+   * Здебільшого порожньо, і так і має бути: «не вдалось записати страву»
+   * застосунок формулює сам, своєю мовою і на своєму екрані. Але у входу
+   * поштою половина відповідей це саме текст, який більше нізвідки не взяти:
+   * «цей акаунт вже зареєстровано», «лист щойно пішов, наступний через 45
+   * секунд». Вигадати їх наново на телефоні означало б тримати дві копії
+   * правил, які розійдуться. */
+  final String? message;
 
   /// Worth trying again later: the network, or the server having a bad minute.
   bool get temporary => status == 0 || status >= 500 || code == 'rate_limited';

@@ -162,11 +162,21 @@ class _CameraScreenState extends State<CameraScreen> {
    *
    * Камера на телефоні одна, а читачів у нас два: звичайний видошукач для
    * страви і сканер для штрихкоду. Відпускається вона не миттєво, тому після
-   * кожного перемикання режиму живий шар зникає на чверть секунди, і аж потім
-   * зʼявляється новий. Перший показ цього не потребує: до нього камеру ніхто не
-   * тримав. */
+   * кожного перемикання живий шар гасне, і новий зʼявляється тільки тоді, коли
+   * попередній справді відпустив пристрій: див. `_handLens`. Перший показ
+   * цього не потребує: до нього камеру ніхто не тримав. */
   bool _lensFree = true;
+
+  /// Стеля на передачу: якщо попередній читач так і не сказав, що відпустив,
+  /// лінза звільняється сама. Темний екран без кінця гірший за ризик.
   Timer? _handoff;
+
+  /// Номер поточної передачі: запізніла відповідь від попередньої не має
+  /// відкривати лінзу посеред наступної.
+  int _handoffTicket = 0;
+
+  /// Що зробити, коли видошукач страви скаже, що закрився.
+  VoidCallback? _freeLens;
 
   /* --- Прицілювання ---
    *
@@ -374,7 +384,7 @@ class _CameraScreenState extends State<CameraScreen> {
       _done = false;
       _lensFree = false;
     });
-    _handLens();
+    _handLens(fromScanner: true);
   }
 
   /// Знімає етикетку і віддає її моделі переписати.
@@ -403,7 +413,7 @@ class _CameraScreenState extends State<CameraScreen> {
         _scan = Scanned.unknown;
         _trouble = L.of(context).camLabelNoShot;
       });
-      _handLens();
+      _handLens(fromScanner: false);
       return;
     }
 
@@ -446,7 +456,7 @@ class _CameraScreenState extends State<CameraScreen> {
           };
     });
 
-    _handLens();
+    _handLens(fromScanner: false);
   }
 
   /// Перемикає режим і передає камеру від одного читача до іншого.
@@ -456,10 +466,18 @@ class _CameraScreenState extends State<CameraScreen> {
   /// тієї ж миті, коли попередній ще тримав пристрій; камера не відкривалась, а
   /// віджет у такому стані малює просто чорний прямокутник, нічого не кажучи.
   ///
-  /// Тому спершу живий шар зникає з дерева зовсім, і тільки за чверть секунди,
-  /// коли попередній справді закрився, зʼявляється новий.
+  /// Тому спершу живий шар гасне, і тільки коли попередній читач справді
+  /// закрився, зʼявляється новий і проявляється над темним.
   void _setMode(CamMode m) {
-    if (m == _mode) return;
+    if (m == _mode) {
+      /* Поки знімають етикетку, смуга підсвічує «Фото», і дотик по «Штрихкод»
+         означає «назад до сканера», хоч режим і не мінявся. */
+      if (_aiming) _again();
+      return;
+    }
+
+    // Хто тримає лінзу зараз: від цього залежить, кого чекати.
+    final wasScanner = _mode == CamMode.barcode && !_aiming;
 
     setState(() {
       _mode = m;
@@ -474,23 +492,39 @@ class _CameraScreenState extends State<CameraScreen> {
       _lock = null;
     });
 
-    _handLens();
+    _handLens(fromScanner: wasScanner);
   }
 
   /// Передає лінзу від одного читача до іншого.
   ///
   /// Камера на телефоні одна, а читачів двоє: сканер кодів і звичайний
   /// видошукач. Новий не можна відкривати, поки старий ще тримає пристрій, тому
-  /// живий шар спершу зникає з дерева зовсім, і аж за чверть секунди
-  /// зʼявляється наступний. Тут ховався сірий екран сканера.
+  /// живий шар спершу гасне, а наступний зʼявляється тоді, коли попередній
+  /// справді відпустив лінзу: сканер про це каже завершенням `stop()`, видошукач
+  /// через `onClosed`. Доти стояв таймер на чверть секунди, і він був водночас
+  /// задовгий для швидкої камери і закороткий для повільної.
   ///
   /// Потрібно не тільки на перемиканні режиму: зйомка етикетки теж міняє
   /// читача, бо знімає її звичайна камера, а не сканер.
-  void _handLens() {
+  void _handLens({required bool fromScanner}) {
     _handoff?.cancel();
-    _handoff = Timer(const Duration(milliseconds: 260), () {
-      if (mounted) setState(() => _lensFree = true);
-    });
+    final ticket = ++_handoffTicket;
+
+    void free() {
+      if (!mounted || ticket != _handoffTicket || _lensFree) return;
+      _handoff?.cancel();
+      setState(() => _lensFree = true);
+    }
+
+    // Стеля: лінза не має лишатись темною, якщо відповідь так і не прийде.
+    _handoff = Timer(const Duration(milliseconds: 900), free);
+
+    if (fromScanner) {
+      _freeLens = null;
+      unawaited(_scanner.stop().then((_) => free(), onError: (_) => free()));
+    } else {
+      _freeLens = free;
+    }
   }
 
   /// Назад до читання, коли людина хоче спробувати ще раз.
@@ -513,7 +547,7 @@ class _CameraScreenState extends State<CameraScreen> {
       _lock = null;
     });
 
-    if (wasAiming) _handLens();
+    if (wasAiming) _handLens(fromScanner: false);
   }
 
   /* The torch belongs to the camera, so a screen without one simply does not
@@ -660,35 +694,62 @@ class _CameraScreenState extends State<CameraScreen> {
              них: див. `_setMode`. */
         Positioned.fill(
           child: RepaintBoundary(
-            child: !_lensFree
-                ? const _Handing()
-                : slim
-                ? MobileScanner(
-                    controller: _scanner,
-                    onDetect: _onCode,
-                    /* Читається рівно те, на що наведено. Без цього рядка
-                         сканер бачить увесь кадр і ловить сусідню пляшку, поки
-                         телефон ще їде до потрібної: махнув рукою, і в
-                         застосунку вже чужий продукт. */
-                    scanWindow: window,
-                    // Чорний прямокутник мовчки це найгірша з відповідей:
-                    // людина не знає, чи камера зайнята, чи дозволу немає, чи
-                    // застосунок просто завис.
-                    placeholderBuilder: (context) => const _Handing(),
-                    errorBuilder: (context, error) =>
-                        _Trouble(text: _scanReason(L.of(context), error)),
-                    fit: BoxFit.cover,
-                  )
-                : LiveFeed(
-                    fallback: const _Feed(),
-                    onReady: (cam) {
-                      if (!mounted) return;
-                      setState(() {
-                        _cam = cam;
-                        if (cam == null) _flash = false;
-                      });
-                    },
-                  ),
+            /* Читачі змінюють один одного через темне: попередній гасне за
+               мить, наступний проявляється, щойно дасть перший кадр. Різка
+               заміна читалась як збій, а не як перемикання. */
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 140),
+              switchInCurve: Curves.easeOut,
+              switchOutCurve: Curves.easeIn,
+              layoutBuilder: (current, previous) =>
+                  Stack(fit: StackFit.expand, children: [...previous, if (current != null) current]),
+              child: !_lensFree
+                  ? const _Handing(key: ValueKey('dark'))
+                  : slim
+                  ? ValueListenableBuilder<MobileScannerState>(
+                      key: const ValueKey('scan'),
+                      valueListenable: _scanner,
+                      // Кадр є лише коли сканер біжить: доти шар прозорий над темним.
+                      builder: (context, state, child) => AnimatedOpacity(
+                        opacity: state.isRunning ? 1 : 0,
+                        duration: const Duration(milliseconds: 220),
+                        curve: Curves.easeOut,
+                        child: child,
+                      ),
+                      child: MobileScanner(
+                        controller: _scanner,
+                        onDetect: _onCode,
+                        /* Читається рівно те, на що наведено. Без цього рядка
+                           сканер бачить увесь кадр і ловить сусідню пляшку, поки
+                           телефон ще їде до потрібної: махнув рукою, і в
+                           застосунку вже чужий продукт. */
+                        scanWindow: window,
+                        placeholderBuilder: (context) => const _Handing(),
+                        // Чорний прямокутник мовчки це найгірша з відповідей:
+                        // людина не знає, чи камера зайнята, чи дозволу немає,
+                        // чи застосунок просто завис.
+                        errorBuilder: (context, error) =>
+                            _Trouble(text: _scanReason(L.of(context), error)),
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : LiveFeed(
+                      key: const ValueKey('feed'),
+                      /* Намальована тарілка тільки там, де камери не буде
+                         зовсім: веб, відмова, телефон без камери. Поки камера
+                         відкривається, темне, і картинка проявляється над ним. */
+                      fallback: const _Feed(),
+                      loading: const _Handing(),
+                      onReady: (cam) {
+                        if (!mounted) return;
+                        setState(() {
+                          _cam = cam;
+                          if (cam == null) _flash = false;
+                        });
+                      },
+                      onClosed: () => _freeLens?.call(),
+                    ),
+            ),
           ),
         ),
 
@@ -809,16 +870,25 @@ class _CameraScreenState extends State<CameraScreen> {
                 child: Transform.translate(offset: Offset(0, 64 * (1 - t)), child: child),
               ),
             ),
-            child: _Result(
-              mode: _mode,
-              slot: widget.slot,
-              code: _code,
-              food: _food,
-              trouble: _trouble,
-              scan: _scan,
-              onAgain: _again,
-              onAim: _aim,
-              onSend: _send,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                /* Режими стоять над карткою, а не під нею. Доти картка їх
+                   накривала, і після скану не було куди піти, крім «Ще раз». */
+                _Modes(mode: _mode, aiming: _aiming, onMode: _setMode, onGallery: _fromGallery),
+                const SizedBox(height: 12),
+                _Result(
+                  mode: _mode,
+                  slot: widget.slot,
+                  code: _code,
+                  food: _food,
+                  trouble: _trouble,
+                  scan: _scan,
+                  onAgain: _again,
+                  onAim: _aim,
+                  onSend: _send,
+                ),
+              ],
             ),
           ),
       ],
@@ -844,7 +914,7 @@ String _scanReason(L l, MobileScannerException e) => switch (e.errorCode) {
 /// має помічати цю мить узагалі, і різкий чорний прямокутник посеред неї
 /// помітили б відразу.
 class _Handing extends StatelessWidget {
-  const _Handing();
+  const _Handing({super.key});
 
   @override
   Widget build(BuildContext context) => const ColoredBox(color: _dark);
@@ -1273,53 +1343,7 @@ class _Deck extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         children: [
-          /* The modes sit in one smoked strip. The current one is the only one
-             that gets a name; the rest are marks, which is what makes the row
-             readable at a glance instead of three equal labels. */
-          ClipRRect(
-            borderRadius: BorderRadius.circular(CalviSize.rPill),
-            child: BackdropFilter(
-              filter: ui.ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-              child: Container(
-                padding: const EdgeInsets.all(6),
-                color: _chrome,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    for (final m in _modes(l))
-                      Padding(
-                        padding: const EdgeInsets.only(right: 4),
-                        child: m.id == mode
-                            ? Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 9),
-                                decoration: BoxDecoration(
-                                  color: _ink,
-                                  borderRadius: BorderRadius.circular(CalviSize.rPill),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    CalviIcon(m.icon, size: 15, color: _dark),
-                                    const SizedBox(width: 7),
-                                    Text(
-                                      m.title,
-                                      style: const TextStyle(
-                                        color: _dark,
-                                        fontSize: CalviSize.fsMicro,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            : _Mode(icon: m.icon, label: m.title, onTap: () => onMode(m.id)),
-                      ),
-                    _Mode(icon: 'image', label: l.camGallery, onTap: onGallery),
-                  ],
-                ),
-              ),
-            ),
-          ),
+          _Modes(mode: mode, aiming: aiming, onMode: onMode, onGallery: onGallery),
           const SizedBox(height: 16),
 
           Row(
@@ -1369,6 +1393,90 @@ class _Deck extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+/* Смуга режимів, одна на обидва місця: під видошукачем і над карткою
+   результату.
+
+   Доти картка результату накривала її, і після скану людина не бачила, куди
+   піти далі: ні «Фото», ні галереї, тільки «Ще раз». Тепер режими стоять над
+   карткою, і з будь-якого результату можна одразу перейти до знімка чи до
+   іншого коду.
+
+   The modes sit in one smoked strip. The current one is the only one that
+   gets a name; the rest are marks, which is what makes the row readable at a
+   glance instead of three equal labels.
+
+   Поки знімають етикетку, підсвічується «Фото»: людина в цю мить справді
+   робить знімок, і смуга каже про це прямо. Дотик по «Штрихкод» тоді вертає
+   сканер, а по підсвіченому «Фото» веде у звичайну зйомку страви. */
+class _Modes extends StatelessWidget {
+  const _Modes({
+    required this.mode,
+    required this.onMode,
+    required this.onGallery,
+    this.aiming = false,
+  });
+
+  final CamMode mode;
+  final bool aiming;
+  final ValueChanged<CamMode> onMode;
+  final VoidCallback onGallery;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final lit = aiming ? CamMode.food : mode;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(CalviSize.rPill),
+      child: BackdropFilter(
+        filter: ui.ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        child: Container(
+          padding: const EdgeInsets.all(6),
+          color: _chrome,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (final m in _modes(l))
+                Padding(
+                  padding: const EdgeInsets.only(right: 4),
+                  child: m.id == lit
+                      ? GestureDetector(
+                          onTap: aiming ? () => onMode(m.id) : null,
+                          behavior: HitTestBehavior.opaque,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 9),
+                            decoration: BoxDecoration(
+                              color: _ink,
+                              borderRadius: BorderRadius.circular(CalviSize.rPill),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                CalviIcon(m.icon, size: 15, color: _dark),
+                                const SizedBox(width: 7),
+                                Text(
+                                  m.title,
+                                  style: const TextStyle(
+                                    color: _dark,
+                                    fontSize: CalviSize.fsMicro,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      : _Mode(icon: m.icon, label: m.title, onTap: () => onMode(m.id)),
+                ),
+              _Mode(icon: 'image', label: l.camGallery, onTap: onGallery),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -1720,6 +1828,20 @@ class _Result extends StatelessWidget {
       _ => (l.camNotRead, trouble ?? ''),
     };
 
+    /* Коли підвів сервер або мережа, головна кнопка повторює скан, а ліва
+       веде на етикетку. Доти обидві казали «Ще раз» і робили одне й те саме:
+       дві однакові кнопки поруч це не вибір, а помилка. Етикетка тут доречна,
+       бо вона є на кожній пачці і не залежить від того, чи знає код чужа
+       база. */
+    final failed = switch (scan) {
+      Scanned.notAProduct ||
+      Scanned.offline ||
+      Scanned.slow ||
+      Scanned.broken ||
+      Scanned.signedOut => true,
+      _ => false,
+    };
+
     return Align(
       alignment: Alignment.bottomCenter,
       child: Container(
@@ -1767,7 +1889,9 @@ class _Result extends StatelessWidget {
                 const SizedBox(height: 12),
               ],
 
-              if (found && code != null) ...[
+              /* Тільки над знайденим товаром: для решки станів код друкує
+                 гілка нижче, і без цієї умови він стояв двічі підряд. */
+              if (found && code != null && item != null) ...[
                 Text(code!, style: context.t.labelSmall?.copyWith(fontSize: 12)),
                 const SizedBox(height: 4),
               ],
@@ -1895,7 +2019,7 @@ class _Result extends StatelessWidget {
                 children: [
                   Expanded(
                     child: GestureDetector(
-                      onTap: onAgain,
+                      onTap: failed ? onAim : onAgain,
                       behavior: HitTestBehavior.opaque,
                       child: Container(
                         height: 50,
@@ -1905,7 +2029,8 @@ class _Result extends StatelessWidget {
                           borderRadius: BorderRadius.circular(CalviSize.rCard),
                         ),
                         child: Text(
-                          l.camAgain,
+                          failed ? l.camShootLabel : l.camAgain,
+                          textAlign: TextAlign.center,
                           style: context.t.titleMedium?.copyWith(fontSize: 15),
                         ),
                       ),

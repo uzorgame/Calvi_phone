@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'first_run.dart';
+
 import 'package:calvi/main.dart';
 
 /// Згода на непрочитане це не згода.
@@ -17,18 +19,11 @@ void main() {
     await tester.pumpWidget(const CalviApp(storage: false, hello: false));
     await tester.pump(const Duration(seconds: 1));
 
-    /* Перший запуск відкривається розвилкою «уперше чи повертаюсь». Тести
-       йдуть дорогою новачка, тому тиснуть «Почати». */
-    await tester.tap(find.text('Почати'));
-    await tester.pumpAndSettle();
+    /* Вхід стоїть першим кроком, одразу за вітанням, тому йти до нього більше
+       нікуди: воно догрується і саме його показує. */
+    await welcomeOut(tester);
 
-    // Про тебе, Вага, Ціль, Темп, Спосіб життя, Норма.
-    for (var i = 0; i < 6; i++) {
-      await tester.tap(find.text('Далі'));
-      await tester.pumpAndSettle();
-    }
-
-    expect(find.text('Збережімо це'), findsOneWidget, reason: 'не дійшли до входу');
+    expect(find.text('Вхід'), findsOneWidget, reason: 'не дійшли до входу');
   }
 
   testWidgets('умови відкриваються аркушем просто з екрана входу', (tester) async {
@@ -53,7 +48,7 @@ void main() {
 
     /* Екран входу лишається під аркушем. Якби документ приїхав окремим екраном,
        людина втратила б те, з чого його відкрила. */
-    expect(find.text('Збережімо це'), findsOneWidget);
+    expect(find.text('Вхід'), findsOneWidget);
   });
 
   testWidgets('приватність відкривається тим самим шляхом', (tester) async {

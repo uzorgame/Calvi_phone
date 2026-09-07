@@ -1,0 +1,81 @@
+{
+  "kcalUnit": "{kcal} kcal",
+  "@kcalUnit": {
+    "placeholders": { "kcal": { "type": "int" } }
+  },
+  "gramsUnit": "{grams} g",
+  "@gramsUnit": {
+    "placeholders": { "grams": { "type": "int" } }
+  },
+  "unitKcal": "kcal",
+  "unitKg": "kg",
+  "unitCm": "cm",
+  "unitG": "g",
+  "unitMl": "ml",
+  "macroProtein": "Protéines",
+  "macroFat": "Lipides",
+  "macroCarbs": "Glucides",
+  "slotBreakfast": "Petit-déjeuner",
+  "slotLunch": "Déjeuner",
+  "slotDinner": "Dîner",
+  "slotSnack": "Collation",
+  "slotIntoBreakfast": "au petit-déjeuner",
+  "slotIntoLunch": "au déjeuner",
+  "slotIntoDinner": "au dîner",
+  "slotIntoSnack": "dans la collation",
+  "slotIntoOther": "dans «{name}»",
+  "@slotIntoOther": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "actionDone": "Terminé",
+  "actionCancel": "Annuler",
+  "actionDelete": "Supprimer",
+  "actionNext": "Suivant",
+  "actionBack": "Retour",
+  "actionSave": "Enregistrer",
+  "actionAdd": "Ajouter",
+  "actionClose": "Fermer",
+  "macroPShort": "P {value}",
+  "@macroPShort": {
+    "placeholders": { "value": { "type": "int" } }
+  },
+  "macroFShort": "L {value}",
+  "@macroFShort": {
+    "placeholders": { "value": { "type": "int" } }
+  },
+  "macroCShort": "G {value}",
+  "@macroCShort": {
+    "placeholders": { "value": { "type": "int" } }
+  },
+  "macroPNone": "P ?",
+  "macroFNone": "L ?",
+  "macroCNone": "G ?",
+  "macroProteinLetter": "P",
+  "macroFatLetter": "L",
+  "macroCarbsLetter": "G",
+  "menuTitle": "Menu",
+  "menuDiary": "Journal",
+  "menuAnalytics": "Statistiques",
+  "menuWeek": "Bilan de la semaine",
+  "menuRecipes": "Recettes",
+  "menuMeds": "Médicaments",
+  "menuAllergy": "Allergies",
+  "menuPlan": "Abonnement",
+  "menuSettings": "Réglages",
+  "menuAbout": "À propos",
+
+  "menuHintKcal": "aujourd'hui {n} kcal",
+  "@menuHintKcal": {"placeholders": {"n": {"type": "int"}}},
+  "menuHintNothing": "rien de noté pour l'instant",
+  "menuHintOnGoal": "dans l'objectif {ok} sur {total}",
+  "@menuHintOnGoal": {"placeholders": {"ok": {"type": "int"}, "total": {"type": "int"}}},
+  "menuHintWeekYoung": "la semaine vient de commencer",
+  "menuHintWeekFriday": "dès vendredi, 18:00",
+  "menuHintWeekOpen": "ouvert jusqu'à dimanche",
+  "menuHintRecipes": "de Nora, adaptées à ta norme",
+  "menuHintNoMeds": "aucune cure",
+  "menuHintNoAllergy": "aucune",
+  "menuHintMore": "+{n}",
+  "@menuHintMore": {"placeholders": {"n": {"type": "int"}}},
+  "menuHintFree": "gratuit"
+}

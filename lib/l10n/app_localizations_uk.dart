@@ -425,6 +425,100 @@ class LUk extends L {
   String get assistantWhatToRemember => 'Що памʼятати';
 
   @override
+  String get authAgain => 'Підтвердження пароля';
+
+  @override
+  String get authAgainDiffers => 'Паролі не збігаються';
+
+  @override
+  String get authAgainEmpty => 'Повтори пароль';
+
+  @override
+  String get authAgainHint => 'ще раз';
+
+  @override
+  String authAgainIn(int sec) {
+    return 'Надіслати ще раз можна через $sec с';
+  }
+
+  @override
+  String get authCode => 'Код із листа';
+
+  @override
+  String get authCodeAction => 'Підтвердити';
+
+  @override
+  String get authCodeBad => 'Код не підходить або вже застарів';
+
+  @override
+  String authCodeHint(String mail) {
+    return 'Надіслали код на $mail. Введи шість цифр із листа.';
+  }
+
+  @override
+  String get authCodeShort => 'Код із 6 цифр';
+
+  @override
+  String get authCodeTitle => 'Підтверди пошту';
+
+  @override
+  String get authForgotAction => 'Надіслати код';
+
+  @override
+  String get authForgotHint => 'Надішлемо код на пошту, а тоді придумаєш новий пароль.';
+
+  @override
+  String get authForgotLink => 'Забули пароль?';
+
+  @override
+  String get authForgotTitle => 'Новий пароль';
+
+  @override
+  String get authMail => 'Пошта';
+
+  @override
+  String get authMailBad => 'Схоже, в адресі помилка';
+
+  @override
+  String get authOr => 'або';
+
+  @override
+  String get authPass => 'Пароль';
+
+  @override
+  String get authPassEmpty => 'Введи пароль';
+
+  @override
+  String get authPassHint => 'від 5 літер і знак';
+
+  @override
+  String get authPassNew => 'Новий пароль';
+
+  @override
+  String get authPassWeak => 'Пароль ненадійний: щонайменше 5 літер і одна цифра або знак';
+
+  @override
+  String get authResetAction => 'Зберегти пароль';
+
+  @override
+  String get authSendAgain => 'Надіслати ще раз';
+
+  @override
+  String get authSignInAction => 'Увійти';
+
+  @override
+  String get authSignInTitle => 'Вхід';
+
+  @override
+  String get authSignUpAction => 'Створити акаунт';
+
+  @override
+  String get authSignUpLink => 'Зареєструватись';
+
+  @override
+  String get authSignUpTitle => 'Заведімо акаунт';
+
+  @override
   String get barCamera => 'Камера';
 
   @override
@@ -612,7 +706,7 @@ class LUk extends L {
   String get camShoot => 'Зняти';
 
   @override
-  String get camShootLabel => 'Зняти етикетку';
+  String get camShootLabel => 'Сфотографувати етикетку';
 
   @override
   String get camShotFailed => 'Кадр не вийшов';
@@ -1305,6 +1399,45 @@ class LUk extends L {
   String get menuDiary => 'Щоденник';
 
   @override
+  String get menuHintFree => 'безкоштовний';
+
+  @override
+  String menuHintKcal(int n) {
+    return 'сьогодні $n ккал';
+  }
+
+  @override
+  String menuHintMore(int n) {
+    return 'ще $n';
+  }
+
+  @override
+  String get menuHintNoAllergy => 'немає';
+
+  @override
+  String get menuHintNoMeds => 'без курсів';
+
+  @override
+  String get menuHintNothing => 'ще нічого не записано';
+
+  @override
+  String menuHintOnGoal(int ok, int total) {
+    return 'у нормі $ok із $total';
+  }
+
+  @override
+  String get menuHintRecipes => 'від Нори під твою норму';
+
+  @override
+  String get menuHintWeekFriday => 'з пʼятниці, 18:00';
+
+  @override
+  String get menuHintWeekOpen => 'відкрито до неділі';
+
+  @override
+  String get menuHintWeekYoung => 'тиждень щойно почався';
+
+  @override
   String get menuMeds => 'Препарати';
 
   @override
@@ -1612,6 +1745,9 @@ class LUk extends L {
   String get plateThinking => 'думаю';
 
   @override
+  String get plateTotal => 'разом';
+
+  @override
   String get privacyCrash => 'Звіти про збої';
 
   @override
@@ -1850,6 +1986,11 @@ class LUk extends L {
 
   @override
   String get rcToolsHead => 'Потрібно на кухні';
+
+  @override
+  String rcWhole(int kcal, int g) {
+    return 'Уся страва: $kcal ккал, $g г';
+  }
 
   @override
   String get remAbout => 'Про що';
@@ -2345,7 +2486,7 @@ class LUk extends L {
   String get startSignInGoogle => 'Продовжити з Google';
 
   @override
-  String get startSignInSkip => 'Увійти без акаунту';
+  String get startSignInSkip => 'Далі без акаунту';
 
   @override
   String get startSignInText =>
@@ -2468,6 +2609,51 @@ class LUk extends L {
   String get todayQuestionClosed => 'Це питання вже закрите. Скажи вагу словами, якщо треба.';
 
   @override
+  String get tourCamera => 'Камера';
+
+  @override
+  String get tourCameraHow => 'тарілка, етикетка або штрих-код';
+
+  @override
+  String get tourDiary => 'Памʼять щоденника';
+
+  @override
+  String get tourDiaryHow => 'сказав «борщ», візьме звичну порцію';
+
+  @override
+  String get tourGuide => 'Гід по додатку';
+
+  @override
+  String get tourGuideHow => 'спитай, де що лежить і як це зробити';
+
+  @override
+  String get tourMemory => 'Постійна памʼять';
+
+  @override
+  String get tourMemoryHow => '«не їм свинини» досить сказати раз';
+
+  @override
+  String get tourMore => 'Не лише їжа';
+
+  @override
+  String get tourMoreHow => 'вода, тренування, заміри, рецепти';
+
+  @override
+  String get tourTitle => 'Що вміє Нора';
+
+  @override
+  String get tourVoice => 'Голос або текст';
+
+  @override
+  String get tourVoiceHow => '«два яйця і тост», і запис готовий';
+
+  @override
+  String get tourWeek => 'Аналіз дня і тижня';
+
+  @override
+  String get tourWeekHow => 'що вийшло і що варто підправити';
+
+  @override
   String get unitCm => 'см';
 
   @override
@@ -2480,7 +2666,28 @@ class LUk extends L {
   String get unitKg => 'кг';
 
   @override
+  String get unitKj => 'кДж';
+
+  @override
   String get unitMl => 'мл';
+
+  @override
+  String get unitsEnergy => 'Енергія';
+
+  @override
+  String get unitsLength => 'Зріст і обхвати';
+
+  @override
+  String get unitsMass => 'Вага тіла';
+
+  @override
+  String get unitsPortion => 'Порції їжі';
+
+  @override
+  String get unitsTitle => 'Які одиниці виміру';
+
+  @override
+  String get unitsVolume => 'Вода';
 
   @override
   String waterGlasses(int glasses) {

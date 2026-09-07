@@ -344,6 +344,7 @@ class CalviRow extends StatelessWidget {
               fontWeight: FontWeight.w500,
               color: ink,
             );
+            final valueStyle = context.t.labelSmall?.copyWith(fontWeight: FontWeight.w400);
             final measure = TextPainter(
               text: TextSpan(text: title, style: titleStyle),
               textDirection: TextDirection.ltr,
@@ -389,7 +390,7 @@ class CalviRow extends StatelessWidget {
                         textAlign: TextAlign.right,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: context.t.labelSmall?.copyWith(fontWeight: FontWeight.w400),
+                        style: valueStyle,
                       ),
                     ),
                   ),
@@ -713,13 +714,22 @@ class CalviSegments extends StatelessWidget {
                         child: GestureDetector(
                           onTap: () => onPick(i),
                           behavior: HitTestBehavior.opaque,
+                          /* Зменшується, а не обрізається.
+                             Комірка тут одна четверта екрана, і на вузькому
+                             телефоні в неї не вміщалось навіть англійське
+                             «3 months», а іспанське втрачало літери вже в слові
+                             «Semana». Назва періоду це підпис кнопки: обрізана,
+                             вона не каже, що станеться від натискання. */
                           child: Center(
-                            child: Text(
-                              l,
-                              maxLines: 1,
-                              style: context.t.labelSmall?.copyWith(
-                                fontWeight: i == index ? FontWeight.w600 : FontWeight.w400,
-                                color: i == index ? c.text : c.textSecondary,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                l,
+                                maxLines: 1,
+                                style: context.t.labelSmall?.copyWith(
+                                  fontWeight: i == index ? FontWeight.w600 : FontWeight.w400,
+                                  color: i == index ? c.text : c.textSecondary,
+                                ),
                               ),
                             ),
                           ),

@@ -52,6 +52,7 @@ class ChatRepository {
     List<Map<String, String>> history = const [],
     String place = 'today',
     bool card = false,
+    bool voice = false,
   }) async {
     final when = at ?? DateTime.now();
 
@@ -66,6 +67,7 @@ class ChatRepository {
       history: history,
       place: place,
       card: card,
+      voice: voice,
     );
 
     await _apply(answer, slot: slot, when: when);

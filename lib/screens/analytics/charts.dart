@@ -238,20 +238,27 @@ class _LineChartState extends State<LineChart> with SingleTickerProviderStateMix
           const SizedBox(height: 8),
           Row(
             children: [
-              // Every label takes an equal share and clips: a long one used to
-              // push the row past the card and paint a stripe over the chart.
+              /* Кожен підпис бере рівну частку і не виходить за неї: довгий
+                 колись розпихав ряд за картку і клав смугу поверх графіка.
+                 Тут він зменшується замість того, щоб губити літери: місяць
+                 французькою це «juil» і «juin», які трьома літерами не
+                 розрізниш, і обрізаний підпис осі перестає бути датою. */
               for (final (i, l) in widget.labels.indexed)
                 Expanded(
-                  child: Text(
-                    l,
-                    maxLines: 1,
-                    overflow: TextOverflow.clip,
-                    textAlign: i == 0
-                        ? TextAlign.left
+                  child: Align(
+                    alignment: i == 0
+                        ? Alignment.centerLeft
                         : i == widget.labels.length - 1
-                        ? TextAlign.right
-                        : TextAlign.center,
-                    style: context.t.labelSmall?.copyWith(fontSize: 11),
+                        ? Alignment.centerRight
+                        : Alignment.center,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        l,
+                        maxLines: 1,
+                        style: context.t.labelSmall?.copyWith(fontSize: 11),
+                      ),
+                    ),
                   ),
                 ),
             ],

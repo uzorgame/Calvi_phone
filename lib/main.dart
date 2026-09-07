@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'data/billing/billing.dart';
 import 'data/evening.dart';
@@ -32,6 +33,7 @@ import 'screens/settings/settings_screen.dart';
 import 'screens/start/hello.dart';
 import 'screens/start/start_screen.dart';
 import 'screens/today/today_screen.dart';
+import 'package:speech_to_text/speech_to_text.dart'; // TEMP
 import 'data/meal.dart';
 import 'l10n/data_lang.dart';
 
@@ -51,7 +53,26 @@ Future<void> main() async {
      від нього. Без ключів це тиха порожня операція, і застосунок стартує так
      само: щоденник не має залежати від того, чи працює оплата. */
   await Billing.start();
+  await _probeSpeech(); // TEMP
   runApp(const CalviApp());
+}
+
+// TEMP probe: what the device really offers for speech recognition.
+Future<void> _probeSpeech() async {
+  try {
+    final s = SpeechToText();
+    final ok = await s.initialize(onError: (e) => debugPrint('PROBE err ${e.errorMsg}'));
+    debugPrint('PROBE init=$ok');
+    final list = await s.locales();
+    debugPrint('PROBE count=${list.length}');
+    for (final l in list) {
+      debugPrint('PROBE locale ${l.localeId} | ${l.name}');
+    }
+    final sys = await s.systemLocale();
+    debugPrint('PROBE system=${sys?.localeId}');
+  } catch (e) {
+    debugPrint('PROBE threw $e');
+  }
 }
 
 class CalviApp extends StatefulWidget {
@@ -246,6 +267,30 @@ class _CalviAppState extends State<CalviApp> {
       _onboarding = saved == null;
     });
     _replan();
+    // Перший запуск: профілю на диску ще немає.
+    if (saved == null && widget.storage) unawaited(_askFirstPermissions());
+  }
+
+  /* Дозволи на камеру і сповіщення питаються на першому запуску, одразу, ще на
+     «Старті», обидва підряд.
+   *
+   * Рішення продукту: людина має пройти обидва системні вікна на першій
+   * хвилині, а не натрапляти на них посеред зйомки страви чи першого
+   * нагадування. Пауза перед першим вікном, щоб «Старт» встиг зʼявитись:
+   * системне вікно поверх порожнього екрана читається як збій.
+   *
+   * Відмова тут не кінець: камера спитає ще раз при відкритті сканера, а
+   * сповіщення при першому нагадуванні, як і доти. */
+  Future<void> _askFirstPermissions() async {
+    await Future<void>.delayed(const Duration(milliseconds: 700));
+    if (!mounted) return;
+    try {
+      await Permission.camera.request();
+    } catch (_) {
+      // Платформа без такого дозволу: нічого питати.
+    }
+    if (!mounted) return;
+    _bellOk = await _bell.ask();
   }
 
   /// Кінець «Старту»: те, що зібрали, стає профілем і одразу лягає на диск.
@@ -704,7 +749,16 @@ class _CalviAppState extends State<CalviApp> {
            Flutter бере першу підтримувану мову для пристроїв, чиєї мови в списку
            немає. Українська стоїть другою і вмикається сама на українському
            телефоні. */
-        supportedLocales: const [Locale('en'), Locale('uk')],
+        supportedLocales: const [
+          Locale('en'),
+          Locale('uk'),
+          Locale('es'),
+          Locale('it'),
+          Locale('de'),
+          Locale('fr'),
+          Locale('pt'),
+          Locale('pl'),
+        ],
 
         /* `null` означає «спитай пристрій». Людина, яка обрала мову руками,
            перебиває це, і її вибір переживає перезапуск: він лежить у профілі
@@ -713,6 +767,12 @@ class _CalviAppState extends State<CalviApp> {
           Lang.system => null,
           Lang.uk => const Locale('uk'),
           Lang.en => const Locale('en'),
+          Lang.es => const Locale('es'),
+          Lang.it => const Locale('it'),
+          Lang.de => const Locale('de'),
+          Lang.fr => const Locale('fr'),
+          Lang.pt => const Locale('pt'),
+          Lang.pl => const Locale('pl'),
         },
         /* Шар даних дізнається про мову звідси.
          *

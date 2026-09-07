@@ -5,7 +5,13 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
+import 'app_localizations_de.dart';
 import 'app_localizations_en.dart';
+import 'app_localizations_es.dart';
+import 'app_localizations_fr.dart';
+import 'app_localizations_it.dart';
+import 'app_localizations_pl.dart';
+import 'app_localizations_pt.dart';
 import 'app_localizations_uk.dart';
 
 // ignore_for_file: type=lint
@@ -91,7 +97,16 @@ abstract class L {
       ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[Locale('en'), Locale('uk')];
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('de'),
+    Locale('en'),
+    Locale('es'),
+    Locale('fr'),
+    Locale('it'),
+    Locale('pl'),
+    Locale('pt'),
+    Locale('uk'),
+  ];
 
   /// No description provided for @aboutContact.
   ///
@@ -818,6 +833,186 @@ abstract class L {
   /// In en, this message translates to:
   /// **'What to remember'**
   String get assistantWhatToRemember;
+
+  /// No description provided for @authAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password'**
+  String get authAgain;
+
+  /// No description provided for @authAgainDiffers.
+  ///
+  /// In en, this message translates to:
+  /// **'The passwords do not match'**
+  String get authAgainDiffers;
+
+  /// No description provided for @authAgainEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat the password'**
+  String get authAgainEmpty;
+
+  /// No description provided for @authAgainHint.
+  ///
+  /// In en, this message translates to:
+  /// **'once more'**
+  String get authAgainHint;
+
+  /// No description provided for @authAgainIn.
+  ///
+  /// In en, this message translates to:
+  /// **'You can ask again in {sec} s'**
+  String authAgainIn(int sec);
+
+  /// No description provided for @authCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Code from the letter'**
+  String get authCode;
+
+  /// No description provided for @authCodeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get authCodeAction;
+
+  /// No description provided for @authCodeBad.
+  ///
+  /// In en, this message translates to:
+  /// **'That code does not fit, or it has expired'**
+  String get authCodeBad;
+
+  /// No description provided for @authCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a code to {mail}. Type the six digits from the letter.'**
+  String authCodeHint(String mail);
+
+  /// No description provided for @authCodeShort.
+  ///
+  /// In en, this message translates to:
+  /// **'The code has 6 digits'**
+  String get authCodeShort;
+
+  /// No description provided for @authCodeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm your email'**
+  String get authCodeTitle;
+
+  /// No description provided for @authForgotAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Send the code'**
+  String get authForgotAction;
+
+  /// No description provided for @authForgotHint.
+  ///
+  /// In en, this message translates to:
+  /// **'We will send a code to your email, then you pick a new password.'**
+  String get authForgotHint;
+
+  /// No description provided for @authForgotLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot it?'**
+  String get authForgotLink;
+
+  /// No description provided for @authForgotTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get authForgotTitle;
+
+  /// No description provided for @authMail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get authMail;
+
+  /// No description provided for @authMailBad.
+  ///
+  /// In en, this message translates to:
+  /// **'That address looks off'**
+  String get authMailBad;
+
+  /// No description provided for @authOr.
+  ///
+  /// In en, this message translates to:
+  /// **'or'**
+  String get authOr;
+
+  /// No description provided for @authPass.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get authPass;
+
+  /// No description provided for @authPassEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password'**
+  String get authPassEmpty;
+
+  /// No description provided for @authPassHint.
+  ///
+  /// In en, this message translates to:
+  /// **'5 letters and a sign'**
+  String get authPassHint;
+
+  /// No description provided for @authPassNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get authPassNew;
+
+  /// No description provided for @authPassWeak.
+  ///
+  /// In en, this message translates to:
+  /// **'Weak password: at least 5 letters and one digit or sign'**
+  String get authPassWeak;
+
+  /// No description provided for @authResetAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save password'**
+  String get authResetAction;
+
+  /// No description provided for @authSendAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Send it again'**
+  String get authSendAgain;
+
+  /// No description provided for @authSignInAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get authSignInAction;
+
+  /// No description provided for @authSignInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get authSignInTitle;
+
+  /// No description provided for @authSignUpAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get authSignUpAction;
+
+  /// No description provided for @authSignUpLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Create an account'**
+  String get authSignUpLink;
+
+  /// No description provided for @authSignUpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Let us make an account'**
+  String get authSignUpTitle;
 
   /// No description provided for @barCamera.
   ///
@@ -1905,7 +2100,7 @@ abstract class L {
   /// **'Device language'**
   String get langSystem;
 
-  /// No description provided for @legalUpdated.
+  /// DO NOT TRANSLATE. The one line of ours inside the legal documents, and they exist in English only: `lib/data/legal.dart` holds a single version of the Terms and of the Privacy Policy, which every language shows. A translated «Updated» put one word of the reader's language into an English legal text and made the date line read half in one language and half in another. Every language repeats this string as it stands, Ukrainian included.
   ///
   /// In en, this message translates to:
   /// **'Updated {date}'**
@@ -2366,6 +2561,72 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Diary'**
   String get menuDiary;
+
+  /// No description provided for @menuHintFree.
+  ///
+  /// In en, this message translates to:
+  /// **'free'**
+  String get menuHintFree;
+
+  /// Under the Diary row in the menu: what is eaten so far today.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} kcal today'**
+  String menuHintKcal(int n);
+
+  /// Tail of a list that does not fit on one line: 'Magnesium, Omega-3, +2'.
+  ///
+  /// In en, this message translates to:
+  /// **'+{n}'**
+  String menuHintMore(int n);
+
+  /// No description provided for @menuHintNoAllergy.
+  ///
+  /// In en, this message translates to:
+  /// **'none'**
+  String get menuHintNoAllergy;
+
+  /// No description provided for @menuHintNoMeds.
+  ///
+  /// In en, this message translates to:
+  /// **'no courses'**
+  String get menuHintNoMeds;
+
+  /// No description provided for @menuHintNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'nothing logged yet'**
+  String get menuHintNothing;
+
+  /// Under Analytics: finished days of this week inside the goal window.
+  ///
+  /// In en, this message translates to:
+  /// **'on goal {ok} of {total}'**
+  String menuHintOnGoal(int ok, int total);
+
+  /// No description provided for @menuHintRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'from Nora, sized to your norm'**
+  String get menuHintRecipes;
+
+  /// No description provided for @menuHintWeekFriday.
+  ///
+  /// In en, this message translates to:
+  /// **'from Friday, 18:00'**
+  String get menuHintWeekFriday;
+
+  /// No description provided for @menuHintWeekOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'open until Sunday'**
+  String get menuHintWeekOpen;
+
+  /// No description provided for @menuHintWeekYoung.
+  ///
+  /// In en, this message translates to:
+  /// **'the week has just begun'**
+  String get menuHintWeekYoung;
 
   /// No description provided for @menuMeds.
   ///
@@ -2925,6 +3186,12 @@ abstract class L {
   /// **'thinking'**
   String get plateThinking;
 
+  /// No description provided for @plateTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'total'**
+  String get plateTotal;
+
   /// No description provided for @privacyCrash.
   ///
   /// In en, this message translates to:
@@ -3356,6 +3623,12 @@ abstract class L {
   /// In en, this message translates to:
   /// **'What the kitchen needs'**
   String get rcToolsHead;
+
+  /// No description provided for @rcWhole.
+  ///
+  /// In en, this message translates to:
+  /// **'Whole dish: {kcal} kcal, {g} g'**
+  String rcWhole(int kcal, int g);
 
   /// No description provided for @remAbout.
   ///
@@ -4455,6 +4728,96 @@ abstract class L {
   /// **'That question is already closed. Say the weight in words if you need to.'**
   String get todayQuestionClosed;
 
+  /// No description provided for @tourCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get tourCamera;
+
+  /// No description provided for @tourCameraHow.
+  ///
+  /// In en, this message translates to:
+  /// **'a plate, a label or a barcode'**
+  String get tourCameraHow;
+
+  /// No description provided for @tourDiary.
+  ///
+  /// In en, this message translates to:
+  /// **'Diary memory'**
+  String get tourDiary;
+
+  /// No description provided for @tourDiaryHow.
+  ///
+  /// In en, this message translates to:
+  /// **'say \"borscht\" and it takes your usual portion'**
+  String get tourDiaryHow;
+
+  /// No description provided for @tourGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'Guide to the app'**
+  String get tourGuide;
+
+  /// No description provided for @tourGuideHow.
+  ///
+  /// In en, this message translates to:
+  /// **'ask where things are and how to do them'**
+  String get tourGuideHow;
+
+  /// No description provided for @tourMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Lasting memory'**
+  String get tourMemory;
+
+  /// No description provided for @tourMemoryHow.
+  ///
+  /// In en, this message translates to:
+  /// **'\"no pork\" is enough to say once'**
+  String get tourMemoryHow;
+
+  /// No description provided for @tourMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Not only food'**
+  String get tourMore;
+
+  /// No description provided for @tourMoreHow.
+  ///
+  /// In en, this message translates to:
+  /// **'water, workouts, measurements, recipes'**
+  String get tourMoreHow;
+
+  /// No description provided for @tourTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What Nora can do'**
+  String get tourTitle;
+
+  /// No description provided for @tourVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice or text'**
+  String get tourVoice;
+
+  /// No description provided for @tourVoiceHow.
+  ///
+  /// In en, this message translates to:
+  /// **'\"two eggs and toast\", and it is logged'**
+  String get tourVoiceHow;
+
+  /// No description provided for @tourWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Day and week review'**
+  String get tourWeek;
+
+  /// No description provided for @tourWeekHow.
+  ///
+  /// In en, this message translates to:
+  /// **'what worked and what to adjust'**
+  String get tourWeekHow;
+
   /// No description provided for @unitCm.
   ///
   /// In en, this message translates to:
@@ -4479,11 +4842,53 @@ abstract class L {
   /// **'kg'**
   String get unitKg;
 
+  /// No description provided for @unitKj.
+  ///
+  /// In en, this message translates to:
+  /// **'kJ'**
+  String get unitKj;
+
   /// No description provided for @unitMl.
   ///
   /// In en, this message translates to:
   /// **'ml'**
   String get unitMl;
+
+  /// No description provided for @unitsEnergy.
+  ///
+  /// In en, this message translates to:
+  /// **'Energy'**
+  String get unitsEnergy;
+
+  /// No description provided for @unitsLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Height and measurements'**
+  String get unitsLength;
+
+  /// No description provided for @unitsMass.
+  ///
+  /// In en, this message translates to:
+  /// **'Body weight'**
+  String get unitsMass;
+
+  /// No description provided for @unitsPortion.
+  ///
+  /// In en, this message translates to:
+  /// **'Food portions'**
+  String get unitsPortion;
+
+  /// No description provided for @unitsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Which units'**
+  String get unitsTitle;
+
+  /// No description provided for @unitsVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'Water'**
+  String get unitsVolume;
 
   /// No description provided for @waterGlasses.
   ///
@@ -5011,7 +5416,8 @@ class _LDelegate extends LocalizationsDelegate<L> {
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['en', 'uk'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['de', 'en', 'es', 'fr', 'it', 'pl', 'pt', 'uk'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_LDelegate old) => false;
@@ -5020,8 +5426,20 @@ class _LDelegate extends LocalizationsDelegate<L> {
 L lookupL(Locale locale) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
+    case 'de':
+      return LDe();
     case 'en':
       return LEn();
+    case 'es':
+      return LEs();
+    case 'fr':
+      return LFr();
+    case 'it':
+      return LIt();
+    case 'pl':
+      return LPl();
+    case 'pt':
+      return LPt();
     case 'uk':
       return LUk();
   }

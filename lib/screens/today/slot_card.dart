@@ -181,6 +181,22 @@ class _SlotCardState extends State<SlotCard> with SingleTickerProviderStateMixin
 
                   final forTitle = math.min(wide(widget.title, titleStyle), room * 0.62);
 
+                  /* Тихий рядок під назвою теж має дочитуватись.
+                   *
+                   * Місце ділили назва і значок, а підпис брав те, що лишиться,
+                   * і не набирав: англійське «2 entries» ховало хвіст під
+                   * трикрапку вже на звичайному телефоні, іспанське
+                   * «sin registros» втрачало три літери, португальське
+                   * «nenhum registro» чотири. Слово, обрізане до «registro…»,
+                   * не читається, а саме воно каже, чи є в картці записи.
+                   *
+                   * Тому значок поступається і йому. Втрат від цього немає:
+                   * у ньому число, і воно зменшується разом із кружком, не
+                   * втрачаючи жодної цифри. Нижня межа тримає його читаним,
+                   * якщо підпис виявиться довшим за весь ряд. */
+                  final forSub = wide(widget.sub, context.t.labelSmall);
+                  final forBadge = math.max(room - math.max(forTitle, forSub), room * 0.28);
+
                   return Row(
                     children: [
                       Container(
@@ -216,7 +232,7 @@ class _SlotCardState extends State<SlotCard> with SingleTickerProviderStateMixin
                         ),
                       ),
                       ConstrainedBox(
-                        constraints: BoxConstraints(maxWidth: math.max(room - forTitle, 0)),
+                        constraints: BoxConstraints(maxWidth: forBadge),
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
                           decoration: BoxDecoration(

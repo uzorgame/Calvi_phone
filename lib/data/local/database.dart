@@ -78,7 +78,7 @@ class CalviDb extends _$CalviDb {
   );
 
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 15;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -213,6 +213,13 @@ class CalviDb extends _$CalviDb {
          старті і це правильно: перше ж відкриття сторінки їх наповнить. */
       if (from < 14) {
         await m.createTable(serverSnapshots);
+      }
+
+      /* Одиниці виміру. Порожній обʼєкт для всіх, хто вже живе, тобто «все
+         метричне»: саме так застосунок і поводився досі, і питати про це тих,
+         хто вже пройшов «Старт», нема за що. */
+      if (from < 15) {
+        await m.addColumn(profile, profile.units);
       }
     },
     beforeOpen: (details) async {

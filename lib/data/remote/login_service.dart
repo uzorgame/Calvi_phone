@@ -83,6 +83,16 @@ class LoginService {
   bool get restored => _restored;
   bool _restored = false;
 
+  /* Останній вхід народив обліковий запис, а не відкрив наявний.
+   *
+   * Питання не про вхід, а про те, що показувати після нього. Порожній акаунт
+   * не має профілю, тому далі анкета; у наявному профіль лежить на сервері, і
+   * питати зріст у того, хто вводив його місяць тому на іншому телефоні,
+   * безглуздо. Доти це було видно тільки з того, звідки прийшли на екран
+   * входу, і на першому кроці такої підказки більше немає. */
+  bool get created => _created;
+  bool _created = false;
+
   Future<LoginResult> signIn({String? deviceName}) => _signIn(
     window: google.idToken,
     windowError: () => google.lastError,
@@ -100,6 +110,79 @@ class LoginService {
     windowError: () => apple.lastError,
     exchange: (idToken) => api.signInWithApple(idToken: idToken, device: deviceName),
   );
+
+  /* Вхід поштою і паролем.
+   *
+   * Вікна провайдера тут немає: пошта й пароль уже набрані на нашому екрані,
+   * тому дорога починається одразу з обміну. Все, що після нього, спільне з
+   * Google до останнього рядка, і саме заради цього воно винесене в [_adopt]:
+   * правила «спершу дотиснути нагору» і «стирати лише порожню чергу» мають
+   * жити в одному місці, інакше другий вхід розійдеться з першим на першій же
+   * правці, а розплатиться за це чийсь щоденник. */
+  Future<LoginResult> signInWithEmail({
+    required String email,
+    required String password,
+    String? deviceName,
+  }) => _adopt(
+    () => api.signInWithEmail(email: email, password: password, device: deviceName),
+  );
+
+  /// Код із листа зійшовся: акаунт народився або отримав пароль.
+  Future<LoginResult> confirmEmail({
+    required String email,
+    required String code,
+    String? deviceName,
+  }) => _adopt(() => api.confirmEmail(email: email, code: code, device: deviceName));
+
+  /// Новий пароль за кодом. Сервер гасить решту сесій сам.
+  Future<LoginResult> resetPassword({
+    required String email,
+    required String code,
+    required String password,
+    String? deviceName,
+  }) => _adopt(
+    () => api.resetPassword(email: email, code: code, password: password, device: deviceName),
+  );
+
+  /* Три запити, після яких акаунта ще немає: попросити код на реєстрацію,
+     попросити код на новий пароль, попросити лист ще раз.
+     `false` означає «не вдалося», а причина лягає в [error]. */
+  Future<bool> registerByEmail({required String email, required String password}) =>
+      _ask(() => api.registerByEmail(email: email, password: password));
+
+  Future<bool> forgotPassword(String email) => _ask(() => api.forgotPassword(email));
+
+  Future<bool> resendCode({required String email, required bool reset}) =>
+      _ask(() => api.resendCode(email: email, reset: reset));
+
+  /* Чого саме не сподобалось серверу на формі входу поштою. Порожньо, поки все
+     гаразд або поки біда не про форму. */
+  String? get badField => _badField;
+  String? _badField;
+
+  Future<bool> _ask(Future<void> Function() call) async {
+    _lastError = null;
+    _badField = null;
+    try {
+      await call();
+      return true;
+    } on ApiFailure catch (e) {
+      /* Текст сервера, а не наш власний: тут він адресований людині і каже
+         щось конкретне, на кшталт «лист щойно пішов» або «пароль ненадійний».
+         Вигадувати ці слова на телефоні означало б тримати дві копії правил. */
+      _lastError = e.message ?? dataL.loginServer('$e');
+
+      /* Куди покласти помилку на екрані. `conflict` це завжди про адресу:
+         єдиний випадок, коли сервер відмовляє через саму пошту, а не через
+         пароль чи мережу. Розбирати замість цього текст повідомлення означало
+         б звірятись зі словами, які завтра перекладуть. */
+      _badField = e.code == 'conflict' ? 'mail' : 'pass';
+      return false;
+    } catch (e) {
+      _lastError = e.toString();
+      return false;
+    }
+  }
 
   Future<LoginResult> _signIn({
     required Future<String?> Function() window,
@@ -119,6 +202,16 @@ class LoginService {
       _lastError = windowError();
       return _lastError == null ? LoginResult.canceled : LoginResult.failed;
     }
+
+    return _adopt(() => exchange(idToken));
+  }
+
+  /* Все після того, як стало відомо, ким заходять. Спільне для Google, Apple і
+     пошти: три кроки під одним замком із фоновим обміном. */
+  Future<LoginResult> _adopt(Future<GoogleAccount> Function() exchange) {
+    _lastError = null;
+    _restored = false;
+    _created = false;
 
     return gate.run(() async {
       try {
@@ -147,8 +240,9 @@ class LoginService {
           return LoginResult.failed;
         }
 
-        final account = await exchange(idToken);
+        final account = await exchange();
         _restored = account.restored;
+        _created = account.outcome == 'created';
 
         /* Акаунт інший: сервер уже перевіз туди записи безіменного. Місцева
            копія тепер чужа за номерами черги, тому чистий аркуш і повний

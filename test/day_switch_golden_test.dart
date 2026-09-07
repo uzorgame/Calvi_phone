@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'first_run.dart';
+
 import 'package:calvi/data/day.dart';
 import 'package:calvi/main.dart';
 
@@ -27,17 +29,7 @@ void main() {
     await tester.pumpWidget(const CalviApp(storage: false, hello: false));
     await tester.pump(const Duration(seconds: 1));
 
-    /* Перший запуск відкривається розвилкою «уперше чи повертаюсь». Тести
-       йдуть дорогою новачка, тому тиснуть «Почати». */
-    await tester.tap(find.text('Почати'));
-    await tester.pumpAndSettle();
-
-    for (var i = 0; i < 6; i++) {
-      await tester.tap(find.text('Далі'));
-      await tester.pumpAndSettle();
-    }
-    await tester.tap(find.text('Увійти без акаунту'));
-    await tester.pumpAndSettle();
+    await toDay(tester);
 
     /* Сусідній день у стрічці: рівно те, що робить людина пальцем.
      *

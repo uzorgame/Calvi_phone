@@ -130,6 +130,12 @@ String langTitle(BuildContext context, Lang lang) => switch (lang) {
   Lang.system => L.of(context).langSystem,
   Lang.uk => 'Українська',
   Lang.en => 'English',
+  Lang.es => 'Español',
+  Lang.it => 'Italiano',
+  Lang.de => 'Deutsch',
+  Lang.fr => 'Français',
+  Lang.pt => 'Português',
+  Lang.pl => 'Polski',
 };
 
 /// Про що нагадування. Назву самій людині вирішувати, це лише рід.

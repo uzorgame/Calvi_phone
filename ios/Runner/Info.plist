@@ -4,6 +4,28 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+
+	<!-- Мови, якими застосунок справді говорить.
+
+	     App Store бере перелік «Languages» на сторінці застосунку саме звідси, а
+	     не з наших слів. Без цього рядка сторінка каже «English» навіть тоді,
+	     коли всередині є українська, і людина, що шукає рідну мову, проходить
+	     повз.
+
+	     Сюди дописується мова **після** того, як переклад готовий, а не разом із
+	     наміром його зробити: оголошена, але не перекладена мова це найкоротший
+	     шлях до відмови «app does not support the declared language». -->
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>uk</string>
+		<string>es</string>
+		<string>it</string>
+		<string>de</string>
+		<string>fr</string>
+		<string>pt</string>
+		<string>pl</string>
+	</array>
 	<key>CFBundleDisplayName</key>
 	<string>Calvi</string>
 	<key>CFBundleExecutable</key>

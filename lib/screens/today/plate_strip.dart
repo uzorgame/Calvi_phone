@@ -92,6 +92,56 @@ class PlateStrip extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
+          /* Кілька страв одним повідомленням: рядок на кожну над підсумком, щоб
+             було видно, що саме вгадано для кожної. Назва зліва, вага тихо,
+             калорії справа жирно, все в одну лінію: список читається як чек, а
+             не як абзац. Одна страва йде без списку, рядок повторював би
+             заголовок. Риска під рядками робить велике число внизу сумою, а не
+             ще одним рядком. Кожна страва при цьому лежить у дні окремим
+             записом: це картка в чаті, а не запис. */
+          if (plate.items.length > 1) ...[
+            for (final item in plate.items)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 5),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        item.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.t.bodyMedium?.copyWith(fontSize: CalviSize.fsCaption),
+                      ),
+                    ),
+                    if (item.grams != null) ...[
+                      const SizedBox(width: 8),
+                      Text(
+                        l.mealGrams(item.grams!.round()),
+                        style: context.t.labelSmall?.copyWith(fontSize: CalviSize.fsMicro),
+                      ),
+                    ],
+                    const SizedBox(width: 8),
+                    /* Калорії в стовпчик: найкоротше число тримає ту саму
+                       правую межу, що й тризначне, інакше око зʼїжджає. */
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(minWidth: 30),
+                      child: Text(
+                        '${item.kcal}',
+                        textAlign: TextAlign.right,
+                        style: context.t.titleMedium?.copyWith(fontSize: CalviSize.fsCaption),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            Container(
+              height: 1,
+              margin: const EdgeInsets.only(top: 3, bottom: 8),
+              color: c.cardBorder,
+            ),
+          ],
           Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
@@ -110,7 +160,15 @@ class PlateStrip extends StatelessWidget {
                 style: context.t.labelSmall?.copyWith(fontSize: CalviSize.fsMicro),
               ),
               const Spacer(),
-              if (plate.grams != null)
+              /* Під списком підсумок підписаний «разом», а не вагою: грами
+                 борщу з хлібом в одному числі нічого не кажуть, вони вже
+                 стоять у рядках. */
+              if (plate.items.length > 1)
+                Text(
+                  l.plateTotal,
+                  style: context.t.labelSmall?.copyWith(fontSize: CalviSize.fsMicro),
+                )
+              else if (plate.grams != null)
                 Text(
                   L.of(context).plateFor(plate.grams!.round()),
                   maxLines: 1,

@@ -272,6 +272,12 @@ DateTime Function() dayClock = DateTime.now;
 /// годинник не діставав.
 int get nowHour => dayClock().hour;
 
+/// Та сама мить із хвилинами.
+///
+/// Потрібна там, де межа проходить не по цілій годині: нічний перекус
+/// закінчується о пів на пʼяту, і самої години тут мало.
+DateTime get nowTime => dayClock();
+
 /// Сьогодні, обрізане до дати.
 ///
 /// Обчислюється щоразу, а не один раз при запуску: телефон, залишений
@@ -293,6 +299,12 @@ String dataLang = 'uk';
 
 const _weekdaysUk = ['НД', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
 const _weekdaysEn = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+const _weekdaysEs = ['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB'];
+const _weekdaysIt = ['DOM', 'LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB'];
+const _weekdaysDe = ['SO', 'MO', 'DI', 'MI', 'DO', 'FR', 'SA'];
+const _weekdaysFr = ['DIM', 'LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM'];
+const _weekdaysPt = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
+const _weekdaysPl = ['ND', 'PN', 'WT', 'ŚR', 'CZ', 'PT', 'SO'];
 
 /* Родовий відмінок: «15 серпня», а не «15 серпень». Місяць тут ніколи не
    стоїть сам, він завжди після числа. */
@@ -326,10 +338,141 @@ const _monthsEn = [
   'December',
 ];
 
-List<String> get _months => dataLang == 'uk' ? _monthsUk : _monthsEn;
-List<String> get _weekdays => dataLang == 'uk' ? _weekdaysUk : _weekdaysEn;
+const _monthsEs = [
+  'enero',
+  'febrero',
+  'marzo',
+  'abril',
+  'mayo',
+  'junio',
+  'julio',
+  'agosto',
+  'septiembre',
+  'octubre',
+  'noviembre',
+  'diciembre',
+];
 
-/// Назва місяця так, як вона стоїть у даті: «серпня», «August».
+const _monthsDe = [
+  'Januar',
+  'Februar',
+  'März',
+  'April',
+  'Mai',
+  'Juni',
+  'Juli',
+  'August',
+  'September',
+  'Oktober',
+  'November',
+  'Dezember',
+];
+
+/* Мова, якої в списку немає, дістає англійську: та сама запасна, що й у
+   `supportedLocales`. Тому тут `switch`, а не ланцюжок тернарних: з третьою
+   мовою ланцюжок читається як помилка, а з четвертою нею й стає. */
+/* Італійська дата це «2 settembre», без прийменника: тут назва місяця стоїть
+   сама, на відміну від іспанської. */
+const _monthsIt = [
+  'gennaio',
+  'febbraio',
+  'marzo',
+  'aprile',
+  'maggio',
+  'giugno',
+  'luglio',
+  'agosto',
+  'settembre',
+  'ottobre',
+  'novembre',
+  'dicembre',
+];
+
+const _monthsFr = [
+  'janvier',
+  'février',
+  'mars',
+  'avril',
+  'mai',
+  'juin',
+  'juillet',
+  'août',
+  'septembre',
+  'octobre',
+  'novembre',
+  'décembre',
+];
+
+const _monthsPt = [
+  'janeiro',
+  'fevereiro',
+  'março',
+  'abril',
+  'maio',
+  'junho',
+  'julho',
+  'agosto',
+  'setembro',
+  'outubro',
+  'novembro',
+  'dezembro',
+];
+
+/* Польська, як і українська, ставить місяць у родовому відмінку: «2 września»,
+   а не «2 wrzesień». Місяць тут теж ніколи не стоїть сам. */
+const _monthsPl = [
+  'stycznia',
+  'lutego',
+  'marca',
+  'kwietnia',
+  'maja',
+  'czerwca',
+  'lipca',
+  'sierpnia',
+  'września',
+  'października',
+  'listopada',
+  'grudnia',
+];
+
+List<String> get _months => switch (dataLang) {
+  'uk' => _monthsUk,
+  'es' => _monthsEs,
+  'it' => _monthsIt,
+  'de' => _monthsDe,
+  'fr' => _monthsFr,
+  'pt' => _monthsPt,
+  'pl' => _monthsPl,
+  _ => _monthsEn,
+};
+List<String> get _weekdays => switch (dataLang) {
+  'uk' => _weekdaysUk,
+  'es' => _weekdaysEs,
+  'it' => _weekdaysIt,
+  'de' => _weekdaysDe,
+  'fr' => _weekdaysFr,
+  'pt' => _weekdaysPt,
+  'pl' => _weekdaysPl,
+  _ => _weekdaysEn,
+};
+
+/* Дата словами, зібрана в одному місці.
+ *
+ * Раніше кожен екран складав її сам, рядком `'$day ${monthName(month)}'`, і це
+ * працювало рівно доти, доки мов було дві. Іспанська вимагає прийменник
+ * («2 de septiembre»), німецька крапку після числа («2. September»), і жодне з
+ * двох не можна покласти в назву місяця: прийменник опинився б перед числом, а
+ * крапка після нього. */
+String dayMonth(int day, int month) {
+  final name = _months[month - 1];
+  return switch (dataLang) {
+    'es' || 'pt' => '$day de $name',
+    'de' => '$day. $name',
+    _ => '$day $name',
+  };
+}
+
+/// Назва місяця так, як вона стоїть у даті: «серпня», «August», «de agosto».
 String monthName(int month) => _months[month - 1];
 
 /// Скорочення днів тижня від понеділка: «ПН…НД», «MON…SUN».
@@ -345,7 +488,16 @@ String monthName(int month) => _months[month - 1];
 /// блимнув би українськими днями. Мова, взята з контексту, від порядку побудови
 /// не залежить взагалі.
 List<String> weekdaysFromMonday([String? lang]) {
-  final week = (lang ?? dataLang) == 'uk' ? _weekdaysUk : _weekdaysEn;
+  final week = switch (lang ?? dataLang) {
+    'uk' => _weekdaysUk,
+    'es' => _weekdaysEs,
+    'it' => _weekdaysIt,
+    'de' => _weekdaysDe,
+    'fr' => _weekdaysFr,
+    'pt' => _weekdaysPt,
+    'pl' => _weekdaysPl,
+    _ => _weekdaysEn,
+  };
   return [...week.skip(1), week.first];
 }
 
@@ -364,9 +516,68 @@ const _shortUk = [
   'груд',
 ];
 
+/* Іспанські скорочення списком, а не відрізанням трьох літер від повної назви:
+   там попереду стоїть прийменник, і «de a» замість «ago» помітили б не одразу. */
+const _shortEs = [
+  'ene',
+  'feb',
+  'mar',
+  'abr',
+  'may',
+  'jun',
+  'jul',
+  'ago',
+  'sep',
+  'oct',
+  'nov',
+  'dic',
+];
+
 /// Скорочений місяць, для рядків, де на повний немає місця.
-String monthShort(int month) =>
-    dataLang == 'uk' ? _shortUk[month - 1] : _monthsEn[month - 1].substring(0, 3);
+const _shortIt = [
+  'gen',
+  'feb',
+  'mar',
+  'apr',
+  'mag',
+  'giu',
+  'lug',
+  'ago',
+  'set',
+  'ott',
+  'nov',
+  'dic',
+];
+
+/* Французькі скорочення теж списком: «juillet» від «juin» трьома літерами не
+   відрізниш, обидва дали б «jui». */
+const _shortFr = [
+  'janv',
+  'févr',
+  'mars',
+  'avr',
+  'mai',
+  'juin',
+  'juil',
+  'août',
+  'sept',
+  'oct',
+  'nov',
+  'déc',
+];
+
+String monthShort(int month) => switch (dataLang) {
+  'uk' => _shortUk[month - 1],
+  'es' => _shortEs[month - 1],
+  'it' => _shortIt[month - 1],
+  'fr' => _shortFr[month - 1],
+  'de' => _monthsDe[month - 1].substring(0, 3),
+  'pt' => _monthsPt[month - 1].substring(0, 3),
+  /* Польські три літери самі виходять різними: «sty», «sie», «wrz», «paź».
+     Списком їх писати нема потреби, на відміну від французької. */
+  'pl' => _monthsPl[month - 1].substring(0, 3),
+  _ => _monthsEn[month - 1].substring(0, 3),
+};
 
 class DayInfo {
   const DayInfo({required this.day, required this.label, required this.full});
@@ -396,7 +607,7 @@ DayInfo dayInfo(int offset) {
   return DayInfo(
     day: d.day,
     label: _weekdays[d.weekday % 7],
-    full: '${d.day} ${_months[d.month - 1]}',
+    full: dayMonth(d.day, d.month),
   );
 }
 

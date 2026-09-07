@@ -1,0 +1,130 @@
+{
+  "rcTitle": "Recetas",
+  "rcEyebrow": "La cocina",
+  "rcCount": "{n} recetas",
+  "@rcCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "rcCountOne": "1 receta",
+  "rcCountFew": "{n} recetas",
+  "@rcCountFew": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "rcHeroA": "Qué cocinar",
+  "rcHeroB": "hoy",
+  "rcHeroLede": "Di qué tienes en casa. Nora propone y calcula la ración; tu propia receta también vale.",
+  "rcAsk": "Pídele una receta a Nora",
+  "rcTabAll": "Todas",
+  "rcTabNora": "De Nora",
+  "rcTabMine": "Mías",
+  "rcFromNora": "De Nora",
+  "rcFromMine": "Mía",
+  "rcEmpty": "Aquí no hay nada todavía. Dile a Nora qué hay en la cocina y aparece la primera receta.",
+  "rcEmptyMine": "Todavía no hay recetas tuyas. Dictale cualquiera a Nora y aterriza aquí.",
+  "rcMinutes": "{n} min",
+  "@rcMinutes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "rcServingsOne": "1 ración",
+  "rcServingsFew": "{n} raciones",
+  "@rcServingsFew": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "rcServingsMany": "{n} raciones",
+  "@rcServingsMany": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "rcPerServing": "por ración",
+  "rcPerServingHead": "Por ración",
+  "rcWhole": "Plato entero: {kcal} kcal, {g} g",
+  "@rcWhole": {
+    "placeholders": {
+      "kcal": {
+        "type": "int"
+      },
+      "g": {
+        "type": "int"
+      }
+    }
+  },
+  "rcPortion": "ración {g} g",
+  "@rcPortion": {
+    "placeholders": {
+      "g": {
+        "type": "int"
+      }
+    }
+  },
+  "rcOfDay": "eso es el {p}% de la norma diaria",
+  "@rcOfDay": {
+    "placeholders": {
+      "p": {
+        "type": "int"
+      }
+    }
+  },
+  "rcItemsHead": "Productos",
+  "rcItemsTotal": "en total {g} g",
+  "@rcItemsTotal": {
+    "placeholders": {
+      "g": {
+        "type": "int"
+      }
+    }
+  },
+  "rcToolsHead": "Qué hace falta en la cocina",
+  "rcNoTools": "Nada más que un cuchillo y un bol",
+  "rcStepsHead": "Cómo cocinarlo",
+  "rcAskAbout": "Pregúntale a Nora por esta receta",
+  "rcAsking": "Pensando…",
+  "rcAskTitle": "¿Qué hay en la cocina?",
+  "rcPickTitle": "Elige un plato",
+  "rcAskPlaceholder": "pollo, brócoli, arroz",
+  "rcAskGo": "Preguntar",
+  "rcAskCancel": "Cancelar",
+  "rcJustNow": "ahora mismo",
+  "rcToolOven": "Horno",
+  "rcToolPan": "Sartén",
+  "rcToolPot": "Olla",
+  "rcToolBlender": "Batidora",
+  "rcToolGrill": "Parrilla",
+  "rcToolMixer": "Mezcladora",
+  "rcChatGreet": "Pregunta sobre «{name}»: qué cambiar, cómo no estropearlo, qué dejar hecho antes.",
+  "@rcChatGreet": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "rcChatPlaceholder": "Pregunta sobre esta receta",
+  "rcLoadFailed": "El recetario no se cargó. Tira para reintentar.",
+  "rcSuggestFailed": "Nora no pudo componer recetas. Inténtalo otra vez.",
+  "rcDeleteTitle": "¿Eliminar esta receta?",
+  "rcDeleteBody": "«{name}» saldrá del recetario. Los registros del diario hechos desde ella se quedan.",
+  "@rcDeleteBody": { "placeholders": { "name": { "type": "String" } } },
+  "rcDeleteCta": "Eliminar",
+  "rcDeleteFailed": "No se pudo eliminar. Inténtalo otra vez.",
+  "rcAllergyWarn": "Contiene {names}, que está en tu lista de alergias. Ten cuidado con esta.",
+  "@rcAllergyWarn": { "placeholders": { "names": { "type": "String" } } }
+}

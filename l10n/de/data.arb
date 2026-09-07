@@ -1,0 +1,86 @@
+{
+  "fieldWeight": "Gewicht",
+  "fieldChest": "Brust",
+  "fieldWaist": "Taille",
+  "fieldHips": "Hüfte",
+  "fieldThigh": "Oberschenkel",
+  "fieldWrist": "Handgelenk",
+  "fieldNeck": "Hals",
+  "fieldBiceps": "Bizeps",
+  "agoToday": "heute",
+  "agoYesterday": "gestern",
+  "agoDays": "{count, plural, =1{vor 1 Tag} other{vor {count} Tagen}}",
+  "@agoDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "agoWeeks": "{count, plural, other{vor {count} Wochen}}",
+  "@agoWeeks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "actGym": "Fitnessstudio",
+  "actRun": "Laufen",
+  "actBike": "Radfahren",
+  "actWalk": "Gehen",
+  "actSwim": "Schwimmen",
+  "actYoga": "Yoga",
+  "actHiit": "HIIT",
+  "actJumprope": "Seilspringen",
+  "actStretch": "Dehnen",
+  "actFootball": "Fußball",
+  "actBasketball": "Basketball",
+  "actTennis": "Tennis",
+  "actDance": "Tanzen",
+  "actSki": "Ski",
+  "wdMon": "Mo",
+  "wdTue": "Di",
+  "wdWed": "Mi",
+  "wdThu": "Do",
+  "wdFri": "Fr",
+  "wdSat": "Sa",
+  "wdSun": "So",
+  "repDaily": "jeden Tag",
+  "repWeekdays": "werktags",
+  "repWeekends": "am Wochenende",
+  "repEveryOther": "jeden zweiten Tag",
+  "repWeekly": "einmal pro Woche",
+  "repEveryN": "{count, plural, other{alle {count} Tage}}",
+  "@repEveryN": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "repPickDaily": "Jeden Tag",
+  "repPickWeekdays": "Wochentage",
+  "repPickNoDays": "Es ist kein Tag gewählt, die Erinnerung kommt also nie.",
+  "repPickFromToday": "Gezählt ab heute.",
+  "wheelLess": "Weniger",
+  "wheelMore": "Mehr",
+  "doseTabOne": "Tablette",
+  "doseTabFew": "Tabletten",
+  "doseTabMany": "Tabletten",
+  "doseCapOne": "Kapsel",
+  "doseCapFew": "Kapseln",
+  "doseCapMany": "Kapseln",
+  "doseDropOne": "Tropfen",
+  "doseDropFew": "Tropfen",
+  "doseDropMany": "Tropfen",
+  "doseMlOne": "ml",
+  "doseMlFew": "ml",
+  "doseMlMany": "ml",
+  "doseShotOne": "Spritze",
+  "doseShotFew": "Spritzen",
+  "doseShotMany": "Spritzen",
+  "agoWeek": "vor einer Woche",
+
+  "repPickInterval": "Jeden zweiten Tag"
+}

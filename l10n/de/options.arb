@@ -1,0 +1,52 @@
+{
+  "sexShortMale": "M",
+  "sexShortFemale": "W",
+  "sexOther": "Divers",
+
+  "activitySedentary": "Sitzend",
+  "activitySedentaryHint": "fast keine Bewegung",
+  "activityLight": "Wenig aktiv",
+  "activityLightHint": "1-2 Einheiten pro Woche",
+  "activityModerate": "Mittel",
+  "activityModerateHint": "3-4 Einheiten",
+  "activityHigh": "Hoch",
+  "activityHighHint": "5-6 Einheiten",
+  "activityVeryHigh": "Sehr hoch",
+  "activityVeryHighHint": "körperliche Arbeit oder täglich Sport",
+
+  "themeLight": "Hell",
+  "themeLightHint": "immer die helle Oberfläche",
+  "themeAquarelle": "Aquarell",
+  "themeAquarelleHint": "hell, mit Pastellwolken im Hintergrund",
+  "themeDawn": "Morgenrot",
+  "themeDawnHint": "hell, mit warmem Licht von der Seite",
+  "themeDark": "Dunkel",
+  "themeDarkHint": "immer die dunkle Oberfläche",
+  "themeSystem": "Design des Geräts",
+  "themeSystemHint": "folgt der Systemeinstellung",
+
+  "langSystem": "Sprache des Geräts",
+
+  "reminderMeal": "Essen",
+  "reminderMealHint": "ich erinnere dich, die Mahlzeit einzutragen",
+  "reminderWater": "Wasser",
+  "reminderWaterHint": "ich erinnere dich ans Trinken",
+  "reminderMeds": "Medikamente",
+  "reminderMedsHint": "nach dem Zeitplan aus dem Protokoll",
+  "reminderWorkout": "Training",
+  "reminderWorkoutHint": "ich erinnere dich an das geplante",
+  "reminderWeigh": "Wiegen",
+  "reminderWeighHint": "damit die Gewichtskurve nicht abreißt",
+  "reminderSummary": "Tagesrückblick",
+  "reminderSummaryHint": "kurz zum Tag vor dem Schlafen",
+
+  "reminderBodyMeal": "Trag ein, was es war",
+  "reminderBodyWater": "Zeit zu trinken",
+  "reminderBodyWorkout": "Trag es ein, falls es stattfand",
+  "reminderBodyWeigh": "Morgens, vor dem Essen",
+  "reminderBodySummary": "Was hast du heute nicht eingetragen?",
+  "reminderBodyMeds": "Laut Zeitplan",
+
+  "notifyChannel": "Erinnerungen",
+  "notifyChannelHint": "Erinnerungen an Essen, Wasser, Medikamente und Wiegen"
+}

@@ -1,0 +1,52 @@
+{
+  "sexShortMale": "M",
+  "sexShortFemale": "K",
+  "sexOther": "Inna",
+
+  "activitySedentary": "Siedzący",
+  "activitySedentaryHint": "prawie bez ruchu",
+  "activityLight": "Lekka aktywność",
+  "activityLightHint": "1-2 treningi w tygodniu",
+  "activityModerate": "Umiarkowana",
+  "activityModerateHint": "3-4 treningi",
+  "activityHigh": "Wysoka",
+  "activityHighHint": "5-6 treningów",
+  "activityVeryHigh": "Bardzo wysoka",
+  "activityVeryHighHint": "praca fizyczna albo sport codziennie",
+
+  "themeLight": "Jasny",
+  "themeLightHint": "zawsze jasny interfejs",
+  "themeAquarelle": "Akwarela",
+  "themeAquarelleHint": "jasny, z pastelowymi chmurami w tle",
+  "themeDawn": "Świt",
+  "themeDawnHint": "jasny, z ciepłym światłem z boku",
+  "themeDark": "Ciemny",
+  "themeDarkHint": "zawsze ciemny interfejs",
+  "themeSystem": "Motyw urządzenia",
+  "themeSystemHint": "słucha ustawień systemu",
+
+  "langSystem": "Język urządzenia",
+
+  "reminderMeal": "Jedzenie",
+  "reminderMealHint": "przypomnę o zapisaniu posiłku",
+  "reminderWater": "Woda",
+  "reminderWaterHint": "przypomnę o piciu",
+  "reminderMeds": "Leki",
+  "reminderMedsHint": "według harmonogramu z dziennika",
+  "reminderWorkout": "Trening",
+  "reminderWorkoutHint": "przypomnę o zaplanowanym",
+  "reminderWeigh": "Ważenie",
+  "reminderWeighHint": "żeby wykres wagi się nie rwał",
+  "reminderSummary": "Podsumowanie dnia",
+  "reminderSummaryHint": "krótko o dniu przed snem",
+
+  "reminderBodyMeal": "Zapisz, co było",
+  "reminderBodyWater": "Czas się napić",
+  "reminderBodyWorkout": "Zapisz, jeśli był",
+  "reminderBodyWeigh": "Rano, przed jedzeniem",
+  "reminderBodySummary": "Czego dziś nie zapisano?",
+  "reminderBodyMeds": "Według harmonogramu",
+
+  "notifyChannel": "Przypomnienia",
+  "notifyChannelHint": "Przypomnienia o jedzeniu, wodzie, lekach i ważeniu"
+}

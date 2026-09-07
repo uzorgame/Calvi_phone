@@ -352,7 +352,17 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
     final typed = mine.kind == MsgKind.text || mine.kind == MsgKind.voice;
     if (scope.real && sync != null && typed) {
       unawaited(
-        _askNora(sync, mine.text, waiting: waiting, slotId: slotId, draft: draft, quiet: !raise),
+        _askNora(
+          sync,
+          mine.text,
+          waiting: waiting,
+          slotId: slotId,
+          draft: draft,
+          quiet: !raise,
+          /* Сервер має знати, що це продиктоване: для голосу він не питає
+             ваги, а бере звичну порцію. Для набраного питає, як і раніше. */
+          voice: mine.kind == MsgKind.voice,
+        ),
       );
       return;
     }
@@ -684,6 +694,7 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
     String? slotId,
     String? draft,
     bool quiet = false,
+    bool voice = false,
   }) async {
     try {
       // База береться до `await`: після нього контекст може вже не жити.
@@ -702,6 +713,9 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
          * питати ваги: коли її не названо, береться звична порція. */
         history: draft != null ? const [] : _recent(waiting),
         card: draft != null,
+        /* Продиктоване в чат: без питання про вагу, решта як у розмові. Запис
+           у картку і так не питає, тому ознака голосу йому не потрібна. */
+        voice: draft == null && voice,
       );
 
       /* Чернетка прибирається до перевірки `mounted`: записане на сервері вже
@@ -764,7 +778,7 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
       _answer(
         waiting,
         line.isEmpty ? l.todayDone : line,
-        plate: _plateOf(answer.logged) ?? _plateOfLabel(answer.label),
+        plate: _plateOf(answer.logged) ?? _plateOfFixed(answer.fixed) ?? _plateOfLabel(answer.label),
         /* Питання з кнопками їде на самій відповіді: варіанти стоять під
            реченням Нори, а дотик по варіанту шле його текст у чат. */
         options: answer.choice?.options ?? const [],
@@ -892,6 +906,30 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
       protein: logged.fold<double>(0, (a, m) => a + m.protein).round(),
       fat: logged.fold<double>(0, (a, m) => a + m.fat).round(),
       carbs: logged.fold<double>(0, (a, m) => a + m.carbs).round(),
+      // Рядок на страву, щоб було видно, що саме вгадано для кожної.
+      items: [for (final m in logged) PlateItem(name: m.name, grams: m.grams, kcal: m.kcal)],
+    );
+  }
+
+  /* Смужка після поправки: людина щойно сказала «була 500», і їй треба
+     побачити, що саме переписано, тими ж числами і в тому ж місці, що й при
+     записі. Доти виправлення відповідало самими словами, і перевірити їх
+     можна було тільки в картці дня. */
+  MealPlate? _plateOfFixed(List<FixedMeal> fixed) {
+    if (fixed.isEmpty) return null;
+
+    final grams = fixed.every((m) => m.grams != null)
+        ? fixed.fold<double>(0, (a, m) => a + m.grams!)
+        : null;
+
+    return MealPlate(
+      name: fixed.length == 1 ? fixed.first.name : l.todayLoggedCount(fixed.length),
+      grams: grams,
+      kcal: fixed.fold<int>(0, (a, m) => a + m.kcal),
+      protein: fixed.fold<double>(0, (a, m) => a + m.protein).round(),
+      fat: fixed.fold<double>(0, (a, m) => a + m.fat).round(),
+      carbs: fixed.fold<double>(0, (a, m) => a + m.carbs).round(),
+      items: [for (final m in fixed) PlateItem(name: m.name, grams: m.grams, kcal: m.kcal)],
     );
   }
 
@@ -1738,14 +1776,9 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
   /// системного часу, і він лишався єдиною діркою в закріпленому годиннику:
   /// знімок екрана розходився залежно від того, о котрій його зняли, бо підпис
   /// у рядку називав то обід, то вечерю.
-  SlotDef? _nextSlotDef(DayModel day) {
-    final hour = nowHour;
-    SlotDef? best;
-    for (final s in day.slots) {
-      if (best == null || (s.order - hour).abs() < (best.order - hour).abs()) best = s;
-    }
-    return best;
-  }
+  /// Саме правило живе в шарі даних, поруч із картками: уночі перекус, далі
+  /// найближча за годиною.
+  SlotDef? _nextSlotDef(DayModel day) => nearestSlot(day.slots, nowTime);
 
   /// Її назва для людини.
   ///

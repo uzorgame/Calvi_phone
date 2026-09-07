@@ -105,5 +105,29 @@
   "menuAllergy": "Allergies",
   "menuPlan": "Subscription",
   "menuSettings": "Settings",
-  "menuAbout": "About"
+  "menuAbout": "About",
+
+  "menuHintKcal": "{n} kcal today",
+  "@menuHintKcal": {
+    "description": "Under the Diary row in the menu: what is eaten so far today.",
+    "placeholders": {"n": {"type": "int"}}
+  },
+  "menuHintNothing": "nothing logged yet",
+  "menuHintOnGoal": "on goal {ok} of {total}",
+  "@menuHintOnGoal": {
+    "description": "Under Analytics: finished days of this week inside the goal window.",
+    "placeholders": {"ok": {"type": "int"}, "total": {"type": "int"}}
+  },
+  "menuHintWeekYoung": "the week has just begun",
+  "menuHintWeekFriday": "from Friday, 18:00",
+  "menuHintWeekOpen": "open until Sunday",
+  "menuHintRecipes": "from Nora, sized to your norm",
+  "menuHintNoMeds": "no courses",
+  "menuHintNoAllergy": "none",
+  "menuHintMore": "+{n}",
+  "@menuHintMore": {
+    "description": "Tail of a list that does not fit on one line: 'Magnesium, Omega-3, +2'.",
+    "placeholders": {"n": {"type": "int"}}
+  },
+  "menuHintFree": "free"
 }

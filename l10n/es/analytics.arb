@@ -1,0 +1,63 @@
+{
+  "anTitle": "Analítica",
+  "anWeek": "Semana",
+  "anMonth": "Mes",
+  "anQuarter": "3 meses",
+  "anYear": "Año",
+
+  "anForYear": "durante el año",
+  "anForQuarter": "durante 3 meses",
+  "anForMonth": "durante el mes",
+
+  "anGoalProgress": "Avance hacia el objetivo",
+  "anStartKg": "inicio, kg",
+  "anNowKg": "ahora, kg",
+  "anTargetKg": "objetivo, kg",
+  "anWeightEmpty": "La curva aparece con el segundo pesaje. Dile tu peso a Nora y ella lo anota.",
+  "anEtaHead": "A este ritmo llegarás al objetivo hacia *{date}*",
+  "@anEtaHead": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+
+  "anKcal": "Calorías",
+  "anShareOfNorm": "{share}% de la norma",
+  "@anShareOfNorm": {
+    "placeholders": { "share": { "type": "int" } }
+  },
+  "anKcalTotal": "en el periodo, kcal",
+  "anKcalAvg": "de media al día",
+  "anKcalEmpty": "Todavía no hay nada registrado en este periodo. Dile a Nora qué comiste y el gráfico se construye solo.",
+
+  "anWater": "Hidratación",
+  "anWaterAvg": "de media, ml",
+
+  "anMeasures": "Medidas",
+  "anMeasuresChange": "cambio {period}",
+  "@anMeasuresChange": {
+    "placeholders": { "period": { "type": "String" } }
+  },
+  "anMeasuresEmpty": "Todavía no hay medidas.",
+  "anMeasuresEmptyHint": "Mídete una vez al mes y te enseño qué se mueve",
+  "anNow": "ahora",
+  "anOneReading": "una medición",
+
+  "anMacrosAvg": "Macros de media",
+  "anMacrosEmpty": "La media aparece en cuanto hay algo que promediar: registra al menos un día.",
+  "anPerDay": "al día",
+  "anMacroGoal": "norma {grams} g",
+  "@anMacroGoal": {
+    "placeholders": { "grams": { "type": "int" } }
+  },
+
+  "anOneWeighing": "De momento solo hay una medición. La segunda marca la dirección, y la línea empieza ahí.",
+  "anChartGoal": "objetivo {value}",
+  "@anChartGoal": {
+    "placeholders": { "value": { "type": "String" } }
+  },
+
+  "anWaterGoal": "norma {ml} ml",
+  "@anWaterGoal": {"placeholders":{"ml":{"type":"String"}}},
+  "anDaysInNorm": "días dentro del objetivo",
+  "anDonePercent": "{percent}% hecho",
+  "@anDonePercent": {"placeholders":{"percent":{"type":"int"}}}
+}

@@ -1,0 +1,43 @@
+{
+  "authSignInTitle": "Sign in",
+  "authSignInAction": "Sign in",
+  "authSignUpTitle": "Let us make an account",
+  "authSignUpAction": "Create account",
+  "authSignUpLink": "Create an account",
+  "authOr": "or",
+
+  "authMail": "Email",
+  "authPass": "Password",
+  "authPassNew": "New password",
+  "authPassHint": "5 letters and a sign",
+  "authAgain": "Confirm password",
+  "authAgainHint": "once more",
+
+  "authMailBad": "That address looks off",
+  "authPassEmpty": "Enter your password",
+  "authPassWeak": "Weak password: at least 5 letters and one digit or sign",
+  "authAgainEmpty": "Repeat the password",
+  "authAgainDiffers": "The passwords do not match",
+
+  "authCode": "Code from the letter",
+  "authCodeTitle": "Confirm your email",
+  "authCodeHint": "We sent a code to {mail}. Type the six digits from the letter.",
+  "@authCodeHint": {
+    "placeholders": { "mail": { "type": "String" } }
+  },
+  "authCodeAction": "Confirm",
+  "authCodeShort": "The code has 6 digits",
+  "authCodeBad": "That code does not fit, or it has expired",
+
+  "authSendAgain": "Send it again",
+  "authAgainIn": "You can ask again in {sec} s",
+  "@authAgainIn": {
+    "placeholders": { "sec": { "type": "int" } }
+  },
+
+  "authForgotLink": "Forgot it?",
+  "authForgotTitle": "New password",
+  "authForgotHint": "We will send a code to your email, then you pick a new password.",
+  "authForgotAction": "Send the code",
+  "authResetAction": "Save password"
+}

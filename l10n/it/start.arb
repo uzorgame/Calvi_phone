@@ -1,0 +1,89 @@
+{
+  "startGoalLose": "Dimagrire",
+  "startGoalLoseHint": "un deficit al ritmo che scegli",
+  "startGoalKeep": "Mantenere il peso",
+  "startGoalKeepHint": "rimetti esattamente quello che consumi",
+  "startGoalGain": "Mettere peso",
+  "startGoalGainHint": "un surplus al ritmo che scegli",
+
+  "startAbout": "Su di te",
+  "startSex": "Sesso",
+  "startSexMale": "Uomo",
+  "startSexFemale": "Donna",
+  "startSexOther": "Altro",
+  "startAge": "Età",
+  "startAgeYears": "{count, plural, =1{1 anno} other{{count} anni}}",
+  "@startAgeYears": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "startYearsShort": "anni",
+  "startHeight": "Altezza",
+
+  "startWeightNow": "Peso attuale",
+
+  "startGoal": "Dove andiamo",
+  "startTargetWeight": "Peso obiettivo",
+
+  "startPace": "A che ritmo",
+  "startPaceUnit": "kg a settimana",
+  "startPaceSlow": "lento",
+  "startPaceUsual": "costante",
+  "startPaceFast": "veloce",
+  "startPaceEtaHead": "Obiettivo verso il ",
+  "startPaceEtaTail": ", cioè ",
+  "startPaceWeeks": "{count, plural, =1{1 settimana} other{{count} settimane}}",
+  "@startPaceWeeks": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "startPaceWarning": "Un ritmo così è difficile da tenere e di solito si spezza. Sotto gli 0,8 kg a settimana il risultato arriva più lento, ma resta.",
+
+  "startLife": "Stile di vita",
+  "startAllergies": "Allergie",
+
+  "startNorm": "La tua soglia",
+  "startNormPerDay": "kcal al giorno",
+  "startNormWeeks": "settimane",
+  "startNormHold": "mantenendo",
+  "startNormNora": "Calcolata. Da qui in poi è più facile.",
+  "startNormNoraHint": "Scrivilo o dillo come ti viene: «due uova e un toast», «bevuto 300 di acqua». Il resto te lo chiedo nella conversazione.",
+  "startNormNote": "Questa è la formula di Mifflin-St Jeor, non un consiglio medico. Se hai una patologia, sei incinta o segui una dieta prescritta, parlane con il tuo medico.",
+
+  "startDeviceFirstRun": "primo avvio",
+  "startSignInFailed": "Accesso non riuscito. Riprova, oppure continua senza account.",
+  "startSignInFailedWhy": "Accesso non riuscito. {why}",
+  "@startSignInFailedWhy": {
+    "placeholders": { "why": { "type": "String" } }
+  },
+  "startSignInTitle": "Teniamo tutto questo",
+  "startSignInText": "La soglia è calcolata. Accedi per conservarla: cronologia, misure e registri saranno su ogni dispositivo, non solo qui.",
+  "startSignInBusy": "Accedo…",
+  "startSignInGoogle": "Continua con Google",
+  "startSignInApple": "Continua con Apple",
+  "startSignInSkip": "Continua senza account",
+
+  "startAgreeHead": "Accetto le ",
+  "startAgreeTerms": "condizioni d'uso",
+  "startAgreeAnd": " e l'",
+  "startAgreePrivacy": "informativa sulla privacy",
+
+  "helloSaid": "due uova e un toast",
+  "helloSlotSub": "due voci",
+  "helloDishEggs": "Uova strapazzate",
+  "helloDishBread": "Pane di segale",
+
+  "helloStepSay": "Di' che cosa hai mangiato",
+  "helloStepCount": "Conto le calorie",
+  "helloStepLog": "Lo annoto nella tua giornata",
+
+  "welLead": "Conta le calorie dalle tue parole",
+  "welSaid": "Ho mangiato due uova e un toast",
+  "welEggs": "Due uova fritte",
+  "welEggsGrams": "120 g",
+  "welToast": "Toast con burro",
+  "welToastGrams": "50 g",
+  "welTotal": "In tutto",
+  "welStart": "Iniziamo",
+  "welHaveAccount": "Ho già un account",
+  "startSignInBackTitle": "Bentornato",
+  "startSignInBackText": "Accedi con lo stesso account e torna tutto: il diario, l'obiettivo, la soglia e le misure. Non c'è niente da ricompilare."
+}

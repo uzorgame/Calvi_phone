@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'first_run.dart';
+
 import 'package:calvi/data/day.dart';
 import 'package:calvi/data/fixtures.dart';
 import 'package:calvi/design/theme.dart';
@@ -8,27 +10,27 @@ import 'package:calvi/main.dart';
 
 void main() {
   testWidgets('застосунок відкривається першим запуском, а не днем', (tester) async {
+    tester.view.physicalSize = const Size(390, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     tester.platformDispatcher.localesTestValue = const [Locale('uk')];
     addTearDown(tester.platformDispatcher.clearLocalesTestValue);
     await tester.pumpWidget(const CalviApp(storage: false, hello: false));
     await tester.pump(const Duration(seconds: 1));
 
-    /* Перше, що бачить новий телефон, це розвилка, а не питання про стать.
-       Той, хто вже має акаунт, мусить мати куди піти з першого ж екрана:
-       заповнювати анкету заради даних, які лежать на сервері, безглуздо. */
-    expect(find.text('Почати'), findsOneWidget);
-    expect(find.text('У мене вже є акаунт'), findsOneWidget);
+    /* Перше, що бачить новий телефон, це вітання. Воно нічого не питає і само
+       йде далі: розвилки «уперше чи повертаюсь» більше немає, бо на неї
+       відповідає наступний екран, де вхід і реєстрація стоять поруч. */
     expect(find.text('Про тебе'), findsNothing, reason: 'питання ще не ставили');
 
-    // Дорога новачка: за розвилкою починається те, заради чого «Старт» і є.
-    await tester.tap(find.text('Почати'));
-    await tester.pumpAndSettle();
+    await welcomeOut(tester);
 
-    expect(find.text('Про тебе'), findsOneWidget);
-    expect(find.text('Сніданок'), findsNothing, reason: 'день ще не заслужено');
+    expect(find.text('Вхід'), findsOneWidget);
+    expect(find.text('Далі без акаунту'), findsOneWidget);
+    expect(find.text('Про тебе'), findsNothing, reason: 'анкета після входу, не перед');
   });
 
-  testWidgets('«У мене вже є акаунт» веде одразу на вхід, без питань', (tester) async {
+  testWidgets('реєстрація це окрема сторінка, і назад із неї є куди', (tester) async {
     tester.view.physicalSize = const Size(390, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -37,40 +39,22 @@ void main() {
 
     await tester.pumpWidget(const CalviApp(storage: false, hello: false));
     await tester.pump(const Duration(seconds: 1));
+    await welcomeOut(tester);
 
-    await tester.tap(find.text('У мене вже є акаунт'));
+    await tester.tap(find.text('Зареєструватись'));
     await tester.pumpAndSettle();
 
-    /* Жодного питання анкети між розвилкою і входом: профіль приїде з акаунта
-       разом зі щоденником. Кнопок провайдерів у тестовій збірці немає, бо вхід
-       у ній не налаштований, тому екран пізнається за тим, що на ньому є
-       завжди. */
-    expect(find.text('Увійти без акаунту'), findsOneWidget);
-    expect(find.text('Про тебе'), findsNothing);
-  });
+    /* Три поля і більше нічого: провайдери, розділювач і «далі без акаунту» на
+       цю сторінку не переїжджають. */
+    expect(find.text('Заведімо акаунт'), findsOneWidget);
+    expect(find.text('ПІДТВЕРДЖЕННЯ ПАРОЛЯ'), findsOneWidget);
+    expect(find.text('Далі без акаунту'), findsNothing);
 
-  testWidgets('той, хто повертається, не пропускає анкету повз вхід', (tester) async {
-    tester.view.physicalSize = const Size(390, 900);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-    tester.platformDispatcher.localesTestValue = const [Locale('uk')];
-    addTearDown(tester.platformDispatcher.clearLocalesTestValue);
-
-    await tester.pumpWidget(const CalviApp(storage: false, hello: false));
-    await tester.pump(const Duration(seconds: 1));
-
-    await tester.tap(find.text('У мене вже є акаунт'));
+    /* Стрілка згори, та сама, що на решті анкети. На самому вході її немає, бо
+       позаду першого екрана нічого. */
+    await tester.tap(find.bySemanticsLabel('Назад'));
     await tester.pumpAndSettle();
-
-    /* Передумав входити. Профілю нема ні на телефоні, ні в акаунті, і випустити
-       його на день означало б зберегти заводську чернетку «Старту»: чоловік, 26
-       років, 178 см. На сервері вона затерла б справжні цілі, а на телефоні
-       просто збрехала б. Тому дорога веде на перше питання, а не в день. */
-    await tester.tap(find.text('Увійти без акаунту'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Про тебе'), findsOneWidget, reason: 'анкету обійшли стороною');
-    expect(find.text('Сніданок'), findsNothing, reason: 'день відкрився з чужим профілем');
+    expect(find.text('Вхід'), findsOneWidget);
   });
 
   testWidgets('перший запуск проходиться до кінця і відкриває день', (tester) async {
@@ -82,23 +66,27 @@ void main() {
 
     await tester.pumpWidget(const CalviApp(storage: false, hello: false));
     await tester.pump(const Duration(seconds: 1));
+    await welcomeOut(tester);
 
-    /* Перший запуск відкривається розвилкою «уперше чи повертаюсь». Тести
-       йдуть дорогою новачка, тому тиснуть «Почати». */
-    await tester.tap(find.text('Почати'));
+    /* Вхід стоїть першим. Далі без акаунту веде на перше питання анкети, а не
+       в день: профілю ще немає ні на телефоні, ні на сервері. */
+    await tester.tap(find.text('Далі без акаунту'));
     await tester.pumpAndSettle();
 
-    // Про тебе, Вага, Ціль, Темп, Спосіб життя, Норма.
+    expect(find.text('Про тебе'), findsOneWidget);
+    expect(find.text('Сніданок'), findsNothing, reason: 'день ще не заслужено');
+
+    // Про тебе, Одиниці, Вага, Ціль, Темп, Спосіб життя, Норма.
     // Settle rather than a fixed pump: the switcher keeps the outgoing step in
     // the tree for the length of the slide, and two «Далі» is an ambiguous tap.
-    for (var i = 0; i < 6; i++) {
+    for (var i = 0; i < 7; i++) {
       await tester.tap(find.text('Далі'));
       await tester.pumpAndSettle();
     }
 
-    expect(find.text('Збережімо це'), findsOneWidget, reason: 'акаунт останній, не перший');
+    expect(find.text('Що вміє Нора'), findsOneWidget, reason: 'знайомство останнє');
 
-    await tester.tap(find.text('Увійти без акаунту'));
+    await tester.tap(find.text('Готово'));
     await tester.pump(const Duration(seconds: 1));
 
     // Breakfast, lunch and dinner stand whether or not anything went into them.

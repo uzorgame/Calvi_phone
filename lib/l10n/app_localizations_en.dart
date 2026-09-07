@@ -417,6 +417,100 @@ class LEn extends L {
   String get assistantWhatToRemember => 'What to remember';
 
   @override
+  String get authAgain => 'Confirm password';
+
+  @override
+  String get authAgainDiffers => 'The passwords do not match';
+
+  @override
+  String get authAgainEmpty => 'Repeat the password';
+
+  @override
+  String get authAgainHint => 'once more';
+
+  @override
+  String authAgainIn(int sec) {
+    return 'You can ask again in $sec s';
+  }
+
+  @override
+  String get authCode => 'Code from the letter';
+
+  @override
+  String get authCodeAction => 'Confirm';
+
+  @override
+  String get authCodeBad => 'That code does not fit, or it has expired';
+
+  @override
+  String authCodeHint(String mail) {
+    return 'We sent a code to $mail. Type the six digits from the letter.';
+  }
+
+  @override
+  String get authCodeShort => 'The code has 6 digits';
+
+  @override
+  String get authCodeTitle => 'Confirm your email';
+
+  @override
+  String get authForgotAction => 'Send the code';
+
+  @override
+  String get authForgotHint => 'We will send a code to your email, then you pick a new password.';
+
+  @override
+  String get authForgotLink => 'Forgot it?';
+
+  @override
+  String get authForgotTitle => 'New password';
+
+  @override
+  String get authMail => 'Email';
+
+  @override
+  String get authMailBad => 'That address looks off';
+
+  @override
+  String get authOr => 'or';
+
+  @override
+  String get authPass => 'Password';
+
+  @override
+  String get authPassEmpty => 'Enter your password';
+
+  @override
+  String get authPassHint => '5 letters and a sign';
+
+  @override
+  String get authPassNew => 'New password';
+
+  @override
+  String get authPassWeak => 'Weak password: at least 5 letters and one digit or sign';
+
+  @override
+  String get authResetAction => 'Save password';
+
+  @override
+  String get authSendAgain => 'Send it again';
+
+  @override
+  String get authSignInAction => 'Sign in';
+
+  @override
+  String get authSignInTitle => 'Sign in';
+
+  @override
+  String get authSignUpAction => 'Create account';
+
+  @override
+  String get authSignUpLink => 'Create an account';
+
+  @override
+  String get authSignUpTitle => 'Let us make an account';
+
+  @override
   String get barCamera => 'Camera';
 
   @override
@@ -1296,6 +1390,45 @@ class LEn extends L {
   String get menuDiary => 'Diary';
 
   @override
+  String get menuHintFree => 'free';
+
+  @override
+  String menuHintKcal(int n) {
+    return '$n kcal today';
+  }
+
+  @override
+  String menuHintMore(int n) {
+    return '+$n';
+  }
+
+  @override
+  String get menuHintNoAllergy => 'none';
+
+  @override
+  String get menuHintNoMeds => 'no courses';
+
+  @override
+  String get menuHintNothing => 'nothing logged yet';
+
+  @override
+  String menuHintOnGoal(int ok, int total) {
+    return 'on goal $ok of $total';
+  }
+
+  @override
+  String get menuHintRecipes => 'from Nora, sized to your norm';
+
+  @override
+  String get menuHintWeekFriday => 'from Friday, 18:00';
+
+  @override
+  String get menuHintWeekOpen => 'open until Sunday';
+
+  @override
+  String get menuHintWeekYoung => 'the week has just begun';
+
+  @override
   String get menuMeds => 'Medications';
 
   @override
@@ -1603,6 +1736,9 @@ class LEn extends L {
   String get plateThinking => 'thinking';
 
   @override
+  String get plateTotal => 'total';
+
+  @override
   String get privacyCrash => 'Crash reports';
 
   @override
@@ -1842,6 +1978,11 @@ class LEn extends L {
 
   @override
   String get rcToolsHead => 'What the kitchen needs';
+
+  @override
+  String rcWhole(int kcal, int g) {
+    return 'Whole dish: $kcal kcal, $g g';
+  }
 
   @override
   String get remAbout => 'About what';
@@ -2452,6 +2593,51 @@ class LEn extends L {
       'That question is already closed. Say the weight in words if you need to.';
 
   @override
+  String get tourCamera => 'Camera';
+
+  @override
+  String get tourCameraHow => 'a plate, a label or a barcode';
+
+  @override
+  String get tourDiary => 'Diary memory';
+
+  @override
+  String get tourDiaryHow => 'say \"borscht\" and it takes your usual portion';
+
+  @override
+  String get tourGuide => 'Guide to the app';
+
+  @override
+  String get tourGuideHow => 'ask where things are and how to do them';
+
+  @override
+  String get tourMemory => 'Lasting memory';
+
+  @override
+  String get tourMemoryHow => '\"no pork\" is enough to say once';
+
+  @override
+  String get tourMore => 'Not only food';
+
+  @override
+  String get tourMoreHow => 'water, workouts, measurements, recipes';
+
+  @override
+  String get tourTitle => 'What Nora can do';
+
+  @override
+  String get tourVoice => 'Voice or text';
+
+  @override
+  String get tourVoiceHow => '\"two eggs and toast\", and it is logged';
+
+  @override
+  String get tourWeek => 'Day and week review';
+
+  @override
+  String get tourWeekHow => 'what worked and what to adjust';
+
+  @override
   String get unitCm => 'cm';
 
   @override
@@ -2464,7 +2650,28 @@ class LEn extends L {
   String get unitKg => 'kg';
 
   @override
+  String get unitKj => 'kJ';
+
+  @override
   String get unitMl => 'ml';
+
+  @override
+  String get unitsEnergy => 'Energy';
+
+  @override
+  String get unitsLength => 'Height and measurements';
+
+  @override
+  String get unitsMass => 'Body weight';
+
+  @override
+  String get unitsPortion => 'Food portions';
+
+  @override
+  String get unitsTitle => 'Which units';
+
+  @override
+  String get unitsVolume => 'Water';
 
   @override
   String waterGlasses(int glasses) {

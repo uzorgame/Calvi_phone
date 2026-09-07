@@ -219,6 +219,13 @@ class RecipeView extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      /* Ціле поруч із порцією.
+                       *
+                       * Число на порцію саме по собі нічого не каже тому, хто
+                       * ставить каструлю на сімʼю: він бачить 535 і не знає, чи
+                       * це багато на всю каструлю. Обидва числа поруч знімають
+                       * питання, і обидва вже є: ціле це порція на кількість
+                       * порцій. */
                       Text.rich(
                         TextSpan(
                           text: '${r.kcal} ',
@@ -236,6 +243,11 @@ class RecipeView extends StatelessWidget {
                           fontSize: 40,
                           fontWeight: FontWeight.w700,
                         ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        l.rcWhole(r.kcal * r.servings, r.gramsPerServing * r.servings),
+                        style: context.t.labelSmall,
                       ),
                       const SizedBox(height: 16),
                       MacroRow(

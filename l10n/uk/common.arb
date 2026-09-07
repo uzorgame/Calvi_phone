@@ -44,5 +44,20 @@
   "menuAllergy": "Алергії",
   "menuPlan": "Підписка",
   "menuSettings": "Налаштування",
-  "menuAbout": "Про застосунок"
+  "menuAbout": "Про застосунок",
+
+  "menuHintKcal": "сьогодні {n} ккал",
+  "@menuHintKcal": {"placeholders": {"n": {"type": "int"}}},
+  "menuHintNothing": "ще нічого не записано",
+  "menuHintOnGoal": "у нормі {ok} із {total}",
+  "@menuHintOnGoal": {"placeholders": {"ok": {"type": "int"}, "total": {"type": "int"}}},
+  "menuHintWeekYoung": "тиждень щойно почався",
+  "menuHintWeekFriday": "з пʼятниці, 18:00",
+  "menuHintWeekOpen": "відкрито до неділі",
+  "menuHintRecipes": "від Нори під твою норму",
+  "menuHintNoMeds": "без курсів",
+  "menuHintNoAllergy": "немає",
+  "menuHintMore": "ще {n}",
+  "@menuHintMore": {"placeholders": {"n": {"type": "int"}}},
+  "menuHintFree": "безкоштовний"
 }

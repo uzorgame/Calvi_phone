@@ -137,10 +137,7 @@ class _CalviButtonState extends State<CalviButton> {
                 fit: BoxFit.scaleDown,
                 child: Text(
                   widget.second!,
-                  style: context.t.titleMedium?.copyWith(
-                    fontSize: CalviSize.fsBody,
-                    color: c.text,
-                  ),
+                  style: context.t.titleMedium?.copyWith(fontSize: CalviSize.fsBody, color: c.text),
                 ),
               ),
             ),
@@ -248,77 +245,164 @@ Future<T?> calviSheet<T>(
        * знизу й по боках проглядало затемнене тло. Аркуш, що приходить знизу,
        * має впиратись у край, інакше він читається як вікно поверх екрана, а не
        * як продовження екрана. */
-      /* Стеля висоти живе тут, а не в кожній формі окремо.
+      /* Аркуш піднімається разом із клавіатурою.
        *
-       * Аркуш це картка знизу, і три чверті екрана це вже його межа: вище він
-       * читається як повноекранне вікно, і затемнений день за ним зникає.
-       * Форма всередині прокручується, тому впиратись у стелю їй не боляче.
-       * Доти правило трималось на тому, що вміст випадково влазив, і кнопка
-       * згоди внизу його порушила. */
-      return ConstrainedBox(
-        constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(sheetContext).height * 0.75),
-        child: CalviOn(
-          // Усе всередині лежить на аркуші, а не на сторінці. Див. [CalviOn].
-          color: c.card,
-          child: Container(
-            decoration: BoxDecoration(
-              color: c.card,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(CalviSize.rLarge)),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: SafeArea(
-              top: false,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: Container(
-                      width: 38,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: c.hairline,
-                        borderRadius: BorderRadius.circular(CalviSize.rPill),
+       * Модальний аркуш Flutter сам цього не робить: клавіатура просто лягає
+       * поверх нього. У формі «Що є на кухні?» під нею опинялись обидві
+       * кнопки, і надіслати запит було нічим, бо «назад» замість клавіатури
+       * закриває весь аркуш. Правка тут, а не в тій формі: під клавіатурою
+       * ховались би кнопки будь-якого аркуша з полем вводу.
+       *
+       * Стеля висоти живе тут, а не в кожній формі окремо. Аркуш це картка
+       * знизу, і три чверті екрана це вже його межа: вище він читається як
+       * повноекранне вікно, і затемнений день за ним зникає. Але коли частину
+       * екрана зайняла клавіатура, три чверті рахуються від того, що
+       * лишилось, інакше аркуш знову впреться в неї низом. */
+      final screen = MediaQuery.sizeOf(sheetContext).height;
+      final keyboard = MediaQuery.viewInsetsOf(sheetContext).bottom;
+
+      return Padding(
+        padding: EdgeInsets.only(bottom: keyboard),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: math.min(screen * 0.75, math.max(screen - keyboard - 24, 240)),
+          ),
+          child: CalviOn(
+            // Усе всередині лежить на аркуші, а не на сторінці. Див. [CalviOn].
+            color: c.card,
+            child: Container(
+              decoration: BoxDecoration(
+                color: c.card,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(CalviSize.rLarge)),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: SafeArea(
+                top: false,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: Container(
+                        width: 38,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: c.hairline,
+                          borderRadius: BorderRadius.circular(CalviSize.rPill),
+                        ),
                       ),
                     ),
-                  ),
-                  /* У шапці тільки назва, по центру.
+                    /* У шапці тільки назва, по центру.
                    *
                    * Дрібні слова обабіч заголовка зливалися з ним в один рядок,
                    * і не було видно, що з трьох написів натискаються два; до
                    * того ж кожен аркуш розставляв їх по-своєму. Усі дії тепер
                    * унизу, однаково в кожному аркуші. */
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
-                    child: face == null
-                        ? Text(title, textAlign: TextAlign.center, style: sheetContext.t.titleMedium)
-                        : ValueListenableBuilder(
-                            valueListenable: face,
-                            builder: (_, f, _) => Text(
-                              f.title,
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
+                      child: face == null
+                          ? Text(
+                              title,
                               textAlign: TextAlign.center,
                               style: sheetContext.t.titleMedium,
+                            )
+                          : ValueListenableBuilder(
+                              valueListenable: face,
+                              builder: (_, f, _) => Text(
+                                f.title,
+                                textAlign: TextAlign.center,
+                                style: sheetContext.t.titleMedium,
+                              ),
                             ),
+                    ),
+                    Flexible(child: builder(sheetContext)),
+                    if (face != null)
+                      ValueListenableBuilder(
+                        valueListenable: face,
+                        builder: (_, f, _) => Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            CalviSize.gutter,
+                            18,
+                            CalviSize.gutter,
+                            12,
                           ),
-                  ),
-                  Flexible(child: builder(sheetContext)),
-                  if (face != null)
-                    ValueListenableBuilder(
-                      valueListenable: face,
-                      builder: (_, f, _) => Padding(
-                        padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 18, CalviSize.gutter, 12),
+                          child: Row(
+                            children: [
+                              if (!f.info) ...[
+                                Expanded(
+                                  child: GestureDetector(
+                                    // Скасувати роботу, яку вже почали, не можна.
+                                    onTap: f.busy
+                                        ? null
+                                        : () {
+                                            onCancel?.call();
+                                            Navigator.of(sheetContext).pop();
+                                          },
+                                    behavior: HitTestBehavior.opaque,
+                                    child: Container(
+                                      height: CalviSize.buttonH,
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        color: c.fillSecondary,
+                                        borderRadius: BorderRadius.circular(CalviSize.rPill),
+                                      ),
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Text(
+                                          cancelLabel ?? L.of(sheetContext).actionCancel,
+                                          style: sheetContext.t.titleMedium?.copyWith(
+                                            fontSize: CalviSize.fsBody,
+                                            color: c.text,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                              ],
+                              Expanded(
+                                child: CalviButton(
+                                  label: f.done,
+                                  busy: f.busy,
+                                  onTap: () {
+                                    // Згода без власної дії просто закриває аркуш.
+                                    final act = f.onDone;
+                                    if (act != null) {
+                                      act();
+                                    } else {
+                                      Navigator.of(sheetContext).pop();
+                                    }
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    else
+                      /* Дві кнопки в один рядок: скасування ліворуч, згода праворуч,
+                     як у системних діалогах. Одна над одною вони читались як
+                     список, а не як вибір із двох. Скасування тихою заливкою:
+                     обидві відповіді виглядають як відповіді, але за погляд не
+                     сперечаються. Інформаційний аркуш тримає одну кнопку на всю
+                     ширину: скасовувати там нема чого. */
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          CalviSize.gutter,
+                          18,
+                          CalviSize.gutter,
+                          12,
+                        ),
                         child: Row(
                           children: [
-                            if (!f.info) ...[
+                            if (!info) ...[
                               Expanded(
                                 child: GestureDetector(
-                                  // Скасувати роботу, яку вже почали, не можна.
-                                  onTap: f.busy
-                                      ? null
-                                      : () {
-                                          onCancel?.call();
-                                          Navigator.of(sheetContext).pop();
-                                        },
+                                  onTap: () {
+                                    onCancel?.call();
+                                    Navigator.of(sheetContext).pop();
+                                  },
                                   behavior: HitTestBehavior.opaque,
                                   child: Container(
                                     height: CalviSize.buttonH,
@@ -344,78 +428,19 @@ Future<T?> calviSheet<T>(
                             ],
                             Expanded(
                               child: CalviButton(
-                                label: f.done,
-                                busy: f.busy,
+                                label: doneLabel ?? L.of(sheetContext).actionDone,
+                                danger: danger,
                                 onTap: () {
-                                  // Згода без власної дії просто закриває аркуш.
-                                  final act = f.onDone;
-                                  if (act != null) {
-                                    act();
-                                  } else {
-                                    Navigator.of(sheetContext).pop();
-                                  }
+                                  onDone?.call();
+                                  Navigator.of(sheetContext).pop();
                                 },
                               ),
                             ),
                           ],
                         ),
                       ),
-                    )
-                  else
-                  /* Дві кнопки в один рядок: скасування ліворуч, згода праворуч,
-                     як у системних діалогах. Одна над одною вони читались як
-                     список, а не як вибір із двох. Скасування тихою заливкою:
-                     обидві відповіді виглядають як відповіді, але за погляд не
-                     сперечаються. Інформаційний аркуш тримає одну кнопку на всю
-                     ширину: скасовувати там нема чого. */
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 18, CalviSize.gutter, 12),
-                    child: Row(
-                      children: [
-                        if (!info) ...[
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                onCancel?.call();
-                                Navigator.of(sheetContext).pop();
-                              },
-                              behavior: HitTestBehavior.opaque,
-                              child: Container(
-                                height: CalviSize.buttonH,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color: c.fillSecondary,
-                                  borderRadius: BorderRadius.circular(CalviSize.rPill),
-                                ),
-                                child: FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  child: Text(
-                                    cancelLabel ?? L.of(sheetContext).actionCancel,
-                                    style: sheetContext.t.titleMedium?.copyWith(
-                                      fontSize: CalviSize.fsBody,
-                                      color: c.text,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                        ],
-                        Expanded(
-                          child: CalviButton(
-                            label: doneLabel ?? L.of(sheetContext).actionDone,
-                            danger: danger,
-                            onTap: () {
-                              onDone?.call();
-                              Navigator.of(sheetContext).pop();
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

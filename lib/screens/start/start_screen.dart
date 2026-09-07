@@ -1,13 +1,9 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/gestures.dart' show TapGestureRecognizer;
 import 'package:flutter/material.dart';
 
 import '../../data/allergens.dart';
-import '../../data/app_scope.dart';
-import '../../data/remote/login_service.dart';
-import '../../data/legal.dart';
 import '../../data/settings.dart';
 import '../../design/icons.dart';
 import '../../design/ring.dart';
@@ -15,12 +11,12 @@ import '../../design/ruler.dart';
 import '../../design/shell.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
+import 'nora_tour.dart';
+import 'sign_in.dart';
 import 'welcome.dart';
 import '../../design/wheel.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/labels.dart';
-import '../settings/panel_legal.dart';
-import '../settings/restored_sheet.dart';
 import '../../format.dart';
 
 /* Скільки кроків у першому запуску.
@@ -36,7 +32,7 @@ import '../../format.dart';
  * Вітання «Стіл» звідси пішло і стало заставкою при кожному запуску, див.
  * `hello.dart`. Тут воно було екраном, який нічого не питав, і його доводилось
  * закривати кнопкою: єдиний дотик за весь «Старт», який нічого не означав. */
-const startSteps = 7;
+const startSteps = 9;
 
 /* Allergies asked at the start are only the common ones. The full reference is
    in settings; a first run is not the place to scroll thirty seven entries. */
@@ -115,6 +111,7 @@ class StartDraft {
     required this.protein,
     required this.fat,
     required this.carbs,
+    this.units = metricUnits,
   });
 
   final Sex sex;
@@ -129,6 +126,9 @@ class StartDraft {
   final int protein;
   final int fat;
   final int carbs;
+
+  /// В яких одиницях людина себе важить і міряє.
+  final Units units;
 
   /// Folded into the app's settings, with the goal anchored to today's weight.
   SettingsState applyTo(SettingsState s) => s.copyWith(
@@ -145,6 +145,7 @@ class StartDraft {
     protein: protein,
     fat: fat,
     carbs: carbs,
+    units: units,
   );
 }
 
@@ -174,6 +175,16 @@ class _StartScreenState extends State<StartScreen> {
 
   double _activity = 1.55;
   final _allergies = <String>[];
+  Units _units = metricUnits;
+
+  /* Сторінка входу живе тут, а не всередині самого входу.
+   *
+   * Реєстрація і підтвердження пошти це підсторінки першого кроку, і назад із
+   * них веде та сама стрілка згори, що й з решти анкети. Стрілка намальована в
+   * шапці «Старту», тож знати, куди вона веде, має «Старт». Тримати цей стан
+   * усередині форми означало б малювати їй другу кнопку назад, і на екрані
+   * стояли б дві стрілки з різною поведінкою. */
+  AuthPage _auth = AuthPage.in_;
 
   /// The profile as it stands, so every screen can show what it adds up to.
   SettingsState get _draft => initialSettings().copyWith(
@@ -197,12 +208,28 @@ class _StartScreenState extends State<StartScreen> {
 
   void _go(int n) => setState(() => _step = n);
 
-  /* Вхід не відбувся: вікно закрили або акаунт виявився без профілю. Далі
-     звичайна дорога новачка, з першого питання. Прапорець знімається, бо екран
-     входу в кінці має знову говорити мовою тих, хто щойно порахував норму. */
+  /* Куди веде стрілка згори, або нікуди, якщо йти нема куди.
+   *
+   * На самому вході її немає: це перший екран застосунку, і позаду нього
+   * нічого. На реєстрації вона повертає до входу, з підтвердження пошти до
+   * реєстрації, з відновлення пароля до входу. Далі по анкеті це просто
+   * попередній крок. */
+  VoidCallback? get _back {
+    if (_step > 0) return () => _go(_step - 1);
+
+    return switch (_auth) {
+      AuthPage.in_ => null,
+      AuthPage.up || AuthPage.forgot => () => setState(() => _auth = AuthPage.in_),
+      AuthPage.code => () => setState(() => _auth = AuthPage.up),
+    };
+  }
+
+  /* Вхід відбувся, а профілю в акаунті не виявилось: анкету все одно треба
+     пройти. Прапорець знімається, бо далі це звичайна дорога новачка. */
   void _toForm() => setState(() {
     _returning = false;
-    _step = 0;
+    _auth = AuthPage.in_;
+    _step = 1;
   });
 
   /* Зайшли в наявний акаунт. Нічого не збираємо і нічого не зберігаємо: профіль
@@ -226,24 +253,19 @@ class _StartScreenState extends State<StartScreen> {
       protein: _protein,
       fat: _fat,
       carbs: _carbs,
+      units: _units,
     ),
   );
 
   @override
   Widget build(BuildContext context) {
-    /* Перший екран першого запуску це не питання, а розвилка: людина тут уперше
-       чи повертається. Той, хто повертається, іде одразу на вхід і не заповнює
-       нічого: його профіль лежить на сервері. Демо-вхід на конкретний крок
-       вітання минає, бо йому показують саме те питання, яке попросили. */
+    /* Вітання нічого не питає і ні про що не питає: воно догрує сцену і само
+       веде далі, на вхід. Розвилки «уперше чи повертаєшся» тут більше немає,
+       бо наступний екран і є нею: вхід і реєстрація стоять на ньому поруч.
+       Демо-вхід на конкретний крок вітання минає, бо йому показують саме те
+       питання, яке попросили. */
     if (_welcome) {
-      return WelcomeScreen(
-        onStart: () => setState(() => _welcome = false),
-        onSignIn: () => setState(() {
-          _welcome = false;
-          _returning = true;
-          _step = startSteps - 1;
-        }),
-      );
+      return WelcomeScreen(onDone: () => setState(() => _welcome = false));
     }
 
     return Scaffold(
@@ -271,11 +293,11 @@ class _StartScreenState extends State<StartScreen> {
               child: Row(
                 children: [
                   Visibility(
-                    visible: _step > 0,
+                    visible: _back != null,
                     maintainSize: true,
                     maintainAnimation: true,
                     maintainState: true,
-                    child: _Back(onTap: () => _go(_step - 1)),
+                    child: _Back(onTap: () => _back?.call()),
                   ),
                   const SizedBox(width: 14),
                   /* Крок плюс один: людина на першому питанні пройшла одну
@@ -297,21 +319,75 @@ class _StartScreenState extends State<StartScreen> {
   }
 
   Widget _body() => switch (_step) {
-    0 => _aboutStep(),
-    1 => _weightStep(),
-    2 => _goalStep(),
-    3 => _paceStep(),
-    4 => _lifeStep(),
-    5 => _normStep(),
-    /* Два різні кінці одного екрана. Пройшов анкету: чернетка стає профілем.
-       Прийшов із вітання: профіль забирається з акаунта, а якщо вхід не
-       відбувся, анкету все одно треба пройти, тому дорога веде на перший крок. */
-    _ => _SignIn(
-      onDone: _returning ? _toForm : _done,
-      onEntered: _returning ? _entered : null,
+    /* Вхід стоїть першим, а не останнім.
+     *
+     * Доти він був сьомим екраном, і міркування було таке: норма вже
+     * порахована, тому вхід зберігає зроблене, а не просить довіри наперед.
+     * Ціна цього виявилась вища за користь. Той, хто вже має акаунт, мусив
+     * пройти шість екранів анкети, щоб дістатись до входу і побачити, що всі
+     * відповіді в нього і так на сервері. А той, хто заповнив анкету і закрив
+     * застосунок до останнього екрана, втрачав її цілком.
+     *
+     * Тепер навпаки: спершу питаємо, хто це, і той, хто повертається, забирає
+     * свій профіль замість того, щоб набирати його наново. */
+    0 => SignIn(
+      page: _auth,
+      onPage: (p) => setState(() => _auth = p),
+      onNew: () {
+        setState(() => _auth = AuthPage.in_);
+        _go(1);
+      },
+      onEntered: _entered,
       returning: _returning,
     ),
+    1 => _aboutStep(),
+    2 => _unitsStep(),
+    3 => _weightStep(),
+    4 => _goalStep(),
+    5 => _paceStep(),
+    6 => _lifeStep(),
+    7 => _normStep(),
+    // Остання картка: що вміє Нора. За нею вже щоденник.
+    _ => NoraTour(onDone: _done),
   };
+
+  /* Одиниці питаються один раз і більше не питаються: далі вони живуть у
+     налаштуваннях. Перед вагою, а не після: наступний екран просить число, і
+     воно має бути в тих одиницях, у яких людина себе важить. Спитати після
+     означало б переписувати щойно введене.
+     Пʼять окремих питань, бо кухонні ваги в грамах цілком уживаються з вагою
+     тіла у фунтах. */
+  Widget _unitsStep() {
+    final groups = <({String key, String title, List<String> labels, List<String> values})>[
+      (key: 'mass', title: l.unitsMass, labels: [l.unitKg, 'lb', 'st'], values: ['kg', 'lb', 'st']),
+      (key: 'length', title: l.unitsLength, labels: [l.unitCm, 'in'], values: ['cm', 'in']),
+      (key: 'volume', title: l.unitsVolume, labels: [l.unitMl, 'fl oz'], values: ['ml', 'floz']),
+      (key: 'portion', title: l.unitsPortion, labels: [l.unitG, 'oz'], values: ['g', 'oz']),
+      (
+        key: 'energy',
+        title: l.unitsEnergy,
+        labels: [l.unitKcal, l.unitKj],
+        values: ['kcal', 'kj'],
+      ),
+    ];
+
+    return _Step(
+      title: l.unitsTitle,
+      cta: l.actionNext,
+      onNext: () => _go(3),
+      children: [
+        for (final g in groups)
+          _Block(
+            title: g.title,
+            child: CalviSegments(
+              labels: g.labels,
+              index: g.values.indexOf(_units.byKey(g.key)).clamp(0, g.values.length - 1),
+              onPick: (i) => setState(() => _units = _units.withKey(g.key, g.values[i])),
+            ),
+          ),
+      ],
+    );
+  }
 
   /* Три відповіді одним екраном, і всі три без роздумів.
    *
@@ -322,7 +398,7 @@ class _StartScreenState extends State<StartScreen> {
   Widget _aboutStep() => _Step(
     title: l.startAbout,
     cta: l.actionNext,
-    onNext: () => _go(1),
+    onNext: () => _go(2),
     children: [
       _Block(
         title: l.startSex,
@@ -372,7 +448,7 @@ class _StartScreenState extends State<StartScreen> {
   Widget _weightStep() => _Step(
     title: l.startWeightNow,
     cta: l.actionNext,
-    onNext: () => _go(2),
+    onNext: () => _go(4),
     middle: true,
     children: [
       CalviRuler(
@@ -389,7 +465,7 @@ class _StartScreenState extends State<StartScreen> {
     title: l.startGoal,
     cta: l.actionNext,
     // Holding weight needs no target and no pace, so the next step is skipped.
-    onNext: () => _go(_direction == Direction.keep ? 4 : 3),
+    onNext: () => _go(_direction == Direction.keep ? 6 : 5),
     children: [
       for (final g in _goals(l))
         CalviPick(
@@ -422,7 +498,7 @@ class _StartScreenState extends State<StartScreen> {
     return _Step(
       title: l.startPace,
       cta: l.actionNext,
-      onNext: () => _go(4),
+      onNext: () => _go(6),
       children: [
         Text.rich(
           TextSpan(
@@ -490,7 +566,7 @@ class _StartScreenState extends State<StartScreen> {
   Widget _lifeStep() => _Step(
     title: l.startLife,
     cta: l.actionNext,
-    onNext: () => _go(5),
+    onNext: () => _go(7),
     children: [
       for (final a in activityLevels)
         CalviPick(
@@ -534,7 +610,7 @@ class _StartScreenState extends State<StartScreen> {
     return _Step(
       title: l.startNorm,
       cta: l.actionNext,
-      onNext: () => _go(6),
+      onNext: () => _go(8),
       children: [
         Container(
           padding: const EdgeInsets.all(22),
@@ -968,238 +1044,3 @@ class _Note extends StatelessWidget {
   );
 }
 
-/* The last screen. The norm is already on the table, so signing in keeps
-   something the person has seen rather than paying for something promised. The
-   cost is real: everything before this exists only while the app is open. */
-class _SignIn extends StatefulWidget {
-  const _SignIn({required this.onDone, this.onEntered, this.returning = false});
-
-  /* Сюди прийшли з вітання, тобто акаунт уже є, і анкети ніхто не проходив.
-     Міняє те, що каже екран: обіцяти «норма порахована» тому, хто нічого не
-     рахував, означало б говорити про роботу, якої він не робив. */
-  final bool returning;
-
-  /// Далі без акаунта: вхід пропустили, закрили вікно або він не вдався.
-  final VoidCallback onDone;
-
-  /* Вхід таки відбувся. Окремий кінець, бо він єдиний, після якого профіль уже
-     є і збирати його наново не можна. Порожній, коли акаунт тут не очікується:
-     на дорозі новачка вхід і пропуск ведуть в одне місце. */
-  final Future<void> Function()? onEntered;
-
-  @override
-  State<_SignIn> createState() => _SignInState();
-}
-
-class _SignInState extends State<_SignIn> {
-  bool _agree = true;
-
-  /* Хто саме зараз заходить, а не просто «хтось заходить».
-   *
-   * Один прапорець на дві кнопки показував напис «Заходимо» на кнопці Google,
-   * коли людина тиснула Apple: екран малював роботу не там, де вона йшла. */
-  String? _busyWith;
-  bool get _busy => _busyWith != null;
-
-  /* Вхід і його три кінці.
-   *
-   * Вийшло: йдемо далі, щоденник підписаний. Людина закрила вікно Google: теж
-   * ідемо далі мовчки, бо це не помилка, а передумала. Не вийшло через мережу:
-   * кажемо про це і лишаємось тут, бо повторити варто.
-   *
-   * Питання про два щоденники тут не ставиться навмисно: на першому запуску
-   * місцевих записів ще немає, і сама ситуація неможлива. */
-  Future<void> _google() => _enter('google', (login, device) => login.signIn(deviceName: device));
-
-  Future<void> _apple() =>
-      _enter('apple', (login, device) => login.signInApple(deviceName: device));
-
-  /* Обидва провайдери одним шляхом: кінці входу і текст помилки однакові, якою
-     кнопкою людина б не скористалась. Різниця лише в тому, чия кнопка зайнята. */
-  Future<void> _enter(
-    String who,
-    Future<LoginResult> Function(LoginService login, String device) go,
-  ) async {
-    final sync = AppScope.maybeOf(context)?.sync;
-    if (sync == null) return widget.onDone();
-
-    setState(() => _busyWith = who);
-    final LoginResult result;
-    try {
-      result = await go(sync.login, L.of(context).startDeviceFirstRun);
-    } finally {
-      // У `finally`: інакше один виняток лишає екран зайнятим до перезаходу.
-      if (mounted) setState(() => _busyWith = null);
-    }
-    if (!mounted) return;
-
-    switch (result) {
-      case LoginResult.done:
-      case LoginResult.partial:
-        /* Акаунт стояв у черзі на видалення, і цей вхід зняв його з черги.
-           Сказати про це треба тут, до того, як екран зміниться: людина має
-           знати, що записи повернулись, а видалення доведеться просити знову. */
-        if (sync.login.restored) await showRestoredSheet(context);
-        if (!mounted) return;
-
-        /* Вхід відбувся; недовезений щоденник забере наступний обмін. За
-           акаунтом іде обмін, і він не миттєвий, тому кнопка лишається зайнятою
-           до кінця: інакше екран виглядав би так, ніби нічого не сталось. */
-        final entered = widget.onEntered;
-        if (entered != null) {
-          setState(() => _busyWith = who);
-          await entered();
-          if (mounted) setState(() => _busyWith = null);
-          return;
-        }
-        widget.onDone();
-      case LoginResult.canceled:
-        // Вікно закрили: акаунта не стало, тому далі звичайною дорогою.
-        widget.onDone();
-      case LoginResult.failed:
-        // Причина в тексті: без неї збій виглядає як мовчання, а до сервера він
-        // не доходить, тому в логах його теж немає.
-        final why = sync.login.error;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              why == null
-                  ? L.of(context).startSignInFailed
-                  : L.of(context).startSignInFailedWhy(why),
-            ),
-            duration: const Duration(seconds: 10),
-          ),
-        );
-    }
-  }
-
-  /* Документ відкривається аркушем, а не в браузері.
-   *
-   * Розходження з сайтом тут уже не загрожує: слова лежать в одному місці, і
-   * `tools/legal.mjs` розвозить їх звідти і в сторінку сайту, і в застосунок.
-   * А от браузер посеред знайомства коштував дорого: людина йшла читати умови й
-   * поверталась у застосунок, який доводилось починати спочатку. Ще гірше без
-   * мережі, де вона не поверталась узагалі. */
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.c;
-    final l = L.of(context);
-    /* The buttons sit in the body, not pinned to the floor: the sentence above
-       them is the reason to press one, and it has to be read first. */
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 0, CalviSize.gutter, 16),
-      children: [
-        Text(
-          widget.returning ? l.startSignInBackTitle : l.startSignInTitle,
-          style: context.t.displayLarge?.copyWith(
-            fontSize: 34,
-            letterSpacing: 34 * -0.03,
-            height: 1.12,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          widget.returning ? l.startSignInBackText : l.startSignInText,
-          style: context.t.bodyMedium?.copyWith(fontSize: CalviSize.fsBody, height: 1.5),
-        ),
-        const SizedBox(height: 24),
-        // Nothing agreed to means nothing to press, and the row says so by going
-        // pale rather than by turning grey.
-        Opacity(
-          opacity: _agree ? 1 : 0.4,
-          child: IgnorePointer(
-            ignoring: !_agree,
-            child: Column(
-              children: [
-                /* Кнопка є тільки тоді, коли за нею щось стоїть.
-                 *
-                 * Порожній ідентифікатор означає, що вхід ще не налаштований у
-                 * цій збірці. Показувати кнопку, яка нічого не зробить, гірше,
-                 * ніж не показувати її: людина натискає, нічого не відбувається,
-                 * і застосунок виглядає зламаним, а не незавершеним. */
-                if (AppScope.maybeOf(context)?.sync?.login.available ?? false) ...[
-                  CalviButton(
-                    label: _busyWith == 'google' ? l.startSignInBusy : l.startSignInGoogle,
-                    enabled: !_busy,
-                    onTap: () => unawaited(_google()),
-                  ),
-                  const SizedBox(height: 10),
-                ],
-
-                /* Apple where Apple is. On Android the button leads nowhere, and
-                   a way in that cannot be walked is worse than one less way in. */
-                if (AppScope.maybeOf(context)?.sync?.login.appleAvailable ?? false) ...[
-                  CalviGhost(
-                    label: _busyWith == 'apple' ? l.startSignInBusy : l.startSignInApple,
-                    enabled: !_busy,
-                    onTap: () => unawaited(_apple()),
-                  ),
-                  const SizedBox(height: 10),
-                ],
-
-                /* Далі без входу. Раніше тут стояла кнопка «Продовжити з
-                   поштою», за якою не було нічого: ні маршруту, ні планів.
-                   Поки триває вхід, вона теж мовчить: піти звідси на пів дорозі
-                   означає лишити акаунт у стані, якого ніхто не чекав. */
-                CalviGhost(label: l.startSignInSkip, enabled: !_busy, onTap: widget.onDone),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 18),
-        GestureDetector(
-          onTap: () => setState(() => _agree = !_agree),
-          behavior: HitTestBehavior.opaque,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AnimatedContainer(
-                duration: CalviMotion.fast,
-                curve: CalviMotion.ease,
-                width: 20,
-                height: 20,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6),
-                  color: _agree ? c.button : const Color(0x00000000),
-                  border: Border.all(color: _agree ? c.button : c.hairline, width: 1.5),
-                ),
-                child: _agree ? CalviIcon('check', size: 13, color: c.buttonText) : null,
-              ),
-              const SizedBox(width: 10),
-              /* Документи відкриваються, а не просто називаються.
-               *
-               * Тут стояв звичайний рядок тексту, і людина ставила галочку під
-               * тим, чого не могла прочитати: слова «умови» і «політика» ні на
-               * що не вели. Згода на непрочитане це не згода. */
-              Expanded(
-                child: Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(text: l.startAgreeHead),
-                      TextSpan(
-                        text: l.startAgreeTerms,
-                        style: TextStyle(color: c.text, decoration: TextDecoration.underline),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () => legalSheet(context, terms),
-                      ),
-                      TextSpan(text: l.startAgreeAnd),
-                      TextSpan(
-                        text: l.startAgreePrivacy,
-                        style: TextStyle(color: c.text, decoration: TextDecoration.underline),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () => legalSheet(context, privacy),
-                      ),
-                    ],
-                  ),
-                  style: context.t.bodyMedium?.copyWith(fontSize: CalviSize.fsMicro, height: 1.45),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}

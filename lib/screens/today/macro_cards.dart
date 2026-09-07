@@ -215,19 +215,31 @@ class _Card extends StatelessWidget {
               child: CalviIcon(icon, size: 15, color: colour),
             ),
             const SizedBox(height: 10),
-            Text(
-              label,
-              maxLines: 1,
-              // Clipped rather than wrapped: a second line under one card
-              // makes the whole row taller than the other three.
-              overflow: TextOverflow.clip,
-              softWrap: false,
-              /* Підпис як у приладів: маленький і розріджений. Саме трекінг
-                 робить із нього підпис шкали, а не маленьке слово. */
-              style: context.t.labelSmall?.copyWith(
-                fontSize: tight ? 9 : 10,
-                fontWeight: FontWeight.w500,
-                letterSpacing: tight ? 0 : 10 * 0.09,
+            /* Зменшується, а не втрачає літери.
+             *
+             * Переносити не можна: другий рядок під однією карткою робить весь
+             * ряд вищим за інші три. Тому раніше стояло `overflow: clip`, і
+             * довге слово просто впиралось у край картки: німецьке
+             * «KOHLENHYDRATE» ставало «KOHLENHYDRA», польське «WĘGLOWODANY»
+             * втрачало останню літеру і читалось як «WĘGLOWODAN».
+             *
+             * `FittedBox` вирішує обидві задачі одразу: висота лишається тією
+             * самою, бо шрифт зменшується всередині тієї ж коробки, а слово
+             * лишається цілим. Мовам, чиє слово й так уміщається, він нічого
+             * не робить. */
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                maxLines: 1,
+                softWrap: false,
+                /* Підпис як у приладів: маленький і розріджений. Саме трекінг
+                   робить із нього підпис шкали, а не маленьке слово. */
+                style: context.t.labelSmall?.copyWith(
+                  fontSize: tight ? 9 : 10,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: tight ? 0 : 10 * 0.09,
+                ),
               ),
             ),
           ],

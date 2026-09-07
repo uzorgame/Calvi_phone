@@ -307,10 +307,14 @@ class _AllergenRow extends StatelessWidget {
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        if (allergen.aka.isNotEmpty) ...[
+                        /* Синоніми показуються лише мовою інтерфейсу, хоч
+                           шукається за всіма: рядок «земляний горіх, groundnut»
+                           під іспанською назвою читається як зламаний
+                           застосунок, а не як щедрий пошук. */
+                        if (allergen.akaShown.isNotEmpty) ...[
                           const SizedBox(height: 2),
                           Text(
-                            allergen.aka.take(3).join(', '),
+                            allergen.akaShown.take(3).join(', '),
                             style: context.t.labelSmall?.copyWith(
                               fontWeight: FontWeight.w400,
                               color: c.faint,

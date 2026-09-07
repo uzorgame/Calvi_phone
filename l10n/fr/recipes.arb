@@ -1,0 +1,130 @@
+{
+  "rcTitle": "Recettes",
+  "rcEyebrow": "La cuisine",
+  "rcCount": "{n} recettes",
+  "@rcCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "rcCountOne": "1 recette",
+  "rcCountFew": "{n} recettes",
+  "@rcCountFew": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "rcHeroA": "Quoi cuisiner",
+  "rcHeroB": "aujourd'hui",
+  "rcHeroLede": "Dis ce que tu as à la maison. Nora propose et calcule la portion ; ta propre recette marche aussi.",
+  "rcAsk": "Demander une recette à Nora",
+  "rcTabAll": "Toutes",
+  "rcTabNora": "De Nora",
+  "rcTabMine": "Les miennes",
+  "rcFromNora": "De Nora",
+  "rcFromMine": "À moi",
+  "rcEmpty": "Il n'y a rien ici pour l'instant. Dis à Nora ce qu'il y a dans la cuisine et la première recette apparaît.",
+  "rcEmptyMine": "Pas encore de recettes à toi. Dicte-en une à Nora et elle atterrit ici.",
+  "rcMinutes": "{n} min",
+  "@rcMinutes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "rcServingsOne": "1 portion",
+  "rcServingsFew": "{n} portions",
+  "@rcServingsFew": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "rcServingsMany": "{n} portions",
+  "@rcServingsMany": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "rcPerServing": "par portion",
+  "rcPerServingHead": "Par portion",
+  "rcWhole": "Plat entier : {kcal} kcal, {g} g",
+  "@rcWhole": {
+    "placeholders": {
+      "kcal": {
+        "type": "int"
+      },
+      "g": {
+        "type": "int"
+      }
+    }
+  },
+  "rcPortion": "portion {g} g",
+  "@rcPortion": {
+    "placeholders": {
+      "g": {
+        "type": "int"
+      }
+    }
+  },
+  "rcOfDay": "soit {p}% du repère journalier",
+  "@rcOfDay": {
+    "placeholders": {
+      "p": {
+        "type": "int"
+      }
+    }
+  },
+  "rcItemsHead": "Ingrédients",
+  "rcItemsTotal": "au total {g} g",
+  "@rcItemsTotal": {
+    "placeholders": {
+      "g": {
+        "type": "int"
+      }
+    }
+  },
+  "rcToolsHead": "Ce qu'il faut en cuisine",
+  "rcNoTools": "Rien de plus qu'un couteau et un saladier",
+  "rcStepsHead": "Comment la faire",
+  "rcAskAbout": "Interroger Nora sur cette recette",
+  "rcAsking": "Je réfléchis…",
+  "rcAskTitle": "Qu'est-ce qu'il y a dans la cuisine ?",
+  "rcPickTitle": "Choisis un plat",
+  "rcAskPlaceholder": "poulet, brocoli, riz",
+  "rcAskGo": "Demander",
+  "rcAskCancel": "Annuler",
+  "rcJustNow": "à l'instant",
+  "rcToolOven": "Four",
+  "rcToolPan": "Poêle",
+  "rcToolPot": "Casserole",
+  "rcToolBlender": "Blender",
+  "rcToolGrill": "Gril",
+  "rcToolMixer": "Batteur",
+  "rcChatGreet": "Pose tes questions sur «{name}» : quoi remplacer, comment ne pas la rater, quoi préparer à l'avance.",
+  "@rcChatGreet": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "rcChatPlaceholder": "Pose une question sur cette recette",
+  "rcLoadFailed": "Le carnet de recettes n'a pas chargé. Tire pour réessayer.",
+  "rcSuggestFailed": "Nora n'a pas pu composer de recettes. Réessaie.",
+  "rcDeleteTitle": "Supprimer cette recette ?",
+  "rcDeleteBody": "«{name}» quitte le carnet. Les entrées du journal faites à partir d'elle restent.",
+  "@rcDeleteBody": { "placeholders": { "name": { "type": "String" } } },
+  "rcDeleteCta": "Supprimer",
+  "rcDeleteFailed": "La suppression n'a pas marché. Réessaie.",
+  "rcAllergyWarn": "Contient {names}, qui est sur ta liste d'allergies. Fais attention avec celle-là.",
+  "@rcAllergyWarn": { "placeholders": { "names": { "type": "String" } } }
+}

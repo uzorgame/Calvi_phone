@@ -1,0 +1,43 @@
+{
+  "authSignInTitle": "Connexion",
+  "authSignInAction": "Se connecter",
+  "authSignUpTitle": "Créons un compte",
+  "authSignUpAction": "Créer le compte",
+  "authSignUpLink": "S'inscrire",
+  "authOr": "ou",
+
+  "authMail": "E-mail",
+  "authPass": "Mot de passe",
+  "authPassNew": "Nouveau mot de passe",
+  "authPassHint": "5 lettres et un signe",
+  "authAgain": "Confirmer le mot de passe",
+  "authAgainHint": "encore une fois",
+
+  "authMailBad": "Cette adresse semble incorrecte",
+  "authPassEmpty": "Saisis ton mot de passe",
+  "authPassWeak": "Mot de passe faible : au moins 5 lettres et un chiffre ou un signe",
+  "authAgainEmpty": "Répète le mot de passe",
+  "authAgainDiffers": "Les mots de passe ne correspondent pas",
+
+  "authCode": "Code du courriel",
+  "authCodeTitle": "Confirme ton e-mail",
+  "authCodeHint": "Nous avons envoyé un code à {mail}. Saisis les six chiffres.",
+  "@authCodeHint": {
+    "placeholders": { "mail": { "type": "String" } }
+  },
+  "authCodeAction": "Confirmer",
+  "authCodeShort": "Le code a 6 chiffres",
+  "authCodeBad": "Ce code ne convient pas ou a expiré",
+
+  "authSendAgain": "Renvoyer",
+  "authAgainIn": "Tu peux redemander dans {sec} s",
+  "@authAgainIn": {
+    "placeholders": { "sec": { "type": "int" } }
+  },
+
+  "authForgotLink": "Oublié ?",
+  "authForgotTitle": "Nouveau mot de passe",
+  "authForgotHint": "Nous enverrons un code par e-mail, puis tu choisiras un nouveau mot de passe.",
+  "authForgotAction": "Envoyer le code",
+  "authResetAction": "Enregistrer"
+}

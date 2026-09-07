@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import '../../design/icons.dart';
 import '../../design/ring.dart';
-import '../../design/shell.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import '../../l10n/app_localizations.dart';
@@ -16,27 +15,26 @@ import '../../l10n/app_localizations.dart';
  * телефоні немає ні акаунта, ні профілю. Він ставить єдине питання, на яке
  * застосунок сам відповісти не може: людина тут уперше чи повертається.
  *
- * Доти питання не ставилось зовсім, і перший екран одразу питав стать, вік і
- * зріст. Для того, хто вже має акаунт, це означало заповнити анкету наново
- * заради даних, які й так лежать на сервері.
- *
  * **Показує, а не перелічує.** Замість переліку можливостей тут розігрується
  * те саме, що станеться з людиною за пів хвилини: фраза, яку вона напише, і
  * відповідь, яку отримає. Одна сцена пояснює більше, ніж три рядки, і не
  * вимагає вірити на слово.
  *
- * Дві дії внизу навмисно різної ваги. Уперше приходить більшість, тому
- * «Почати» це велика кнопка. «У мене вже є акаунт» стоїть тихим рядком: хто
- * повертається, той шукає саме ці слова, а новому вони не заважають.
+ * **Кнопок унизу немає.** Тут стояли дві: «Почати» і «У мене вже є акаунт».
+ * Обидві питали те саме, що наступний екран питає й так, тільки формою, у якій
+ * не помилишся: вхід і реєстрація тепер стоять на ньому поруч. Дві кнопки, які
+ * ведуть на один екран, це два зайві дотики і одна розвилка, на якій можна
+ * помилитись.
+ *
+ * Тому сцена догравається і сама йде далі. Час до переходу це не пауза, а
+ * рівно стільки, скільки триває сама сцена: відповідь Нори має встигнути
+ * зʼявитись і бути прочитаною.
  */
 class WelcomeScreen extends StatefulWidget {
-  const WelcomeScreen({super.key, required this.onStart, required this.onSignIn});
+  const WelcomeScreen({super.key, required this.onDone});
 
-  /// Уперше: далі анкета з першого питання.
-  final VoidCallback onStart;
-
-  /// Акаунт уже є: далі одразу вхід, без жодного питання.
-  final VoidCallback onSignIn;
+  /// Сцена догралась: далі вхід.
+  final VoidCallback onDone;
 
   @override
   State<WelcomeScreen> createState() => _WelcomeScreenState();
@@ -44,6 +42,10 @@ class WelcomeScreen extends StatefulWidget {
 
 /// Коли приходить відповідь. Фраза до цього вже стоїть на своєму місці.
 const _answerAt = Duration(milliseconds: 1000);
+
+/* Коли екран іде далі сам. Відповідь приходить на першій секунді, числа в ній
+   набігають майже секунду, і ще стільки ж треба, щоб їх прочитати. */
+const _leaveAt = Duration(milliseconds: 3400);
 
 /// Скільки триває поява кожної ланки і скільки триває набіг чисел.
 const _riseMs = 620;
@@ -54,6 +56,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
      потім застосунок відповів. Одна мить на двох робила б із розмови картинку. */
   bool _answered = false;
   Timer? _wait;
+  Timer? _leave;
 
   @override
   void initState() {
@@ -61,11 +64,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     _wait = Timer(_answerAt, () {
       if (mounted) setState(() => _answered = true);
     });
+    // Далі екран іде сам: питати тут нічого, а чекати на дотик нема за чим.
+    _leave = Timer(_leaveAt, () {
+      if (mounted) widget.onDone();
+    });
   }
 
   @override
   void dispose() {
     _wait?.cancel();
+    _leave?.cancel();
     super.dispose();
   }
 
@@ -142,19 +150,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               if (_answered) _Rise(delay: 0, child: _Answer(count: _countMs)),
 
               const SizedBox(height: 28),
-              _Rise(
-                delay: 1500,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    CalviButton(label: l.welStart, onTap: widget.onStart),
-                    const SizedBox(height: 4),
-                    /* Тихий рядок, а не друга кнопка: дві однакові кнопки поруч
-                       змушували б вибирати й того, кому вибирати нема з чого. */
-                    CalviGhost(label: l.welHaveAccount, onTap: widget.onSignIn),
-                  ],
-                ),
-              ),
             ],
           ),
         ),

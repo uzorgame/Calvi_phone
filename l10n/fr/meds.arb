@@ -1,0 +1,45 @@
+{
+  "medsTitle": "Médicaments",
+  "medsMine": "Mes médicaments",
+  "medsEmpty": "Il n'y a rien ici pour l'instant. Ajoute un médicament et je te rappelle à l'heure.",
+  "medsEmptyHint": "Je tiens le journal des prises, je ne calcule pas la dose",
+  "medsNoneToday": "Aucune prise aujourd'hui",
+  "medsAllTaken": "Tout est pris pour aujourd'hui",
+  "medsNextAt": "Ensuite à ",
+  "medsAdd": "Ajouter un médicament",
+  "medsPast": "Terminés",
+  "medsPastEmpty": "Ici viendront les cures que tu ne suis plus. Un médicament retiré de la liste reste dans les jours où tu l'as pris.",
+  "medsSince": "depuis le {date}",
+  "@medsSince": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "medsUnmarked": "Pas encore coché : ",
+  "medsFirstDose": "{name}, première prise {day} à {at}",
+  "@medsFirstDose": {
+    "placeholders": { "name": { "type": "String" }, "day": { "type": "String" }, "at": { "type": "String" } }
+  },
+  "medsTomorrow": "demain",
+  "medsNow": "MAINTENANT",
+
+  "medsDose": "Dose",
+  "medsHours": "Heures",
+  "medsSchedule": "Horaire",
+  "medsCourse": "Cure",
+  "medsNote": "Note",
+  "medsResume": "Reprendre la cure",
+
+  "medsNew": "Nouveau médicament",
+  "medsOne": "Médicament",
+  "medsTime": "Heure",
+  "medsName": "Nom",
+  "medsNameExample": "Par exemple, Magnésium B6",
+  "medsPerTake": "Combien par prise",
+  "medsAt": "À",
+  "medsHowOften": "À quelle fréquence",
+  "medsRemind": "Me rappeler",
+  "medsRemindHint": "aux heures choisies",
+  "medsFinish": "Terminer la cure",
+
+  "medsUntil": "jusqu'au {date}",
+  "@medsUntil": {"placeholders":{"date":{"type":"String"}}}
+}

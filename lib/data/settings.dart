@@ -21,7 +21,7 @@ enum AppTheme { light, aquarelle, dawn, dark, system }
 /// Застосунок бере мову телефона, якщо вона в нас є, і англійську, якщо немає.
 /// Саме тому англійська стоїть першою в `supportedLocales`: Flutter бере першу
 /// підтримувану як запасну.
-enum Lang { system, uk, en }
+enum Lang { system, uk, en, es, it, de, fr, pt, pl }
 
 enum Direction { lose, keep, gain }
 
@@ -107,6 +107,98 @@ const reminderKinds = <ReminderKindInfo>[
   ReminderKindInfo(id: ReminderKind.summary, icon: 'chart'),
 ];
 
+/// Одиниці виміру: пʼять питань, кожне зі своєю відповіддю.
+///
+/// **Пʼять, а не одне «метрична чи імперська».** Кухонні ваги в грамах цілком
+/// уживаються з вагою тіла у фунтах, і людина, яка виросла на одному, а живе на
+/// іншому, не має вибирати між своїм зростом і своїм рецептом. Одне питання
+/// замість пʼяти економить чотири дотики один раз і сперечається з людиною
+/// щодня.
+///
+/// **Тут тільки вибір, а не перерахунок.** Застосунок поки що всюди показує
+/// метричне; це поле памʼятає, що людина попросила, і на нього спиратимуться
+/// екрани, коли до них дійде черга. Питати про одиниці на «Старті», а потім
+/// питати ще раз означало б не спитати жодного разу.
+class Units {
+  const Units({
+    this.mass = 'kg',
+    this.length = 'cm',
+    this.volume = 'ml',
+    this.portion = 'g',
+    this.energy = 'kcal',
+  });
+
+  /// Вага тіла: `kg`, `lb`, `st`.
+  final String mass;
+
+  /// Зріст і обхвати: `cm`, `in`.
+  final String length;
+
+  /// Вода: `ml`, `floz`.
+  final String volume;
+
+  /// Порції їжі: `g`, `oz`.
+  final String portion;
+
+  /// Енергія: `kcal`, `kj`.
+  final String energy;
+
+  Units copyWith({
+    String? mass,
+    String? length,
+    String? volume,
+    String? portion,
+    String? energy,
+  }) => Units(
+    mass: mass ?? this.mass,
+    length: length ?? this.length,
+    volume: volume ?? this.volume,
+    portion: portion ?? this.portion,
+    energy: energy ?? this.energy,
+  );
+
+  /* Ключ рядком, бо саме рядком він приходить із таблиці на екрані і саме
+     рядком лягає в базу. Перелік на кожну величину дав би пʼять типів заради
+     двох-трьох значень кожен, і кожен новий варіант коштував би нового типу. */
+  String byKey(String key) => switch (key) {
+    'mass' => mass,
+    'length' => length,
+    'volume' => volume,
+    'portion' => portion,
+    _ => energy,
+  };
+
+  Units withKey(String key, String value) => switch (key) {
+    'mass' => copyWith(mass: value),
+    'length' => copyWith(length: value),
+    'volume' => copyWith(volume: value),
+    'portion' => copyWith(portion: value),
+    _ => copyWith(energy: value),
+  };
+
+  /* Пишемо тільки те, що відрізняється від метричного. Порожній обʼєкт у базі
+     означає «все як було», і саме він дістається всім, хто вже користується
+     застосунком: перепитувати їх нема за що. */
+  Map<String, dynamic> toJson() => {
+    if (mass != 'kg') 'mass': mass,
+    if (length != 'cm') 'length': length,
+    if (volume != 'ml') 'volume': volume,
+    if (portion != 'g') 'portion': portion,
+    if (energy != 'kcal') 'energy': energy,
+  };
+
+  factory Units.fromJson(Map<String, dynamic> j) => Units(
+    mass: j['mass'] as String? ?? 'kg',
+    length: j['length'] as String? ?? 'cm',
+    volume: j['volume'] as String? ?? 'ml',
+    portion: j['portion'] as String? ?? 'g',
+    energy: j['energy'] as String? ?? 'kcal',
+  );
+}
+
+/// Метричні одиниці. Те, що застосунок показував завжди і показує далі.
+const metricUnits = Units();
+
 class SettingsState {
   const SettingsState({
     required this.sex,
@@ -132,6 +224,7 @@ class SettingsState {
     required this.crash,
     required this.theme,
     required this.lang,
+    this.units = metricUnits,
   });
 
   final Sex sex;
@@ -180,6 +273,9 @@ class SettingsState {
   /// recorded, against the day there is one.
   final Lang lang;
 
+  /// В яких одиницях людина себе важить і міряє. Питається один раз, на «Старті».
+  final Units units;
+
   SettingsState copyWith({
     Sex? sex,
     int? age,
@@ -205,6 +301,7 @@ class SettingsState {
     bool? crash,
     AppTheme? theme,
     Lang? lang,
+    Units? units,
   }) => SettingsState(
     sex: sex ?? this.sex,
     age: age ?? this.age,
@@ -229,6 +326,7 @@ class SettingsState {
     crash: crash ?? this.crash,
     theme: theme ?? this.theme,
     lang: lang ?? this.lang,
+    units: units ?? this.units,
   );
 }
 
@@ -289,19 +387,18 @@ SettingsState initialSettings() => SettingsState(
   reminders: const [],
   analytics: true,
   crash: true,
-  /* Dawn on a first run, whatever the phone is set to.
+  /* Aquarelle on a first run, whatever the phone is set to.
      A first run is the one moment the app has no idea who it is talking to, and
      it should look the way it was designed rather than the way the device
      happens to be set. Following the system here means half the people who open
      it see a theme nobody chose for them.
 
-     Саме «Світанок», а не рівний світлий: це той самий ґрунт, яким застосунок
-     показується на calvi.uk, і перше відкриття має впізнаватись як та сама річ
-     з сайту, а не її блідіша сестра. Тепле світло живе лише на ґрунті сторінки,
-     картки і текст лишаються тими ж, тож ціни в читабельності це не має.
+     Саме «Акварель», а не «Світанок»: рішення продукту від 6 вересня 2026.
+     Тепле світло живе лише на ґрунті сторінки, картки і текст в обох темах ті
+     самі, тож ціни в читабельності цей вибір не має.
      Обраної теми це не чіпає: вибір зберігається в профілі і переживає
      перезапуск, замовчування працює рівно до першого рішення людини. */
-  theme: AppTheme.dawn,
+  theme: AppTheme.aquarelle,
   lang: Lang.system,
 );
 
@@ -378,13 +475,13 @@ int weeksToTarget(SettingsState s) {
 /// прогноз, а напис.
 String targetDate(int weeks) {
   final d = calendarDay(weeks * 7);
-  return '${d.day} ${monthName(d.month)} ${d.year}';
+  return '${dayMonth(d.day, d.month)} ${d.year}';
 }
 
 /// The same day without the year, for a sentence that is already about this one.
 String targetDay(int weeks) {
   final d = calendarDay(weeks * 7);
-  return '${d.day} ${monthName(d.month)}';
+  return dayMonth(d.day, d.month);
 }
 
 class ThemeOption {
@@ -404,7 +501,17 @@ const themeOptions = <ThemeOption>[
 
 /* Порядок мов у списку сталий і не залежить від того, якою зараз говорять:
    перелік, що перетасовується на кожному перемиканні, читається як помилка. */
-const langOptions = <Lang>[Lang.system, Lang.uk, Lang.en];
+const langOptions = <Lang>[
+  Lang.system,
+  Lang.uk,
+  Lang.en,
+  Lang.es,
+  Lang.it,
+  Lang.de,
+  Lang.fr,
+  Lang.pt,
+  Lang.pl,
+];
 
 /* --- Where the reminder times come from ---
  *

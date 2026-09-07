@@ -1,0 +1,26 @@
+{
+  "tourTitle": "Was Nora kann",
+
+  "tourVoice": "Stimme oder Text",
+  "tourVoiceHow": "„zwei Eier und Toast“, und der Eintrag steht",
+  "tourCamera": "Kamera",
+  "tourCameraHow": "Teller, Etikett oder Strichcode",
+  "tourMore": "Nicht nur Essen",
+  "tourMoreHow": "Wasser, Training, Maße, Rezepte",
+  "tourDiary": "Gedächtnis des Tagebuchs",
+  "tourDiaryHow": "sag „Borschtsch“ und sie nimmt die übliche Portion",
+  "tourMemory": "Dauerhaftes Gedächtnis",
+  "tourMemoryHow": "„kein Schweinefleisch“ reicht einmal",
+  "tourWeek": "Tages- und Wochenanalyse",
+  "tourWeekHow": "was geklappt hat und was anzupassen ist",
+  "tourGuide": "Führung durch die App",
+  "tourGuideHow": "frag, wo was liegt und wie es geht",
+
+  "unitsTitle": "Welche Einheiten",
+  "unitsMass": "Körpergewicht",
+  "unitsLength": "Größe und Maße",
+  "unitsVolume": "Wasser",
+  "unitsPortion": "Portionen",
+  "unitsEnergy": "Energie",
+  "unitKj": "kJ"
+}

@@ -56,6 +56,17 @@
   },
   "rcPerServing": "на порцію",
   "rcPerServingHead": "На порцію",
+  "rcWhole": "Уся страва: {kcal} ккал, {g} г",
+  "@rcWhole": {
+    "placeholders": {
+      "kcal": {
+        "type": "int"
+      },
+      "g": {
+        "type": "int"
+      }
+    }
+  },
   "rcPortion": "порція {g} г",
   "@rcPortion": {
     "placeholders": {

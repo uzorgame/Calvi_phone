@@ -1,0 +1,89 @@
+{
+  "startGoalLose": "Perdre du poids",
+  "startGoalLoseHint": "un déficit au rythme que tu choisis",
+  "startGoalKeep": "Garder le poids",
+  "startGoalKeepHint": "tu remets exactement ce que tu dépenses",
+  "startGoalGain": "Prendre du poids",
+  "startGoalGainHint": "un surplus au rythme que tu choisis",
+
+  "startAbout": "À propos de toi",
+  "startSex": "Sexe",
+  "startSexMale": "Homme",
+  "startSexFemale": "Femme",
+  "startSexOther": "Autre",
+  "startAge": "Âge",
+  "startAgeYears": "{count, plural, =1{1 an} other{{count} ans}}",
+  "@startAgeYears": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "startYearsShort": "ans",
+  "startHeight": "Taille",
+
+  "startWeightNow": "Poids actuel",
+
+  "startGoal": "Où on va",
+  "startTargetWeight": "Poids visé",
+
+  "startPace": "À quel rythme",
+  "startPaceUnit": "kg par semaine",
+  "startPaceSlow": "lent",
+  "startPaceUsual": "régulier",
+  "startPaceFast": "rapide",
+  "startPaceEtaHead": "Objectif vers le ",
+  "startPaceEtaTail": ", soit ",
+  "startPaceWeeks": "{count, plural, =1{1 semaine} other{{count} semaines}}",
+  "@startPaceWeeks": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "startPaceWarning": "Un rythme pareil est dur à tenir et casse en général. En dessous de 0,8 kg par semaine le résultat vient plus lentement, mais il reste.",
+
+  "startLife": "Mode de vie",
+  "startAllergies": "Allergies",
+
+  "startNorm": "Ton repère",
+  "startNormPerDay": "kcal par jour",
+  "startNormWeeks": "semaines",
+  "startNormHold": "à tenir",
+  "startNormNora": "C'est calculé. À partir d'ici, c'est plus simple.",
+  "startNormNoraHint": "Écris-le ou dis-le comme ça vient : «deux œufs et une tartine», «bu 300 d'eau». Ce qu'il me manque, je te le demande dans la conversation.",
+  "startNormNote": "C'est la formule de Mifflin-St Jeor, pas un avis médical. Si tu as une pathologie, si tu es enceinte ou si tu suis un régime prescrit, parles-en à ton médecin.",
+
+  "startDeviceFirstRun": "premier lancement",
+  "startSignInFailed": "La connexion n'a pas marché. Réessaie, ou continue sans compte.",
+  "startSignInFailedWhy": "La connexion n'a pas marché. {why}",
+  "@startSignInFailedWhy": {
+    "placeholders": { "why": { "type": "String" } }
+  },
+  "startSignInTitle": "Gardons tout ça",
+  "startSignInText": "Le repère est calculé. Connecte-toi pour le garder : l'historique, les mesures et les entrées seront sur tous tes appareils, pas seulement ici.",
+  "startSignInBusy": "Connexion…",
+  "startSignInGoogle": "Continuer avec Google",
+  "startSignInApple": "Continuer avec Apple",
+  "startSignInSkip": "Continuer sans compte",
+
+  "startAgreeHead": "J'accepte les ",
+  "startAgreeTerms": "conditions d'utilisation",
+  "startAgreeAnd": " et la ",
+  "startAgreePrivacy": "politique de confidentialité",
+
+  "helloSaid": "deux œufs et une tartine",
+  "helloSlotSub": "deux entrées",
+  "helloDishEggs": "Œufs brouillés",
+  "helloDishBread": "Pain de seigle",
+
+  "helloStepSay": "Dis ce que tu as mangé",
+  "helloStepCount": "Je compte les calories",
+  "helloStepLog": "Je le note dans ta journée",
+
+  "welLead": "Compte les calories à partir de tes propres mots",
+  "welSaid": "J'ai mangé deux œufs et une tartine",
+  "welEggs": "Deux œufs au plat",
+  "welEggsGrams": "120 g",
+  "welToast": "Tartine avec du beurre",
+  "welToastGrams": "50 g",
+  "welTotal": "Au total",
+  "welStart": "C'est parti",
+  "welHaveAccount": "J'ai déjà un compte",
+  "startSignInBackTitle": "Content de te revoir",
+  "startSignInBackText": "Connecte-toi avec le même compte et tout revient : le journal, l'objectif, le repère et les mesures. Rien à remplir de nouveau."
+}

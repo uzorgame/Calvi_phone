@@ -1,0 +1,130 @@
+{
+  "rcTitle": "Rezepte",
+  "rcEyebrow": "Die Küche",
+  "rcCount": "{n} Rezepte",
+  "@rcCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "rcCountOne": "1 Rezept",
+  "rcCountFew": "{n} Rezepte",
+  "@rcCountFew": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "rcHeroA": "Was kochen wir",
+  "rcHeroB": "heute",
+  "rcHeroLede": "Sag, was du zu Hause hast. Nora schlägt vor und rechnet die Portion; dein eigenes Rezept geht auch.",
+  "rcAsk": "Nora nach einem Rezept fragen",
+  "rcTabAll": "Alle",
+  "rcTabNora": "Von Nora",
+  "rcTabMine": "Meine",
+  "rcFromNora": "Von Nora",
+  "rcFromMine": "Meins",
+  "rcEmpty": "Hier ist noch nichts. Sag Nora, was in der Küche ist, dann erscheint das erste Rezept.",
+  "rcEmptyMine": "Noch keine eigenen Rezepte. Diktier Nora irgendeins, dann landet es hier.",
+  "rcMinutes": "{n} Min",
+  "@rcMinutes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "rcServingsOne": "1 Portion",
+  "rcServingsFew": "{n} Portionen",
+  "@rcServingsFew": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "rcServingsMany": "{n} Portionen",
+  "@rcServingsMany": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "rcPerServing": "pro Portion",
+  "rcPerServingHead": "Pro Portion",
+  "rcWhole": "Ganzes Gericht: {kcal} kcal, {g} g",
+  "@rcWhole": {
+    "placeholders": {
+      "kcal": {
+        "type": "int"
+      },
+      "g": {
+        "type": "int"
+      }
+    }
+  },
+  "rcPortion": "Portion {g} g",
+  "@rcPortion": {
+    "placeholders": {
+      "g": {
+        "type": "int"
+      }
+    }
+  },
+  "rcOfDay": "das sind {p}% des Tagesrichtwerts",
+  "@rcOfDay": {
+    "placeholders": {
+      "p": {
+        "type": "int"
+      }
+    }
+  },
+  "rcItemsHead": "Zutaten",
+  "rcItemsTotal": "insgesamt {g} g",
+  "@rcItemsTotal": {
+    "placeholders": {
+      "g": {
+        "type": "int"
+      }
+    }
+  },
+  "rcToolsHead": "Was die Küche braucht",
+  "rcNoTools": "Nichts außer Messer und Schüssel",
+  "rcStepsHead": "So wird es gekocht",
+  "rcAskAbout": "Nora zu diesem Rezept fragen",
+  "rcAsking": "Denke nach…",
+  "rcAskTitle": "Was ist in der Küche?",
+  "rcPickTitle": "Wähl ein Gericht",
+  "rcAskPlaceholder": "Hähnchen, Brokkoli, Reis",
+  "rcAskGo": "Fragen",
+  "rcAskCancel": "Abbrechen",
+  "rcJustNow": "gerade eben",
+  "rcToolOven": "Backofen",
+  "rcToolPan": "Pfanne",
+  "rcToolPot": "Topf",
+  "rcToolBlender": "Mixer",
+  "rcToolGrill": "Grill",
+  "rcToolMixer": "Handrührer",
+  "rcChatGreet": "Frag zu «{name}»: was man tauschen kann, wie man es nicht ruiniert, was man vorbereiten kann.",
+  "@rcChatGreet": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "rcChatPlaceholder": "Frag zu diesem Rezept",
+  "rcLoadFailed": "Das Rezeptbuch wurde nicht geladen. Zieh nach unten für einen neuen Versuch.",
+  "rcSuggestFailed": "Nora konnte keine Rezepte zusammenstellen. Versuch es noch einmal.",
+  "rcDeleteTitle": "Dieses Rezept löschen?",
+  "rcDeleteBody": "«{name}» verlässt das Buch. Einträge im Tagebuch, die daraus entstanden sind, bleiben.",
+  "@rcDeleteBody": { "placeholders": { "name": { "type": "String" } } },
+  "rcDeleteCta": "Löschen",
+  "rcDeleteFailed": "Löschen ging nicht. Versuch es noch einmal.",
+  "rcAllergyWarn": "Enthält {names}, das steht auf deiner Allergieliste. Sei damit vorsichtig.",
+  "@rcAllergyWarn": { "placeholders": { "names": { "type": "String" } } }
+}

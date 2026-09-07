@@ -1,0 +1,43 @@
+{
+  "authSignInTitle": "Anmelden",
+  "authSignInAction": "Anmelden",
+  "authSignUpTitle": "Konto anlegen",
+  "authSignUpAction": "Konto erstellen",
+  "authSignUpLink": "Registrieren",
+  "authOr": "oder",
+
+  "authMail": "E-Mail",
+  "authPass": "Passwort",
+  "authPassNew": "Neues Passwort",
+  "authPassHint": "5 Buchstaben und ein Zeichen",
+  "authAgain": "Passwort bestätigen",
+  "authAgainHint": "noch einmal",
+
+  "authMailBad": "Diese Adresse sieht falsch aus",
+  "authPassEmpty": "Gib dein Passwort ein",
+  "authPassWeak": "Schwaches Passwort: mindestens 5 Buchstaben und eine Ziffer oder ein Zeichen",
+  "authAgainEmpty": "Passwort wiederholen",
+  "authAgainDiffers": "Die Passwörter stimmen nicht überein",
+
+  "authCode": "Code aus der E-Mail",
+  "authCodeTitle": "E-Mail bestätigen",
+  "authCodeHint": "Wir haben einen Code an {mail} geschickt. Gib die sechs Ziffern ein.",
+  "@authCodeHint": {
+    "placeholders": { "mail": { "type": "String" } }
+  },
+  "authCodeAction": "Bestätigen",
+  "authCodeShort": "Der Code hat 6 Ziffern",
+  "authCodeBad": "Der Code passt nicht oder ist abgelaufen",
+
+  "authSendAgain": "Erneut senden",
+  "authAgainIn": "Erneut möglich in {sec} s",
+  "@authAgainIn": {
+    "placeholders": { "sec": { "type": "int" } }
+  },
+
+  "authForgotLink": "Vergessen?",
+  "authForgotTitle": "Neues Passwort",
+  "authForgotHint": "Wir senden einen Code an deine E-Mail, dann wählst du ein neues Passwort.",
+  "authForgotAction": "Code senden",
+  "authResetAction": "Passwort speichern"
+}

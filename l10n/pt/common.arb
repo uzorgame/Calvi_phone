@@ -1,0 +1,81 @@
+{
+  "kcalUnit": "{kcal} kcal",
+  "@kcalUnit": {
+    "placeholders": { "kcal": { "type": "int" } }
+  },
+  "gramsUnit": "{grams} g",
+  "@gramsUnit": {
+    "placeholders": { "grams": { "type": "int" } }
+  },
+  "unitKcal": "kcal",
+  "unitKg": "kg",
+  "unitCm": "cm",
+  "unitG": "g",
+  "unitMl": "ml",
+  "macroProtein": "Proteínas",
+  "macroFat": "Gorduras",
+  "macroCarbs": "Carboidratos",
+  "slotBreakfast": "Café da manhã",
+  "slotLunch": "Almoço",
+  "slotDinner": "Jantar",
+  "slotSnack": "Lanche",
+  "slotIntoBreakfast": "no café da manhã",
+  "slotIntoLunch": "no almoço",
+  "slotIntoDinner": "no jantar",
+  "slotIntoSnack": "no lanche",
+  "slotIntoOther": "em «{name}»",
+  "@slotIntoOther": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "actionDone": "Pronto",
+  "actionCancel": "Cancelar",
+  "actionDelete": "Excluir",
+  "actionNext": "Avançar",
+  "actionBack": "Voltar",
+  "actionSave": "Salvar",
+  "actionAdd": "Adicionar",
+  "actionClose": "Fechar",
+  "macroPShort": "P {value}",
+  "@macroPShort": {
+    "placeholders": { "value": { "type": "int" } }
+  },
+  "macroFShort": "G {value}",
+  "@macroFShort": {
+    "placeholders": { "value": { "type": "int" } }
+  },
+  "macroCShort": "C {value}",
+  "@macroCShort": {
+    "placeholders": { "value": { "type": "int" } }
+  },
+  "macroPNone": "P ?",
+  "macroFNone": "G ?",
+  "macroCNone": "C ?",
+  "macroProteinLetter": "P",
+  "macroFatLetter": "G",
+  "macroCarbsLetter": "C",
+  "menuTitle": "Menu",
+  "menuDiary": "Diário",
+  "menuAnalytics": "Estatísticas",
+  "menuWeek": "Resumo da semana",
+  "menuRecipes": "Receitas",
+  "menuMeds": "Medicamentos",
+  "menuAllergy": "Alergias",
+  "menuPlan": "Assinatura",
+  "menuSettings": "Configurações",
+  "menuAbout": "Sobre o app",
+
+  "menuHintKcal": "hoje {n} kcal",
+  "@menuHintKcal": {"placeholders": {"n": {"type": "int"}}},
+  "menuHintNothing": "ainda nada registado",
+  "menuHintOnGoal": "na meta {ok} de {total}",
+  "@menuHintOnGoal": {"placeholders": {"ok": {"type": "int"}, "total": {"type": "int"}}},
+  "menuHintWeekYoung": "a semana acabou de começar",
+  "menuHintWeekFriday": "a partir de sexta, 18:00",
+  "menuHintWeekOpen": "aberto até domingo",
+  "menuHintRecipes": "da Nora, à medida da tua norma",
+  "menuHintNoMeds": "sem cursos",
+  "menuHintNoAllergy": "nenhuma",
+  "menuHintMore": "+{n}",
+  "@menuHintMore": {"placeholders": {"n": {"type": "int"}}},
+  "menuHintFree": "gratuito"
+}

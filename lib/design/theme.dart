@@ -274,6 +274,15 @@ ThemeData get calviDawnTheme => _theme(calviLight, Brightness.light, dawn: 1);
 /// end because `overscroll-behavior` says so, and a screen that visibly bends
 /// under a thumb reads as a rendering fault in an app this flat. The list simply
 /// stops, and nothing paints over the edge to explain it.
+///
+/* Пружину тут пробували, і вона не лишилась.
+ *
+ * `BouncingScrollPhysics` дає дві речі одразу, і другу помічають не відразу:
+ * вміст заходить за край, а ще гальмування стає айфонним, тобто довшим. Той
+ * самий кидок пальцем проїжджав помітно далі (на барабані віку це рівно
+ * дев'ятнадцять рядків проти тринадцяти), і після кожного руху список ще довго
+ * котився сам. Обидві половини не сподобались, і прибрані обидві: розділити їх
+ * можна тільки власною фізикою, а це вже інша ціна. */
 class CalviScroll extends MaterialScrollBehavior {
   const CalviScroll();
 

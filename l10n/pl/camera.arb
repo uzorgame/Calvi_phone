@@ -1,0 +1,64 @@
+{
+  "camDish": "Zdjęcie",
+  "camBarcode": "Kod kreskowy",
+  "camTitle": "Skaner",
+  "camShoot": "Zrób zdjęcie",
+  "camFlash": "Lampa",
+  "camGallery": "Z galerii",
+  "camIntoSlot": "Zapis: {slot}",
+
+  "camReading": "Czytam…",
+  "camHintDish": "wyceluj w talerz albo opakowanie",
+  "camHintBarcode": "kod w ramce",
+
+  "camShotFailed": "Zdjęcie się nie udało",
+  "camTookTooLong": "Analiza się przeciąga. Spróbuj jeszcze raz",
+  "camCouldNotRead": "Nie udało się rozpoznać zdjęcia",
+
+  "camNoPermission": "Brak zgody na aparat. Można jej udzielić w ustawieniach telefonu.",
+  "camNoScanner": "Ten telefon nie umie czytać kodów aparatem.",
+  "camBusy": "Aparat się nie otworzył. Najczęściej zajmuje go inna aplikacja.",
+  "camStillWorks": "Zdjęcie dania i galeria działają jak zwykle.",
+
+  "camFromPack": "Liczby z opakowania. Zapis nie kosztuje tokenów.",
+  "camIngredients": "Skład: {text}",
+  "camAllergen": "Alergen!",
+  "camPortionPack": "Porcja z opakowania: {g} g. Liczby na porcję.",
+  "camPer100": "Na opakowaniu nie ma dokładnej wagi: liczby na 100 g.",
+  "camAllergyContains": "Zawiera twój alergen: {list}",
+  "camAllergyTraces": "Może zawierać śladowe ilości: {list}",
+  "camUnknownCode": "Nie ma tego produktu w bazie",
+  "camUnknownCodeNote": "Ani w naszej, ani w otwartej. Sfotografuj tabelę wartości odżywczych z opakowania, a przepiszę z niej liczby. To za darmo.",
+
+  "camNotAProduct": "To nie jest kod produktu",
+  "camNotAProductNote": "Odczytał się link albo kod służbowy. Wyceluj w paski z cyframi pod spodem.",
+
+  "camOfflineTitle": "Brak sieci",
+  "camOffline": "Kod odczytany, ale nie ma kogo o niego zapytać. Spróbuj, gdy wróci połączenie.",
+  "camSlowTitle": "Odpowiedź nie zdążyła",
+  "camSlow": "Kod odczytany, a baza się ociąga. Spróbuj jeszcze raz.",
+  "camSignedOutTitle": "Trzeba zalogować się od nowa",
+  "camSignedOut": "Sesja jest nieważna, więc baza nas nie rozpoznaje. Zaloguj się w aplikacji od nowa, a skaner ruszy.",
+  "camServerDownTitle": "Nasz serwer nie odpowiedział",
+  "camServerDown": "To nie przez kod ani przez aparat. Spróbuj za minutę.",
+
+  "camGapNote": "Tej liczby nie zna żadna baza. Sfotografuj etykietę, a ją uzupełnię.",
+  "camShootLabel": "Sfotografuj etykietę",
+  "camAskNoraInstead": "Nie ma etykiety, zapytaj Norę",
+  "camLabelAim": "wyceluj w tabelę wartości odżywczych",
+  "camLabelReading": "Przepisuję liczby z opakowania…",
+  "camLabelNoShot": "Zdjęcie się nie udało. Spróbuj sfotografować etykietę jeszcze raz.",
+  "camEstimate": " kcal, szacunkowo",
+  "camNotRead": "Nie rozpoznałam",
+  "camShotReady": "Zdjęcie gotowe",
+  "camShotReadyNote": "Nora je przeanalizuje i odpowie na czacie: nazwie danie, oceni porcję i pokaże, skąd wzięła się liczba. Kosztuje dwa tokeny.",
+  "camAgain": "Jeszcze raz",
+  "camLogInto": "Zapisz {slotInto}",
+  "camSendToNora": "Wyślij Norze",
+
+  "camOfflineShot": "Nie mam sieci. Zdjęcie można wysłać Norze później",
+  "camNoTokens": "Skończyły się tokeny",
+
+  "camKcalPer": " kcal na {grams} g",
+  "camKcalFor": " kcal za {grams} g"
+}

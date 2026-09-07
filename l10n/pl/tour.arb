@@ -1,0 +1,26 @@
+{
+  "tourTitle": "Co potrafi Nora",
+
+  "tourVoice": "Głos albo tekst",
+  "tourVoiceHow": "„dwa jajka i tost” i wpis gotowy",
+  "tourCamera": "Aparat",
+  "tourCameraHow": "talerz, etykieta albo kod kreskowy",
+  "tourMore": "Nie tylko jedzenie",
+  "tourMoreHow": "woda, treningi, pomiary, przepisy",
+  "tourDiary": "Pamięć dziennika",
+  "tourDiaryHow": "powiesz „barszcz” i weźmie zwykłą porcję",
+  "tourMemory": "Stała pamięć",
+  "tourMemoryHow": "„nie jem wieprzowiny” wystarczy raz",
+  "tourWeek": "Analiza dnia i tygodnia",
+  "tourWeekHow": "co wyszło i co warto poprawić",
+  "tourGuide": "Przewodnik po aplikacji",
+  "tourGuideHow": "zapytaj, gdzie co jest i jak to zrobić",
+
+  "unitsTitle": "Jakie jednostki",
+  "unitsMass": "Masa ciała",
+  "unitsLength": "Wzrost i obwody",
+  "unitsVolume": "Woda",
+  "unitsPortion": "Porcje jedzenia",
+  "unitsEnergy": "Energia",
+  "unitKj": "kJ"
+}

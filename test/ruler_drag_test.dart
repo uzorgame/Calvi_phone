@@ -106,7 +106,8 @@ void main() {
         locale: const Locale('uk'),
         theme: calviLightTheme,
         scrollBehavior: const CalviScroll(),
-        home: StartScreen(step: 2, onFinish: (d) {}),
+        // Крок «Вага зараз». Третій, а не другий: попереду стали вхід і одиниці.
+        home: StartScreen(step: 3, onFinish: (d) {}),
       ),
       () {
         final tape = tester.widget<CalviRuler>(find.byType(CalviRuler));

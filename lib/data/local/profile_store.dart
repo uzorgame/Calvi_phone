@@ -72,6 +72,7 @@ class ProfileStore {
       allergies: [for (final a in allergies) Allergy(id: a.allergenId, severe: a.severe)],
       theme: _themeOf(row.theme),
       lang: _langOf(row.lang),
+      units: _unitsOf(row.units),
       /* Памʼять приходить із профілю, а не живе тільки в памʼяті екрана.
        *
        * Без цього рядка сторінка «Памʼять» лишалась порожньою назавжди: Нора
@@ -117,6 +118,7 @@ class ProfileStore {
             waterMl: Value(s.waterMl),
             theme: Value(s.theme.name),
             lang: Value(s.lang.name),
+            units: Value(jsonEncode(s.units.toJson())),
             addressAs: Value(s.addressAs),
             memory: Value(
               jsonEncode([
@@ -245,6 +247,18 @@ List<Reminder> _remindersOf(String raw) {
   }
 }
 
+/* Зіпсований рядок означає метричне, а не порожній екран. Одиниці це вигляд,
+   а не дані: втратити тут вибір неприємно, впасти через нього неприпустимо. */
+Units _unitsOf(String raw) {
+  if (raw.isEmpty) return metricUnits;
+  try {
+    final j = jsonDecode(raw);
+    return j is Map<String, dynamic> ? Units.fromJson(j) : metricUnits;
+  } catch (_) {
+    return metricUnits;
+  }
+}
+
 AppTheme _themeOf(String v) => switch (v) {
   'aquarelle' => AppTheme.aquarelle,
   'dawn' => AppTheme.dawn,
@@ -258,5 +272,11 @@ AppTheme _themeOf(String v) => switch (v) {
 Lang _langOf(String v) => switch (v) {
   'uk' => Lang.uk,
   'en' => Lang.en,
+  'es' => Lang.es,
+  'it' => Lang.it,
+  'de' => Lang.de,
+  'fr' => Lang.fr,
+  'pt' => Lang.pt,
+  'pl' => Lang.pl,
   _ => Lang.system,
 };

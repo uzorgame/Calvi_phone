@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.2.2+22
+version: 1.2.7+27
 
 environment:
   sdk: ^3.10.4
@@ -73,6 +73,9 @@ dependencies:
   # магазинів, і кожна помилка в них виглядає однаково: людина заплатила і
   # доступу немає.
   purchases_flutter: ^10.10.1
+  # Дозволи на першому запуску: камера і сповіщення одразу. Не 13.x: його
+  # Android-половина зібрана під AGP 9 і Kotlin 2.3, а проєкт на 8.11 і 2.2.
+  permission_handler: ^12.0.1
 
 # The iOS camera plugin drags in objective_c, and objective_c 9.3 upwards ships
 # build hooks, which the Dart 3.10 toolchain refuses to compile a build script

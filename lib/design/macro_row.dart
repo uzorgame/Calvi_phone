@@ -65,19 +65,28 @@ class _Cell extends StatelessWidget {
         child: CalviIcon(m.icon, size: 15, color: m.colour),
       ),
       const SizedBox(height: 8),
-      Text(
-        m.label,
-        maxLines: 1,
-        // Обрізається, а не переноситься: другий рядок під однією клітинкою
-        // робить увесь ряд вищим за інші дві.
-        overflow: TextOverflow.clip,
-        softWrap: false,
-        /* Підпис як у приладів: маленький і розріджений. Саме трекінг робить
-           із нього підпис шкали, а не маленьке слово. */
-        style: context.t.labelSmall?.copyWith(
-          fontSize: 10,
-          fontWeight: FontWeight.w500,
-          letterSpacing: 10 * 0.09,
+      /* Зменшується, а не втрачає літери.
+       *
+       * Переносити не можна: другий рядок під однією клітинкою робить увесь ряд
+       * вищим за інші дві. Тому тут стояло `overflow: clip`, і довге слово
+       * впиралось у край клітинки: італійське «CARBOIDRATI» втрачало хвіст уже
+       * на звичайному телефоні, польське «WĘGLOWODANY» на вузькому.
+       *
+       * `FittedBox` тримає ту саму висоту, бо зменшує шрифт усередині тієї ж
+       * коробки. Тим мовам, чиє слово вміщається, він не робить нічого. */
+      FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          m.label,
+          maxLines: 1,
+          softWrap: false,
+          /* Підпис як у приладів: маленький і розріджений. Саме трекінг робить
+             із нього підпис шкали, а не маленьке слово. */
+          style: context.t.labelSmall?.copyWith(
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 10 * 0.09,
+          ),
         ),
       ),
     ],

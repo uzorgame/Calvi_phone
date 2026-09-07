@@ -1,0 +1,43 @@
+{
+  "authSignInTitle": "Iniciar sesión",
+  "authSignInAction": "Entrar",
+  "authSignUpTitle": "Creemos una cuenta",
+  "authSignUpAction": "Crear cuenta",
+  "authSignUpLink": "Registrarse",
+  "authOr": "o",
+
+  "authMail": "Correo",
+  "authPass": "Contraseña",
+  "authPassNew": "Nueva contraseña",
+  "authPassHint": "5 letras y un signo",
+  "authAgain": "Confirmar contraseña",
+  "authAgainHint": "otra vez",
+
+  "authMailBad": "Esa dirección parece incorrecta",
+  "authPassEmpty": "Escribe tu contraseña",
+  "authPassWeak": "Contraseña débil: al menos 5 letras y un dígito o signo",
+  "authAgainEmpty": "Repite la contraseña",
+  "authAgainDiffers": "Las contraseñas no coinciden",
+
+  "authCode": "Código del correo",
+  "authCodeTitle": "Confirma tu correo",
+  "authCodeHint": "Enviamos un código a {mail}. Escribe los seis dígitos del correo.",
+  "@authCodeHint": {
+    "placeholders": { "mail": { "type": "String" } }
+  },
+  "authCodeAction": "Confirmar",
+  "authCodeShort": "El código tiene 6 dígitos",
+  "authCodeBad": "El código no coincide o ya caducó",
+
+  "authSendAgain": "Enviar de nuevo",
+  "authAgainIn": "Puedes pedirlo otra vez en {sec} s",
+  "@authAgainIn": {
+    "placeholders": { "sec": { "type": "int" } }
+  },
+
+  "authForgotLink": "¿La olvidaste?",
+  "authForgotTitle": "Nueva contraseña",
+  "authForgotHint": "Enviaremos un código a tu correo y luego eliges una nueva contraseña.",
+  "authForgotAction": "Enviar código",
+  "authResetAction": "Guardar contraseña"
+}

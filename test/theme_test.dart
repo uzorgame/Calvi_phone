@@ -5,14 +5,14 @@ import 'package:calvi/data/settings.dart';
 import 'package:calvi/main.dart';
 
 void main() {
-  test('перший запуск зі «Світанком», а не за пристроєм', () {
-    /* Той самий ґрунт, яким застосунок показується на сайті: перше відкриття
-       має впізнаватись як та сама річ, а не її блідіша сестра. */
-    expect(initialSettings().theme, AppTheme.dawn);
+  test('перший запуск з «Аквареллю», а не за пристроєм', () {
+    /* Перше відкриття показує тему, яку обрав продукт, а не ту, яку випадково
+       має телефон. Далі веде вибір людини, і він переживає перезапуск. */
+    expect(initialSettings().theme, AppTheme.aquarelle);
   });
 
   testWidgets('темний пристрій не перефарбовує застосунок на першому запуску', (tester) async {
-    /* The device is set to dark and the app still opens in its own dawn: a
+    /* The device is set to dark and the app still opens in its own light: a
        first run is the one moment nobody has chosen anything, and following
        the phone there would show half the people a theme they never picked. */
     tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;

@@ -1,0 +1,43 @@
+{
+  "authSignInTitle": "Вхід",
+  "authSignInAction": "Увійти",
+  "authSignUpTitle": "Заведімо акаунт",
+  "authSignUpAction": "Створити акаунт",
+  "authSignUpLink": "Зареєструватись",
+  "authOr": "або",
+
+  "authMail": "Пошта",
+  "authPass": "Пароль",
+  "authPassNew": "Новий пароль",
+  "authPassHint": "від 5 літер і знак",
+  "authAgain": "Підтвердження пароля",
+  "authAgainHint": "ще раз",
+
+  "authMailBad": "Схоже, в адресі помилка",
+  "authPassEmpty": "Введи пароль",
+  "authPassWeak": "Пароль ненадійний: щонайменше 5 літер і одна цифра або знак",
+  "authAgainEmpty": "Повтори пароль",
+  "authAgainDiffers": "Паролі не збігаються",
+
+  "authCode": "Код із листа",
+  "authCodeTitle": "Підтверди пошту",
+  "authCodeHint": "Надіслали код на {mail}. Введи шість цифр із листа.",
+  "@authCodeHint": {
+    "placeholders": { "mail": { "type": "String" } }
+  },
+  "authCodeAction": "Підтвердити",
+  "authCodeShort": "Код із 6 цифр",
+  "authCodeBad": "Код не підходить або вже застарів",
+
+  "authSendAgain": "Надіслати ще раз",
+  "authAgainIn": "Надіслати ще раз можна через {sec} с",
+  "@authAgainIn": {
+    "placeholders": { "sec": { "type": "int" } }
+  },
+
+  "authForgotLink": "Забули пароль?",
+  "authForgotTitle": "Новий пароль",
+  "authForgotHint": "Надішлемо код на пошту, а тоді придумаєш новий пароль.",
+  "authForgotAction": "Надіслати код",
+  "authResetAction": "Зберегти пароль"
+}

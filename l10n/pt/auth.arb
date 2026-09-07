@@ -1,0 +1,43 @@
+{
+  "authSignInTitle": "Entrar",
+  "authSignInAction": "Entrar",
+  "authSignUpTitle": "Vamos criar uma conta",
+  "authSignUpAction": "Criar conta",
+  "authSignUpLink": "Registar",
+  "authOr": "ou",
+
+  "authMail": "E-mail",
+  "authPass": "Palavra-passe",
+  "authPassNew": "Nova palavra-passe",
+  "authPassHint": "5 letras e um sinal",
+  "authAgain": "Confirmar palavra-passe",
+  "authAgainHint": "outra vez",
+
+  "authMailBad": "Este endereço parece errado",
+  "authPassEmpty": "Escreve a palavra-passe",
+  "authPassWeak": "Palavra-passe fraca: pelo menos 5 letras e um dígito ou sinal",
+  "authAgainEmpty": "Repete a palavra-passe",
+  "authAgainDiffers": "As palavras-passe não coincidem",
+
+  "authCode": "Código do e-mail",
+  "authCodeTitle": "Confirma o teu e-mail",
+  "authCodeHint": "Enviámos um código para {mail}. Escreve os seis dígitos.",
+  "@authCodeHint": {
+    "placeholders": { "mail": { "type": "String" } }
+  },
+  "authCodeAction": "Confirmar",
+  "authCodeShort": "O código tem 6 dígitos",
+  "authCodeBad": "O código não serve ou já expirou",
+
+  "authSendAgain": "Enviar de novo",
+  "authAgainIn": "Podes pedir de novo em {sec} s",
+  "@authAgainIn": {
+    "placeholders": { "sec": { "type": "int" } }
+  },
+
+  "authForgotLink": "Esqueceste?",
+  "authForgotTitle": "Nova palavra-passe",
+  "authForgotHint": "Enviamos um código para o teu e-mail e depois escolhes uma nova palavra-passe.",
+  "authForgotAction": "Enviar código",
+  "authResetAction": "Guardar"
+}

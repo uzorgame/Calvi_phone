@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/widgets.dart';
 import 'package:uuid/uuid.dart';
 
+import '../day.dart';
 import '../local/database.dart';
 import 'api.dart';
 import 'config.dart';
@@ -61,10 +62,17 @@ class SyncService with WidgetsBindingObserver {
     String place = 'today',
     /// Написане в поле картки, а не в чат: запис лягає рівно в цю картку.
     bool card = false,
-  }) => ChatRepository(
-    db,
-    _api,
-  ).send(text: text, slot: slot, image: image, history: history, place: place, card: card);
+    /// Продиктоване в чат: вагу без названої не питають, беруть звичну порцію.
+    bool voice = false,
+  }) => ChatRepository(db, _api).send(
+    text: text,
+    slot: slot,
+    image: image,
+    history: history,
+    place: place,
+    card: card,
+    voice: voice,
+  );
 
   /* Тижневий розбір. Живе тут, а не в екрані, бо тут той самий клієнт, той
      самий акаунт і те саме дзеркало токенів: розбір коштує два, і число в
@@ -171,7 +179,17 @@ class SyncService with WidgetsBindingObserver {
    * не буває. Через це серверу й телефону нема за що битись: у знімка немає
    * власної думки, він завжди програє свіжій відповіді. */
 
-  static const _recipesKey = 'recipes';
+  /* Знімок книги зберігається окремо для кожної мови.
+   *
+   * Стартові рецепти сервер перекладає, коли застосунок питає список із новою
+   * мовою. Але екран спершу показує знімок, а знімок був один на всі мови, і
+   * тому після зміни мови картки на секунду лишались старою: спершу старий
+   * знімок, а вже потім свіжа відповідь сервера. Це і був той видимий лаг.
+   *
+   * З мовою в ключі знімка новою мовою просто немає, екран іде одразу в мережу
+   * і показує книгу вже перекладеною. А коли людина повернеться на попередню
+   * мову, її знімок ще лежатиме на місці. */
+  static String get _recipesKey => 'recipes:$dataLang';
   static const _reviewsKey = 'week_reviews';
 
   /* toWire шле чернетку на сервер і тому не знає id та дати; знімок мусить

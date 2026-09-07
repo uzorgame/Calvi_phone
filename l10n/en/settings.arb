@@ -265,6 +265,7 @@
 
   "legalUpdated": "Updated {date}",
   "@legalUpdated": {
+    "description": "DO NOT TRANSLATE. The one line of ours inside the legal documents, and they exist in English only: `lib/data/legal.dart` holds a single version of the Terms and of the Privacy Policy, which every language shows. A translated «Updated» put one word of the reader's language into an English legal text and made the date line read half in one language and half in another. Every language repeats this string as it stands, Ukrainian included.",
     "placeholders": { "date": { "type": "String" } }
   },
 

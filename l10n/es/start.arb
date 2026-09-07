@@ -1,0 +1,89 @@
+{
+  "startGoalLose": "Bajar de peso",
+  "startGoalLoseHint": "un déficit al ritmo que elijas",
+  "startGoalKeep": "Mantener el peso",
+  "startGoalKeepHint": "repones justo lo que gastas",
+  "startGoalGain": "Subir de peso",
+  "startGoalGainHint": "un superávit al ritmo que elijas",
+
+  "startAbout": "Sobre ti",
+  "startSex": "Sexo",
+  "startSexMale": "Hombre",
+  "startSexFemale": "Mujer",
+  "startSexOther": "Otro",
+  "startAge": "Edad",
+  "startAgeYears": "{count, plural, =1{1 año} other{{count} años}}",
+  "@startAgeYears": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "startYearsShort": "años",
+  "startHeight": "Altura",
+
+  "startWeightNow": "Peso actual",
+
+  "startGoal": "Hacia dónde vamos",
+  "startTargetWeight": "Peso objetivo",
+
+  "startPace": "A qué ritmo",
+  "startPaceUnit": "kg por semana",
+  "startPaceSlow": "lento",
+  "startPaceUsual": "constante",
+  "startPaceFast": "rápido",
+  "startPaceEtaHead": "Objetivo hacia ",
+  "startPaceEtaTail": ", o sea ",
+  "startPaceWeeks": "{count, plural, =1{1 semana} other{{count} semanas}}",
+  "@startPaceWeeks": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "startPaceWarning": "Un ritmo así cuesta sostenerlo y suele romperse. Por debajo de 0,8 kg por semana el resultado llega más despacio, pero se queda.",
+
+  "startLife": "Estilo de vida",
+  "startAllergies": "Alergias",
+
+  "startNorm": "Tu norma",
+  "startNormPerDay": "kcal al día",
+  "startNormWeeks": "semanas",
+  "startNormHold": "manteniendo",
+  "startNormNora": "Calculado. A partir de aquí es más fácil.",
+  "startNormNoraHint": "Escríbelo o dilo como te salga: «dos huevos y una tostada», «bebí 300 de agua». Lo que me falte, te lo pregunto en la conversación.",
+  "startNormNote": "Esta es la fórmula de Mifflin-St Jeor, no un consejo médico. Si tienes alguna condición, estás embarazada o sigues una dieta pautada, consúltalo con tu médico.",
+
+  "startDeviceFirstRun": "primer inicio",
+  "startSignInFailed": "No se pudo iniciar sesión. Inténtalo otra vez o sigue sin cuenta.",
+  "startSignInFailedWhy": "No se pudo iniciar sesión. {why}",
+  "@startSignInFailedWhy": {
+    "placeholders": { "why": { "type": "String" } }
+  },
+  "startSignInTitle": "Guardemos esto",
+  "startSignInText": "La norma está calculada. Inicia sesión para conservarla: el historial, las medidas y los registros estarán en todos tus dispositivos, no solo aquí.",
+  "startSignInBusy": "Entrando…",
+  "startSignInGoogle": "Continuar con Google",
+  "startSignInApple": "Continuar con Apple",
+  "startSignInSkip": "Continuar sin cuenta",
+
+  "startAgreeHead": "Acepto las ",
+  "startAgreeTerms": "condiciones de uso",
+  "startAgreeAnd": " y la ",
+  "startAgreePrivacy": "política de privacidad",
+
+  "helloSaid": "dos huevos y una tostada",
+  "helloSlotSub": "dos elementos",
+  "helloDishEggs": "Huevos revueltos",
+  "helloDishBread": "Pan de centeno",
+
+  "helloStepSay": "Di qué comiste",
+  "helloStepCount": "Cuento las calorías",
+  "helloStepLog": "Lo anoto en tu día",
+
+  "welLead": "Cuenta las calorías con tus propias palabras",
+  "welSaid": "Comí dos huevos y una tostada",
+  "welEggs": "Dos huevos fritos",
+  "welEggsGrams": "120 g",
+  "welToast": "Tostada con mantequilla",
+  "welToastGrams": "50 g",
+  "welTotal": "En total",
+  "welStart": "Empezar",
+  "welHaveAccount": "Ya tengo cuenta",
+  "startSignInBackTitle": "Bienvenido de nuevo",
+  "startSignInBackText": "Inicia sesión con la misma cuenta y vuelve todo: el diario, el objetivo, la norma y las medidas. No hay que rellenar nada otra vez."
+}

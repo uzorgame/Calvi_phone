@@ -5336,6 +5336,16 @@ class $ProfileTable extends Profile with TableInfo<$ProfileTable, ProfileData> {
     requiredDuringInsert: false,
     defaultValue: const Constant('system'),
   );
+  static const VerificationMeta _unitsMeta = const VerificationMeta('units');
+  @override
+  late final GeneratedColumn<String> units = GeneratedColumn<String>(
+    'units',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('{}'),
+  );
   static const VerificationMeta _addressAsMeta = const VerificationMeta(
     'addressAs',
   );
@@ -5403,6 +5413,7 @@ class $ProfileTable extends Profile with TableInfo<$ProfileTable, ProfileData> {
     waterMl,
     theme,
     lang,
+    units,
     addressAs,
     memory,
     reminders,
@@ -5544,6 +5555,12 @@ class $ProfileTable extends Profile with TableInfo<$ProfileTable, ProfileData> {
         lang.isAcceptableOrUnknown(data['lang']!, _langMeta),
       );
     }
+    if (data.containsKey('units')) {
+      context.handle(
+        _unitsMeta,
+        units.isAcceptableOrUnknown(data['units']!, _unitsMeta),
+      );
+    }
     if (data.containsKey('address_as')) {
       context.handle(
         _addressAsMeta,
@@ -5657,6 +5674,10 @@ class $ProfileTable extends Profile with TableInfo<$ProfileTable, ProfileData> {
         DriftSqlType.string,
         data['${effectivePrefix}lang'],
       )!,
+      units: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}units'],
+      )!,
       addressAs: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}address_as'],
@@ -5714,6 +5735,7 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
   final int waterMl;
   final String theme;
   final String lang;
+  final String units;
 
   /// Як звертатись до людини. Порожньо, поки вона не сказала.
   final String? addressAs;
@@ -5741,6 +5763,7 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
     required this.waterMl,
     required this.theme,
     required this.lang,
+    required this.units,
     this.addressAs,
     required this.memory,
     required this.reminders,
@@ -5789,6 +5812,7 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
     map['water_ml'] = Variable<int>(waterMl);
     map['theme'] = Variable<String>(theme);
     map['lang'] = Variable<String>(lang);
+    map['units'] = Variable<String>(units);
     if (!nullToAbsent || addressAs != null) {
       map['address_as'] = Variable<String>(addressAs);
     }
@@ -5836,6 +5860,7 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
       waterMl: Value(waterMl),
       theme: Value(theme),
       lang: Value(lang),
+      units: Value(units),
       addressAs: addressAs == null && nullToAbsent
           ? const Value.absent()
           : Value(addressAs),
@@ -5871,6 +5896,7 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
       waterMl: serializer.fromJson<int>(json['waterMl']),
       theme: serializer.fromJson<String>(json['theme']),
       lang: serializer.fromJson<String>(json['lang']),
+      units: serializer.fromJson<String>(json['units']),
       addressAs: serializer.fromJson<String?>(json['addressAs']),
       memory: serializer.fromJson<String>(json['memory']),
       reminders: serializer.fromJson<String>(json['reminders']),
@@ -5901,6 +5927,7 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
       'waterMl': serializer.toJson<int>(waterMl),
       'theme': serializer.toJson<String>(theme),
       'lang': serializer.toJson<String>(lang),
+      'units': serializer.toJson<String>(units),
       'addressAs': serializer.toJson<String?>(addressAs),
       'memory': serializer.toJson<String>(memory),
       'reminders': serializer.toJson<String>(reminders),
@@ -5929,6 +5956,7 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
     int? waterMl,
     String? theme,
     String? lang,
+    String? units,
     Value<String?> addressAs = const Value.absent(),
     String? memory,
     String? reminders,
@@ -5954,6 +5982,7 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
     waterMl: waterMl ?? this.waterMl,
     theme: theme ?? this.theme,
     lang: lang ?? this.lang,
+    units: units ?? this.units,
     addressAs: addressAs.present ? addressAs.value : this.addressAs,
     memory: memory ?? this.memory,
     reminders: reminders ?? this.reminders,
@@ -5985,6 +6014,7 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
       waterMl: data.waterMl.present ? data.waterMl.value : this.waterMl,
       theme: data.theme.present ? data.theme.value : this.theme,
       lang: data.lang.present ? data.lang.value : this.lang,
+      units: data.units.present ? data.units.value : this.units,
       addressAs: data.addressAs.present ? data.addressAs.value : this.addressAs,
       memory: data.memory.present ? data.memory.value : this.memory,
       reminders: data.reminders.present ? data.reminders.value : this.reminders,
@@ -6015,6 +6045,7 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
           ..write('waterMl: $waterMl, ')
           ..write('theme: $theme, ')
           ..write('lang: $lang, ')
+          ..write('units: $units, ')
           ..write('addressAs: $addressAs, ')
           ..write('memory: $memory, ')
           ..write('reminders: $reminders, ')
@@ -6045,6 +6076,7 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
     waterMl,
     theme,
     lang,
+    units,
     addressAs,
     memory,
     reminders,
@@ -6074,6 +6106,7 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
           other.waterMl == this.waterMl &&
           other.theme == this.theme &&
           other.lang == this.lang &&
+          other.units == this.units &&
           other.addressAs == this.addressAs &&
           other.memory == this.memory &&
           other.reminders == this.reminders &&
@@ -6101,6 +6134,7 @@ class ProfileCompanion extends UpdateCompanion<ProfileData> {
   final Value<int> waterMl;
   final Value<String> theme;
   final Value<String> lang;
+  final Value<String> units;
   final Value<String?> addressAs;
   final Value<String> memory;
   final Value<String> reminders;
@@ -6127,6 +6161,7 @@ class ProfileCompanion extends UpdateCompanion<ProfileData> {
     this.waterMl = const Value.absent(),
     this.theme = const Value.absent(),
     this.lang = const Value.absent(),
+    this.units = const Value.absent(),
     this.addressAs = const Value.absent(),
     this.memory = const Value.absent(),
     this.reminders = const Value.absent(),
@@ -6154,6 +6189,7 @@ class ProfileCompanion extends UpdateCompanion<ProfileData> {
     this.waterMl = const Value.absent(),
     this.theme = const Value.absent(),
     this.lang = const Value.absent(),
+    this.units = const Value.absent(),
     this.addressAs = const Value.absent(),
     this.memory = const Value.absent(),
     this.reminders = const Value.absent(),
@@ -6182,6 +6218,7 @@ class ProfileCompanion extends UpdateCompanion<ProfileData> {
     Expression<int>? waterMl,
     Expression<String>? theme,
     Expression<String>? lang,
+    Expression<String>? units,
     Expression<String>? addressAs,
     Expression<String>? memory,
     Expression<String>? reminders,
@@ -6209,6 +6246,7 @@ class ProfileCompanion extends UpdateCompanion<ProfileData> {
       if (waterMl != null) 'water_ml': waterMl,
       if (theme != null) 'theme': theme,
       if (lang != null) 'lang': lang,
+      if (units != null) 'units': units,
       if (addressAs != null) 'address_as': addressAs,
       if (memory != null) 'memory': memory,
       if (reminders != null) 'reminders': reminders,
@@ -6238,6 +6276,7 @@ class ProfileCompanion extends UpdateCompanion<ProfileData> {
     Value<int>? waterMl,
     Value<String>? theme,
     Value<String>? lang,
+    Value<String>? units,
     Value<String?>? addressAs,
     Value<String>? memory,
     Value<String>? reminders,
@@ -6265,6 +6304,7 @@ class ProfileCompanion extends UpdateCompanion<ProfileData> {
       waterMl: waterMl ?? this.waterMl,
       theme: theme ?? this.theme,
       lang: lang ?? this.lang,
+      units: units ?? this.units,
       addressAs: addressAs ?? this.addressAs,
       memory: memory ?? this.memory,
       reminders: reminders ?? this.reminders,
@@ -6336,6 +6376,9 @@ class ProfileCompanion extends UpdateCompanion<ProfileData> {
     if (lang.present) {
       map['lang'] = Variable<String>(lang.value);
     }
+    if (units.present) {
+      map['units'] = Variable<String>(units.value);
+    }
     if (addressAs.present) {
       map['address_as'] = Variable<String>(addressAs.value);
     }
@@ -6377,6 +6420,7 @@ class ProfileCompanion extends UpdateCompanion<ProfileData> {
           ..write('waterMl: $waterMl, ')
           ..write('theme: $theme, ')
           ..write('lang: $lang, ')
+          ..write('units: $units, ')
           ..write('addressAs: $addressAs, ')
           ..write('memory: $memory, ')
           ..write('reminders: $reminders, ')
@@ -10645,6 +10689,7 @@ typedef $$ProfileTableCreateCompanionBuilder =
       Value<int> waterMl,
       Value<String> theme,
       Value<String> lang,
+      Value<String> units,
       Value<String?> addressAs,
       Value<String> memory,
       Value<String> reminders,
@@ -10673,6 +10718,7 @@ typedef $$ProfileTableUpdateCompanionBuilder =
       Value<int> waterMl,
       Value<String> theme,
       Value<String> lang,
+      Value<String> units,
       Value<String?> addressAs,
       Value<String> memory,
       Value<String> reminders,
@@ -10785,6 +10831,11 @@ class $$ProfileTableFilterComposer extends Composer<_$CalviDb, $ProfileTable> {
 
   ColumnFilters<String> get lang => $composableBuilder(
     column: $table.lang,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get units => $composableBuilder(
+    column: $table.units,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -10918,6 +10969,11 @@ class $$ProfileTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get units => $composableBuilder(
+    column: $table.units,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get addressAs => $composableBuilder(
     column: $table.addressAs,
     builder: (column) => ColumnOrderings(column),
@@ -11012,6 +11068,9 @@ class $$ProfileTableAnnotationComposer
   GeneratedColumn<String> get lang =>
       $composableBuilder(column: $table.lang, builder: (column) => column);
 
+  GeneratedColumn<String> get units =>
+      $composableBuilder(column: $table.units, builder: (column) => column);
+
   GeneratedColumn<String> get addressAs =>
       $composableBuilder(column: $table.addressAs, builder: (column) => column);
 
@@ -11073,6 +11132,7 @@ class $$ProfileTableTableManager
                 Value<int> waterMl = const Value.absent(),
                 Value<String> theme = const Value.absent(),
                 Value<String> lang = const Value.absent(),
+                Value<String> units = const Value.absent(),
                 Value<String?> addressAs = const Value.absent(),
                 Value<String> memory = const Value.absent(),
                 Value<String> reminders = const Value.absent(),
@@ -11099,6 +11159,7 @@ class $$ProfileTableTableManager
                 waterMl: waterMl,
                 theme: theme,
                 lang: lang,
+                units: units,
                 addressAs: addressAs,
                 memory: memory,
                 reminders: reminders,
@@ -11127,6 +11188,7 @@ class $$ProfileTableTableManager
                 Value<int> waterMl = const Value.absent(),
                 Value<String> theme = const Value.absent(),
                 Value<String> lang = const Value.absent(),
+                Value<String> units = const Value.absent(),
                 Value<String?> addressAs = const Value.absent(),
                 Value<String> memory = const Value.absent(),
                 Value<String> reminders = const Value.absent(),
@@ -11153,6 +11215,7 @@ class $$ProfileTableTableManager
                 waterMl: waterMl,
                 theme: theme,
                 lang: lang,
+                units: units,
                 addressAs: addressAs,
                 memory: memory,
                 reminders: reminders,

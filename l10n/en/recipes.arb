@@ -56,6 +56,17 @@
   },
   "rcPerServing": "per serving",
   "rcPerServingHead": "Per serving",
+  "rcWhole": "Whole dish: {kcal} kcal, {g} g",
+  "@rcWhole": {
+    "placeholders": {
+      "kcal": {
+        "type": "int"
+      },
+      "g": {
+        "type": "int"
+      }
+    }
+  },
   "rcPortion": "serving {g} g",
   "@rcPortion": {
     "placeholders": {

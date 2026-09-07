@@ -95,6 +95,20 @@
       }
     }
   },
+  "@authAgainIn": {
+    "placeholders": {
+      "sec": {
+        "type": "int"
+      }
+    }
+  },
+  "@authCodeHint": {
+    "placeholders": {
+      "mail": {
+        "type": "String"
+      }
+    }
+  },
   "@barGrams": {
     "placeholders": {
       "grams": {
@@ -285,6 +299,7 @@
     }
   },
   "@legalUpdated": {
+    "description": "DO NOT TRANSLATE. The one line of ours inside the legal documents, and they exist in English only: `lib/data/legal.dart` holds a single version of the Terms and of the Privacy Policy, which every language shows. A translated «Updated» put one word of the reader's language into an English legal text and made the date line read half in one language and half in another. Every language repeats this string as it stands, Ukrainian included.",
     "placeholders": {
       "date": {
         "type": "String"
@@ -378,6 +393,33 @@
     "placeholders": {
       "date": {
         "type": "String"
+      }
+    }
+  },
+  "@menuHintKcal": {
+    "description": "Under the Diary row in the menu: what is eaten so far today.",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@menuHintMore": {
+    "description": "Tail of a list that does not fit on one line: 'Magnesium, Omega-3, +2'.",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@menuHintOnGoal": {
+    "description": "Under Analytics: finished days of this week inside the goal window.",
+    "placeholders": {
+      "ok": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
       }
     }
   },
@@ -553,6 +595,16 @@
   "@rcServingsMany": {
     "placeholders": {
       "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@rcWhole": {
+    "placeholders": {
+      "kcal": {
+        "type": "int"
+      },
+      "g": {
         "type": "int"
       }
     }
@@ -930,6 +982,36 @@
   "assistantPinned": "{count}, {pinned} pinned",
   "assistantTitle": "Assistant",
   "assistantWhatToRemember": "What to remember",
+  "authAgain": "Confirm password",
+  "authAgainDiffers": "The passwords do not match",
+  "authAgainEmpty": "Repeat the password",
+  "authAgainHint": "once more",
+  "authAgainIn": "You can ask again in {sec} s",
+  "authCode": "Code from the letter",
+  "authCodeAction": "Confirm",
+  "authCodeBad": "That code does not fit, or it has expired",
+  "authCodeHint": "We sent a code to {mail}. Type the six digits from the letter.",
+  "authCodeShort": "The code has 6 digits",
+  "authCodeTitle": "Confirm your email",
+  "authForgotAction": "Send the code",
+  "authForgotHint": "We will send a code to your email, then you pick a new password.",
+  "authForgotLink": "Forgot it?",
+  "authForgotTitle": "New password",
+  "authMail": "Email",
+  "authMailBad": "That address looks off",
+  "authOr": "or",
+  "authPass": "Password",
+  "authPassEmpty": "Enter your password",
+  "authPassHint": "5 letters and a sign",
+  "authPassNew": "New password",
+  "authPassWeak": "Weak password: at least 5 letters and one digit or sign",
+  "authResetAction": "Save password",
+  "authSendAgain": "Send it again",
+  "authSignInAction": "Sign in",
+  "authSignInTitle": "Sign in",
+  "authSignUpAction": "Create account",
+  "authSignUpLink": "Create an account",
+  "authSignUpTitle": "Let us make an account",
   "barCamera": "Camera",
   "barGrams": "{grams} g",
   "barHint": "Write the way you speak.",
@@ -1188,6 +1270,17 @@
   "menuAllergy": "Allergies",
   "menuAnalytics": "Analytics",
   "menuDiary": "Diary",
+  "menuHintFree": "free",
+  "menuHintKcal": "{n} kcal today",
+  "menuHintMore": "+{n}",
+  "menuHintNoAllergy": "none",
+  "menuHintNoMeds": "no courses",
+  "menuHintNothing": "nothing logged yet",
+  "menuHintOnGoal": "on goal {ok} of {total}",
+  "menuHintRecipes": "from Nora, sized to your norm",
+  "menuHintWeekFriday": "from Friday, 18:00",
+  "menuHintWeekOpen": "open until Sunday",
+  "menuHintWeekYoung": "the week has just begun",
   "menuMeds": "Medications",
   "menuPlan": "Subscription",
   "menuRecipes": "Recipes",
@@ -1281,6 +1374,7 @@
   "plateGrams": " g",
   "plateKcal": "kcal",
   "plateThinking": "thinking",
+  "plateTotal": "total",
   "privacyCrash": "Crash reports",
   "privacyCrashHint": "the error stack, without diary data",
   "privacyDiaryHead": "Your diary stays yours",
@@ -1353,6 +1447,7 @@
   "rcToolPan": "Pan",
   "rcToolPot": "Pot",
   "rcToolsHead": "What the kitchen needs",
+  "rcWhole": "Whole dish: {kcal} kcal, {g} g",
   "remAbout": "About what",
   "remAdd": "Add a reminder",
   "remAt": "At",
@@ -1536,11 +1631,33 @@
   "todayOutOfTokens": "Out of tokens. Logging by hand always works.",
   "todayPhotoMeal": "Photo",
   "todayQuestionClosed": "That question is already closed. Say the weight in words if you need to.",
+  "tourCamera": "Camera",
+  "tourCameraHow": "a plate, a label or a barcode",
+  "tourDiary": "Diary memory",
+  "tourDiaryHow": "say \"borscht\" and it takes your usual portion",
+  "tourGuide": "Guide to the app",
+  "tourGuideHow": "ask where things are and how to do them",
+  "tourMemory": "Lasting memory",
+  "tourMemoryHow": "\"no pork\" is enough to say once",
+  "tourMore": "Not only food",
+  "tourMoreHow": "water, workouts, measurements, recipes",
+  "tourTitle": "What Nora can do",
+  "tourVoice": "Voice or text",
+  "tourVoiceHow": "\"two eggs and toast\", and it is logged",
+  "tourWeek": "Day and week review",
+  "tourWeekHow": "what worked and what to adjust",
   "unitCm": "cm",
   "unitG": "g",
   "unitKcal": "kcal",
   "unitKg": "kg",
+  "unitKj": "kJ",
   "unitMl": "ml",
+  "unitsEnergy": "Energy",
+  "unitsLength": "Height and measurements",
+  "unitsMass": "Body weight",
+  "unitsPortion": "Food portions",
+  "unitsTitle": "Which units",
+  "unitsVolume": "Water",
   "waterGlasses": "about {glasses} glasses",
   "waterLess": "{step} ml less",
   "waterMore": "{step} ml more",
