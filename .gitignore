@@ -66,3 +66,6 @@ GoogleService-Info.plist
 
 # Вивід невдалого golden-тесту: перезаписується щоразу і нікому не потрібен.
 test/failures/
+
+# Kotlin build sessions. Створюється складанням, до коду не належить.
+.kotlin/
