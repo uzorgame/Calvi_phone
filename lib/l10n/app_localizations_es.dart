@@ -524,7 +524,7 @@ class LEs extends L {
   }
 
   @override
-  String get barHint => 'Escribe como hablas.';
+  String get barHint => 'Hola, soy Nora. Escribe o habla como siempre, te entenderé.';
 
   @override
   String get barHintBorscht => 'Lentejas 300 g para el almuerzo';

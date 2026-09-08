@@ -524,7 +524,7 @@ class LIt extends L {
   }
 
   @override
-  String get barHint => 'Scrivi come parli.';
+  String get barHint => 'Ciao, sono Nora. Scrivi o parla come al solito, ti capisco.';
 
   @override
   String get barHintBorscht => 'Minestrone 300 g a pranzo';

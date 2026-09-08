@@ -1035,7 +1035,7 @@ abstract class L {
   /// No description provided for @barHint.
   ///
   /// In en, this message translates to:
-  /// **'Write the way you speak.'**
+  /// **'Hi, I am Nora. Write or speak as you always would, and I will understand.'**
   String get barHint;
 
   /// No description provided for @barHintBorscht.

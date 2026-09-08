@@ -523,7 +523,7 @@ class LPt extends L {
   }
 
   @override
-  String get barHint => 'Escreva como você fala.';
+  String get barHint => 'Olá, sou a Nora. Escreve ou fala como de costume, que eu percebo.';
 
   @override
   String get barHintBorscht => 'Feijoada 300 g no almoço';

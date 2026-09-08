@@ -522,7 +522,7 @@ class LEn extends L {
   }
 
   @override
-  String get barHint => 'Write the way you speak.';
+  String get barHint => 'Hi, I am Nora. Write or speak as you always would, and I will understand.';
 
   @override
   String get barHintBorscht => 'Borscht 300 g for lunch';

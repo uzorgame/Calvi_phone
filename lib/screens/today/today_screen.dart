@@ -58,6 +58,7 @@ class TodayScreen extends StatefulWidget {
     this.chatOpen = false,
     this.openCard,
     this.ask,
+    this.greet = false,
   });
 
   final VoidCallback onSettings;
@@ -77,6 +78,13 @@ class TodayScreen extends StatefulWidget {
    * лише в чаті. Ставиться один раз: питання, яке повторюється на кожній
    * перемальовці, це не питання, а заїкання. */
   final String? ask;
+
+  /* Перший запуск щойно закінчився: штора чату піднімається сама.
+   *
+   * Нічого в неї не кладеться. Порожня розмова вже має що сказати: картка з
+   * іменем і прикладами стоїть у ній від початку, і саме її людина має
+   * побачити першою, а не здогадатись про неї, натиснувши на рядок унизу. */
+  final bool greet;
 
   @override
   State<TodayScreen> createState() => _TodayScreenState();
@@ -309,6 +317,30 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
       });
     });
   }
+
+  /* Кінець першого запуску: штора піднімається сама, і порожня.
+   *
+   * Не тієї ж миті, а після дня. Штора вміє виїжджати знизу, але тільки з
+   * закритого стану: розмова, відкрита в першому ж кадрі, зʼявляється готовою,
+   * і рух, заради якого все це, не грає взагалі. Тому спершу день стає на
+   * місце, і аж тоді вона піднімається, своїм звичайним рухом.
+   *
+   * Один раз: далі штора слухається тільки людину. */
+  void _raiseChat() {
+    if (!widget.greet || _raised) return;
+    _raised = true;
+
+    _rise = Timer(const Duration(milliseconds: 320), () {
+      if (!mounted) return;
+      setState(() => _chatOpen = true);
+    });
+  }
+
+  /// Чи піднімали вже штору на цьому екрані.
+  bool _raised = false;
+
+  /// Відкладене підняття. Знімається разом з екраном, як і решта таймерів.
+  Timer? _rise;
 
   void _openAnalytics(BuildContext context) => Navigator.of(context).push(
     slideRoute(
@@ -1338,6 +1370,7 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
     _reply?.cancel();
     _feed?.cancel();
     _showing?.cancel();
+    _rise?.cancel();
     WidgetsBinding.instance.removeObserver(this);
 
     /* Екран зникає, мікрофон гасне. Раніше тут не було цього рядка, і людина,
@@ -1394,11 +1427,13 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
     super.didUpdateWidget(old);
     if (widget.ask != old.ask) _asked = false;
     _askEvening();
+    _raiseChat();
   }
 
   @override
   Widget build(BuildContext context) {
     _askEvening();
+    _raiseChat();
     final scope = AppScope.of(context);
     final real = scope.real && scope.db != null;
     final day = _dayNow(scope);

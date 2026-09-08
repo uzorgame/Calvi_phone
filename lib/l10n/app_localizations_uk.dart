@@ -530,7 +530,7 @@ class LUk extends L {
   }
 
   @override
-  String get barHint => 'Пиши як кажеш.';
+  String get barHint => 'Привіт, я Нора. Пиши або кажи як зазвичай, і я зрозумію.';
 
   @override
   String get barHintBorscht => 'Борщ 300 г на обід';

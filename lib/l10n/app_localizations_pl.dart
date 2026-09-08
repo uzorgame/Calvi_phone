@@ -531,7 +531,7 @@ class LPl extends L {
   }
 
   @override
-  String get barHint => 'Pisz tak, jak mówisz.';
+  String get barHint => 'Cześć, jestem Nora. Pisz albo mów jak zwykle, a zrozumiem.';
 
   @override
   String get barHintBorscht => 'Barszcz 300 g na obiad';

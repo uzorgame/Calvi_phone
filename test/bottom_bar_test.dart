@@ -85,7 +85,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Нора'), findsNWidgets(2), reason: 'заголовок кімнати і підказка поля');
-    expect(find.text('Пиши як кажеш.'), findsOneWidget);
+    expect(find.text('Привіт, я Нора. Пиши або кажи як зазвичай, і я зрозумію.'), findsOneWidget);
     expect(find.text('19'), findsOneWidget, reason: 'залишок токенів, одне число без знаменника');
   });
 

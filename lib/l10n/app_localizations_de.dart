@@ -525,7 +525,8 @@ class LDe extends L {
   }
 
   @override
-  String get barHint => 'Schreib, wie du sprichst.';
+  String get barHint =>
+      'Hallo, ich bin Nora. Schreib oder sprich wie sonst auch, ich verstehe dich.';
 
   @override
   String get barHintBorscht => 'Linsensuppe 300 g zum Mittagessen';

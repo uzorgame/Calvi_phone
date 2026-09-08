@@ -26,6 +26,9 @@ void main() {
     await welcomeOut(tester);
 
     expect(find.text('Вхід'), findsOneWidget);
+    /* У тестовій збірці входу немає взагалі, і тоді лишається запобіжник:
+       інакше перший запуск не мав би куди вести. У магазинній збірці
+       провайдери є, і цього рядка там не буває. */
     expect(find.text('Далі без акаунту'), findsOneWidget);
     expect(find.text('Про тебе'), findsNothing, reason: 'анкета після входу, не перед');
   });
@@ -68,8 +71,8 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     await welcomeOut(tester);
 
-    /* Вхід стоїть першим. Далі без акаунту веде на перше питання анкети, а не
-       в день: профілю ще немає ні на телефоні, ні на сервері. */
+    /* Вхід стоїть першим і веде на перше питання анкети, а не в день: профілю
+       ще немає ні на телефоні, ні на сервері. */
     await tester.tap(find.text('Далі без акаунту'));
     await tester.pumpAndSettle();
 
@@ -88,6 +91,21 @@ void main() {
 
     await tester.tap(find.text('Готово'));
     await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+
+    /* Кінець першого запуску це не порожній день, а розмова: штора чату
+       піднімається сама, і в порожній розмові стоїть картка Нори. Пояснювати
+       порожній день нічим, і показати замість нього те, заради чого застосунок
+       ставили, краще за підказку поверх нулів. */
+    expect(
+      find.textContaining('Пиши або кажи як зазвичай'),
+      findsOneWidget,
+      reason: 'штора піднялась сама, без дотику до чату',
+    );
+
+    // Завісою назад у день: далі перевіряємо саме його.
+    await tester.tapAt(const Offset(195, 80));
+    await tester.pumpAndSettle();
 
     // Breakfast, lunch and dinner stand whether or not anything went into them.
     expect(find.text('Сніданок'), findsOneWidget);

@@ -528,7 +528,7 @@ class LFr extends L {
   }
 
   @override
-  String get barHint => 'Écris comme tu parles.';
+  String get barHint => 'Salut, je suis Nora. Écris ou parle comme d’habitude, je comprendrai.';
 
   @override
   String get barHintBorscht => 'Soupe de lentilles 300 g au déjeuner';
