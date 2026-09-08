@@ -71,10 +71,6 @@ class _AuthRouteState extends State<AuthRoute> {
               child: SignIn(
                 page: _page,
                 onPage: (p) => setState(() => _page = p),
-                /* «Далі без акаунту» тут не показуємо: людина вже користується
-                   застосунком без акаунта, і пропонувати їй це вдруге означає
-                   пропонувати не робити те, по що вона прийшла. */
-                skip: false,
                 onNew: () => _done(true),
                 onEntered: () async => _done(true),
               ),
