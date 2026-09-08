@@ -55,7 +55,7 @@ class LegalDoc {
 
 const _terms = LegalDoc(
   title: 'Terms of Use',
-  updated: '7 September 2026',
+  updated: '8 September 2026',
   lede:
       'The diary is free of charge, the assistant runs on a token allowance, all nutritional figures are estimates, and Calvi is not a medical device.',
   url: 'https://calvi.uk/terms/',
@@ -194,7 +194,7 @@ const _terms = LegalDoc(
 
 const _privacy = LegalDoc(
   title: 'Privacy Policy',
-  updated: '7 September 2026',
+  updated: '8 September 2026',
   lede:
       'Only the data the diary requires is collected, health data is processed on the basis of your explicit consent, photographs and conversations are not kept on our servers, and no personal data is sold or used for advertising.',
   url: 'https://calvi.uk/privacy/',
@@ -386,7 +386,7 @@ const _privacy = LegalDoc(
 
 const _medical = LegalDoc(
   title: 'Medical Disclaimer',
-  updated: '7 September 2026',
+  updated: '8 September 2026',
   lede:
       'Calvi keeps a record and estimates numbers. It does not diagnose, does not prescribe, and does not replace a doctor.',
   url: 'https://calvi.uk/medical/',
@@ -410,24 +410,28 @@ const _medical = LegalDoc(
           'Where an allergy is severe, the packaging in your hand remains the final word, and the Service is not a substitute for reading it.',
     ),
     LegalPart(
-      h: 'Medication and injections',
+      h: 'Medication, injections and peptides',
       p: 'The medication log records what you tell it: the substance, the amount and the time. That record is yours, and the Service draws no clinical conclusion from it.',
       list: [
+        LegalItem(
+          b: 'We recommend none of it.',
+          t: ' Reference pages describe substances and the amounts reported for them in published research, manufacturer instructions and other open sources. That is a description of what those sources say, not a scheme to follow. We DO NOT RECOMMEND, DO NOT OFFER, DO NOT ADVERTISE and DO NOT ADVISE the use of any substance named anywhere in the Service.',
+        ),
+        LegalItem(
+          b: 'Many of these substances are not medicines.',
+          t: ' Many substances people track are approved by no regulator: not by the FDA, not by the EMA, not by any other. Some are still in clinical trials. Others are sold only as research reagents, and nobody guarantees the purity or the true contents of what is sold under a given name. The regulatory status is stated at the top of every substance page, and it is there to be read before the numbers below it.',
+        ),
         LegalItem(
           b: 'No dose is ever chosen for you.',
           t: ' No part of the Service prescribes, selects, suggests or titrates a dose, and no figure it displays is a recommendation to take that amount. Choosing a dose belongs to a qualified prescriber who knows your history.',
         ),
         LegalItem(
           b: 'Arithmetic converts, it does not decide.',
-          t: ' Where the Service performs any calculation on a dose, it converts a figure you already have into another unit. The figure you start from must come from your prescriber or from the product instructions, and the result is only as correct as what you entered.',
-        ),
-        LegalItem(
-          b: 'Reference information is not a protocol.',
-          t: ' Any description of a substance, its regulatory status or the amounts reported for it in published sources is a reference, not an instruction to use it. Many substances people track are not approved as medicines by any regulator.',
+          t: ' Where the Service performs any calculation on a dose, it converts a dose you already know into syringe units. It does not select that dose, and the number it shows is not a recommendation to inject that amount. The figure you start from must come from your prescriber or from the product instructions, and the result is only as correct as what you entered.',
         ),
       ],
       tail:
-          'Do not start, stop or change any medication or injection on the basis of anything in the Service. An injection carries risk, and substances interact with each other and with existing conditions. Speak to a qualified healthcare professional first.',
+          'Do not start, stop, resume or change the substance, the dose, the schedule or the route of any medication or injection on the basis of anything you read, record or calculate in Calvi. An injection carries risk of its own, and these substances interact with each other, with medicines you have been prescribed and with conditions you already have. Speak to a qualified healthcare professional first, and if you feel unwell seek medical help.',
     ),
     LegalPart(
       h: 'Disordered eating',
