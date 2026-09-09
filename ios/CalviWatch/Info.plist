@@ -38,7 +38,5 @@
 	     питає їх сам, і текст показує теж він. -->
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Щоб записати сказане в щоденник.</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Щоб розібрати сказане на страви.</string>
 </dict>
 </plist>

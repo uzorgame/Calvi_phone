@@ -1,162 +1,98 @@
 import AVFoundation
 import Foundation
-import Speech
 
-/// Слухання на годиннику: свій мікрофон, своє розпізнавання, свій метр.
+/// Мікрофон годинника: пише сказане у файл і показує рівень, поки людина
+/// говорить.
 ///
-/// Системне диктування Apple було б безкоштовним і не просило б дозволів, але
-/// воно малює свій екран посеред нашого застосунку, і виглядає він саме як
-/// чужий. Ціна власного екрана в тому, що запис і розпізнавання доводиться
-/// вести самим.
+/// **Тут не розпізнається нічого.** На watchOS немає `Speech`, а вбудована
+/// диктовка приносить свій екран замість нашого. Тому годинник записує звук,
+/// а слова з нього робить телефон поруч, тим самим розпізнавачем і тією самою
+/// мовою, що й диктовка в застосунку: як і телефон, годинник чує тільки її.
+///
+/// Рівень для метра береться з самого запису (`averagePower`), а не з другого
+/// входу: мікрофон один, і два слухачі на ньому заважали б один одному.
 @MainActor
 final class Ears: NSObject, ObservableObject {
-  /// Рівень голосу, від нуля до одиниці. Це і є те, за чим ходить метр.
+  /// Гучність зараз, від 0 до 1. Метр читає її кожні пʼятдесят мілісекунд.
   @Published private(set) var level: Double = 0
 
-  /// Розпізнане на цю мить. Останнє значення і піде до Нори.
-  @Published private(set) var heard: String = ""
-
-  /// Чому не вийшло. Порожньо означає, що все гаразд.
+  /// Чому не вийшло почати. Порожньо означає «слухаю».
   @Published private(set) var trouble: String?
 
-  private let engine = AVAudioEngine()
-  private var recognizer: SFSpeechRecognizer?
-  private var request: SFSpeechAudioBufferRecognitionRequest?
-  private var task: SFSpeechRecognitionTask?
+  private var recorder: AVAudioRecorder?
+  private var meter: Timer?
+  private var file: URL?
 
-  /* Мова розпізнавання за мовою застосунку. Таблиця та сама, що на телефоні, і
-     тримати її треба разом із тією: телефон із польським застосунком, який
-     слухає українською моделлю, повертає кирилицею те, що йому здалося.
-     Португальська бразильська навмисно, як і там. */
-  private static let locales: [String: String] = [
-    "uk": "uk-UA", "en": "en-US", "es": "es-ES", "it": "it-IT",
-    "de": "de-DE", "fr": "fr-FR", "pt": "pt-BR", "pl": "pl-PL",
+  /* Стиснутий AAC, моно, 16 кГц, 24 кбіт/с: речення про обід це кілька
+     десятків кілобайт. Межа має значення: одне повідомлення на телефон несе не
+     більше за 64 кілобайти, і пʼятнадцять секунд на цій швидкості вміщаються
+     із запасом. */
+  private static let settings: [String: Any] = [
+    AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+    AVSampleRateKey: 16_000,
+    AVNumberOfChannelsKey: 1,
+    AVEncoderBitRateKey: 24_000,
+    AVEncoderAudioQualityKey: AVAudioQuality.medium.rawValue,
   ]
 
-  /// Локаль для мови застосунку, з відкатом на ту саму мову іншої країни.
-  ///
-  /// Мова передається двигуну навіть тоді, коли він не назвав її серед своїх:
-  /// гірше за спробу тут нічого немає, а локаль годинника це гарантовано не та
-  /// мова, якої просили.
-  static func locale(for lang: String) -> Locale {
-    let want = locales[lang] ?? "en-US"
-    let have = SFSpeechRecognizer.supportedLocales().map(\.identifier)
+  /// Стеля запису. Довше за це не скажеш про одну їжу, а файл переріс би
+  /// повідомлення.
+  private static let longest: TimeInterval = 15
 
-    if have.contains(want) { return Locale(identifier: want) }
-
-    let family = want.split(separator: "-").first.map(String.init) ?? want
-    if let near = have.first(where: { $0.hasPrefix(family) }) { return Locale(identifier: near) }
-
-    return Locale(identifier: want)
-  }
-
-  /// Питає дозволи і починає слухати. Помилка лягає в [trouble].
-  func start(lang: String) async {
-    heard = ""
+  func start() async {
     trouble = nil
     level = 0
 
-    guard await ask() else {
-      trouble = "Немає дозволу на мікрофон"
+    guard await AVAudioApplication.requestRecordPermission() else {
+      trouble = "Дозволь мікрофон у налаштуваннях"
       return
     }
-
-    let locale = Self.locale(for: lang)
-    guard let speech = SFSpeechRecognizer(locale: locale), speech.isAvailable else {
-      trouble = "Ця мова тут не розпізнається"
-      return
-    }
-    recognizer = speech
 
     do {
-      try listen(with: speech)
-    } catch {
-      trouble = "Мікрофон не відкрився"
-      stop()
-    }
-  }
+      let session = AVAudioSession.sharedInstance()
+      try session.setCategory(.record, mode: .measurement, options: [])
+      try session.setActive(true)
 
-  /// Спиняє слухання і віддає почуте. Порожньо означає, що не почули нічого.
-  @discardableResult
-  func finish() -> String {
-    stop()
-    return heard.trimmingCharacters(in: .whitespacesAndNewlines)
-  }
+      let url = FileManager.default.temporaryDirectory.appendingPathComponent("said.m4a")
+      try? FileManager.default.removeItem(at: url)
 
-  private func ask() async -> Bool {
-    let speech = await withCheckedContinuation { go in
-      SFSpeechRecognizer.requestAuthorization { go.resume(returning: $0 == .authorized) }
-    }
-    guard speech else { return false }
-
-    return await withCheckedContinuation { go in
-      AVAudioApplication.requestRecordPermission { go.resume(returning: $0) }
-    }
-  }
-
-  private func listen(with speech: SFSpeechRecognizer) throws {
-    let audio = AVAudioSession.sharedInstance()
-    /* Без додаткових опцій. `duckOthers` для запису на годиннику зайвий: він
-       стосується чужого звуку, а чужого звуку під час диктування і так немає. */
-    try audio.setCategory(.record, mode: .measurement)
-    try audio.setActive(true, options: .notifyOthersOnDeactivation)
-
-    let ask = SFSpeechAudioBufferRecognitionRequest()
-    ask.shouldReportPartialResults = true
-    /* Просимо розпізнавати на самому годиннику, якщо він уміє. Не вміє: піде
-       через мережу, і це теж робота, просто повільніша. Забороняти мережу не
-       можна, бо саме через неї працює більшість мов. */
-    ask.requiresOnDeviceRecognition = false
-    request = ask
-
-    let input = engine.inputNode
-    let format = input.outputFormat(forBus: 0)
-
-    input.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
-      ask.append(buffer)
-      guard let loud = Self.loudness(of: buffer) else { return }
-      Task { @MainActor in self?.level = loud }
-    }
-
-    engine.prepare()
-    try engine.start()
-
-    task = speech.recognitionTask(with: ask) { [weak self] result, error in
-      guard let self else { return }
-      Task { @MainActor in
-        if let words = result?.bestTranscription.formattedString { self.heard = words }
-        /* Помилку тут не показуємо: слухання спиняє людина кнопкою, і будь-яка
-           зупинка приходить сюди помилкою. Порожнє почуте скаже про це краще. */
-        if error != nil, result?.isFinal != true { self.stop() }
+      let r = try AVAudioRecorder(url: url, settings: Self.settings)
+      r.isMeteringEnabled = true
+      guard r.record(forDuration: Self.longest) else {
+        trouble = "Мікрофон не відповів"
+        return
       }
+      recorder = r
+      file = url
+
+      meter = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
+        Task { @MainActor in self?.tick() }
+      }
+    } catch {
+      trouble = "Мікрофон не відповів"
     }
   }
 
-  private func stop() {
-    engine.inputNode.removeTap(onBus: 0)
-    if engine.isRunning { engine.stop() }
-    request?.endAudio()
-    task?.cancel()
-    request = nil
-    task = nil
-    level = 0
-    try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+  private func tick() {
+    guard let r = recorder else { return }
+    r.updateMeters()
+    /* Децибели від -160 до 0 переводяться в лінійну гучність, а та стискається
+       так само, як на телефоні: тихий голос уже видно, крик не впирається в
+       стелю. */
+    let linear = pow(10, Double(r.averagePower(forChannel: 0)) / 20)
+    level = min(1, pow(linear * 6.2, 0.72))
   }
 
-  /* Гучність пачки як середньоквадратичне.
-   *
-   * Показник менший за одиницю навмисно: тихе стає помітним, а гучне не
-   * впирається в стелю з першого складу. Вухо чує саме так, не лінійно, і метр
-   * має ходити за вухом, а не за числом. */
-  private nonisolated static func loudness(of buffer: AVAudioPCMBuffer) -> Double? {
-    guard let data = buffer.floatChannelData?[0] else { return nil }
-    let n = Int(buffer.frameLength)
-    guard n > 0 else { return nil }
+  /// Зупиняє запис і віддає файл. Порожньо, коли запису не було.
+  func finish() -> URL? {
+    meter?.invalidate()
+    meter = nil
+    level = 0
 
-    var sum: Float = 0
-    for i in 0..<n { sum += data[i] * data[i] }
-    let rms = Double((sum / Float(n)).squareRoot())
-
-    return min(1, pow(rms * 6.2, 0.72))
+    guard let r = recorder else { return nil }
+    r.stop()
+    recorder = nil
+    try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+    return file
   }
 }

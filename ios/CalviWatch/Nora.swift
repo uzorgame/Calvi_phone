@@ -35,8 +35,9 @@ enum NoraTrouble: Error {
 enum Nora {
   private static let host = URL(string: "https://calvi.uk")!
 
-  static func say(_ text: String, token: String, lang: String) async throws -> Answer {
-    var request = URLRequest(url: host.appendingPathComponent("v1/chat"))
+  /// Запит на сервер із усім, що телефон шле завжди.
+  private static func post(_ path: String, token: String) -> URLRequest {
+    var request = URLRequest(url: host.appendingPathComponent(path))
     request.httpMethod = "POST"
     request.setValue("application/json", forHTTPHeaderField: "content-type")
     request.setValue("Bearer \(token)", forHTTPHeaderField: "authorization")
@@ -50,6 +51,34 @@ enum Nora {
     request.setValue("ios", forHTTPHeaderField: "x-calvi-platform")
 
     request.timeoutInterval = 30
+    return request
+  }
+
+  /// Відповідь сервера як JSON, або та сама трійка помилок, що й у чаті.
+  private static func send(_ request: URLRequest) async throws -> [String: Any] {
+    let data: Data
+    let response: URLResponse
+    do {
+      (data, response) = try await URLSession.shared.data(for: request)
+    } catch {
+      throw NoraTrouble.offline
+    }
+
+    let code = (response as? HTTPURLResponse)?.statusCode ?? 0
+    guard code == 200 else {
+      /* Сервер каже про порожній баланс окремим кодом. Для людини це не помилка,
+         а стан: запис рукою в телефоні працює й далі. */
+      throw code == 402 || code == 429 ? NoraTrouble.dry : NoraTrouble.refused
+    }
+
+    guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+      throw NoraTrouble.refused
+    }
+    return json
+  }
+
+  static func say(_ text: String, token: String, lang: String) async throws -> Answer {
+    var request = post("v1/chat", token: token)
 
     let now = Date()
     let day = DateFormatter()
@@ -72,24 +101,7 @@ enum Nora {
     ]
     request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
-    let data: Data
-    let response: URLResponse
-    do {
-      (data, response) = try await URLSession.shared.data(for: request)
-    } catch {
-      throw NoraTrouble.offline
-    }
-
-    let code = (response as? HTTPURLResponse)?.statusCode ?? 0
-    guard code == 200 else {
-      /* Сервер каже про порожній баланс окремим кодом. Для людини це не помилка,
-         а стан: запис рукою в телефоні працює й далі. */
-      throw code == 402 || code == 429 ? NoraTrouble.dry : NoraTrouble.refused
-    }
-
-    guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-      throw NoraTrouble.refused
-    }
+    let json = try await send(request)
 
     let logged = (json["logged"] as? [[String: Any]] ?? []).map {
       Dish(

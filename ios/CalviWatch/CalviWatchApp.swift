@@ -160,12 +160,15 @@ struct Watch: View {
 
   // MARK: Аналізує
 
-  /* Почуте на екрані одразу, ще до відповіді. Без миттєвого підтвердження людина
-     каже вдруге і отримує подвійний запис. */
+  /* Почуте на екрані одразу, щойно сервер його повернув, ще до відповіді про
+     їжу. Без підтвердження людина каже вдруге і отримує подвійний запис. Поки
+     слова ще в дорозі, картки немає: порожні лапки читались би як «не почула». */
   private func analysing(_ heard: String) -> some View {
     VStack(spacing: 0) {
-      Card { Text("«\(heard)»").font(.footnote).foregroundStyle(Palette.ink) }
-        .padding(.top, w * 0.05)
+      if !heard.isEmpty {
+        Card { Text("«\(heard)»").font(.footnote).foregroundStyle(Palette.ink) }
+          .padding(.top, w * 0.05)
+      }
       Spacer(minLength: 0)
 
       /* Індикатор це саме слово, а не значок поруч із ним: крутилка казала б те
@@ -239,22 +242,45 @@ struct Watch: View {
 
   private func listen() async {
     step = .hearing
-    await ears.start(lang: link.lang)
+    await ears.start()
     if let why = ears.trouble { step = .trouble(why) }
   }
 
   private func send() async {
-    let heard = ears.finish()
-
-    /* Порожньо означає, що розпізнавання не встигло або не почуло нічого. Мовчки
-       вертатись на початок не можна: людина щойно говорила, і порожній екран
-       читається як «застосунок зламався», а не як «скажи ще раз». */
-    guard !heard.isEmpty else {
+    guard let file = ears.finish() else {
       step = .trouble("Не почула. Скажи ще раз")
       return
     }
     guard let token = link.token else {
       step = .trouble("Відкрий Calvi на телефоні")
+      return
+    }
+
+    /* Спершу слова від телефона, потім їжа від сервера. Почуте стає на екран,
+       щойно воно є, а не разом із відповіддю про калорії. */
+    step = .analysing("")
+
+    let heard: String
+    do {
+      heard = try await link.hear(file, lang: link.lang)
+    } catch LinkTrouble.far {
+      /* Звук у чергу не кладеться: сказане без телефона поруч втратило б свій
+         момент, а файл на годиннику нема де тримати. */
+      step = .trouble("Телефон далеко. Підійди до нього і скажи ще раз")
+      return
+    } catch LinkTrouble.failed(let why) {
+      step = .trouble(why)
+      return
+    } catch {
+      step = .trouble("Телефон не відповів")
+      return
+    }
+
+    /* Порожньо означає, що не почула нічого або почула не тією мовою. Мовчки
+       вертатись на початок не можна: людина щойно говорила, і порожній екран
+       читається як «застосунок зламався», а не як «скажи ще раз». */
+    guard !heard.isEmpty else {
+      step = .trouble("Не почула. Скажи ще раз")
       return
     }
 

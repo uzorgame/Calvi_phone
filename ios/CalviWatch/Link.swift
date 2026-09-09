@@ -97,6 +97,52 @@ final class Link: NSObject, ObservableObject {
   }
 }
 
+/// Чому телефон не відповів словами.
+enum LinkTrouble: Error {
+  /// Телефона немає поруч, або він вимкнений.
+  case far
+  /// Телефон відповів, але не словами: без дозволу, без мови, без мережі.
+  case failed(String)
+}
+
+extension Link {
+  /// Слова зі звуку, від телефона.
+  ///
+  /// Звук іде на айфон разом із мовою застосунку, і той розпізнає тим самим
+  /// розпізнавачем Apple, що й диктовка в застосунку, тільки цією мовою.
+  /// Застосунок на телефоні відкривати не треба: iOS підіймає його у фоні
+  /// сама, і телефон може лишатись заблокованим. Потрібно лише, щоб він був
+  /// поруч, у межах Bluetooth або тієї самої мережі.
+  func hear(_ file: URL, lang: String) async throws -> String {
+    let session = WCSession.default
+    guard session.activationState == .activated, session.isReachable else { throw LinkTrouble.far }
+    guard let audio = try? Data(contentsOf: file), !audio.isEmpty else {
+      throw LinkTrouble.failed("Не почула. Скажи ще раз")
+    }
+
+    return try await withCheckedThrowingContinuation { next in
+      session.sendMessage(
+        ["audio": audio, "lang": lang],
+        replyHandler: { reply in
+          if let text = reply["text"] as? String {
+            next.resume(returning: text.trimmingCharacters(in: .whitespacesAndNewlines))
+          } else {
+            next.resume(throwing: LinkTrouble.failed(reply["error"] as? String ?? "Не почула. Скажи ще раз"))
+          }
+        },
+        errorHandler: { error in
+          /* Не дістав або не дочекався: для людини це одне «телефон далеко».
+             Решта помилок каналу теж лягає сюди, бо порада та сама: підійти. */
+          let code = (error as? WCError)?.code
+          next.resume(throwing: code == .notReachable || code == .messageReplyTimedOut
+            ? LinkTrouble.far
+            : LinkTrouble.failed("Телефон не відповів"))
+        }
+      )
+    }
+  }
+}
+
 extension Link: WCSessionDelegate {
   nonisolated func session(
     _ session: WCSession,
