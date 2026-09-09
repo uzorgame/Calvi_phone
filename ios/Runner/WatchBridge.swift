@@ -238,10 +238,22 @@ enum Hearing {
       for i in 0..<frames { samples[i] *= gain }
     }
 
-    let out = url.deletingPathExtension().appendingPathExtension("caf")
+    /* Звичайний WAV, 16 біт, канали впереміш: найпростіший формат, який
+       читає будь-що. Налаштування буфера з плавучою комою й роздільними
+       каналами для файлу не годяться, файл їх може не прийняти. */
+    let out = url.deletingPathExtension().appendingPathExtension("wav")
+    let settings: [String: Any] = [
+      AVFormatIDKey: Int(kAudioFormatLinearPCM),
+      AVSampleRateKey: format.sampleRate,
+      AVNumberOfChannelsKey: Int(format.channelCount),
+      AVLinearPCMBitDepthKey: 16,
+      AVLinearPCMIsFloatKey: false,
+      AVLinearPCMIsBigEndianKey: false,
+      AVLinearPCMIsNonInterleaved: false,
+    ]
     guard
       let output = try? AVAudioFile(
-        forWriting: out, settings: format.settings, commonFormat: .pcmFormatFloat32, interleaved: false),
+        forWriting: out, settings: settings, commonFormat: .pcmFormatFloat32, interleaved: false),
       (try? output.write(from: buffer)) != nil
     else { return nil }
     return out

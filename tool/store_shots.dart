@@ -85,7 +85,7 @@ void shots(String lang) {
         theme: calviLightTheme,
         scrollBehavior: const CalviScroll(),
         home: CalviGround(
-          child: TodayScreen(onSettings: () {}, onMeds: () {}, openCard: open),
+          child: TodayScreen(onSettings: () {}, onMeds: () {}, onPlan: () {}, openCard: open),
         ),
       ),
     );

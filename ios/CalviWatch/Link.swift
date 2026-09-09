@@ -32,6 +32,12 @@ final class Link: NSObject, ObservableObject {
   /// Слова, на які годинник ще чекає від телефона, за номером запису.
   private var pending: [String: CheckedContinuation<String, Error>] = [:]
 
+  /// Слова, що прийшли раніше, ніж годинник почав на них чекати. Помилку без
+  /// розпізнавання телефон шле тієї ж миті, що й «прийняв», і друге
+  /// повідомлення може обігнати перше; загубити його означало б чекати
+  /// п'ятнадцять секунд і сказати «не відповів» замість справжньої причини.
+  private var early: [String: Result<String, Error>] = [:]
+
   /// Скільки чекати на слова. Холодний старт застосунку у фоні плюс саме
   /// розпізнавання вкладаються з запасом; довше означає, що телефон не відповість.
   static let patience: Duration = .seconds(15)
@@ -174,6 +180,7 @@ final class Link: NSObject, ObservableObject {
       )
     }
 
+    if let result = early.removeValue(forKey: id) { return try result.get() }
     return try await withCheckedThrowingContinuation { next in
       pending[id] = next
       Task { [weak self] in
@@ -191,10 +198,16 @@ final class Link: NSObject, ObservableObject {
 
   fileprivate func heard(_ message: [String: Any]) {
     guard let id = message["id"] as? String else { return }
+    let result: Result<String, Error>
     if let text = message["heard"] as? String {
-      settle(id, with: .success(text.trimmingCharacters(in: .whitespacesAndNewlines)))
+      result = .success(text.trimmingCharacters(in: .whitespacesAndNewlines))
     } else {
-      settle(id, with: .failure(LinkTrouble.failed(message["error"] as? String ?? Words.of(lang).notHeard)))
+      result = .failure(LinkTrouble.failed(message["error"] as? String ?? Words.of(lang).notHeard))
+    }
+    if pending[id] != nil {
+      settle(id, with: result)
+    } else {
+      early[id] = result
     }
   }
 
