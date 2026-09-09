@@ -24,10 +24,6 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
-	<key>UIRequiredDeviceCapabilities</key>
-	<array>
-		<string>watch-companion</string>
-	</array>
 	<!-- Кому належить цей годинниковий застосунок. Без цього рядка він не
 	     ставиться разом із телефонним і не бачить його пари. -->
 	<key>WKCompanionAppBundleIdentifier</key>
