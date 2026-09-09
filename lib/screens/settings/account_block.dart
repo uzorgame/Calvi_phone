@@ -263,19 +263,16 @@ class _SignedIn extends StatelessWidget {
 
           /* Годинник під акаунтом, бо він живе цим акаунтом: токен, мова і
              числа дня йдуть на нього звідси. Рядок є лише тоді, коли годинник
-             у парі; телефону без годинника нема чого казати. */
+             у парі і Calvi на ньому стоїть; в усіх інших випадках казати нема
+             чого, і рядка немає. */
           if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS)
             FutureBuilder<WatchStatus?>(
               future: Watch.status(),
               builder: (context, snap) {
                 final w = snap.data;
-                if (w == null || !w.paired) return const SizedBox.shrink();
+                if (w == null || !w.paired || !w.installed) return const SizedBox.shrink();
                 final l = L.of(context);
-                final word = !w.installed
-                    ? l.watchNotInstalled
-                    : w.current
-                    ? l.watchLinked
-                    : l.watchWaiting;
+                final word = l.watchLinked;
                 return Container(
                   margin: const EdgeInsets.only(top: 12),
                   padding: const EdgeInsets.only(top: 12),

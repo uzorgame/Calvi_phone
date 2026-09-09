@@ -54,11 +54,7 @@
 
   "accountWatch": "Apple Watch",
 
-  "watchLinked": "conectado, datos al día",
-
-  "watchWaiting": "conectado, esperando datos",
-
-  "watchNotInstalled": "app no instalada en el reloj",
+  "watchLinked": "conectado",
   "setUnset": "sin definir",
 
   "setFreeTierShort": "Para los defensores de Ucrania, y para quienes sirven en las Fuerzas Armadas, el Servicio Estatal de Emergencias, DTEK, personal médico, voluntarios y docentes en zonas de primera línea, el plan de pago es GRATIS",

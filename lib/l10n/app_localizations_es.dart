@@ -2759,13 +2759,7 @@ class LEs extends L {
   String get unitsVolume => 'Agua';
 
   @override
-  String get watchLinked => 'conectado, datos al día';
-
-  @override
-  String get watchNotInstalled => 'app no instalada en el reloj';
-
-  @override
-  String get watchWaiting => 'conectado, esperando datos';
+  String get watchLinked => 'conectado';
 
   @override
   String waterGlasses(int glasses) {

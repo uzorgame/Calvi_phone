@@ -47,11 +47,7 @@
 
   "accountWatch": "Apple Watch",
 
-  "watchLinked": "połączony, dane aktualne",
-
-  "watchWaiting": "połączony, czeka na dane",
-
-  "watchNotInstalled": "aplikacja nie jest zainstalowana na zegarku",
+  "watchLinked": "połączony",
   "setUnset": "nie podano",
 
   "setFreeTierShort": "Dla obrońców Ukrainy, pracowników Sił Zbrojnych, służb ratunkowych, DTEK, medyków, wolontariuszy i nauczycieli stref przyfrontowych plan jest BEZPŁATNY",

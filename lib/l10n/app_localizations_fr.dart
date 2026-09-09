@@ -2774,13 +2774,7 @@ class LFr extends L {
   String get unitsVolume => 'Eau';
 
   @override
-  String get watchLinked => 'connectée, données à jour';
-
-  @override
-  String get watchNotInstalled => 'app non installée sur la montre';
-
-  @override
-  String get watchWaiting => 'connectée, en attente des données';
+  String get watchLinked => 'connectée';
 
   @override
   String waterGlasses(int glasses) {

@@ -2762,13 +2762,7 @@ class LIt extends L {
   String get unitsVolume => 'Acqua';
 
   @override
-  String get watchLinked => 'collegato, dati aggiornati';
-
-  @override
-  String get watchNotInstalled => 'app non installata sullo smartwatch';
-
-  @override
-  String get watchWaiting => 'collegato, in attesa dei dati';
+  String get watchLinked => 'collegato';
 
   @override
   String waterGlasses(int glasses) {

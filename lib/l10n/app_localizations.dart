@@ -4983,20 +4983,8 @@ abstract class L {
   /// No description provided for @watchLinked.
   ///
   /// In en, this message translates to:
-  /// **'connected, data is current'**
+  /// **'connected'**
   String get watchLinked;
-
-  /// No description provided for @watchNotInstalled.
-  ///
-  /// In en, this message translates to:
-  /// **'app not installed on the watch'**
-  String get watchNotInstalled;
-
-  /// No description provided for @watchWaiting.
-  ///
-  /// In en, this message translates to:
-  /// **'connected, waiting for data'**
-  String get watchWaiting;
 
   /// No description provided for @waterGlasses.
   ///

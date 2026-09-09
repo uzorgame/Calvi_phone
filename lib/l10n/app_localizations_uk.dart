@@ -2773,13 +2773,7 @@ class LUk extends L {
   String get unitsVolume => 'Вода';
 
   @override
-  String get watchLinked => 'підключено, дані актуальні';
-
-  @override
-  String get watchNotInstalled => 'застосунок на годиннику не встановлено';
-
-  @override
-  String get watchWaiting => 'підключено, чекає на дані';
+  String get watchLinked => 'підключено';
 
   @override
   String waterGlasses(int glasses) {

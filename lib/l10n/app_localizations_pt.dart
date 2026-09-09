@@ -2762,13 +2762,7 @@ class LPt extends L {
   String get unitsVolume => 'Água';
 
   @override
-  String get watchLinked => 'conectado, dados atualizados';
-
-  @override
-  String get watchNotInstalled => 'app não instalado no relógio';
-
-  @override
-  String get watchWaiting => 'conectado, aguardando dados';
+  String get watchLinked => 'conectado';
 
   @override
   String waterGlasses(int glasses) {

@@ -2757,13 +2757,7 @@ class LEn extends L {
   String get unitsVolume => 'Water';
 
   @override
-  String get watchLinked => 'connected, data is current';
-
-  @override
-  String get watchNotInstalled => 'app not installed on the watch';
-
-  @override
-  String get watchWaiting => 'connected, waiting for data';
+  String get watchLinked => 'connected';
 
   @override
   String waterGlasses(int glasses) {

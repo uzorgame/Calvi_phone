@@ -54,11 +54,7 @@
 
   "accountWatch": "Apple Watch",
 
-  "watchLinked": "verbunden, Daten aktuell",
-
-  "watchWaiting": "verbunden, wartet auf Daten",
-
-  "watchNotInstalled": "App nicht auf der Uhr installiert",
+  "watchLinked": "verbunden",
   "setUnset": "nicht gesetzt",
 
   "setFreeTierShort": "Für die Verteidiger der Ukraine und für alle, die bei den Streitkräften, beim staatlichen Rettungsdienst, bei DTEK, als medizinisches Personal, als Freiwillige oder als Lehrkräfte in frontnahen Gebieten arbeiten, ist der Bezahltarif KOSTENLOS",

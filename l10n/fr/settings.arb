@@ -54,11 +54,7 @@
 
   "accountWatch": "Apple Watch",
 
-  "watchLinked": "connectée, données à jour",
-
-  "watchWaiting": "connectée, en attente des données",
-
-  "watchNotInstalled": "app non installée sur la montre",
+  "watchLinked": "connectée",
   "setUnset": "non défini",
 
   "setFreeTierShort": "Pour les défenseurs de l'Ukraine, et pour celles et ceux qui servent dans les Forces armées, au Service national d'urgence, chez DTEK, pour le personnel médical, les bénévoles et les enseignants des zones proches du front, l'offre payante est GRATUITE",

@@ -2781,13 +2781,7 @@ class LPl extends L {
   String get unitsVolume => 'Woda';
 
   @override
-  String get watchLinked => 'połączony, dane aktualne';
-
-  @override
-  String get watchNotInstalled => 'aplikacja nie jest zainstalowana na zegarku';
-
-  @override
-  String get watchWaiting => 'połączony, czeka na dane';
+  String get watchLinked => 'połączony';
 
   @override
   String waterGlasses(int glasses) {

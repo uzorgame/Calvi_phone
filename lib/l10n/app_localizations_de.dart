@@ -2772,13 +2772,7 @@ class LDe extends L {
   String get unitsVolume => 'Wasser';
 
   @override
-  String get watchLinked => 'verbunden, Daten aktuell';
-
-  @override
-  String get watchNotInstalled => 'App nicht auf der Uhr installiert';
-
-  @override
-  String get watchWaiting => 'verbunden, wartet auf Daten';
+  String get watchLinked => 'verbunden';
 
   @override
   String waterGlasses(int glasses) {
