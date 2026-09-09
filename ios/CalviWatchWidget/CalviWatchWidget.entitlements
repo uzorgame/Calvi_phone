@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Та сама група, що в застосунку годинника, і першою: сюди застосунок
+	     кладе залишок дня, звідси його читає ускладнення. -->
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)com.calvi.calvi.watch</string>
+	</array>
+</dict>
+</plist>

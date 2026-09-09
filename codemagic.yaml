@@ -93,6 +93,14 @@ workflows:
             --certificate-key=@env:CERTIFICATE_PRIVATE_KEY \
             --create
 
+          # Ускладнення на циферблаті: третій ідентифікатор і третій профіль.
+          # Це розширення всередині годинникового застосунку, і підписується
+          # воно своїм профілем, як і сам застосунок.
+          app-store-connect fetch-signing-files "${BUNDLE_ID}.watchkitapp.widget" \
+            --type IOS_APP_STORE \
+            --certificate-key=@env:CERTIFICATE_PRIVATE_KEY \
+            --create
+
           keychain add-certificates
           # Проставляє профіль у проєкт Xcode, щоб не робити цього руками.
           xcode-project use-profiles

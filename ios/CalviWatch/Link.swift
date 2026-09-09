@@ -1,5 +1,6 @@
 import Foundation
 import WatchConnectivity
+import WidgetKit
 
 /// Те, що телефон розповів годиннику, і що годинник памʼятає між запусками.
 ///
@@ -83,6 +84,7 @@ final class Link: NSObject, ObservableObject {
   func spend(_ kcal: Int) {
     left -= kcal
     disk.set(left, forKey: "left")
+    showOnFace()
   }
 
   /// Токен більше не годиться: сервер відмовив ним. Годинник повертається в
@@ -90,6 +92,20 @@ final class Link: NSObject, ObservableObject {
   func forget() {
     token = nil
     disk.removeObject(forKey: "token")
+    showOnFace()
+  }
+
+  /* Залишок дня для ускладнення на циферблаті. Воно живе в окремому
+     розширенні і саме нічого не знає: застосунок кладе числа в спільний
+     ланцюжок ключів і просить перемалювати. Без токена циферблат порожній,
+     а не показує вчорашнє число людини, яка вийшла. */
+  private func showOnFace() {
+    if token == nil {
+      Face.clear()
+    } else {
+      Face.write(Face.State(left: left, norm: norm))
+    }
+    WidgetCenter.shared.reloadAllTimelines()
   }
 
   private func load() {
@@ -137,6 +153,7 @@ final class Link: NSObject, ObservableObject {
       direction = v
       disk.set(v, forKey: "direction")
     }
+    showOnFace()
   }
 
   // MARK: Слова від телефона

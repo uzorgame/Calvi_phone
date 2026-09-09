@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Спільний ланцюжок ключів із ускладненням на циферблаті. Група під
+	     префіксом команди входить у профіль сама, окремої здатності в порталі
+	     не треба. Першою в списку, бо саме в першу групу йде запис без адреси. -->
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)com.calvi.calvi.watch</string>
+	</array>
+</dict>
+</plist>
