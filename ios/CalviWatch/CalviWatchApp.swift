@@ -402,7 +402,7 @@ struct Watch: View {
     let key = UUID().uuidString
 
     do {
-      let answer = try await Nora.say(heard, key: key, token: token, lang: link.lang)
+      let answer = try await log(heard, key: key, token: token)
       logs += 1
       link.spend(answer.dishes.reduce(0) { $0 + $1.kcal })
       step = .done(answer.dishes)
@@ -412,12 +412,28 @@ struct Watch: View {
       Queue.add(heard, key: key)
       step = .queued(heard)
     } catch NoraTrouble.stale {
-      /* Сервер не впізнав токен: людина вийшла на телефоні або токен протух.
-         Годинник забуває його сам, і головний екран каже, що робити. */
+      /* Сервер не впізнав і свіжий токен: людина вийшла на телефоні або
+         акаунта більше немає. Годинник забуває його сам. */
       link.forget()
       step = .trouble(t.openPhone)
+    } catch LinkTrouble.far {
+      step = .trouble(t.phoneFar)
+    } catch LinkTrouble.failed(let why) {
+      step = .trouble(why)
     } catch {
       step = .trouble(t.serverSilent)
+    }
+  }
+
+  /// Запис із одним оновленням токена. На 401 годинник просить у телефона
+  /// свіжий і повторює те саме речення з тим самим ключем: сервер, який уже
+  /// записав його, не запише вдруге.
+  private func log(_ text: String, key: String, token: String) async throws -> Answer {
+    do {
+      return try await Nora.say(text, key: key, token: token, lang: link.lang)
+    } catch NoraTrouble.stale {
+      let fresh = try await link.renew()
+      return try await Nora.say(text, key: key, token: fresh, lang: link.lang)
     }
   }
 }

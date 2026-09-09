@@ -58,7 +58,60 @@ class CalviApi {
   /// handed back in, so the api holds no session of its own.
   String? token;
 
+  /* The session behind the access token, and where a fresh access token goes.
+     Both optional: without them the api still works, it just cannot outlive
+     its token. The access token lasts thirty days, the session a year, and
+     nobody should see the sign-in screen again because a month has passed. */
+  String? refreshToken;
+  Future<void> Function(String access)? onAccess;
+
   void close() => _client.close();
+
+  /// A fresh access token by the session. A 401 here means the session itself
+  /// is gone: expired, revoked, or the account deleted. Only signing in helps.
+  Future<String> refresh() async {
+    final session = refreshToken;
+    if (session == null) throw const ApiFailure(code: 'unauthorized', status: 401);
+    final body = await _post('/v1/auth/refresh', {'refresh_token': session}, auth: false);
+    final access = body['access_token'] as String;
+    token = access;
+    await onAccess?.call(access);
+    return access;
+  }
+
+  /// Whether the token has less than twenty of its thirty days left, so a
+  /// phone opened at least once a month never runs into the edge. Unreadable
+  /// tokens count as fine: the server will say otherwise with a 401.
+  static bool fading(String jwt) {
+    final parts = jwt.split('.');
+    if (parts.length != 3) return false;
+    try {
+      final claims =
+          jsonDecode(utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))))
+              as Map<String, dynamic>;
+      final exp = claims['exp'];
+      if (exp is! int) return false;
+      final left = exp - DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      return left < 20 * 24 * 60 * 60;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /* An authorised request, repeated once with a fresh token when the server
+     answered 401. The closure reads `token` anew, so the retry carries the new
+     one. If refreshing fails for any reason the original answer stands: the
+     caller already knows what a 401 means, and no network is no network. */
+  Future<http.Response> _signed(Future<http.Response> Function() go) async {
+    final res = await go();
+    if (res.statusCode != 401 || refreshToken == null) return res;
+    try {
+      await refresh();
+    } on ApiFailure {
+      return res;
+    }
+    return go();
+  }
 
   /// Asks for an account of this device's own.
   ///
@@ -514,12 +567,14 @@ class CalviApi {
   Future<Map<String, dynamic>> _get(String path) async {
     final http.Response res;
     try {
-      res = await _client
-          .get(
-            base.resolve(path),
-            headers: {..._client_, if (token != null) 'authorization': 'Bearer $token'},
-          )
-          .timeout(timeout);
+      res = await _signed(
+        () => _client
+            .get(
+              base.resolve(path),
+              headers: {..._client_, if (token != null) 'authorization': 'Bearer $token'},
+            )
+            .timeout(timeout),
+      );
     } on TimeoutException {
       throw const ApiFailure.slow();
     } catch (e) {
@@ -539,17 +594,19 @@ class CalviApi {
     bool auth = true,
     Duration? wait,
   }) async {
-    final headers = {
+    Map<String, String> headers() => {
       ..._client_,
       'content-type': 'application/json',
       if (auth && token != null) 'authorization': 'Bearer $token',
     };
+    Future<http.Response> go() => _client
+        .post(base.resolve(path), headers: headers(), body: jsonEncode(body))
+        .timeout(wait ?? timeout);
 
     final http.Response res;
     try {
-      res = await _client
-          .post(base.resolve(path), headers: headers, body: jsonEncode(body))
-          .timeout(wait ?? timeout);
+      // The refresh call itself goes unsigned, so it can never chase its own tail.
+      res = await (auth ? _signed(go) : go());
     } on TimeoutException {
       /* Терпіння скінчилось, але мережа була. Це різні біди й різні поради:
          «зачекай» проти «увімкни інтернет». */
@@ -577,12 +634,14 @@ class CalviApi {
   Future<Map<String, dynamic>> eraseDiary() async {
     final http.Response res;
     try {
-      res = await _client
-          .delete(
-            base.resolve('/v1/diary'),
-            headers: {..._client_, if (token != null) 'authorization': 'Bearer $token'},
-          )
-          .timeout(timeout);
+      res = await _signed(
+        () => _client
+            .delete(
+              base.resolve('/v1/diary'),
+              headers: {..._client_, if (token != null) 'authorization': 'Bearer $token'},
+            )
+            .timeout(timeout),
+      );
     } on TimeoutException {
       throw const ApiFailure.slow();
     } catch (e) {
@@ -606,17 +665,19 @@ class CalviApi {
   Future<Map<String, dynamic>> _put(String path, Map<String, dynamic> body) async {
     final http.Response res;
     try {
-      res = await _client
-          .put(
-            base.resolve(path),
-            headers: {
-              ..._client_,
-              'content-type': 'application/json',
-              if (token != null) 'authorization': 'Bearer $token',
-            },
-            body: jsonEncode(body),
-          )
-          .timeout(timeout);
+      res = await _signed(
+        () => _client
+            .put(
+              base.resolve(path),
+              headers: {
+                ..._client_,
+                'content-type': 'application/json',
+                if (token != null) 'authorization': 'Bearer $token',
+              },
+              body: jsonEncode(body),
+            )
+            .timeout(timeout),
+      );
     } on TimeoutException {
       throw const ApiFailure.slow();
     } catch (e) {

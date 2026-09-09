@@ -187,17 +187,29 @@ enum Queue {
   }
 
   /// Пробує віддати все, що чекало. Мовчить, коли чекати нема чого.
+  ///
+  /// На 401 годинник просить у телефона свіжий токен і йде далі з ним. Черга
+  /// зникає лише тоді, коли телефон сказав, що людини більше немає: тоді
+  /// годинник уже забув токен, і сказане нікому не належить.
+  @MainActor
   static func flush(token: String, lang: String) async {
     let all = waiting
     guard !all.isEmpty else { return }
 
+    var token = token
+    var renewed = false
     for one in all {
       do {
         _ = try await Nora.say(one.text, key: one.key, token: token, lang: lang)
       } catch NoraTrouble.stale {
-        // Ця людина вже вийшла: її черга нікому не потрібна.
-        clear()
-        return
+        guard !renewed, let fresh = try? await Link.shared.renew() else {
+          if Link.shared.token == nil { clear() }
+          return
+        }
+        renewed = true
+        token = fresh
+        // Те саме речення з тим самим ключем: сервер не запише його двічі.
+        guard (try? await Nora.say(one.text, key: one.key, token: token, lang: lang)) != nil else { return }
       } catch {
         // Мережі досі немає: лишаємо чергу як є і спробуємо наступного разу.
         return

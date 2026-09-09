@@ -21,7 +21,10 @@ import 'sync_repository.dart';
 /// for anything and never shows its progress: the local database is what the
 /// screens read, and this only makes sure the same rows exist on the server.
 class SyncService with WidgetsBindingObserver {
-  SyncService(this.db, {CalviApi? api}) : _api = api ?? CalviApi(base: Uri.parse(apiBase));
+  SyncService(this.db, {CalviApi? api}) : _api = api ?? CalviApi(base: Uri.parse(apiBase)) {
+    // A renewed access token lands in the same row the rest of the app reads.
+    _api.onAccess = db.syncDao.setAccessToken;
+  }
 
   final CalviDb db;
   final CalviApi _api;

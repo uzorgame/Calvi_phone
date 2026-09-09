@@ -32,6 +32,8 @@ struct Words {
   let notHeard: String
   let phoneFar: String
   let phoneSilent: String
+  /// Телефон поруч, але сам без мережі: свіжий токен узяти нема звідки.
+  let phoneOffline: String
   let serverSilent: String
   let micDenied: String
   let micFailed: String
@@ -63,6 +65,7 @@ struct Words {
       notHeard: "Не почула. Скажи ще раз",
       phoneFar: "Телефон далеко. Підійди до нього і скажи ще раз",
       phoneSilent: "Телефон не відповів",
+      phoneOffline: "Телефон без мережі",
       serverSilent: "Сервер не відповів",
       micDenied: "Дозволь мікрофон у налаштуваннях",
       micFailed: "Мікрофон не відповів",
@@ -87,6 +90,7 @@ struct Words {
       notHeard: "Did not catch that. Say it again",
       phoneFar: "Phone is out of reach. Move closer and say it again",
       phoneSilent: "Phone did not answer",
+      phoneOffline: "The phone has no network",
       serverSilent: "Server did not answer",
       micDenied: "Allow the microphone in Settings",
       micFailed: "Microphone did not respond",
@@ -111,6 +115,7 @@ struct Words {
       notHeard: "No te oí. Dilo otra vez",
       phoneFar: "El teléfono está lejos. Acércate y dilo otra vez",
       phoneSilent: "El teléfono no respondió",
+      phoneOffline: "El teléfono no tiene red",
       serverSilent: "El servidor no respondió",
       micDenied: "Permite el micrófono en Ajustes",
       micFailed: "El micrófono no respondió",
@@ -135,6 +140,7 @@ struct Words {
       notHeard: "Non ho sentito. Ripeti",
       phoneFar: "Il telefono è lontano. Avvicinati e ripeti",
       phoneSilent: "Il telefono non ha risposto",
+      phoneOffline: "Il telefono è senza rete",
       serverSilent: "Il server non ha risposto",
       micDenied: "Consenti il microfono nelle Impostazioni",
       micFailed: "Il microfono non ha risposto",
@@ -159,6 +165,7 @@ struct Words {
       notHeard: "Nicht verstanden. Sag es noch einmal",
       phoneFar: "Das iPhone ist außer Reichweite. Geh näher und sag es noch einmal",
       phoneSilent: "Das iPhone hat nicht geantwortet",
+      phoneOffline: "Das Telefon hat kein Netz",
       serverSilent: "Der Server hat nicht geantwortet",
       micDenied: "Erlaube das Mikrofon in den Einstellungen",
       micFailed: "Das Mikrofon hat nicht reagiert",
@@ -183,6 +190,7 @@ struct Words {
       notHeard: "Je n’ai pas entendu. Répète",
       phoneFar: "Le téléphone est trop loin. Rapproche-toi et répète",
       phoneSilent: "Le téléphone n’a pas répondu",
+      phoneOffline: "Le téléphone n’a pas de réseau",
       serverSilent: "Le serveur n’a pas répondu",
       micDenied: "Autorise le micro dans Réglages",
       micFailed: "Le micro n’a pas répondu",
@@ -207,6 +215,7 @@ struct Words {
       notHeard: "Não ouvi. Diga de novo",
       phoneFar: "O telefone está longe. Aproxime-se e diga de novo",
       phoneSilent: "O telefone não respondeu",
+      phoneOffline: "O telefone está sem rede",
       serverSilent: "O servidor não respondeu",
       micDenied: "Permita o microfone nos Ajustes",
       micFailed: "O microfone não respondeu",
@@ -231,6 +240,7 @@ struct Words {
       notHeard: "Nie usłyszałam. Powtórz",
       phoneFar: "Telefon jest daleko. Podejdź bliżej i powtórz",
       phoneSilent: "Telefon nie odpowiedział",
+      phoneOffline: "Telefon bez sieci",
       serverSilent: "Serwer nie odpowiedział",
       micDenied: "Zezwól na mikrofon w Ustawieniach",
       micFailed: "Mikrofon nie odpowiedział",

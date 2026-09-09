@@ -65,6 +65,18 @@ class SyncRepository {
 
     if (state.userId != null && state.accessToken != null) {
       api.token = state.accessToken;
+      api.refreshToken = state.refreshToken;
+      /* Ahead of the edge, not at it: a token with under twenty days left is
+         renewed now, while the phone is here and online, so neither it nor
+         the watch ever meets a 401 just because a month has passed. A failed
+         renewal is not an error yet; the next request will say if it is. */
+      if (state.refreshToken != null && CalviApi.fading(state.accessToken!)) {
+        try {
+          await api.refresh();
+        } on ApiFailure {
+          // Offline, or the session is gone: the 401 that follows says which.
+        }
+      }
       /* Магазин теж має знати цей акаунт, і саме тут, а не лише при вході:
          більшість людей ніколи не входить, вони просто відкрили застосунок і
          отримали акаунт пристрою. Купувати їм ніхто не забороняв. */
@@ -82,6 +94,7 @@ class SyncRepository {
       );
       await db.syncDao.putTokens(balance: account.balance, unlimited: account.unlimited);
       api.token = account.accessToken;
+      api.refreshToken = account.refreshToken;
       await Billing.identify(account.userId);
       return true;
     } on ApiFailure {

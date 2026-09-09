@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import 'remote/config.dart';
+
 /// Що телефон розповідає годиннику.
 ///
 /// Годинник це окремий застосунок: він не бачить ні наших налаштувань, ні бази,
@@ -80,6 +82,10 @@ class Watch {
     /// Where the person is heading: lose, keep, gain. The watch uses it to
     /// decide when the day already reads "plan done", by the app's own rule.
     String direction = 'keep',
+    /// The session behind the token. It stays on the phone: the native bridge
+    /// keeps it to renew the watch's token on request, even with the app
+    /// closed, and never forwards it to the wrist.
+    String? refresh,
   }) async {
     /* Тільки iPhone. На Android каналу немає взагалі, на вебі немає й самого
        поняття, і питати там нема кого. */
@@ -88,7 +94,7 @@ class Watch {
     // Без токена годиннику нема з чим іти на сервер: чекаємо, поки акаунт буде.
     if (token == null || token.isEmpty) return;
 
-    final now = '$token|$lang|$norm|$left|$portion|$energy|$direction';
+    final now = '$token|$lang|$norm|$left|$portion|$energy|$direction|$refresh';
     if (now == _sent) return;
     _sent = now;
 
@@ -101,6 +107,8 @@ class Watch {
         'portion': portion,
         'energy': energy,
         'direction': direction,
+        if (refresh != null) 'refresh': refresh,
+        'api': apiBase,
       });
     } on PlatformException {
       /* Годинника може не бути зовсім, і це не помилка застосунку. Наступна

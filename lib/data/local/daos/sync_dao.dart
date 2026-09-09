@@ -85,6 +85,12 @@ class SyncDao extends DatabaseAccessor<CalviDb> with _$SyncDaoMixin {
     ),
   );
 
+  /// A fresh access token for the same account and session. Nothing else moves,
+  /// and the state stream carries the new token on to the watch.
+  Future<void> setAccessToken(String token) => (update(syncMeta)..where((s) => s.id.equals(1))).write(
+    SyncMetaCompanion(accessToken: Value(token)),
+  );
+
   /* Вихід з акаунта, і тільки з нього.
    *
    * Щоденник лишається на місці: людина виходить, щоб перестати синхронізувати,

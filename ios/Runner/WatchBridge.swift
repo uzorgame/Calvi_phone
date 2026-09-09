@@ -63,8 +63,30 @@ final class WatchBridge: NSObject {
        лякати телефон тим, що його не стосується. */
     guard session.isPaired, session.isWatchAppInstalled else { return }
 
+    /* Сесія і адреса сервера лишаються на телефоні. Годиннику вони не
+       потрібні, а мосту потрібні: за ними він бере свіжий токен, коли годинник
+       про це просить, і застосунок для цього відкривати не треба. */
+    var context = state
+    if let refresh = context.removeValue(forKey: "refresh") as? String {
+      Renewal.keep(refresh: refresh)
+    }
+    if let api = context.removeValue(forKey: "api") as? String {
+      Renewal.keep(api: api)
+    }
+
+    if let told = context["token"] as? String {
+      if told.isEmpty {
+        // Вихід з акаунта: сесія цієї людини мосту більше не належить.
+        Renewal.forget()
+      } else if let newer = Renewal.newer(than: told) {
+        /* Токен, оновлений тут для годинника, свіжіший за той, що Dart ще
+           тримає. Старий пішов би на годинник і зустрів 401 без причини. */
+        context["token"] = newer
+      }
+    }
+
     do {
-      try session.updateApplicationContext(state)
+      try session.updateApplicationContext(context)
     } catch {
       /* Контекст не пішов. Наступна зміна дня надішле новий, а старий нікому не
          потрібен: там ті самі поля, тільки застарілі. */
@@ -116,6 +138,36 @@ extension WatchBridge: WCSessionDelegate {
     didReceiveMessage message: [String: Any],
     replyHandler: @escaping ([String: Any]) -> Void
   ) {
+    /* Годинник отримав 401 і просить свіжий токен. Телефон бере його за своєю
+       сесією, кладе в контекст, щоб годинник мав його і після перезапуску, і
+       відповідає ним же. «Сесії немає» означає вихід або зниклий акаунт:
+       годинник на це забуває людину. */
+    if message["renew"] != nil {
+      var task = UIBackgroundTaskIdentifier.invalid
+      task = UIApplication.shared.beginBackgroundTask {
+        UIApplication.shared.endBackgroundTask(task)
+        task = .invalid
+      }
+      Renewal.fresh { outcome in
+        switch outcome {
+        case .success(let token):
+          var context = session.applicationContext
+          context["token"] = token
+          try? session.updateApplicationContext(context)
+          replyHandler(["token": token])
+        case .failure(.dead):
+          replyHandler(["dead": true])
+        case .failure(.offline):
+          replyHandler(["offline": true])
+        }
+        if task != .invalid {
+          UIApplication.shared.endBackgroundTask(task)
+          task = .invalid
+        }
+      }
+      return
+    }
+
     let lang = message["lang"] as? String ?? "en"
     guard let audio = message["audio"] as? Data, !audio.isEmpty else {
       replyHandler(["error": Hearing.say(.notHeard, lang)])
@@ -328,5 +380,92 @@ enum Hearing {
         finish(["error": say(network ? .noNetwork : .notHeard, lang)])
       }
     }
+  }
+}
+
+/// Свіжий токен доступу для годинника, за сесією телефона.
+///
+/// Токен доступу живе тридцять днів, сесія рік. Годинник, який зустрів 401,
+/// просить телефон, а не показує вхід: телефон бере новий токен за сесією тут,
+/// у рідному коді, тому це працює і з закритим застосунком, у фоні, куди iOS
+/// підіймає його заради повідомлення. Сесія і адреса сервера лежать у
+/// сховищі застосунку, там само, де й база з тією самою сесією.
+enum Renewal {
+  enum Failure: Error {
+    /// Сесії більше немає: вихід, відкликання або видалення акаунта.
+    case dead
+    /// Мережі немає або сервер не відповів: спробувати можна пізніше.
+    case offline
+  }
+
+  private static let disk = UserDefaults.standard
+  private static let refreshKey = "calvi.watch.refresh"
+  private static let apiKey = "calvi.watch.api"
+  private static let renewedKey = "calvi.watch.renewed"
+
+  static func keep(refresh: String) { disk.set(refresh, forKey: refreshKey) }
+  static func keep(api: String) { disk.set(api, forKey: apiKey) }
+
+  static func forget() {
+    disk.removeObject(forKey: refreshKey)
+    disk.removeObject(forKey: renewedKey)
+  }
+
+  /// Токен, оновлений тут, якщо він молодший за той, що приніс Dart.
+  static func newer(than token: String) -> String? {
+    guard let mine = disk.string(forKey: renewedKey), mine != token else { return nil }
+    guard let a = issued(mine), let b = issued(token), a > b else { return nil }
+    return mine
+  }
+
+  /// Коли токен підписано, з його ж тіла. Порожньо для будь-чого, що не JWT.
+  private static func issued(_ jwt: String) -> Int? {
+    let parts = jwt.split(separator: ".")
+    guard parts.count == 3 else { return nil }
+    var raw = String(parts[1]).replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/")
+    while raw.count % 4 != 0 { raw += "=" }
+    guard
+      let data = Data(base64Encoded: raw),
+      let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+    else { return nil }
+    return json["iat"] as? Int
+  }
+
+  static func fresh(_ done: @escaping (Result<String, Failure>) -> Void) {
+    guard
+      let refresh = disk.string(forKey: refreshKey),
+      let api = disk.string(forKey: apiKey),
+      let url = URL(string: api)?.appendingPathComponent("v1/auth/refresh")
+    else {
+      done(.failure(.dead))
+      return
+    }
+
+    var request = URLRequest(url: url)
+    request.httpMethod = "POST"
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    request.setValue("phone", forHTTPHeaderField: "X-Calvi-Client")
+    request.httpBody = try? JSONSerialization.data(withJSONObject: ["refresh_token": refresh])
+    request.timeoutInterval = 15
+
+    URLSession.shared.dataTask(with: request) { data, response, _ in
+      let code = (response as? HTTPURLResponse)?.statusCode ?? 0
+      if code == 401 {
+        done(.failure(.dead))
+        return
+      }
+      guard
+        code == 200,
+        let data,
+        let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+        let token = json["access_token"] as? String,
+        !token.isEmpty
+      else {
+        done(.failure(.offline))
+        return
+      }
+      disk.set(token, forKey: renewedKey)
+      done(.success(token))
+    }.resume()
   }
 }

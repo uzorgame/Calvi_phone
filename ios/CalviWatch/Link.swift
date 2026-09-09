@@ -199,6 +199,36 @@ final class Link: NSObject, ObservableObject {
     }
   }
 
+  /// Свіжий токен від телефона.
+  ///
+  /// Сервер відповів 401. Це не привід показувати «відкрий Calvi»: токен
+  /// доступу живе тридцять днів, а сесія рік, і телефон уміє взяти новий за
+  /// сесією, не відкриваючи застосунок. Годинник забуває людину лише тоді,
+  /// коли телефон сказав, що сесії більше немає.
+  func renew() async throws -> String {
+    let session = WCSession.default
+    guard session.activationState == .activated else { throw LinkTrouble.far }
+    let t = Words.of(lang)
+
+    let reply: [String: Any] = try await withCheckedThrowingContinuation { next in
+      session.sendMessage(
+        ["renew": true],
+        replyHandler: { next.resume(returning: $0) },
+        errorHandler: { next.resume(throwing: Self.trouble($0, t)) }
+      )
+    }
+
+    if let token = reply["token"] as? String, !token.isEmpty {
+      take(["token": token])
+      return token
+    }
+    if reply["dead"] != nil {
+      forget()
+      throw LinkTrouble.failed(t.openPhone)
+    }
+    throw LinkTrouble.failed(t.phoneOffline)
+  }
+
   /// Один результат на один запис: хто перший, той і відповів.
   private func settle(_ id: String, with result: Result<String, Error>) {
     guard let next = pending.removeValue(forKey: id) else { return }

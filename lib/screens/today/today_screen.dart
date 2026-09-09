@@ -1387,6 +1387,7 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
     _stateFeed?.cancel();
     _stateFeed = db.syncDao.watchState().listen((m) {
       _token = m?.accessToken;
+      _refresh = m?.refreshToken;
       if (mounted) setState(() {});
     });
   }
@@ -1865,13 +1866,19 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
   /* Токен доступу, як він є зараз: його тримає свіжим потік стану синку. Поки
      акаунта немає, лишається порожнім, і годинник каже «відкрий Calvi». */
   String? _token;
+  String? _refresh;
   StreamSubscription<SyncMetaData?>? _stateFeed;
 
   /// Розповідає годиннику про день. Сам [Watch] мовчить, коли нічого не змінилось.
   Future<void> _tellWatch(AppScope scope, int norm, int left) async {
-    _token ??= (await scope.db?.syncDao.state())?.accessToken;
+    if (_token == null) {
+      final state = await scope.db?.syncDao.state();
+      _token = state?.accessToken;
+      _refresh = state?.refreshToken;
+    }
     await Watch.tell(
       token: _token,
+      refresh: _refresh,
       lang: dataLang,
       direction: scope.s.direction.name,
       norm: norm,
