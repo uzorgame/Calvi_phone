@@ -23,6 +23,8 @@ enum NoraTrouble: Error {
   case dry
   /// Мережі немає. Сказане не пропадає, воно лягає в чергу.
   case offline
+  /// Токен більше не годиться: людина вийшла на телефоні або токен протух.
+  case stale
   /// Сервер відмовив з іншої причини.
   case refused
 }
@@ -67,8 +69,14 @@ enum Nora {
     let code = (response as? HTTPURLResponse)?.statusCode ?? 0
     guard code == 200 else {
       /* Сервер каже про порожній баланс окремим кодом. Для людини це не помилка,
-         а стан: запис рукою в телефоні працює й далі. */
-      throw code == 402 || code == 429 ? NoraTrouble.dry : NoraTrouble.refused
+         а стан: запис рукою в телефоні працює й далі. Чужий чи протухлий токен
+         теж окремо: порада тут «відкрий Calvi на телефоні», а не «спробуй
+         пізніше». */
+      switch code {
+      case 401: throw NoraTrouble.stale
+      case 402, 429: throw NoraTrouble.dry
+      default: throw NoraTrouble.refused
+      }
     }
 
     guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
@@ -77,7 +85,10 @@ enum Nora {
     return json
   }
 
-  static func say(_ text: String, token: String, lang: String) async throws -> Answer {
+  /// Записує сказане. `key` живе разом із реченням, а не з запитом: та сама
+  /// фраза, надіслана вдруге після обриву, приходить на сервер із тим самим
+  /// ключем, і він упізнає її замість того, щоб записати двічі.
+  static func say(_ text: String, key: String, token: String, lang: String) async throws -> Answer {
     var request = post("v1/chat", token: token)
 
     let now = Date()
@@ -87,7 +98,7 @@ enum Nora {
 
     let body: [String: Any] = [
       "text": text,
-      "idempotency_key": UUID().uuidString,
+      "idempotency_key": key,
       /* Слот за годиною, як і на телефоні. Пізню вечерю чи пізній сніданок
          перейменує сама Нора: це її робота, а не годинника. */
       "slot": slot(at: now),
@@ -152,20 +163,27 @@ enum Nora {
 /// Без черги сказане на пробіжці без звʼязку зникало б разом з екраном, і людина
 /// дізнавалась би про це ввечері, дивлячись на порожній день.
 enum Queue {
-  private static let key = "pending"
+  private static let store = "pending"
 
-  static var waiting: [String] {
-    UserDefaults.standard.stringArray(forKey: key) ?? []
+  /// Речення разом зі своїм ключем ідемпотентності. Ключ народжується з
+  /// реченням і йде з ним у кожну спробу: сервер, який уже записав його, а
+  /// відповісти не встиг, побачить той самий ключ і не запише вдруге.
+  static var waiting: [(text: String, key: String)] {
+    let raw = UserDefaults.standard.array(forKey: store) as? [[String: String]] ?? []
+    return raw.compactMap { one in
+      guard let text = one["text"], let key = one["key"] else { return nil }
+      return (text, key)
+    }
   }
 
-  static func add(_ text: String) {
-    var all = waiting
-    all.append(text)
-    UserDefaults.standard.set(all, forKey: key)
+  static func add(_ text: String, key: String) {
+    var all = UserDefaults.standard.array(forKey: store) as? [[String: String]] ?? []
+    all.append(["text": text, "key": key])
+    UserDefaults.standard.set(all, forKey: store)
   }
 
   static func clear() {
-    UserDefaults.standard.removeObject(forKey: key)
+    UserDefaults.standard.removeObject(forKey: store)
   }
 
   /// Пробує віддати все, що чекало. Мовчить, коли чекати нема чого.
@@ -173,9 +191,13 @@ enum Queue {
     let all = waiting
     guard !all.isEmpty else { return }
 
-    for text in all {
+    for one in all {
       do {
-        _ = try await Nora.say(text, token: token, lang: lang)
+        _ = try await Nora.say(one.text, key: one.key, token: token, lang: lang)
+      } catch NoraTrouble.stale {
+        // Ця людина вже вийшла: її черга нікому не потрібна.
+        clear()
+        return
       } catch {
         // Мережі досі немає: лишаємо чергу як є і спробуємо наступного разу.
         return

@@ -33,6 +33,32 @@
   "setPolicy": "Informativa sulla privacy",
   "setMedical": "Avviso medico",
   "setAbout": "Informazioni sull'app",
+
+  "setAccess": "Accesso",
+
+  "accessMic": "Microfono",
+
+  "accessSpeech": "Riconoscimento vocale",
+
+  "accessCamera": "Fotocamera",
+
+  "accessNotify": "Notifiche",
+
+  "accessOn": "consentito",
+
+  "accessOff": "negato",
+
+  "accessAsk": "non ancora richiesto",
+
+  "accessNote": "Microfono e riconoscimento vocale servono alla dettatura, e il riconoscimento anche allo smartwatch: registra ciò che dici e il telefono lo trasforma in parole. Tocca una riga per concedere il permesso o aprire le impostazioni di sistema e disattivarlo.",
+
+  "accountWatch": "Apple Watch",
+
+  "watchLinked": "collegato, dati aggiornati",
+
+  "watchWaiting": "collegato, in attesa dei dati",
+
+  "watchNotInstalled": "app non installata sullo smartwatch",
   "setUnset": "non impostato",
 
   "setFreeTierShort": "Per i difensori dell'Ucraina, e per chi presta servizio nelle Forze Armate, nel Servizio Statale di Emergenza, in DTEK, per il personale medico, i volontari e gli insegnanti nelle zone di prima linea, il piano a pagamento è GRATIS",

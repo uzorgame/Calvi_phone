@@ -28,6 +28,31 @@ class LEs extends L {
   String get aboutWrite => 'Escríbenos';
 
   @override
+  String get accessAsk => 'aún no se ha pedido';
+
+  @override
+  String get accessCamera => 'Cámara';
+
+  @override
+  String get accessMic => 'Micrófono';
+
+  @override
+  String get accessNote =>
+      'El micrófono y el reconocimiento de voz hacen falta para dictar, y el reconocimiento también para el reloj: él graba lo que dices y el teléfono lo convierte en palabras. Toca una fila para conceder el acceso o abrir los ajustes del sistema y desactivarlo.';
+
+  @override
+  String get accessNotify => 'Notificaciones';
+
+  @override
+  String get accessOff => 'denegado';
+
+  @override
+  String get accessOn => 'permitido';
+
+  @override
+  String get accessSpeech => 'Reconocimiento de voz';
+
+  @override
   String get accountBusy => 'Entrando…';
 
   @override
@@ -86,6 +111,9 @@ class LEs extends L {
 
   @override
   String get accountViaEmail => 'Sesión iniciada con correo';
+
+  @override
+  String get accountWatch => 'Apple Watch';
 
   @override
   String get accountWhichDiary => '¿Con qué diario nos quedamos?';
@@ -2166,6 +2194,9 @@ class LEs extends L {
   String get setAbout => 'Acerca de la app';
 
   @override
+  String get setAccess => 'Acceso';
+
+  @override
   String get setAllergies => 'Alergias';
 
   @override
@@ -2726,6 +2757,15 @@ class LEs extends L {
 
   @override
   String get unitsVolume => 'Agua';
+
+  @override
+  String get watchLinked => 'conectado, datos al día';
+
+  @override
+  String get watchNotInstalled => 'app no instalada en el reloj';
+
+  @override
+  String get watchWaiting => 'conectado, esperando datos';
 
   @override
   String waterGlasses(int glasses) {

@@ -28,6 +28,31 @@ class LIt extends L {
   String get aboutWrite => 'Scrivici';
 
   @override
+  String get accessAsk => 'non ancora richiesto';
+
+  @override
+  String get accessCamera => 'Fotocamera';
+
+  @override
+  String get accessMic => 'Microfono';
+
+  @override
+  String get accessNote =>
+      'Microfono e riconoscimento vocale servono alla dettatura, e il riconoscimento anche allo smartwatch: registra ciò che dici e il telefono lo trasforma in parole. Tocca una riga per concedere il permesso o aprire le impostazioni di sistema e disattivarlo.';
+
+  @override
+  String get accessNotify => 'Notifiche';
+
+  @override
+  String get accessOff => 'negato';
+
+  @override
+  String get accessOn => 'consentito';
+
+  @override
+  String get accessSpeech => 'Riconoscimento vocale';
+
+  @override
   String get accountBusy => 'Accedo…';
 
   @override
@@ -86,6 +111,9 @@ class LIt extends L {
 
   @override
   String get accountViaEmail => 'Accesso con e-mail';
+
+  @override
+  String get accountWatch => 'Apple Watch';
 
   @override
   String get accountWhichDiary => 'Quale diario teniamo?';
@@ -2171,6 +2199,9 @@ class LIt extends L {
   String get setAbout => 'Informazioni sull\'app';
 
   @override
+  String get setAccess => 'Accesso';
+
+  @override
   String get setAllergies => 'Allergie';
 
   @override
@@ -2729,6 +2760,15 @@ class LIt extends L {
 
   @override
   String get unitsVolume => 'Acqua';
+
+  @override
+  String get watchLinked => 'collegato, dati aggiornati';
+
+  @override
+  String get watchNotInstalled => 'app non installata sullo smartwatch';
+
+  @override
+  String get watchWaiting => 'collegato, in attesa dei dati';
 
   @override
   String waterGlasses(int glasses) {

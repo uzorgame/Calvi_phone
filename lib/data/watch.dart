@@ -26,6 +26,47 @@ class Watch {
      годинник має дізнаватись про зміни, а не про перемальовки. */
   static String? _sent;
 
+  /// Годинник забуває людину: порожній токен у контексті.
+  ///
+  /// При виході з акаунта. Без цього годинник писав би в щоденник того, хто
+  /// вийшов, ще тридцять днів, поки токен не протух би сам.
+  static Future<void> clear() async {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.iOS) return;
+    _sent = null;
+    try {
+      await _channel.invokeMethod<void>('tell', {
+        'token': '',
+        'lang': 'en',
+        'norm': 0,
+        'left': 0,
+        'portion': 'g',
+        'energy': 'kcal',
+      });
+    } on PlatformException {
+      // Годинника немає, забувати нема кому.
+    } on MissingPluginException {
+      // Складання без нативного боку.
+    }
+  }
+
+  /// Що телефон знає про годинник. Порожньо там, де годинника не буває.
+  static Future<WatchStatus?> status() async {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.iOS) return null;
+    try {
+      final m = await _channel.invokeMapMethod<String, Object?>('status');
+      if (m == null) return null;
+      return WatchStatus(
+        paired: m['paired'] == true,
+        installed: m['installed'] == true,
+        current: m['current'] == true,
+      );
+    } on PlatformException {
+      return null;
+    } on MissingPluginException {
+      return null;
+    }
+  }
+
   /// Кладе свіжий стан у чергу до годинника. Мовчить, коли нічого не змінилось.
   static Future<void> tell({
     required String? token,
@@ -72,4 +113,18 @@ class Watch {
   /// Без цього наступний вхід із тим самим станом не дійшов би до годинника: він
   /// збігся б із запамʼятованим, і ми вирішили б, що вже все розповіли.
   static void forget() => _sent = null;
+}
+
+/// Що телефон знає про годинник, для рядка в акаунті.
+class WatchStatus {
+  const WatchStatus({required this.paired, required this.installed, required this.current});
+
+  /// Годинник у парі з цим телефоном.
+  final bool paired;
+
+  /// Calvi стоїть на годиннику.
+  final bool installed;
+
+  /// Останній стан ліг у канал: далі його доставить система, навіть уві сні.
+  final bool current;
 }

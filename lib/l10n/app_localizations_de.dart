@@ -28,6 +28,31 @@ class LDe extends L {
   String get aboutWrite => 'Schreib uns';
 
   @override
+  String get accessAsk => 'noch nicht gefragt';
+
+  @override
+  String get accessCamera => 'Kamera';
+
+  @override
+  String get accessMic => 'Mikrofon';
+
+  @override
+  String get accessNote =>
+      'Mikrofon und Spracherkennung braucht das Diktieren, die Erkennung auch die Uhr: sie nimmt auf, das Telefon macht daraus Wörter. Tippe auf eine Zeile, um den Zugriff zu erlauben oder ihn in den Systemeinstellungen abzuschalten.';
+
+  @override
+  String get accessNotify => 'Mitteilungen';
+
+  @override
+  String get accessOff => 'verweigert';
+
+  @override
+  String get accessOn => 'erlaubt';
+
+  @override
+  String get accessSpeech => 'Spracherkennung';
+
+  @override
   String get accountBusy => 'Melde an…';
 
   @override
@@ -86,6 +111,9 @@ class LDe extends L {
 
   @override
   String get accountViaEmail => 'Angemeldet mit E-Mail';
+
+  @override
+  String get accountWatch => 'Apple Watch';
 
   @override
   String get accountWhichDiary => 'Welches Tagebuch behalten wir?';
@@ -2178,6 +2206,9 @@ class LDe extends L {
   String get setAbout => 'Über die App';
 
   @override
+  String get setAccess => 'Zugriff';
+
+  @override
   String get setAllergies => 'Allergien';
 
   @override
@@ -2739,6 +2770,15 @@ class LDe extends L {
 
   @override
   String get unitsVolume => 'Wasser';
+
+  @override
+  String get watchLinked => 'verbunden, Daten aktuell';
+
+  @override
+  String get watchNotInstalled => 'App nicht auf der Uhr installiert';
+
+  @override
+  String get watchWaiting => 'verbunden, wartet auf Daten';
 
   @override
   String waterGlasses(int glasses) {

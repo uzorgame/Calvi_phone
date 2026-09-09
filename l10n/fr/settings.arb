@@ -33,6 +33,32 @@
   "setPolicy": "Politique de confidentialité",
   "setMedical": "Avertissement médical",
   "setAbout": "À propos de l'app",
+
+  "setAccess": "Accès",
+
+  "accessMic": "Micro",
+
+  "accessSpeech": "Reconnaissance vocale",
+
+  "accessCamera": "Appareil photo",
+
+  "accessNotify": "Notifications",
+
+  "accessOn": "autorisé",
+
+  "accessOff": "refusé",
+
+  "accessAsk": "pas encore demandé",
+
+  "accessNote": "Le micro et la reconnaissance vocale servent à la dictée, et la reconnaissance aussi à la montre : elle enregistre ce que tu dis et le téléphone en fait des mots. Touche une ligne pour accorder le droit ou ouvrir les réglages système et le couper.",
+
+  "accountWatch": "Apple Watch",
+
+  "watchLinked": "connectée, données à jour",
+
+  "watchWaiting": "connectée, en attente des données",
+
+  "watchNotInstalled": "app non installée sur la montre",
   "setUnset": "non défini",
 
   "setFreeTierShort": "Pour les défenseurs de l'Ukraine, et pour celles et ceux qui servent dans les Forces armées, au Service national d'urgence, chez DTEK, pour le personnel médical, les bénévoles et les enseignants des zones proches du front, l'offre payante est GRATUITE",

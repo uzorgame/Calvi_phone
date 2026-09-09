@@ -28,6 +28,31 @@ class LPl extends L {
   String get aboutWrite => 'Napisz do nas';
 
   @override
+  String get accessAsk => 'jeszcze nie pytano';
+
+  @override
+  String get accessCamera => 'Aparat';
+
+  @override
+  String get accessMic => 'Mikrofon';
+
+  @override
+  String get accessNote =>
+      'Mikrofon i rozpoznawanie mowy są potrzebne do dyktowania, a rozpoznawanie także zegarkowi: nagrywa, co mówisz, a telefon zamienia to w słowa. Dotknij wiersza, aby udzielić dostępu lub otworzyć ustawienia systemu i go wyłączyć.';
+
+  @override
+  String get accessNotify => 'Powiadomienia';
+
+  @override
+  String get accessOff => 'odmówiono';
+
+  @override
+  String get accessOn => 'dozwolone';
+
+  @override
+  String get accessSpeech => 'Rozpoznawanie mowy';
+
+  @override
   String get accountBusy => 'Logowanie…';
 
   @override
@@ -86,6 +111,9 @@ class LPl extends L {
 
   @override
   String get accountViaEmail => 'Logowanie przez e-mail';
+
+  @override
+  String get accountWatch => 'Apple Watch';
 
   @override
   String get accountWhichDiary => 'Który dziennik zostawiamy?';
@@ -2185,6 +2213,9 @@ class LPl extends L {
   String get setAbout => 'O aplikacji';
 
   @override
+  String get setAccess => 'Dostęp';
+
+  @override
   String get setAllergies => 'Alergie';
 
   @override
@@ -2748,6 +2779,15 @@ class LPl extends L {
 
   @override
   String get unitsVolume => 'Woda';
+
+  @override
+  String get watchLinked => 'połączony, dane aktualne';
+
+  @override
+  String get watchNotInstalled => 'aplikacja nie jest zainstalowana na zegarku';
+
+  @override
+  String get watchWaiting => 'połączony, czeka na dane';
 
   @override
   String waterGlasses(int glasses) {

@@ -33,6 +33,32 @@
   "setPolicy": "Política de privacidad",
   "setMedical": "Aviso médico",
   "setAbout": "Acerca de la app",
+
+  "setAccess": "Acceso",
+
+  "accessMic": "Micrófono",
+
+  "accessSpeech": "Reconocimiento de voz",
+
+  "accessCamera": "Cámara",
+
+  "accessNotify": "Notificaciones",
+
+  "accessOn": "permitido",
+
+  "accessOff": "denegado",
+
+  "accessAsk": "aún no se ha pedido",
+
+  "accessNote": "El micrófono y el reconocimiento de voz hacen falta para dictar, y el reconocimiento también para el reloj: él graba lo que dices y el teléfono lo convierte en palabras. Toca una fila para conceder el acceso o abrir los ajustes del sistema y desactivarlo.",
+
+  "accountWatch": "Apple Watch",
+
+  "watchLinked": "conectado, datos al día",
+
+  "watchWaiting": "conectado, esperando datos",
+
+  "watchNotInstalled": "app no instalada en el reloj",
   "setUnset": "sin definir",
 
   "setFreeTierShort": "Para los defensores de Ucrania, y para quienes sirven en las Fuerzas Armadas, el Servicio Estatal de Emergencias, DTEK, personal médico, voluntarios y docentes en zonas de primera línea, el plan de pago es GRATIS",

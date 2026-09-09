@@ -28,6 +28,31 @@ class LEn extends L {
   String get aboutWrite => 'Write to us';
 
   @override
+  String get accessAsk => 'not asked yet';
+
+  @override
+  String get accessCamera => 'Camera';
+
+  @override
+  String get accessMic => 'Microphone';
+
+  @override
+  String get accessNote =>
+      'The microphone and speech recognition are needed for dictation, and recognition also serves the watch: it records what you say and the phone turns it into words. Tap a row to grant access or open the system settings to turn it off.';
+
+  @override
+  String get accessNotify => 'Notifications';
+
+  @override
+  String get accessOff => 'denied';
+
+  @override
+  String get accessOn => 'allowed';
+
+  @override
+  String get accessSpeech => 'Speech recognition';
+
+  @override
   String get accountBusy => 'Signing in…';
 
   @override
@@ -86,6 +111,9 @@ class LEn extends L {
 
   @override
   String get accountViaEmail => 'Signed in with email';
+
+  @override
+  String get accountWatch => 'Apple Watch';
 
   @override
   String get accountWhichDiary => 'Which diary do we keep?';
@@ -2165,6 +2193,9 @@ class LEn extends L {
   String get setAbout => 'About the app';
 
   @override
+  String get setAccess => 'Access';
+
+  @override
   String get setAllergies => 'Allergies';
 
   @override
@@ -2724,6 +2755,15 @@ class LEn extends L {
 
   @override
   String get unitsVolume => 'Water';
+
+  @override
+  String get watchLinked => 'connected, data is current';
+
+  @override
+  String get watchNotInstalled => 'app not installed on the watch';
+
+  @override
+  String get watchWaiting => 'connected, waiting for data';
 
   @override
   String waterGlasses(int glasses) {

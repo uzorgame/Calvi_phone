@@ -33,6 +33,32 @@
   "setPolicy": "Datenschutzerklärung",
   "setMedical": "Medizinischer Hinweis",
   "setAbout": "Über die App",
+
+  "setAccess": "Zugriff",
+
+  "accessMic": "Mikrofon",
+
+  "accessSpeech": "Spracherkennung",
+
+  "accessCamera": "Kamera",
+
+  "accessNotify": "Mitteilungen",
+
+  "accessOn": "erlaubt",
+
+  "accessOff": "verweigert",
+
+  "accessAsk": "noch nicht gefragt",
+
+  "accessNote": "Mikrofon und Spracherkennung braucht das Diktieren, die Erkennung auch die Uhr: sie nimmt auf, das Telefon macht daraus Wörter. Tippe auf eine Zeile, um den Zugriff zu erlauben oder ihn in den Systemeinstellungen abzuschalten.",
+
+  "accountWatch": "Apple Watch",
+
+  "watchLinked": "verbunden, Daten aktuell",
+
+  "watchWaiting": "verbunden, wartet auf Daten",
+
+  "watchNotInstalled": "App nicht auf der Uhr installiert",
   "setUnset": "nicht gesetzt",
 
   "setFreeTierShort": "Für die Verteidiger der Ukraine und für alle, die bei den Streitkräften, beim staatlichen Rettungsdienst, bei DTEK, als medizinisches Personal, als Freiwillige oder als Lehrkräfte in frontnahen Gebieten arbeiten, ist der Bezahltarif KOSTENLOS",

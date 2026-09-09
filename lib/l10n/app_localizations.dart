@@ -144,6 +144,54 @@ abstract class L {
   /// **'Write to us'**
   String get aboutWrite;
 
+  /// No description provided for @accessAsk.
+  ///
+  /// In en, this message translates to:
+  /// **'not asked yet'**
+  String get accessAsk;
+
+  /// No description provided for @accessCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get accessCamera;
+
+  /// No description provided for @accessMic.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone'**
+  String get accessMic;
+
+  /// No description provided for @accessNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The microphone and speech recognition are needed for dictation, and recognition also serves the watch: it records what you say and the phone turns it into words. Tap a row to grant access or open the system settings to turn it off.'**
+  String get accessNote;
+
+  /// No description provided for @accessNotify.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get accessNotify;
+
+  /// No description provided for @accessOff.
+  ///
+  /// In en, this message translates to:
+  /// **'denied'**
+  String get accessOff;
+
+  /// No description provided for @accessOn.
+  ///
+  /// In en, this message translates to:
+  /// **'allowed'**
+  String get accessOn;
+
+  /// No description provided for @accessSpeech.
+  ///
+  /// In en, this message translates to:
+  /// **'Speech recognition'**
+  String get accessSpeech;
+
   /// No description provided for @accountBusy.
   ///
   /// In en, this message translates to:
@@ -251,6 +299,12 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Signed in with email'**
   String get accountViaEmail;
+
+  /// No description provided for @accountWatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Apple Watch'**
+  String get accountWatch;
 
   /// No description provided for @accountWhichDiary.
   ///
@@ -3924,6 +3978,12 @@ abstract class L {
   /// **'About the app'**
   String get setAbout;
 
+  /// No description provided for @setAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Access'**
+  String get setAccess;
+
   /// No description provided for @setAllergies.
   ///
   /// In en, this message translates to:
@@ -4919,6 +4979,24 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Water'**
   String get unitsVolume;
+
+  /// No description provided for @watchLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'connected, data is current'**
+  String get watchLinked;
+
+  /// No description provided for @watchNotInstalled.
+  ///
+  /// In en, this message translates to:
+  /// **'app not installed on the watch'**
+  String get watchNotInstalled;
+
+  /// No description provided for @watchWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'connected, waiting for data'**
+  String get watchWaiting;
 
   /// No description provided for @waterGlasses.
   ///

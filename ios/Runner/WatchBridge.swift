@@ -7,7 +7,8 @@ import WatchConnectivity
 ///
 /// Телефон тримає годинник у курсі токена, мови і сьогоднішніх чисел через
 /// `updateApplicationContext`: контекст один, він заміняє попередній і доїжджає
-/// навіть тоді, коли годинниковий застосунок не запущений.
+/// навіть тоді, коли годинниковий застосунок не запущений. Порожній токен у
+/// контексті означає вихід з акаунта: годинник забуває людину тієї ж миті.
 ///
 /// Єдине, про що годинник питає телефон, це слова зі звуку. На watchOS немає
 /// розпізнавача, яким користується диктовка в застосунку, а вбудована диктовка
@@ -32,12 +33,19 @@ final class WatchBridge: NSObject {
     let channel = FlutterMethodChannel(name: "calvi/watch", binaryMessenger: messenger)
 
     channel.setMethodCallHandler { call, result in
-      guard call.method == "tell", let args = call.arguments as? [String: Any] else {
+      switch call.method {
+      case "tell":
+        guard let args = call.arguments as? [String: Any] else {
+          result(FlutterMethodNotImplemented)
+          return
+        }
+        bridge.tell(args)
+        result(nil)
+      case "status":
+        result(bridge.status())
+      default:
         result(FlutterMethodNotImplemented)
-        return
       }
-      bridge.tell(args)
-      result(nil)
     }
 
     return bridge
@@ -59,6 +67,21 @@ final class WatchBridge: NSObject {
       NSLog("watch: контекст не пішов, \(error.localizedDescription)")
     }
   }
+
+  /// Що телефон знає про годинник, для рядка в налаштуваннях.
+  ///
+  /// «Актуальний» означає, що останній контекст ліг у канал: далі його доставить
+  /// система, навіть якщо годинник зараз спить.
+  private func status() -> [String: Any] {
+    guard let session, session.activationState == .activated else {
+      return ["paired": false, "installed": false, "current": false]
+    }
+    return [
+      "paired": session.isPaired,
+      "installed": session.isWatchAppInstalled,
+      "current": !session.applicationContext.isEmpty,
+    ]
+  }
 }
 
 extension WatchBridge: WCSessionDelegate {
@@ -77,8 +100,13 @@ extension WatchBridge: WCSessionDelegate {
     session.activate()
   }
 
-  /// Звук із годинника. Відповідь це або `text`, або `error` зі словами для
-  /// екрана годинника.
+  /// Звук із годинника.
+  ///
+  /// Відповідь на саме повідомлення це лише «прийняв», і йде вона одразу: канал
+  /// чекає на неї лічені секунди, а холодний старт у фоні разом із
+  /// розпізнаванням у них не завжди вкладається. Слова їдуть назад окремим
+  /// повідомленням із тим самим номером, і на них годинник чекає стільки,
+  /// скільки сам вирішив.
   func session(
     _ session: WCSession,
     didReceiveMessage message: [String: Any],
@@ -89,8 +117,18 @@ extension WatchBridge: WCSessionDelegate {
       return
     }
     let lang = message["lang"] as? String ?? "en"
+    let id = message["id"] as? String ?? ""
+    replyHandler(["ack": true])
+
     DispatchQueue.main.async {
-      Hearing.transcribe(audio, lang: lang, done: replyHandler)
+      Hearing.transcribe(audio, lang: lang) { outcome in
+        var back = outcome
+        back["id"] = id
+        session.sendMessage(back, replyHandler: nil) { error in
+          // Годинник уже не в руці: слова нікому, і це не помилка телефона.
+          NSLog("watch: слова не пішли, \(error.localizedDescription)")
+        }
+      }
     }
   }
 }
@@ -106,18 +144,24 @@ enum Hearing {
   ]
 
   static func transcribe(_ audio: Data, lang: String, done: @escaping ([String: Any]) -> Void) {
-    /* Дозвіл уже є: його просила диктовка в застосунку, і це той самий дозвіл.
-       Просити тут не можна, бо застосунок може бути піднятий у фоні, де вікна
-       з питанням нема кому показати. */
+    /* Дозвіл уже є: його просила диктовка в застосунку або екран «Доступ», і
+       це той самий дозвіл. Просити тут не можна, бо застосунок може бути
+       піднятий у фоні, де вікна з питанням нема кому показати. */
     guard SFSpeechRecognizer.authorizationStatus() == .authorized else {
-      done(["error": "Дозволь розпізнавання мовлення в Calvi на телефоні"])
+      done(["error": "Дозволь розпізнавання мовлення: Calvi, Налаштування, Доступ"])
       return
     }
 
     // Замок на мові: розпізнавач саме цієї локалі, а не «яку почує».
     let id = locales[lang] ?? "en-US"
-    guard let recognizer = SFSpeechRecognizer(locale: Locale(identifier: id)), recognizer.isAvailable else {
-      done(["error": "Розпізнавання цією мовою зараз недоступне"])
+    guard let recognizer = SFSpeechRecognizer(locale: Locale(identifier: id)) else {
+      done(["error": "Розпізнавання цією мовою недоступне"])
+      return
+    }
+    /* Розпізнавач Apple працює через мережу, і «недоступний» майже завжди
+       означає, що телефон без неї. Так і кажемо, а не «мова недоступна». */
+    guard recognizer.isAvailable else {
+      done(["error": "Відсутнє підключення до мережі"])
       return
     }
 
@@ -156,7 +200,7 @@ enum Hearing {
 
     recognizer.recognitionTask(with: request) { result, error in
       if let result, result.isFinal {
-        finish(["text": result.bestTranscription.formattedString])
+        finish(["heard": result.bestTranscription.formattedString])
       } else if error != nil {
         // Тиша, шум або не та мова: для годинника це одне й те саме.
         finish(["error": "Не почула. Скажи ще раз"])

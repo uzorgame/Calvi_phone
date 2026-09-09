@@ -51,6 +51,11 @@ class SyncDao extends DatabaseAccessor<CalviDb> with _$SyncDaoMixin {
     return select(syncMeta).getSingle();
   }
 
+  /// The same row, live. The watch needs the access token as it is now, not as
+  /// it was when the screen first read it: linking an account swaps the token
+  /// while the day screen stays on.
+  Stream<SyncMetaData?> watchState() => select(syncMeta).watchSingleOrNull();
+
   Future<void> setCursor(int cursor) => (update(syncMeta)..where((s) => s.id.equals(1))).write(
     SyncMetaCompanion(cursor: Value(cursor), lastSyncAt: Value(DateTime.now())),
   );

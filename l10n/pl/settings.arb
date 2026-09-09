@@ -26,6 +26,32 @@
   "setPolicy": "Polityka prywatności",
   "setMedical": "Zastrzeżenie medyczne",
   "setAbout": "O aplikacji",
+
+  "setAccess": "Dostęp",
+
+  "accessMic": "Mikrofon",
+
+  "accessSpeech": "Rozpoznawanie mowy",
+
+  "accessCamera": "Aparat",
+
+  "accessNotify": "Powiadomienia",
+
+  "accessOn": "dozwolone",
+
+  "accessOff": "odmówiono",
+
+  "accessAsk": "jeszcze nie pytano",
+
+  "accessNote": "Mikrofon i rozpoznawanie mowy są potrzebne do dyktowania, a rozpoznawanie także zegarkowi: nagrywa, co mówisz, a telefon zamienia to w słowa. Dotknij wiersza, aby udzielić dostępu lub otworzyć ustawienia systemu i go wyłączyć.",
+
+  "accountWatch": "Apple Watch",
+
+  "watchLinked": "połączony, dane aktualne",
+
+  "watchWaiting": "połączony, czeka na dane",
+
+  "watchNotInstalled": "aplikacja nie jest zainstalowana na zegarku",
   "setUnset": "nie podano",
 
   "setFreeTierShort": "Dla obrońców Ukrainy, pracowników Sił Zbrojnych, służb ratunkowych, DTEK, medyków, wolontariuszy i nauczycieli stref przyfrontowych plan jest BEZPŁATNY",

@@ -28,6 +28,31 @@ class LUk extends L {
   String get aboutWrite => 'Написати нам';
 
   @override
+  String get accessAsk => 'ще не питали';
+
+  @override
+  String get accessCamera => 'Камера';
+
+  @override
+  String get accessMic => 'Мікрофон';
+
+  @override
+  String get accessNote =>
+      'Мікрофон і розпізнавання мовлення потрібні для диктовки, а розпізнавання ще й годиннику: він записує сказане, а слова з нього робить телефон. Дотик по рядку просить дозвіл або відкриває налаштування системи, де його можна вимкнути.';
+
+  @override
+  String get accessNotify => 'Сповіщення';
+
+  @override
+  String get accessOff => 'заборонено';
+
+  @override
+  String get accessOn => 'дозволено';
+
+  @override
+  String get accessSpeech => 'Розпізнавання мовлення';
+
+  @override
   String get accountBusy => 'Заходимо…';
 
   @override
@@ -86,6 +111,9 @@ class LUk extends L {
 
   @override
   String get accountViaEmail => 'Вхід через пошту';
+
+  @override
+  String get accountWatch => 'Apple Watch';
 
   @override
   String get accountWhichDiary => 'Який щоденник лишаємо?';
@@ -2180,6 +2208,9 @@ class LUk extends L {
   String get setAbout => 'Про застосунок';
 
   @override
+  String get setAccess => 'Доступ';
+
+  @override
   String get setAllergies => 'Алергії';
 
   @override
@@ -2740,6 +2771,15 @@ class LUk extends L {
 
   @override
   String get unitsVolume => 'Вода';
+
+  @override
+  String get watchLinked => 'підключено, дані актуальні';
+
+  @override
+  String get watchNotInstalled => 'застосунок на годиннику не встановлено';
+
+  @override
+  String get watchWaiting => 'підключено, чекає на дані';
 
   @override
   String waterGlasses(int glasses) {

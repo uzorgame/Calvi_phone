@@ -22,6 +22,7 @@ import '../../l10n/labels.dart';
 import 'panel_assistant.dart';
 import 'panel_reminders.dart';
 import 'panel_about.dart';
+import 'panel_access.dart';
 import 'panel_legal.dart';
 import 'panels_account.dart';
 import 'panels_body.dart';
@@ -186,6 +187,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       /* Медичне застереження третім документом, а не розділом усередині Умов:
          на нього треба посилатись з екранів, а не з абзацу. */
       'medical' => LegalPanel(doc: medical, onBack: _close),
+      'access' => AccessPanel(onBack: _close),
       'about' => AboutPanel(onBack: _close),
       'delete' => DeletePanel(onBack: _close),
       _ => const SizedBox.shrink(),
@@ -376,6 +378,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       title: l.setMedical,
                       onTap: () => _open('medical'),
                     ),
+                    /* Доступи між документами і «Про застосунок»: це теж про те,
+                       що застосунок може, а не про те, що людина їсть. */
+                    CalviRow(icon: 'shield', title: l.setAccess, onTap: () => _open('access')),
                     CalviRow(icon: 'settings', title: l.setAbout, onTap: () => _open('about')),
                   ],
                 ),

@@ -28,6 +28,31 @@ class LFr extends L {
   String get aboutWrite => 'Écris-nous';
 
   @override
+  String get accessAsk => 'pas encore demandé';
+
+  @override
+  String get accessCamera => 'Appareil photo';
+
+  @override
+  String get accessMic => 'Micro';
+
+  @override
+  String get accessNote =>
+      'Le micro et la reconnaissance vocale servent à la dictée, et la reconnaissance aussi à la montre : elle enregistre ce que tu dis et le téléphone en fait des mots. Touche une ligne pour accorder le droit ou ouvrir les réglages système et le couper.';
+
+  @override
+  String get accessNotify => 'Notifications';
+
+  @override
+  String get accessOff => 'refusé';
+
+  @override
+  String get accessOn => 'autorisé';
+
+  @override
+  String get accessSpeech => 'Reconnaissance vocale';
+
+  @override
   String get accountBusy => 'Connexion…';
 
   @override
@@ -86,6 +111,9 @@ class LFr extends L {
 
   @override
   String get accountViaEmail => 'Connecté avec l\'e-mail';
+
+  @override
+  String get accountWatch => 'Apple Watch';
 
   @override
   String get accountWhichDiary => 'Quel journal on garde ?';
@@ -2181,6 +2209,9 @@ class LFr extends L {
   String get setAbout => 'À propos de l\'app';
 
   @override
+  String get setAccess => 'Accès';
+
+  @override
   String get setAllergies => 'Allergies';
 
   @override
@@ -2741,6 +2772,15 @@ class LFr extends L {
 
   @override
   String get unitsVolume => 'Eau';
+
+  @override
+  String get watchLinked => 'connectée, données à jour';
+
+  @override
+  String get watchNotInstalled => 'app non installée sur la montre';
+
+  @override
+  String get watchWaiting => 'connectée, en attente des données';
 
   @override
   String waterGlasses(int glasses) {

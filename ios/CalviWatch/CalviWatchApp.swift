@@ -144,6 +144,20 @@ struct Watch: View {
         .font(.headline)
         .foregroundStyle(Palette.ink)
 
+      /* Скільки часу лишилось. Смужка наповнюється двадцять секунд, і коли
+         вона повна, запис зупиняється і йде далі сам, як після «Готово».
+         Без неї стеля була б невидимою: людина говорила б у вимкнений
+         мікрофон і не знала про це. */
+      GeometryReader { box in
+        ZStack(alignment: .leading) {
+          Capsule().fill(Palette.track)
+          Capsule().fill(Palette.dim).frame(width: box.size.width * ears.elapsed)
+        }
+      }
+      .frame(height: 3)
+      .padding(.top, w * 0.02)
+      .padding(.horizontal, w * 0.1)
+
       /* Одна широка кнопка. Скасування свайпом управо, як у всьому watchOS:
          друга кнопка поруч відібрала б половину ряду в головної дії заради
          того, що система і так уміє. */
@@ -155,6 +169,10 @@ struct Watch: View {
         .background(Palette.ink, in: Capsule())
         .buttonStyle(.plain)
         .padding(.top, w * 0.03)
+    }
+    // Стеля запису спрацювала: далі так само, як після «Готово».
+    .onChange(of: ears.ended) { _, ended in
+      if ended, step == .hearing { Task { await send() } }
     }
   }
 
@@ -286,16 +304,25 @@ struct Watch: View {
 
     step = .analysing(heard)
 
+    /* Ключ належить реченню. Якщо відповідь не дійде і речення піде вдруге з
+       черги, сервер побачить той самий ключ і не запише страву двічі. */
+    let key = UUID().uuidString
+
     do {
-      let answer = try await Nora.say(heard, token: token, lang: link.lang)
+      let answer = try await Nora.say(heard, key: key, token: token, lang: link.lang)
       logs += 1
       link.spend(answer.dishes.reduce(0) { $0 + $1.kcal })
       step = .done(answer.dishes)
     } catch NoraTrouble.dry {
       step = .dry
     } catch NoraTrouble.offline {
-      Queue.add(heard)
+      Queue.add(heard, key: key)
       step = .queued
+    } catch NoraTrouble.stale {
+      /* Сервер не впізнав токен: людина вийшла на телефоні або токен протух.
+         Годинник забуває його сам, і головний екран каже, що робити. */
+      link.forget()
+      step = .trouble("Відкрий Calvi на телефоні")
     } catch {
       step = .trouble("Сервер не відповів")
     }

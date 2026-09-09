@@ -1,9 +1,11 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../data/app_scope.dart';
 import '../../data/day.dart';
+import '../../data/watch.dart';
 import '../../data/local/database.dart';
 import '../../data/remote/login_service.dart';
 import '../../design/brand_marks.dart';
@@ -258,6 +260,48 @@ class _SignedIn extends StatelessWidget {
               ),
             ),
           ],
+
+          /* Годинник під акаунтом, бо він живе цим акаунтом: токен, мова і
+             числа дня йдуть на нього звідси. Рядок є лише тоді, коли годинник
+             у парі; телефону без годинника нема чого казати. */
+          if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS)
+            FutureBuilder<WatchStatus?>(
+              future: Watch.status(),
+              builder: (context, snap) {
+                final w = snap.data;
+                if (w == null || !w.paired) return const SizedBox.shrink();
+                final l = L.of(context);
+                final word = !w.installed
+                    ? l.watchNotInstalled
+                    : w.current
+                    ? l.watchLinked
+                    : l.watchWaiting;
+                return Container(
+                  margin: const EdgeInsets.only(top: 12),
+                  padding: const EdgeInsets.only(top: 12),
+                  decoration: BoxDecoration(
+                    border: Border(top: BorderSide(color: c.cardBorder)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(l.accountWatch, style: context.t.labelSmall),
+                      const SizedBox(width: 12),
+                      Flexible(
+                        child: Text(
+                          word,
+                          textAlign: TextAlign.end,
+                          style: context.t.labelSmall?.copyWith(
+                            color: c.text,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
 
           GestureDetector(
             onTap: onOut,

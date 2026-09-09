@@ -552,6 +552,7 @@ class _CalviAppState extends State<CalviApp> {
     /* Годинник більше не знає цієї людини. Без цього рядка наступний вхід із тим
        самим станом до нього не дійшов би: він збігся б із запамʼятованим. */
     Watch.forget();
+    unawaited(Watch.clear());
     setState(() {
       _s = emptySettings();
       _meds = const [];

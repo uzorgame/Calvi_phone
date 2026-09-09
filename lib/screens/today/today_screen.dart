@@ -10,7 +10,7 @@ import '../../data/meal.dart';
 import '../../data/app_scope.dart';
 // Only the handle: the generated row classes carry names the screens already
 // use for their own models, and `Workout` is one of them.
-import '../../data/local/database.dart' show CalviDb, TokenStateData;
+import '../../data/local/database.dart' show CalviDb, SyncMetaData, TokenStateData;
 import '../../data/local/chat_store.dart';
 import '../../data/local/day_reader.dart';
 import '../../data/remote/api.dart';
@@ -1380,6 +1380,15 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
     _tokenFeed = db.syncDao.watchTokens().listen((t) {
       if (mounted) setState(() => _tokens = t);
     });
+
+    /* Токен для годинника теж живий, а не прочитаний один раз: вхід в акаунт
+       або звʼязування з ним міняє токен, поки екран дня стоїть під панеллю
+       налаштувань, і годинник має отримати новий, а не лишитись зі старим. */
+    _stateFeed?.cancel();
+    _stateFeed = db.syncDao.watchState().listen((m) {
+      _token = m?.accessToken;
+      if (mounted) setState(() {});
+    });
   }
 
   @override
@@ -1429,6 +1438,7 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    _stateFeed?.cancel();
     _reply?.cancel();
     _feed?.cancel();
     _showing?.cancel();
@@ -1852,10 +1862,10 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
     _drawn = ids.toSet();
   }
 
-  /* Токен доступу, прочитаний один раз. Поки акаунта немає, лишається порожнім і
-     питається знову на наступному кадрі: пристрій без мережі отримує акаунт не
-     одразу, а годинник без токена не має чим підписати запит. */
+  /* Токен доступу, як він є зараз: його тримає свіжим потік стану синку. Поки
+     акаунта немає, лишається порожнім, і годинник каже «відкрий Calvi». */
   String? _token;
+  StreamSubscription<SyncMetaData?>? _stateFeed;
 
   /// Розповідає годиннику про день. Сам [Watch] мовчить, коли нічого не змінилось.
   Future<void> _tellWatch(AppScope scope, int norm, int left) async {

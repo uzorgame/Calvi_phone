@@ -3,10 +3,11 @@ import WatchConnectivity
 
 /// Те, що телефон розповів годиннику, і що годинник памʼятає між запусками.
 ///
-/// Годинник не питає в телефона нічого. Телефон кладе контекст, коли має що
-/// сказати, а годинник читає його тоді, коли його відкрили. Тому все, що
-/// прийшло, одразу лягає на диск: людина може підняти руку через добу після
-/// того, як телефон востаннє був поруч, і застосунок мусить працювати.
+/// Годинник не питає в телефона нічого, крім слів зі звуку. Телефон кладе
+/// контекст, коли має що сказати, а годинник читає його тоді, коли його
+/// відкрили. Тому все, що прийшло, одразу лягає на диск: людина може підняти
+/// руку через добу після того, як телефон востаннє був поруч, і застосунок
+/// мусить працювати.
 @MainActor
 final class Link: NSObject, ObservableObject {
   static let shared = Link()
@@ -27,6 +28,13 @@ final class Link: NSObject, ObservableObject {
   @Published private(set) var energy = "kcal"
 
   private let disk = UserDefaults.standard
+
+  /// Слова, на які годинник ще чекає від телефона, за номером запису.
+  private var pending: [String: CheckedContinuation<String, Error>] = [:]
+
+  /// Скільки чекати на слова. Холодний старт застосунку у фоні плюс саме
+  /// розпізнавання вкладаються з запасом; довше означає, що телефон не відповість.
+  static let patience: Duration = .seconds(15)
 
   /// Порція так, як її читає людина: грами цілі, унції з одним знаком.
   func portionText(_ grams: Int) -> String {
@@ -60,6 +68,13 @@ final class Link: NSObject, ObservableObject {
     disk.set(left, forKey: "left")
   }
 
+  /// Токен більше не годиться: сервер відмовив ним. Годинник повертається в
+  /// стан «відкрий Calvi на телефоні», і телефон дасть свіжий.
+  func forget() {
+    token = nil
+    disk.removeObject(forKey: "token")
+  }
+
   private func load() {
     token = disk.string(forKey: "token")
     lang = disk.string(forKey: "lang") ?? "en"
@@ -70,9 +85,15 @@ final class Link: NSObject, ObservableObject {
   }
 
   fileprivate func take(_ context: [String: Any]) {
+    /* Порожній токен це вихід з акаунта на телефоні. Годинник забуває людину
+       тієї ж миті, а не через тридцять днів, коли токен протух би сам. */
     if let v = context["token"] as? String {
-      token = v
-      disk.set(v, forKey: "token")
+      if v.isEmpty {
+        forget()
+      } else {
+        token = v
+        disk.set(v, forKey: "token")
+      }
     }
     if let v = context["lang"] as? String {
       lang = v
@@ -95,6 +116,77 @@ final class Link: NSObject, ObservableObject {
       disk.set(v, forKey: "energy")
     }
   }
+
+  // MARK: Слова від телефона
+
+  /// Слова зі звуку, від телефона.
+  ///
+  /// Звук іде на айфон разом із мовою застосунку, і той розпізнає тим самим
+  /// розпізнавачем Apple, що й диктовка в застосунку, тільки цією мовою.
+  /// Застосунок на телефоні відкривати не треба: iOS підіймає його у фоні
+  /// сама, і телефон може лишатись заблокованим. Потрібно лише, щоб він був
+  /// поруч, у межах Bluetooth або тієї самої мережі.
+  ///
+  /// Два кроки, а не один. Відповідь на повідомлення має прийти за лічені
+  /// секунди, інакше канал сам рахує її простроченою; холодний старт
+  /// застосунку у фоні разом із розпізнаванням у це не завжди вкладається.
+  /// Тому телефон відповідає «прийняв» одразу, а слова шле окремим
+  /// повідомленням, і на них годинник чекає стільки, скільки сам вирішив.
+  func hear(_ file: URL, lang: String) async throws -> String {
+    let session = WCSession.default
+    guard session.activationState == .activated, session.isReachable else { throw LinkTrouble.far }
+    guard let audio = try? Data(contentsOf: file), !audio.isEmpty else {
+      throw LinkTrouble.failed("Не почула. Скажи ще раз")
+    }
+
+    let id = UUID().uuidString
+
+    try await withCheckedThrowingContinuation { (next: CheckedContinuation<Void, Error>) in
+      session.sendMessage(
+        ["audio": audio, "lang": lang, "id": id],
+        replyHandler: { reply in
+          if let why = reply["error"] as? String {
+            next.resume(throwing: LinkTrouble.failed(why))
+          } else {
+            next.resume()
+          }
+        },
+        errorHandler: { error in next.resume(throwing: Self.trouble(error)) }
+      )
+    }
+
+    return try await withCheckedThrowingContinuation { next in
+      pending[id] = next
+      Task { [weak self] in
+        try? await Task.sleep(for: Self.patience)
+        self?.settle(id, with: .failure(LinkTrouble.failed("Телефон не відповів")))
+      }
+    }
+  }
+
+  /// Один результат на один запис: хто перший, той і відповів.
+  private func settle(_ id: String, with result: Result<String, Error>) {
+    guard let next = pending.removeValue(forKey: id) else { return }
+    next.resume(with: result)
+  }
+
+  fileprivate func heard(_ message: [String: Any]) {
+    guard let id = message["id"] as? String else { return }
+    if let text = message["heard"] as? String {
+      settle(id, with: .success(text.trimmingCharacters(in: .whitespacesAndNewlines)))
+    } else {
+      settle(id, with: .failure(LinkTrouble.failed(message["error"] as? String ?? "Не почула. Скажи ще раз")))
+    }
+  }
+
+  /* Не дістав або не дочекався: для людини це одне «телефон далеко». Решта
+     помилок каналу лягає в «не відповів», бо порада та сама: підійти. */
+  private nonisolated static func trouble(_ error: Error) -> LinkTrouble {
+    let code = (error as? WCError)?.code
+    return code == .notReachable || code == .messageReplyTimedOut
+      ? .far
+      : .failed("Телефон не відповів")
+  }
 }
 
 /// Чому телефон не відповів словами.
@@ -103,44 +195,6 @@ enum LinkTrouble: Error {
   case far
   /// Телефон відповів, але не словами: без дозволу, без мови, без мережі.
   case failed(String)
-}
-
-extension Link {
-  /// Слова зі звуку, від телефона.
-  ///
-  /// Звук іде на айфон разом із мовою застосунку, і той розпізнає тим самим
-  /// розпізнавачем Apple, що й диктовка в застосунку, тільки цією мовою.
-  /// Застосунок на телефоні відкривати не треба: iOS підіймає його у фоні
-  /// сама, і телефон може лишатись заблокованим. Потрібно лише, щоб він був
-  /// поруч, у межах Bluetooth або тієї самої мережі.
-  func hear(_ file: URL, lang: String) async throws -> String {
-    let session = WCSession.default
-    guard session.activationState == .activated, session.isReachable else { throw LinkTrouble.far }
-    guard let audio = try? Data(contentsOf: file), !audio.isEmpty else {
-      throw LinkTrouble.failed("Не почула. Скажи ще раз")
-    }
-
-    return try await withCheckedThrowingContinuation { next in
-      session.sendMessage(
-        ["audio": audio, "lang": lang],
-        replyHandler: { reply in
-          if let text = reply["text"] as? String {
-            next.resume(returning: text.trimmingCharacters(in: .whitespacesAndNewlines))
-          } else {
-            next.resume(throwing: LinkTrouble.failed(reply["error"] as? String ?? "Не почула. Скажи ще раз"))
-          }
-        },
-        errorHandler: { error in
-          /* Не дістав або не дочекався: для людини це одне «телефон далеко».
-             Решта помилок каналу теж лягає сюди, бо порада та сама: підійти. */
-          let code = (error as? WCError)?.code
-          next.resume(throwing: code == .notReachable || code == .messageReplyTimedOut
-            ? LinkTrouble.far
-            : LinkTrouble.failed("Телефон не відповів"))
-        }
-      )
-    }
-  }
 }
 
 extension Link: WCSessionDelegate {
@@ -159,5 +213,10 @@ extension Link: WCSessionDelegate {
 
   nonisolated func session(_ session: WCSession, didReceiveApplicationContext context: [String: Any]) {
     Task { @MainActor in Link.shared.take(context) }
+  }
+
+  /// Слова, які телефон надіслав окремим повідомленням після «прийняв».
+  nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+    Task { @MainActor in Link.shared.heard(message) }
   }
 }
