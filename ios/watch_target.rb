@@ -78,6 +78,18 @@ watch.build_configurations.each do |config|
   s['PRODUCT_NAME'] = 'Calvi'
   s['INFOPLIST_FILE'] = "#{NAME}/Info.plist"
   s['SDKROOT'] = 'watchos'
+  # Платформи названі вголос, і це не дублювання SDKROOT.
+  #
+  # Проєкт Flutter на рівні проєкту ставить `SUPPORTED_PLATFORMS = iphoneos` у
+  # Release і Profile, і ціль без власного значення його успадковує. Тоді для
+  # Xcode годинниковий застосунок «підтримує iOS», і на архівуванні під iPhone
+  # він збирає його як iOS-ціль: SDK підміняється на iphoneos, а компілятор
+  # каталогу шукає в іконці годинника iOS-розміри, яких там немає. Саме звідси
+  # «AppIcon did not have any applicable content» на обох форматах іконки
+  # поспіль, і саме тому архів падав за шість секунд, ще до першого рядка
+  # Swift.
+  s['SUPPORTED_PLATFORMS'] = 'watchos watchsimulator'
+  s['SUPPORTS_MACCATALYST'] = 'NO'
   # Четвірка це годинник. Без неї Xcode збирає під iPhone і падає на імпорті
   # WatchKit.
   s['TARGETED_DEVICE_FAMILY'] = '4'
