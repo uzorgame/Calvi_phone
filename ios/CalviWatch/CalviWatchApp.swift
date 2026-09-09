@@ -160,7 +160,7 @@ struct Watch: View {
   private var hearing: some View {
     VStack(spacing: 0) {
       Spacer(minLength: 0)
-      Meter(level: ears.level).frame(height: w * 0.3)
+      Meter(level: ears.level).frame(width: w * 0.66, height: w * 0.3)
       Spacer(minLength: 0)
 
       Text(t.listening)
