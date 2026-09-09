@@ -69,8 +69,11 @@ class _AccessPanelState extends State<AccessPanel> with WidgetsBindingObserver {
      system settings, because the sheet is shown once and never again, and
      turning a granted permission off is only possible there. */
   Future<void> _tap(Permission permission) async {
-    final now = _status[permission];
-    if (now == null || now.isDenied) {
+    /* Asked fresh, not from the cache: the person may have just come back
+       from the system settings, and a stale "not asked" would show the sheet
+       that iOS no longer shows, so the tap would do nothing. */
+    final now = await permission.status;
+    if (now.isDenied) {
       await permission.request();
     } else {
       await openAppSettings();
