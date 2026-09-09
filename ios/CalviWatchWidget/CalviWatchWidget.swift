@@ -79,11 +79,13 @@ struct FaceView: View {
     .containerBackground(for: .widget) { Color.clear }
   }
 
-  /// Частка залишку, як на прототипі: повне кільце зранку, порожнє, коли
-  /// норму зʼїли. Перебір нижче за нуль не йде.
+  /// Зʼїдене, як на кільці дня в застосунку: порожнє кільце зранку, і воно
+  /// наповнюється разом із днем. Число всередині при цьому лишається
+  /// залишком, бо саме його людина хоче знати, глянувши на руку. Перебір
+  /// вище за повне кільце не йде.
   private var part: CGFloat {
     guard let state, state.norm > 0 else { return 0 }
-    return CGFloat(max(0, min(1, Double(state.left) / Double(state.norm))))
+    return CGFloat(max(0, min(1, 1 - Double(state.left) / Double(state.norm))))
   }
 
   private var number: String {
