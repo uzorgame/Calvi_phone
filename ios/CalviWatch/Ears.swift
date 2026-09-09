@@ -47,14 +47,16 @@ final class Ears: NSObject, ObservableObject {
   /// повідомлення.
   static let longest: TimeInterval = 20
 
-  func start() async {
+  /// `lang` лише для слів помилок: мова застосунку на телефоні.
+  func start(lang: String) async {
+    let t = Words.of(lang)
     trouble = nil
     level = 0
     elapsed = 0
     ended = false
 
     guard await AVAudioApplication.requestRecordPermission() else {
-      trouble = "Дозволь мікрофон у налаштуваннях"
+      trouble = t.micDenied
       return
     }
 
@@ -70,7 +72,7 @@ final class Ears: NSObject, ObservableObject {
       r.isMeteringEnabled = true
       r.delegate = self
       guard r.record(forDuration: Self.longest) else {
-        trouble = "Мікрофон не відповів"
+        trouble = t.micFailed
         return
       }
       recorder = r
@@ -80,7 +82,7 @@ final class Ears: NSObject, ObservableObject {
         Task { @MainActor in self?.tick() }
       }
     } catch {
-      trouble = "Мікрофон не відповів"
+      trouble = t.micFailed
     }
   }
 

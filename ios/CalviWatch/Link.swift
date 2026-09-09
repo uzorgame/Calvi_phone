@@ -38,7 +38,9 @@ final class Link: NSObject, ObservableObject {
 
   /// Порція так, як її читає людина: грами цілі, унції з одним знаком.
   func portionText(_ grams: Int) -> String {
-    portion == "oz" ? String(format: "%.1f oz", Double(grams) / 28.349523) : "\(grams) г"
+    portion == "oz"
+      ? String(format: "%.1f oz", Double(grams) / 28.349523)
+      : "\(grams) \(Words.of(lang).gram)"
   }
 
   func energyNum(_ kcal: Int) -> String {
@@ -46,7 +48,7 @@ final class Link: NSObject, ObservableObject {
   }
 
   func energyText(_ kcal: Int) -> String {
-    "\(energyNum(kcal)) \(energy == "kj" ? "кДж" : "ккал")"
+    "\(energyNum(kcal)) \(energy == "kj" ? Words.of(lang).kj : Words.of(lang).kcal)"
   }
 
   private override init() {
@@ -135,8 +137,9 @@ final class Link: NSObject, ObservableObject {
   func hear(_ file: URL, lang: String) async throws -> String {
     let session = WCSession.default
     guard session.activationState == .activated, session.isReachable else { throw LinkTrouble.far }
+    let t = Words.of(lang)
     guard let audio = try? Data(contentsOf: file), !audio.isEmpty else {
-      throw LinkTrouble.failed("Не почула. Скажи ще раз")
+      throw LinkTrouble.failed(t.notHeard)
     }
 
     let id = UUID().uuidString
@@ -151,7 +154,7 @@ final class Link: NSObject, ObservableObject {
             next.resume()
           }
         },
-        errorHandler: { error in next.resume(throwing: Self.trouble(error)) }
+        errorHandler: { error in next.resume(throwing: Self.trouble(error, t)) }
       )
     }
 
@@ -159,7 +162,7 @@ final class Link: NSObject, ObservableObject {
       pending[id] = next
       Task { [weak self] in
         try? await Task.sleep(for: Self.patience)
-        self?.settle(id, with: .failure(LinkTrouble.failed("Телефон не відповів")))
+        self?.settle(id, with: .failure(LinkTrouble.failed(t.phoneSilent)))
       }
     }
   }
@@ -175,17 +178,17 @@ final class Link: NSObject, ObservableObject {
     if let text = message["heard"] as? String {
       settle(id, with: .success(text.trimmingCharacters(in: .whitespacesAndNewlines)))
     } else {
-      settle(id, with: .failure(LinkTrouble.failed(message["error"] as? String ?? "Не почула. Скажи ще раз")))
+      settle(id, with: .failure(LinkTrouble.failed(message["error"] as? String ?? Words.of(lang).notHeard)))
     }
   }
 
   /* Не дістав або не дочекався: для людини це одне «телефон далеко». Решта
      помилок каналу лягає в «не відповів», бо порада та сама: підійти. */
-  private nonisolated static func trouble(_ error: Error) -> LinkTrouble {
+  private nonisolated static func trouble(_ error: Error, _ t: Words) -> LinkTrouble {
     let code = (error as? WCError)?.code
     return code == .notReachable || code == .messageReplyTimedOut
       ? .far
-      : .failed("Телефон не відповів")
+      : .failed(t.phoneSilent)
   }
 }
 

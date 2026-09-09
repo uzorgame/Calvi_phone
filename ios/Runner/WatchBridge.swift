@@ -112,11 +112,11 @@ extension WatchBridge: WCSessionDelegate {
     didReceiveMessage message: [String: Any],
     replyHandler: @escaping ([String: Any]) -> Void
   ) {
+    let lang = message["lang"] as? String ?? "en"
     guard let audio = message["audio"] as? Data, !audio.isEmpty else {
-      replyHandler(["error": "Не почула. Скажи ще раз"])
+      replyHandler(["error": Hearing.say(.notHeard, lang)])
       return
     }
-    let lang = message["lang"] as? String ?? "en"
     let id = message["id"] as? String ?? ""
     replyHandler(["ack": true])
 
@@ -143,25 +143,83 @@ enum Hearing {
     "de": "de-DE", "fr": "fr-FR", "pt": "pt-BR", "pl": "pl-PL",
   ]
 
+  /// Що телефон відповідає годиннику словами. Мовою застосунку, як і сам
+  /// годинник: помилка українською на англійському екрані читалась би як збій.
+  enum Reply { case notHeard, needSpeech, noNetwork, noLanguage }
+
+  static func say(_ what: Reply, _ lang: String) -> String {
+    let table: [String: [Reply: String]] = [
+      "uk": [
+        .notHeard: "Не почула. Скажи ще раз",
+        .needSpeech: "Дозволь розпізнавання мовлення: Calvi, Налаштування, Доступ",
+        .noNetwork: "Відсутнє підключення до мережі",
+        .noLanguage: "Розпізнавання цією мовою недоступне",
+      ],
+      "en": [
+        .notHeard: "Did not catch that. Say it again",
+        .needSpeech: "Allow speech recognition: Calvi, Settings, Access",
+        .noNetwork: "No network connection",
+        .noLanguage: "Recognition is not available in this language",
+      ],
+      "es": [
+        .notHeard: "No te oí. Dilo otra vez",
+        .needSpeech: "Permite el reconocimiento de voz: Calvi, Ajustes, Acceso",
+        .noNetwork: "Sin conexión de red",
+        .noLanguage: "El reconocimiento no está disponible en este idioma",
+      ],
+      "it": [
+        .notHeard: "Non ho sentito. Ripeti",
+        .needSpeech: "Consenti il riconoscimento vocale: Calvi, Impostazioni, Accesso",
+        .noNetwork: "Nessuna connessione di rete",
+        .noLanguage: "Il riconoscimento non è disponibile in questa lingua",
+      ],
+      "de": [
+        .notHeard: "Nicht verstanden. Sag es noch einmal",
+        .needSpeech: "Erlaube die Spracherkennung: Calvi, Einstellungen, Zugriff",
+        .noNetwork: "Keine Netzverbindung",
+        .noLanguage: "Erkennung in dieser Sprache nicht verfügbar",
+      ],
+      "fr": [
+        .notHeard: "Je n’ai pas entendu. Répète",
+        .needSpeech: "Autorise la reconnaissance vocale : Calvi, Réglages, Accès",
+        .noNetwork: "Pas de connexion réseau",
+        .noLanguage: "La reconnaissance n’est pas disponible dans cette langue",
+      ],
+      "pt": [
+        .notHeard: "Não ouvi. Diga de novo",
+        .needSpeech: "Permita o reconhecimento de fala: Calvi, Ajustes, Acesso",
+        .noNetwork: "Sem conexão de rede",
+        .noLanguage: "Reconhecimento indisponível neste idioma",
+      ],
+      "pl": [
+        .notHeard: "Nie usłyszałam. Powtórz",
+        .needSpeech: "Zezwól na rozpoznawanie mowy: Calvi, Ustawienia, Dostęp",
+        .noNetwork: "Brak połączenia z siecią",
+        .noLanguage: "Rozpoznawanie niedostępne w tym języku",
+      ],
+    ]
+    return (table[lang] ?? table["en"]!)[what]!
+  }
+
   static func transcribe(_ audio: Data, lang: String, done: @escaping ([String: Any]) -> Void) {
     /* Дозвіл уже є: його просила диктовка в застосунку або екран «Доступ», і
        це той самий дозвіл. Просити тут не можна, бо застосунок може бути
        піднятий у фоні, де вікна з питанням нема кому показати. */
     guard SFSpeechRecognizer.authorizationStatus() == .authorized else {
-      done(["error": "Дозволь розпізнавання мовлення: Calvi, Налаштування, Доступ"])
+      done(["error": say(.needSpeech, lang)])
       return
     }
 
     // Замок на мові: розпізнавач саме цієї локалі, а не «яку почує».
     let id = locales[lang] ?? "en-US"
     guard let recognizer = SFSpeechRecognizer(locale: Locale(identifier: id)) else {
-      done(["error": "Розпізнавання цією мовою недоступне"])
+      done(["error": say(.noLanguage, lang)])
       return
     }
     /* Розпізнавач Apple працює через мережу, і «недоступний» майже завжди
        означає, що телефон без неї. Так і кажемо, а не «мова недоступна». */
     guard recognizer.isAvailable else {
-      done(["error": "Відсутнє підключення до мережі"])
+      done(["error": say(.noNetwork, lang)])
       return
     }
 
@@ -169,7 +227,7 @@ enum Hearing {
     do {
       try audio.write(to: file)
     } catch {
-      done(["error": "Не почула. Скажи ще раз"])
+      done(["error": say(.notHeard, lang)])
       return
     }
 
@@ -203,7 +261,7 @@ enum Hearing {
         finish(["heard": result.bestTranscription.formattedString])
       } else if error != nil {
         // Тиша, шум або не та мова: для годинника це одне й те саме.
-        finish(["error": "Не почула. Скажи ще раз"])
+        finish(["error": say(.notHeard, lang)])
       }
     }
   }

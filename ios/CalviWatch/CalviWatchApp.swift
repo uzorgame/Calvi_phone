@@ -43,6 +43,9 @@ struct Watch: View {
   /// Ширина екрана в пунктах. Від неї рахується все, що має форму.
   private var w: CGFloat { WKInterfaceDevice.current().screenBounds.width }
 
+  /// Слова мовою застосунку на телефоні, а не системною мовою годинника.
+  private var t: Words { Words.of(link.lang) }
+
   var body: some View {
     VStack(spacing: 0) {
       Bar()
@@ -79,13 +82,13 @@ struct Watch: View {
      * взагалі вся взаємодія. */
     case .done(let dishes): done(dishes).onTapGesture { self.step = .idle }
     case .dry:
-      note("Токени скінчились", "Я поки мовчу. Запис рукою в телефоні працює й далі.")
+      note(t.dryHead, t.dryBody)
         .onTapGesture { self.step = .idle }
     case .queued:
-      note("У черзі", "Немає мережі. Надішлю сама, щойно вона зʼявиться.")
+      note(t.queuedHead, t.queuedBody)
         .onTapGesture { self.step = .idle }
     case .trouble(let why):
-      note("Не вийшло", why).onTapGesture { self.step = .idle }
+      note(t.failHead, why).onTapGesture { self.step = .idle }
     }
   }
 
@@ -119,13 +122,13 @@ struct Watch: View {
 
       Spacer(minLength: 0)
 
-      Text(link.ready ? "Сказати" : "Відкрий Calvi на телефоні")
+      Text(link.ready ? t.say : t.openPhone)
         .font(.headline)
         .foregroundStyle(Palette.ink)
         .multilineTextAlignment(.center)
 
       if link.ready {
-        Text("лишилось \(link.energyNum(link.left)) з \(link.energyText(link.norm))")
+        Text(String(format: t.leftOf, link.energyNum(link.left), link.energyText(link.norm)))
           .font(.caption2)
           .foregroundStyle(Palette.dim)
       }
@@ -140,7 +143,7 @@ struct Watch: View {
       Meter(level: ears.level).frame(height: w * 0.3)
       Spacer(minLength: 0)
 
-      Text("Слухаю…")
+      Text(t.listening)
         .font(.headline)
         .foregroundStyle(Palette.ink)
 
@@ -161,7 +164,7 @@ struct Watch: View {
       /* Одна широка кнопка. Скасування свайпом управо, як у всьому watchOS:
          друга кнопка поруч відібрала б половину ряду в головної дії заради
          того, що система і так уміє. */
-      Button("Готово") { Task { await send() } }
+      Button(t.done) { Task { await send() } }
         .font(.body.weight(.semibold))
         .foregroundStyle(Palette.ground)
         .frame(maxWidth: .infinity)
@@ -191,7 +194,7 @@ struct Watch: View {
 
       /* Індикатор це саме слово, а не значок поруч із ним: крутилка казала б те
          саме, тільки чужим голосом. */
-      Text("Аналізую")
+      Text(t.analysing)
         .font(.title3.weight(.semibold))
         .foregroundStyle(Palette.dim)
 
@@ -205,7 +208,7 @@ struct Watch: View {
     VStack(alignment: .leading, spacing: w * 0.022) {
       HStack(spacing: 4) {
         Image(systemName: "checkmark")
-        Text("Записала")
+        Text(t.logged)
       }
       .font(.headline)
       .foregroundStyle(Palette.good)
@@ -226,7 +229,7 @@ struct Watch: View {
       Spacer(minLength: 0)
 
       VStack(spacing: 1) {
-        Text("лишилось \(link.energyText(link.left))")
+        Text(String(format: t.leftNow, link.energyText(link.left)))
           .font(.caption)
           .foregroundStyle(Palette.dim)
 
@@ -234,7 +237,7 @@ struct Watch: View {
            частиною інтерфейсу, а сказане тому, хто щойно перебрав норму, це не
            підтримка, а брехня. */
         if logs % 5 == 0, link.left > 0 {
-          Text("Ти гарно йдеш до цілі!")
+          Text(t.praise)
             .font(.caption2)
             .foregroundStyle(Palette.good)
         }
@@ -260,17 +263,17 @@ struct Watch: View {
 
   private func listen() async {
     step = .hearing
-    await ears.start()
+    await ears.start(lang: link.lang)
     if let why = ears.trouble { step = .trouble(why) }
   }
 
   private func send() async {
     guard let file = ears.finish() else {
-      step = .trouble("Не почула. Скажи ще раз")
+      step = .trouble(t.notHeard)
       return
     }
     guard let token = link.token else {
-      step = .trouble("Відкрий Calvi на телефоні")
+      step = .trouble(t.openPhone)
       return
     }
 
@@ -284,13 +287,13 @@ struct Watch: View {
     } catch LinkTrouble.far {
       /* Звук у чергу не кладеться: сказане без телефона поруч втратило б свій
          момент, а файл на годиннику нема де тримати. */
-      step = .trouble("Телефон далеко. Підійди до нього і скажи ще раз")
+      step = .trouble(t.phoneFar)
       return
     } catch LinkTrouble.failed(let why) {
       step = .trouble(why)
       return
     } catch {
-      step = .trouble("Телефон не відповів")
+      step = .trouble(t.phoneSilent)
       return
     }
 
@@ -298,7 +301,7 @@ struct Watch: View {
        вертатись на початок не можна: людина щойно говорила, і порожній екран
        читається як «застосунок зламався», а не як «скажи ще раз». */
     guard !heard.isEmpty else {
-      step = .trouble("Не почула. Скажи ще раз")
+      step = .trouble(t.notHeard)
       return
     }
 
@@ -322,9 +325,9 @@ struct Watch: View {
       /* Сервер не впізнав токен: людина вийшла на телефоні або токен протух.
          Годинник забуває його сам, і головний екран каже, що робити. */
       link.forget()
-      step = .trouble("Відкрий Calvi на телефоні")
+      step = .trouble(t.openPhone)
     } catch {
-      step = .trouble("Сервер не відповів")
+      step = .trouble(t.serverSilent)
     }
   }
 }
