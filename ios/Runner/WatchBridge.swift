@@ -269,7 +269,13 @@ enum Hearing {
   /// тихий, і розпізнавач на тихому файлі відповідав «нічого не сказано».
   /// Найгучніший відлік стає -1 дБ; запис, який і так гучний, лишається як є.
   /// Порожньо, коли файл не прочитався: тоді хай розпізнавач пробує сирий.
+  /* Що телефон побачив у записі: пік і тривалість. Іде на годинник дрібним
+     рядком під помилкою, бо інакше «не почула» не каже, де саме обірвалось:
+     у мікрофоні годинника, у файлі чи в розпізнавачі. Слів тут немає. */
+  private static var stats = "no audio"
+
   private static func louder(_ url: URL) -> URL? {
+    stats = "no audio"
     guard let input = try? AVAudioFile(forReading: url) else { return nil }
     let format = input.processingFormat
     guard
@@ -287,6 +293,7 @@ enum Hearing {
       let samples = channels[c]
       for i in 0..<frames { peak = max(peak, abs(samples[i])) }
     }
+    stats = String(format: "peak %.2f · %.1fs", peak, Double(frames) / format.sampleRate)
     // Тиша не підсилюється: із шуму слів не зробиш, а стелю він продавив би.
     guard peak > 0.001 else { return nil }
     if peak > 0.5 { return url }
@@ -401,7 +408,10 @@ enum Hearing {
 
     recognizer.recognitionTask(with: request) { result, error in
       if let result, result.isFinal {
-        finish(["heard": result.bestTranscription.formattedString])
+        let text = result.bestTranscription.formattedString
+        var back: [String: Any] = ["heard": text]
+        if text.isEmpty { back["note"] = "\(locked ? "L" : "U") · \(stats) · empty" }
+        finish(back)
       } else if let error {
         /* Причина лишається в журналі телефона, а годиннику йде одна з трьох:
            замок, коли телефон замкнений, мережа, коли впала вона, інакше «не
@@ -410,6 +420,8 @@ enum Hearing {
         let network = (error as NSError).domain == NSURLErrorDomain
         var back: [String: Any] = ["error": say(locked ? .locked : network ? .noNetwork : .notHeard, lang)]
         if locked { back["locked"] = true }
+        let e = error as NSError
+        back["note"] = "\(locked ? "L" : "U") · \(stats) · \(e.domain) \(e.code)"
         finish(back)
       }
     }

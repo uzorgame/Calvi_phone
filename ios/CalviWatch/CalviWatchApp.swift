@@ -439,11 +439,16 @@ struct Watch: View {
       return try await link.hear(file, lang: link.lang)
     } catch LinkTrouble.locked(let why) {
       do {
-        return try await heardByServer(file, token: token)
+        let text = try await heardByServer(file, token: token)
+        // Сервер відповів, але без слів: «не почула», з позначкою, що це він.
+        guard !text.isEmpty else { throw LinkTrouble.failed(t.notHeard + "\n\nS · empty") }
+        return text
       } catch NoraTrouble.stale {
         throw NoraTrouble.stale
+      } catch LinkTrouble.failed(let said) {
+        throw LinkTrouble.failed(said)
       } catch {
-        throw LinkTrouble.failed(why)
+        throw LinkTrouble.failed(why + "\n\nS · \(error)")
       }
     }
   }
@@ -552,10 +557,19 @@ private struct Note: View {
         Text(head)
           .font(Palette.font(w * 0.081, .semibold))
           .foregroundStyle(Palette.text)
-        Text(say)
+        /* Після порожнього рядка може стояти службова примітка: звідки
+           прийшла відмова. Вона дрібна і бліда, бо це не для людини, а для
+           розбору, коли людина скаже, що саме побачила. */
+        let parts = say.components(separatedBy: "\n\n")
+        Text(parts[0])
           .font(Palette.font(w * 0.066))
           .lineSpacing(w * 0.066 * 0.4)
           .foregroundStyle(Palette.dim)
+        if parts.count > 1 {
+          Text(parts.dropFirst().joined(separator: " · "))
+            .font(Palette.font(w * 0.05))
+            .foregroundStyle(Palette.faint)
+        }
       }
     }
     .modifier(Rise(delay: 0.08, length: 0.4))

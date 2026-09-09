@@ -254,13 +254,18 @@ final class Link: NSObject, ObservableObject {
 
   fileprivate func heard(_ message: [String: Any]) {
     guard let id = message["id"] as? String else { return }
+    /* Дрібний рядок під помилкою: що телефон побачив у записі і чим саме
+       відмовив розпізнавач. Без нього «не почула» не каже, де обірвалось. */
+    let note = (message["note"] as? String).map { "\n\n" + $0 } ?? ""
+    let why = (message["error"] as? String ?? Words.of(lang).notHeard) + note
     let result: Result<String, Error>
     if let text = message["heard"] as? String {
-      result = .success(text.trimmingCharacters(in: .whitespacesAndNewlines))
+      let clean = text.trimmingCharacters(in: .whitespacesAndNewlines)
+      result = clean.isEmpty && !note.isEmpty ? .failure(LinkTrouble.failed(why)) : .success(clean)
     } else if message["locked"] != nil {
-      result = .failure(LinkTrouble.locked(message["error"] as? String ?? Words.of(lang).notHeard))
+      result = .failure(LinkTrouble.locked(why))
     } else {
-      result = .failure(LinkTrouble.failed(message["error"] as? String ?? Words.of(lang).notHeard))
+      result = .failure(LinkTrouble.failed(why))
     }
     if pending[id] != nil {
       settle(id, with: result)
