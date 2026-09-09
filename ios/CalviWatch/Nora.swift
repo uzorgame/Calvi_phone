@@ -83,6 +83,22 @@ enum Nora {
     return json
   }
 
+  /// Слова зі звуку, від сервера.
+  ///
+  /// Запасна дорога, не головна: звичайно слова робить телефон, безкоштовно.
+  /// Сюди звук іде лише тоді, коли телефон замкнений і розпізнавач Apple на
+  /// ньому мовчить. Файл шлеться як є, мова заголовком, та сама, що в
+  /// застосунку. Порожній рядок означає, що сервер нічого не розібрав.
+  static func hear(_ file: URL, token: String, lang: String) async throws -> String {
+    guard let audio = try? Data(contentsOf: file), !audio.isEmpty else { return "" }
+    var request = post("v1/voice", token: token)
+    request.setValue("audio/mp4", forHTTPHeaderField: "content-type")
+    request.setValue(lang, forHTTPHeaderField: "x-calvi-lang")
+    request.httpBody = audio
+    let json = try await send(request)
+    return (json["text"] as? String ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+  }
+
   /// Записує сказане. `key` живе разом із реченням, а не з запитом: та сама
   /// фраза, надіслана вдруге після обриву, приходить на сервер із тим самим
   /// ключем, і він упізнає її замість того, щоб записати двічі.

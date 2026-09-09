@@ -257,6 +257,8 @@ final class Link: NSObject, ObservableObject {
     let result: Result<String, Error>
     if let text = message["heard"] as? String {
       result = .success(text.trimmingCharacters(in: .whitespacesAndNewlines))
+    } else if message["locked"] != nil {
+      result = .failure(LinkTrouble.locked(message["error"] as? String ?? Words.of(lang).notHeard))
     } else {
       result = .failure(LinkTrouble.failed(message["error"] as? String ?? Words.of(lang).notHeard))
     }
@@ -280,6 +282,9 @@ enum LinkTrouble: Error {
   case far
   /// Телефон відповів, але не словами: без дозволу, без мови, без мережі.
   case failed(String)
+  /// Телефон замкнений, і розпізнавач Apple на ньому мовчить. Слова всередині
+  /// це порада розблокувати, на випадок, коли й сервер не почує.
+  case locked(String)
 }
 
 extension Link: WCSessionDelegate {

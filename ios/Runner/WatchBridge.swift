@@ -384,9 +384,11 @@ enum Hearing {
     /* На замкненому телефоні лишається розпізнавання на самому пристрої, без
        мережі: воно не ходить до служби, яка відмовляє під замком. Є воно не
        для кожної мови, і тоді чесна порада одна: розблокувати й повторити. */
+    /* Разом зі словами йде позначка «замкнений»: годинник тоді шле звук на
+       сервер, а слова лишає на випадок, коли сервер не чує. */
     if locked {
       guard recognizer.supportsOnDeviceRecognition else {
-        finish(["error": say(.locked, lang)])
+        finish(["locked": true, "error": say(.locked, lang)])
         return
       }
       request.requiresOnDeviceRecognition = true
@@ -401,7 +403,9 @@ enum Hearing {
            почула». Тиша, шум і не та мова для годинника одне й те саме. */
         NSLog("watch: розпізнавання не вдалось, \(error)")
         let network = (error as NSError).domain == NSURLErrorDomain
-        finish(["error": say(locked ? .locked : network ? .noNetwork : .notHeard, lang)])
+        var back: [String: Any] = ["error": say(locked ? .locked : network ? .noNetwork : .notHeard, lang)]
+        if locked { back["locked"] = true }
+        finish(back)
       }
     }
   }

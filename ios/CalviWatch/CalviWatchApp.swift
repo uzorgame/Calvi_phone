@@ -373,7 +373,11 @@ struct Watch: View {
 
     let heard: String
     do {
-      heard = try await link.hear(file, lang: link.lang)
+      heard = try await words(file, token: token)
+    } catch NoraTrouble.stale {
+      link.forget()
+      step = .trouble(t.openPhone)
+      return
     } catch LinkTrouble.far {
       /* Звук у чергу не кладеться: сказане без телефона поруч втратило б свій
          момент, а файл на годиннику нема де тримати. */
@@ -422,6 +426,35 @@ struct Watch: View {
       step = .trouble(why)
     } catch {
       step = .trouble(t.serverSilent)
+    }
+  }
+
+  /// Слова зі звуку: спершу телефон, а з замкненого телефона сервер.
+  ///
+  /// Телефон замкнений, і розпізнавач Apple на ньому мовчить. Тоді звук іде
+  /// на наш сервер: у годинника є мережа через айфон і є токен. Якщо й
+  /// сервер не зміг, лишається чесна порада телефона: розблокувати.
+  private func words(_ file: URL, token: String) async throws -> String {
+    do {
+      return try await link.hear(file, lang: link.lang)
+    } catch LinkTrouble.locked(let why) {
+      do {
+        return try await heardByServer(file, token: token)
+      } catch NoraTrouble.stale {
+        throw NoraTrouble.stale
+      } catch {
+        throw LinkTrouble.failed(why)
+      }
+    }
+  }
+
+  /// Той самий один повтор із свіжим токеном, що й у записі.
+  private func heardByServer(_ file: URL, token: String) async throws -> String {
+    do {
+      return try await Nora.hear(file, token: token, lang: link.lang)
+    } catch NoraTrouble.stale {
+      let fresh = try await link.renew()
+      return try await Nora.hear(file, token: fresh, lang: link.lang)
     }
   }
 
