@@ -2365,9 +2365,6 @@ class LUk extends L {
   String get startAgreeTerms => 'умовами користування';
 
   @override
-  String get startAllergies => 'Алергії';
-
-  @override
   String get startDeviceFirstRun => 'перший запуск';
 
   @override
@@ -2401,14 +2398,10 @@ class LUk extends L {
   String get startNorm => 'Твоя норма';
 
   @override
+  String get startNormCounting => 'рахую…';
+
+  @override
   String get startNormHold => 'тримаємо';
-
-  @override
-  String get startNormNora => 'Порахувала. Далі простіше.';
-
-  @override
-  String get startNormNoraHint =>
-      'Пиши або кажи як зручно: «два яйця і тост», «випив 300 води». Решту, що знадобиться, спитаю в розмові.';
 
   @override
   String get startNormNote =>
@@ -2565,6 +2558,10 @@ class LUk extends L {
   String get todayFailedRetry => 'Не вийшло. Спробуй ще раз за хвилину.';
 
   @override
+  String get todayGoalMet =>
+      'Я вас вітаю! 🎉 Бажана вага ваша, ціль закрита. І зробили це ви, а не застосунок. Тепер я переставляю норму на утримання, щоб результат лишався з вами.';
+
+  @override
   String todayHowManyGrams(String dish) {
     return 'Скільки грамів було: $dish?';
   }
@@ -2609,7 +2606,14 @@ class LUk extends L {
       'Не дістаю мережі. Запис лишиться на телефоні і поїде, коли зʼявиться.';
 
   @override
-  String get todayOutOfTokens => 'Токени скінчились. Записати вручну можна завжди.';
+  String get todayOutOfBody =>
+      'Я поки мовчу, але записувати вручну можна завжди, і це безкоштовно. Підписка вмикає мене назад і коштує як три кави на місяць.';
+
+  @override
+  String get todayOutOfPlan => 'Підписка';
+
+  @override
+  String get todayOutOfTokens => 'Токени скінчились.';
 
   @override
   String get todayPhotoMeal => 'Фото';

@@ -32,14 +32,12 @@
   "startPaceWarning": "Takie tempo trudno utrzymać i zwykle się urywa. Poniżej 0,8 kg na tydzień efekt idzie wolniej, ale zostaje.",
 
   "startLife": "Tryb życia",
-  "startAllergies": "Alergie",
 
   "startNorm": "Twoja norma",
   "startNormPerDay": "kcal dziennie",
+  "startNormCounting": "liczę…",
   "startNormWeeks": "tygodni",
   "startNormHold": "utrzymujemy",
-  "startNormNora": "Policzone. Dalej jest prościej.",
-  "startNormNoraHint": "Pisz albo mów, jak ci wygodnie: „dwa jajka i tost”, „300 ml wody”. O resztę, jeśli będzie trzeba, dopytam w rozmowie.",
   "startNormNote": "To wyliczenie według wzoru Mifflina-St Jeora, a nie zalecenie lekarskie. Jeśli masz chorobę, jesteś w ciąży albo masz przepisaną dietę, skonsultuj się z lekarzem.",
 
   "startDeviceFirstRun": "pierwsze uruchomienie",

@@ -45,7 +45,10 @@
   "todayLogFailed": "Could not log it. Try again.",
   "todayFailedRetry": "Did not work. Try again in a minute.",
   "todayNoraSlow": "Nora is thinking longer than usual. Try again, the token was not spent.",
-  "todayOutOfTokens": "Out of tokens. Logging by hand always works.",
+  "todayOutOfTokens": "The tokens are gone.",
+  "todayOutOfBody": "I am quiet for now, but writing entries by hand is always there, and it is free. A subscription switches me back on, and costs about three coffees a month.",
+  "todayOutOfPlan": "Subscription",
+  "todayGoalMet": "Congratulations! 🎉 The weight you wanted is yours, and the goal is closed. And you did that, not the app. Now I am moving your norm to holding, so the result stays with you.",
 
 
   "noraName": "Nora",

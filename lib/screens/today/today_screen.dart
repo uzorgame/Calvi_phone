@@ -18,6 +18,7 @@ import '../../data/remote/sync_service.dart';
 import '../../data/measure.dart';
 import '../../data/meds.dart';
 import '../../data/settings.dart';
+import '../../data/watch.dart';
 import '../../data/week.dart';
 import '../../data/workout.dart';
 import '../../design/icons.dart';
@@ -55,10 +56,12 @@ class TodayScreen extends StatefulWidget {
     super.key,
     required this.onSettings,
     required this.onMeds,
+    required this.onPlan,
     this.chatOpen = false,
     this.openCard,
     this.ask,
     this.greet = false,
+    this.hail = false,
   });
 
   final VoidCallback onSettings;
@@ -71,6 +74,12 @@ class TodayScreen extends StatefulWidget {
 
   /// The fourth macro card opens the medications.
   final VoidCallback onMeds;
+
+  /* Тарифи, куди веде кнопка на картці «токени скінчились».
+   *
+   * Згори, як і решта переходів звідси: екран дня не знає ні про налаштування,
+   * ні про те, якою панеллю в них відкриваються тарифи. */
+  final VoidCallback onPlan;
 
   /* Вечірнє питання, з яким відкрили застосунок. Порожньо, коли зайшли самі.
    *
@@ -85,6 +94,12 @@ class TodayScreen extends StatefulWidget {
    * іменем і прикладами стоїть у ній від початку, і саме її людина має
    * побачити першою, а не здогадатись про неї, натиснувши на рядок унизу. */
   final bool greet;
+
+  /* Ціль досягнута: Нора вітає і каже, що норма перейшла на утримання.
+   *
+   * Прапорцем, як і привітання: слова беруться з локалізації, а рішення про те,
+   * що ціль узята, ухвалює корінь, у якого локалізації ще немає. */
+  final bool hail;
 
   @override
   State<TodayScreen> createState() => _TodayScreenState();
@@ -339,6 +354,44 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
   /// Чи піднімали вже штору на цьому екрані.
   bool _raised = false;
 
+  /* Ціль досягнута: Нора вітає і каже, що норма перейшла на утримання.
+   *
+   * Карткою, а не бульбашкою: це не репліка в розмові, а подія, після якої в
+   * профілі справді змінилось число. Норму на утримання переставляє корінь, ще
+   * до того, як екран про це дізнається; тут лишається сказати.
+   *
+   * Один раз. Напрямок після цього «тримати», умова більше не виконується, і
+   * почути це вдруге можна тільки поставивши нову ціль і дійшовши до неї. */
+  void _sayHail() {
+    if (!widget.hail || _hailed) return;
+    _hailed = true;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() {
+        _chatOpen = true;
+        /* Разом зі словами міняється й число на картці дня, і воно теж має це
+           показати: норма перераховується на очах, тим самим рухом, яким її
+           рахували вперше на «Твоїй нормі». */
+        _recount = true;
+        _messages.add(msg(from: MsgFrom.nora, text: l.todayGoalMet, card: true));
+      });
+
+      /* Рух кінчається, прапорець гасне. Інакше він лишався б піднятим, і
+         кожна наступна перебудова картки заводила б лічильник наново. */
+      _stopRecount = Timer(const Duration(milliseconds: 1700), () {
+        if (mounted) setState(() => _recount = false);
+      });
+    });
+  }
+
+  /// Чи вітали вже з ціллю на цьому екрані.
+  bool _hailed = false;
+
+  /// Норма перераховується просто зараз: число на картці дня крутиться.
+  bool _recount = false;
+  Timer? _stopRecount;
+
   /// Відкладене підняття. Знімається разом з екраном, як і решта таймерів.
   Timer? _rise;
 
@@ -436,6 +489,7 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
     MealPlate? plate,
     List<int> weights = const [],
     List<String> options = const [],
+    bool offer = false,
   }) {
     if (!mounted) return;
     final at = _messages.indexWhere((m) => m.id == waiting.id);
@@ -452,6 +506,7 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
       weights: weights,
       // Так само і варіанти вибору: відповіли, і кнопки зникли.
       options: options,
+      offer: offer,
     );
     setState(() => _messages[at] = said);
     unawaited(_chat?.save(said) ?? Future.value());
@@ -889,12 +944,20 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
         setState(() => _chatOpen = true);
       }
 
-      _answer(waiting, switch (e.code) {
-        'no_tokens' => l.todayOutOfTokens,
-        'offline' => l.todayOfflineSaved,
-        'slow' => l.todayNoraSlow,
-        _ => l.todayFailedRetry,
-      });
+      /* Скінчились токени це не помилка, а стан, і виглядає він інакше: не
+         бульбашка з поясненням, а картка з дорогою до тарифів. Решта тут
+         справді помилки, і на них ніякої кнопки немає: мережа полагодиться
+         сама, а Нора, яка думала довго, наступного разу відповість. */
+      _answer(
+        waiting,
+        switch (e.code) {
+          'no_tokens' => l.todayOutOfTokens,
+          'offline' => l.todayOfflineSaved,
+          'slow' => l.todayNoraSlow,
+          _ => l.todayFailedRetry,
+        },
+        offer: e.code == 'no_tokens',
+      );
     }
   }
 
@@ -1371,6 +1434,7 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
     _feed?.cancel();
     _showing?.cancel();
     _rise?.cancel();
+    _stopRecount?.cancel();
     WidgetsBinding.instance.removeObserver(this);
 
     /* Екран зникає, мікрофон гасне. Раніше тут не було цього рядка, і людина,
@@ -1428,12 +1492,14 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
     if (widget.ask != old.ask) _asked = false;
     _askEvening();
     _raiseChat();
+    _sayHail();
   }
 
   @override
   Widget build(BuildContext context) {
     _askEvening();
     _raiseChat();
+    _sayHail();
     final scope = AppScope.of(context);
     final real = scope.real && scope.db != null;
     final day = _dayNow(scope);
@@ -1456,6 +1522,14 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
      * заведений сьогодні, зʼявлявся в кожному минулому дні. */
     final meds = medsOnDay(scope.meds, calendarDay(_date), day.medTakes);
     final goal = goalOf(scope.s);
+
+    /* Годинник дізнається про день звідси: тут уже пораховані і норма, і
+       зʼїдене, і другого місця, де вони обидва є, у застосунку немає.
+       Спалене тренуванням не віднімається, бо воно не зсуває норму й на картці:
+       там воно стоїть окремою пігулкою. */
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => unawaited(_tellWatch(scope, goal.kcal, goal.kcal - totals.kcal)),
+    );
 
     /* Тиждень зводиться раз і віддається обом читачам: третій стороні картки і
        сторінці, яку вона відкриває. Два підрахунки одного тижня розійшлись би
@@ -1567,6 +1641,10 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
                               child: HeroCard(
                                 key: ValueKey(_date),
                                 day: day,
+                                /* Норму щойно переставили на утримання, і картка
+                                   показує це рухом, а не новим числом, яке
+                                   зʼявилось саме собою. */
+                                recount: _recount,
                                 burned: workouts.fold<int>(0, (s, w) => s + w.kcal),
                                 goal: goal,
                                 /* Зведення рахується тут і віддається обом:
@@ -1725,6 +1803,7 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
                 onClose: () => setState(() => _chatOpen = false),
                 onWeigh: _pickWeight,
                 onChoose: _choose,
+                onPlan: widget.onPlan,
                 onSend: (text) =>
                     _say(msg(from: MsgFrom.me, text: text), l.todayLoggedAskWeightShort),
                 onCamera: () => _openCamera(context),
@@ -1772,6 +1851,17 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
   void _remember(Iterable<String> ids) {
     _drawnFor = '$_date';
     _drawn = ids.toSet();
+  }
+
+  /* Токен доступу, прочитаний один раз. Поки акаунта немає, лишається порожнім і
+     питається знову на наступному кадрі: пристрій без мережі отримує акаунт не
+     одразу, а годинник без токена не має чим підписати запит. */
+  String? _token;
+
+  /// Розповідає годиннику про день. Сам [Watch] мовчить, коли нічого не змінилось.
+  Future<void> _tellWatch(AppScope scope, int norm, int left) async {
+    _token ??= (await scope.db?.syncDao.state())?.accessToken;
+    await Watch.tell(token: _token, lang: dataLang, norm: norm, left: left);
   }
 
   /// Ідентифікатор картки за її написом.

@@ -44,7 +44,10 @@
   "todayLogFailed": "Non sono riuscita a registrarlo. Riprova.",
   "todayFailedRetry": "Non è andata. Riprova tra un minuto.",
   "todayNoraSlow": "Nora ci sta pensando più del solito. Riprova, il token non è stato speso.",
-  "todayOutOfTokens": "Token finiti. Registrare a mano funziona sempre.",
+  "todayOutOfTokens": "I token sono finiti.",
+  "todayOutOfBody": "Per ora taccio, ma inserire a mano si può sempre, ed è gratis. L’abbonamento mi riaccende e costa quanto tre caffè al mese.",
+  "todayOutOfPlan": "Abbonamento",
+  "todayGoalMet": "Complimenti! 🎉 Il peso che volevi è tuo, l’obiettivo è chiuso. E l’hai fatto tu, non l’app. Ora passo la tua norma al mantenimento, così il risultato resta.",
 
 
   "noraName": "Nora",

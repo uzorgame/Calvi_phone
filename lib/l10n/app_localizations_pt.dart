@@ -2354,9 +2354,6 @@ class LPt extends L {
   String get startAgreeTerms => 'termos de uso';
 
   @override
-  String get startAllergies => 'Alergias';
-
-  @override
   String get startDeviceFirstRun => 'primeira abertura';
 
   @override
@@ -2390,14 +2387,10 @@ class LPt extends L {
   String get startNorm => 'Sua referência';
 
   @override
+  String get startNormCounting => 'a calcular…';
+
+  @override
   String get startNormHold => 'mantendo';
-
-  @override
-  String get startNormNora => 'Calculado. Daqui em diante fica mais fácil.';
-
-  @override
-  String get startNormNoraHint =>
-      'Escreva ou fale do jeito que vier: «dois ovos e uma torrada», «bebi 300 de água». O que faltar, eu pergunto na conversa.';
 
   @override
   String get startNormNote =>
@@ -2552,6 +2545,10 @@ class LPt extends L {
   String get todayFailedRetry => 'Não deu certo. Tente daqui a um minuto.';
 
   @override
+  String get todayGoalMet =>
+      'Parabéns! 🎉 O peso que você queria é seu e a meta está fechada. E foi você que conseguiu, não o app. Agora passo a sua norma para manutenção, para o resultado ficar.';
+
+  @override
   String todayHowManyGrams(String dish) {
     return 'Quantos gramas eram de $dish?';
   }
@@ -2597,7 +2594,14 @@ class LPt extends L {
       'Sem conexão. O registro fica no telefone e sobe assim que ela voltar.';
 
   @override
-  String get todayOutOfTokens => 'Sem tokens. Anotar na mão funciona sempre.';
+  String get todayOutOfBody =>
+      'Por enquanto fico quieta, mas anotar na mão dá sempre, e é de graça. A assinatura me liga de volta e custa como três cafés por mês.';
+
+  @override
+  String get todayOutOfPlan => 'Assinatura';
+
+  @override
+  String get todayOutOfTokens => 'Os tokens acabaram.';
 
   @override
   String get todayPhotoMeal => 'Foto';

@@ -66,7 +66,7 @@ void main() {
           locale: const Locale('uk'),
           theme: theme,
           scrollBehavior: const CalviScroll(),
-          home: TodayScreen(onSettings: () {}, onMeds: () {}),
+          home: TodayScreen(onSettings: () {}, onMeds: () {}, onPlan: () {}),
         ),
       ),
     );

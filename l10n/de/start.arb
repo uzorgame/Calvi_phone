@@ -38,14 +38,12 @@
   "startPaceWarning": "So ein Tempo hält man schwer durch, meistens reißt es ab. Unter 0,8 kg pro Woche kommt das Ergebnis langsamer, bleibt aber.",
 
   "startLife": "Lebensweise",
-  "startAllergies": "Allergien",
 
   "startNorm": "Dein Richtwert",
   "startNormPerDay": "kcal am Tag",
+  "startNormCounting": "rechne…",
   "startNormWeeks": "Wochen",
   "startNormHold": "halten",
-  "startNormNora": "Gerechnet. Ab hier wird es leichter.",
-  "startNormNoraHint": "Schreib oder sag es, wie es dir passt: «zwei Eier und ein Toast», «300 Wasser getrunken». Was mir fehlt, frage ich im Gespräch.",
   "startNormNote": "Das ist die Mifflin-St-Jeor-Formel, kein medizinischer Rat. Wenn du eine Erkrankung hast, schwanger bist oder eine verordnete Diät hältst, sprich mit deiner Ärztin oder deinem Arzt.",
 
   "startDeviceFirstRun": "erster Start",

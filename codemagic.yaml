@@ -40,6 +40,21 @@ workflows:
       cocoapods: default
 
     scripts:
+      # Ціль годинникового застосунку додається тут, а не лежить у репозиторії.
+      # Причина в ios/watch_target.rb: зіпсований файл проєкту зупинив би всі
+      # збірки, а невдалий скрипт валить одну. Скрипт ідемпотентний.
+      #
+      # Обовʼязково до сертифікатів: профіль для годинника треба замовляти на
+      # ціль, яка вже існує, інакше use-profiles не має куди його класти.
+      - name: Ціль годинника
+        script: |
+          gem list -i xcodeproj > /dev/null 2>&1 || gem install xcodeproj --no-document
+          export CALVI_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: *//' | cut -d+ -f1)
+          # Номер тут тимчасовий: справжній відомий лише після TestFlight, і
+          # скрипт викликається вдруге, коли він порахований.
+          export CALVI_BUILD=1
+          ruby ios/watch_target.rb
+
       - name: Дістати сертифікати Apple
         script: |
           # Порожній ланцюжок ключів, куди ляжуть сертифікати цієї збірки.
@@ -66,6 +81,14 @@ workflows:
           # Сертифікат і профіль беруться з App Store Connect за ключем API.
           # `--create` робить їх на нашому закритому ключі, якщо їх ще немає.
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --certificate-key=@env:CERTIFICATE_PRIVATE_KEY \
+            --create
+
+          # Годинниковий застосунок це окремий ідентифікатор і окремий профіль,
+          # хоч у магазині вони й одна картка. Без цього рядка збірка падає на
+          # підписі саме годинникової цілі, а повідомлення говорить про телефон.
+          app-store-connect fetch-signing-files "${BUNDLE_ID}.watchkitapp" \
             --type IOS_APP_STORE \
             --certificate-key=@env:CERTIFICATE_PRIVATE_KEY \
             --create
@@ -131,6 +154,14 @@ workflows:
           esac
           echo "останній у TestFlight: $BUILD"
           echo "BUILD_NUMBER=$((BUILD + 1))" >> $CM_ENV
+
+          # Той самий номер годиннику. Прапорець --build-number править лише
+          # телефонну ціль, бо FLUTTER_BUILD_NUMBER доходить тільки до неї;
+          # годинник має свій plist і без цього рядка лишився б на одиниці.
+          # Пару з розбіжними номерами Apple відхиляє цілком.
+          export CALVI_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: *//' | cut -d+ -f1)
+          export CALVI_BUILD=$((BUILD + 1))
+          ruby ios/watch_target.rb
 
       - name: Схема Google для входу
         script: |

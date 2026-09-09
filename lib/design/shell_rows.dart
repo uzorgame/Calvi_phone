@@ -761,10 +761,19 @@ class CalviSegments extends StatelessWidget {
 /// The border matters: without it the words read as a caption belonging to
 /// whatever is above them, and with it they read as somebody talking.
 class CalviNora extends StatelessWidget {
-  const CalviNora({super.key, required this.text, this.hint});
+  const CalviNora({super.key, required this.text, this.hint, this.action, this.onAction});
 
   final String text;
   final String? hint;
+
+  /* Кнопка під двома рядками. Порожньо в порожніх станах: там нема куди вести,
+     і кнопка «зрозуміло» це кнопка нізащо.
+   *
+   * Зʼявилась заради одного випадку: токени скінчились, і людина має дійти до
+   * тарифів. Дорога туди через меню, тобто три дотики і здогад, а тут вона
+   * стоїть рівно там, де про неї сказали. */
+  final String? action;
+  final VoidCallback? onAction;
 
   @override
   Widget build(BuildContext context) {
@@ -811,6 +820,53 @@ class CalviNora extends StatelessWidget {
                 if (hint != null) ...[
                   const SizedBox(height: 6),
                   Text(hint!, style: context.t.labelSmall?.copyWith(fontSize: CalviSize.fsMicro)),
+                ],
+                if (action != null && onAction != null) ...[
+                  const SizedBox(height: 12),
+                  /* Не на всю ширину: кнопка на всю картку читається як «далі»,
+                     тобто як єдина дорога звідси. А дорога тут не єдина, поруч
+                     стоїть «записуй вручну», і саме тому кнопка рівно така, як
+                     напис на ній. */
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: CalviPress(
+                      onTap: onAction!,
+                      builder: (context, down) => AnimatedScale(
+                        scale: down ? 0.96 : 1,
+                        duration: CalviMotion.fast,
+                        curve: CalviMotion.ease,
+                        child: Container(
+                          padding: const EdgeInsets.fromLTRB(16, 9, 12, 9),
+                          decoration: BoxDecoration(
+                            color: c.button,
+                            borderRadius: BorderRadius.circular(CalviSize.rPill),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              /* Гнучкий, хоч напис і короткий: у ряді з
+                                 `MainAxisSize.min` текст лягає в один рядок
+                                 будь-якої довжини і на вузькому телефоні
+                                 виходить за край картки. Тут він переноситься
+                                 замість цього. */
+                              Flexible(
+                                child: Text(
+                                  action!,
+                                  style: context.t.bodyMedium?.copyWith(
+                                    fontSize: CalviSize.fsCaption,
+                                    fontWeight: FontWeight.w500,
+                                    color: c.buttonText,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 2),
+                              CalviIcon('chevron', size: 16, color: c.buttonText),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ],
             ),

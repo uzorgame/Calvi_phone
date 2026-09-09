@@ -44,7 +44,10 @@
   "todayLogFailed": "Não consegui anotar. Tente de novo.",
   "todayFailedRetry": "Não deu certo. Tente daqui a um minuto.",
   "todayNoraSlow": "A Nora está pensando mais que o normal. Tente de novo, o token não foi gasto.",
-  "todayOutOfTokens": "Sem tokens. Anotar na mão funciona sempre.",
+  "todayOutOfTokens": "Os tokens acabaram.",
+  "todayOutOfBody": "Por enquanto fico quieta, mas anotar na mão dá sempre, e é de graça. A assinatura me liga de volta e custa como três cafés por mês.",
+  "todayOutOfPlan": "Assinatura",
+  "todayGoalMet": "Parabéns! 🎉 O peso que você queria é seu e a meta está fechada. E foi você que conseguiu, não o app. Agora passo a sua norma para manutenção, para o resultado ficar.",
 
 
   "noraName": "Nora",

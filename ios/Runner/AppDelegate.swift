@@ -11,6 +11,11 @@ import UIKit
    * їх два, вони крихітні, і звільняти тут нічого. */
   private var sounds: [String: SystemSoundID] = [:]
 
+  /* Міст до годинника живе стільки ж, скільки застосунок: він тримає сесію
+     WatchConnectivity, а та вимагає постійного делегата. Локальна змінна вмерла
+     б одразу після старту, і контекст не пішов би нікуди. */
+  private var watch: WatchBridge?
+
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
@@ -44,6 +49,8 @@ import UIKit
         }
         self?.play(named: name, in: controller, done: result)
       }
+
+      watch = WatchBridge.attach(to: controller.binaryMessenger)
     }
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)

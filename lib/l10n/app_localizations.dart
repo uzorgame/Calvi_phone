@@ -4302,12 +4302,6 @@ abstract class L {
   /// **'terms of use'**
   String get startAgreeTerms;
 
-  /// No description provided for @startAllergies.
-  ///
-  /// In en, this message translates to:
-  /// **'Allergies'**
-  String get startAllergies;
-
   /// No description provided for @startDeviceFirstRun.
   ///
   /// In en, this message translates to:
@@ -4374,23 +4368,17 @@ abstract class L {
   /// **'Your norm'**
   String get startNorm;
 
+  /// No description provided for @startNormCounting.
+  ///
+  /// In en, this message translates to:
+  /// **'counting…'**
+  String get startNormCounting;
+
   /// No description provided for @startNormHold.
   ///
   /// In en, this message translates to:
   /// **'holding'**
   String get startNormHold;
-
-  /// No description provided for @startNormNora.
-  ///
-  /// In en, this message translates to:
-  /// **'Counted. It gets easier from here.'**
-  String get startNormNora;
-
-  /// No description provided for @startNormNoraHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Write or say it however suits you: \"two eggs and toast\", \"drank 300 of water\". Whatever else I need, I will ask in the conversation.'**
-  String get startNormNoraHint;
 
   /// No description provided for @startNormNote.
   ///
@@ -4662,6 +4650,12 @@ abstract class L {
   /// **'Did not work. Try again in a minute.'**
   String get todayFailedRetry;
 
+  /// No description provided for @todayGoalMet.
+  ///
+  /// In en, this message translates to:
+  /// **'Congratulations! 🎉 The weight you wanted is yours, and the goal is closed. And you did that, not the app. Now I am moving your norm to holding, so the result stays with you.'**
+  String get todayGoalMet;
+
   /// One question per dish whose weight was not stated. The app writes it, not the model: on two dishes the model wrote one question for both, and one number cannot answer for two dishes.
   ///
   /// In en, this message translates to:
@@ -4728,10 +4722,22 @@ abstract class L {
   /// **'No connection. The entry stays on the phone and goes up when it returns.'**
   String get todayOfflineSaved;
 
+  /// No description provided for @todayOutOfBody.
+  ///
+  /// In en, this message translates to:
+  /// **'I am quiet for now, but writing entries by hand is always there, and it is free. A subscription switches me back on, and costs about three coffees a month.'**
+  String get todayOutOfBody;
+
+  /// No description provided for @todayOutOfPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription'**
+  String get todayOutOfPlan;
+
   /// No description provided for @todayOutOfTokens.
   ///
   /// In en, this message translates to:
-  /// **'Out of tokens. Logging by hand always works.'**
+  /// **'The tokens are gone.'**
   String get todayOutOfTokens;
 
   /// No description provided for @todayPhotoMeal.

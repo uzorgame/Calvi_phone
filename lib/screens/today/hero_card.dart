@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
@@ -35,6 +36,7 @@ class HeroCard extends StatefulWidget {
     required this.goal,
     required this.week,
     required this.onWeek,
+    this.recount = false,
   });
 
   final DayModel day;
@@ -52,6 +54,9 @@ class HeroCard extends StatefulWidget {
 
   /// Дотик по стороні тижня. Відкриває сторінку тижневої аналітики.
   final VoidCallback onWeek;
+
+  /// Норма щойно змінилась: число на картці перераховується на очах.
+  final bool recount;
 
   @override
   State<HeroCard> createState() => _HeroCardState();
@@ -286,7 +291,12 @@ class _HeroCardState extends State<HeroCard>
        the faces are the same widgets from frame to frame and the framework skips
        their subtrees entirely while the deck turns. */
     final faces = <Widget>[
-      _Kcal(day: widget.day, burned: widget.burned, goal: widget.goal),
+      _Kcal(
+        day: widget.day,
+        burned: widget.burned,
+        goal: widget.goal,
+        recount: widget.recount,
+      ),
       const _Weight(),
       _Week(summary: widget.week, onOpen: widget.onWeek),
     ];
@@ -475,15 +485,88 @@ class _Dot extends StatelessWidget {
 /// Overshoot at which the ring is fully red: a third past the norm.
 const _heat = 0.33;
 
-class _Kcal extends StatelessWidget {
-  const _Kcal({required this.day, required this.burned, required this.goal});
+/* Скільки норма «перераховується» після досягнутої цілі.
+ *
+ * Те саме число і той самий час, що на екрані «Твоя норма» в першому запуску:
+ * там Нора рахує норму вперше, тут перераховує. Один рух на дві події, бо подія
+ * по суті одна, і людина має впізнати її з першого погляду. */
+const _recounting = Duration(milliseconds: 1500);
+
+class _Kcal extends StatefulWidget {
+  const _Kcal({
+    required this.day,
+    required this.burned,
+    required this.goal,
+    this.recount = false,
+  });
 
   final DayModel day;
   final int burned;
   final DayGoal goal;
 
+  /* Норма щойно змінилась, і це видно: число крутиться і зупиняється на новому.
+   *
+   * Ціль узята, застосунок переставив норму на утримання, і Нора сказала про це
+   * в чаті. Але змінилось при цьому число на картці дня, а не в чаті, і воно
+   * мало б змінитись мовчки. Тому рух: те, що переставили, показується. */
+  final bool recount;
+
+  @override
+  State<_Kcal> createState() => _KcalState();
+}
+
+class _KcalState extends State<_Kcal> {
+  /// Не порожньо, поки норма шукає себе.
+  int? _spin;
+  final _dice = math.Random();
+
+  Timer? _roll;
+  Timer? _lands;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.recount) _start();
+  }
+
+  @override
+  void didUpdateWidget(_Kcal old) {
+    super.didUpdateWidget(old);
+    if (widget.recount && !old.recount) _start();
+  }
+
+  void _start() {
+    /* Систему просили менше рухів: тоді число просто стає новим. Подію в цьому
+       разі показує сама картка в чаті, і без неї нічого не губиться. */
+    if (WidgetsBinding.instance.platformDispatcher.accessibilityFeatures.disableAnimations) {
+      return;
+    }
+
+    _roll?.cancel();
+    _lands?.cancel();
+
+    _roll = Timer.periodic(
+      const Duration(milliseconds: 70),
+      (_) => setState(() => _spin = 1200 + _dice.nextInt(2200)),
+    );
+    _lands = Timer(_recounting, () {
+      _roll?.cancel();
+      if (mounted) setState(() => _spin = null);
+    });
+  }
+
+  @override
+  void dispose() {
+    _roll?.cancel();
+    _lands?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final day = widget.day;
+    final burned = widget.burned;
+    final goal = widget.goal;
     final c = context.c;
     /* Нетто: зʼїдене мінус спалене. Норма стоїть на місці, а тренування
        зменшує зараховане, а не піднімає ціль. Доти було навпаки, і підпис казав
@@ -557,14 +640,27 @@ class _Kcal extends StatelessWidget {
                         text: thousands(shownLeft),
                         style: TextStyle(color: c.text, fontWeight: FontWeight.w600),
                       ),
-                      TextSpan(text: L.of(context).heroOf(thousands(goal.kcal))),
+                      /* Норма моноширинними цифрами рівно тоді, коли вона
+                         крутиться: інакше рядок смикався б туди-сюди на кожній
+                         зміні, і рух читався б як збій, а не як робота. */
+                      TextSpan(
+                        text: L.of(context).heroOf(thousands(_spin ?? goal.kcal)),
+                        style: _spin == null
+                            ? null
+                            : const TextStyle(fontFeatures: [FontFeature.tabularFigures()]),
+                      ),
                     ] else ...[
                       TextSpan(text: L.of(context).heroOver),
                       TextSpan(
                         text: thousands(shownLeft.abs()),
                         style: TextStyle(color: c.protein, fontWeight: FontWeight.w600),
                       ),
-                      TextSpan(text: L.of(context).heroFrom(thousands(goal.kcal))),
+                      TextSpan(
+                        text: L.of(context).heroFrom(thousands(_spin ?? goal.kcal)),
+                        style: _spin == null
+                            ? null
+                            : const TextStyle(fontFeatures: [FontFeature.tabularFigures()]),
+                      ),
                     ],
                   ],
                 ),

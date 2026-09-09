@@ -8,6 +8,7 @@ import 'data/evening.dart';
 import 'data/local/database.dart';
 import 'data/remote/sync_service.dart';
 import 'data/meds.dart';
+import 'data/watch.dart';
 import 'data/settings.dart';
 import 'data/app_scope.dart';
 import 'data/day_stats.dart';
@@ -384,7 +385,16 @@ class _CalviAppState extends State<CalviApp> {
 
   void _set(SettingsState Function(SettingsState) patch) {
     final had = _s.reminders;
+    final weighed = _s.weightKg;
     setState(() => _s = patch(_s));
+
+    /* Вага змінилась: може, це вже ціль.
+     *
+     * Тут, а не в екрані заміру, бо ваги в застосунку три дороги: картка
+     * вимірювань, панель у налаштуваннях і слова Норі («зважився 78.8»). Усі
+     * три сходяться сюди, і правило, поставлене тут, працює для всіх, а
+     * поставлене в одній з них мовчало б у двох інших. */
+    if (_s.weightKg != weighed) _goalMet();
 
     /* Нагадування переставляються одразу, а дозвіл питається на першому з них.
      *
@@ -412,6 +422,50 @@ class _CalviAppState extends State<CalviApp> {
       () => unawaited(_profiles?.save(snapshot).then((_) => _sync?.now())),
     );
   }
+
+  /* Ціль узята: норма переходить на утримання, і Нора каже про це сама.
+   *
+   * Триста грамів у обидва боки, бо стільки коливається сама вага за день, і
+   * вимагати влучити в десяту означало б, що більшість людей не почує цього
+   * ніколи. Ваги теж не обіцяють більшої точності.
+   *
+   * Тим, хто від початку тримає вагу, не кажеться нічого: цілі в них не було, і
+   * вітати нема з чим. Це і є захист від спаму, бо після переходу на утримання
+   * умова більше не виконується жодного разу. Поставить нову ціль і дійде до
+   * неї, почує знову, і це правильно.
+   *
+   * Разом із напрямком переїжджає і вага старту цілі. Норма рахується саме від
+   * неї, і без цього утримання рахувалось би від тієї ваги, з якої людина
+   * колись починала худнути, тобто від чужого тіла. */
+  void _goalMet() {
+    if (_s.direction == Direction.keep) return;
+    if ((_s.weightKg - _s.targetKg).abs() > 0.3) return;
+
+    final held = _s.weightKg;
+    _set((s) {
+      final kept = s.copyWith(direction: Direction.keep, goalStartKg: held, targetKg: held);
+
+      /* Разом із калоріями переїжджає і розкладка.
+       *
+       * Калорії рахуються з напрямку щоразу заново, а білок, жири й вуглеводи
+       * лежать у налаштуваннях числами. Без цього рядка норма ставала 2670, а
+       * три картки під нею лишались від 2220: сума розкладки не сходилась із
+       * числом над нею, і Нора обіцяла переставити норму, переставивши
+       * половину.
+       *
+       * Свою розкладку не чіпаємо. Ручна норма означає, що людина взяла ці
+       * числа собі, і переписувати їх від імені формули значило б відібрати
+       * зроблене руками. */
+      if (s.kcalManual != null) return kept;
+
+      final m = macrosFor(kept);
+      return kept.copyWith(protein: m.protein, fat: m.fat, carbs: m.carbs);
+    });
+    setState(() => _hail = true);
+  }
+
+  /// Ціль щойно взяли: день має привітати і сказати про нову норму.
+  bool _hail = false;
 
   /* День, за який зараз показані галочки прийому.
    *
@@ -460,6 +514,7 @@ class _CalviAppState extends State<CalviApp> {
     setState(() {
       _era++;
       _greet = false;
+      _hail = false;
     });
     await _loadMeds();
   }
@@ -493,6 +548,9 @@ class _CalviAppState extends State<CalviApp> {
      розмова з Норою, яку тримає екран дня. */
   void _toWelcome() {
     _saveLater?.cancel();
+    /* Годинник більше не знає цієї людини. Без цього рядка наступний вхід із тим
+       самим станом до нього не дійшов би: він збігся б із запамʼятованим. */
+    Watch.forget();
     setState(() {
       _s = emptySettings();
       _meds = const [];
@@ -821,8 +879,14 @@ class _CalviAppState extends State<CalviApp> {
                 key: ValueKey('day-era-$_era'),
                 ask: _evening,
                 greet: _greet,
+                hail: _hail,
                 onSettings: () => Navigator.of(context).push(slideRoute(const SettingsScreen())),
                 onMeds: () => Navigator.of(context).push(slideRoute(const MedsRoute())),
+                /* Кнопка на картці «токени скінчились» веде одразу на панель
+                   тарифів, тим самим шляхом, що й пункт меню. */
+                onPlan: () => Navigator.of(context).push(
+                  slideRoute(const SettingsScreen(panel: 'plan')),
+                ),
               ),
             });
           },
@@ -913,6 +977,8 @@ Widget _start(Widget home) {
               openCard: Uri.base.queryParameters['card'],
               onSettings: () => Navigator.of(context).push(slideRoute(const SettingsScreen())),
               onMeds: () => Navigator.of(context).push(slideRoute(const MedsRoute())),
+              onPlan: () =>
+                  Navigator.of(context).push(slideRoute(const SettingsScreen(panel: 'plan'))),
             );
           },
         ),

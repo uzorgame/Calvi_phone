@@ -44,7 +44,10 @@
   "todayLogFailed": "Eintragen ging nicht. Versuch es noch einmal.",
   "todayFailedRetry": "Hat nicht geklappt. Versuch es in einer Minute.",
   "todayNoraSlow": "Nora denkt länger als sonst. Versuch es noch einmal, der Token ist nicht weg.",
-  "todayOutOfTokens": "Keine Tokens mehr. Von Hand eintragen geht immer.",
+  "todayOutOfTokens": "Die Tokens sind aufgebraucht.",
+  "todayOutOfBody": "Ich bin erst mal still, aber von Hand eintragen geht immer, und das kostet nichts. Ein Abo schaltet mich wieder ein und kostet so viel wie drei Kaffee im Monat.",
+  "todayOutOfPlan": "Abo",
+  "todayGoalMet": "Glückwunsch! 🎉 Dein Wunschgewicht ist da, das Ziel ist geschafft. Und geschafft hast du es, nicht die App. Jetzt stelle ich deine Norm aufs Halten um, damit das Ergebnis bleibt.",
 
 
   "noraName": "Nora",

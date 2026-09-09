@@ -2350,9 +2350,6 @@ class LEs extends L {
   String get startAgreeTerms => 'condiciones de uso';
 
   @override
-  String get startAllergies => 'Alergias';
-
-  @override
   String get startDeviceFirstRun => 'primer inicio';
 
   @override
@@ -2386,14 +2383,10 @@ class LEs extends L {
   String get startNorm => 'Tu norma';
 
   @override
+  String get startNormCounting => 'calculando…';
+
+  @override
   String get startNormHold => 'manteniendo';
-
-  @override
-  String get startNormNora => 'Calculado. A partir de aquí es más fácil.';
-
-  @override
-  String get startNormNoraHint =>
-      'Escríbelo o dilo como te salga: «dos huevos y una tostada», «bebí 300 de agua». Lo que me falte, te lo pregunto en la conversación.';
 
   @override
   String get startNormNote =>
@@ -2549,6 +2542,10 @@ class LEs extends L {
   String get todayFailedRetry => 'No salió. Prueba dentro de un minuto.';
 
   @override
+  String get todayGoalMet =>
+      '¡Enhorabuena! 🎉 El peso que querías ya es tuyo y el objetivo está cerrado. Y lo has hecho tú, no la app. Ahora paso tu norma a mantenimiento, para que el resultado se quede.';
+
+  @override
   String todayHowManyGrams(String dish) {
     return '¿Cuántos gramos eran de $dish?';
   }
@@ -2594,7 +2591,14 @@ class LEs extends L {
       'Sin conexión. El registro se queda en el teléfono y sube cuando vuelva.';
 
   @override
-  String get todayOutOfTokens => 'Sin tokens. Registrar a mano funciona siempre.';
+  String get todayOutOfBody =>
+      'De momento callo, pero apuntar a mano se puede siempre, y es gratis. La suscripción me vuelve a encender y cuesta como tres cafés al mes.';
+
+  @override
+  String get todayOutOfPlan => 'Suscripción';
+
+  @override
+  String get todayOutOfTokens => 'Se acabaron los tokens.';
 
   @override
   String get todayPhotoMeal => 'Foto';

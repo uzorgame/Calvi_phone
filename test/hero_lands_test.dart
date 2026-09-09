@@ -171,7 +171,7 @@ void main() {
             locale: const Locale('uk'),
             theme: calviLightTheme,
             scrollBehavior: const CalviScroll(),
-            home: TodayScreen(onSettings: () {}, onMeds: () {}),
+            home: TodayScreen(onSettings: () {}, onMeds: () {}, onPlan: () {}),
           ),
         ),
       );

@@ -19,7 +19,10 @@
   "todayLogFailed": "Nie udało się zapisać. Spróbuj jeszcze raz.",
   "todayFailedRetry": "Nie udało się. Spróbuj jeszcze raz za minutę.",
   "todayNoraSlow": "Nora myśli dłużej niż zwykle. Spróbuj jeszcze raz, token nie został pobrany.",
-  "todayOutOfTokens": "Skończyły się tokeny. Ręcznie zapisać można zawsze.",
+  "todayOutOfTokens": "Tokeny się skończyły.",
+  "todayOutOfBody": "Na razie milczę, ale wpisywać ręcznie możesz zawsze, i to za darmo. Subskrypcja włącza mnie z powrotem i kosztuje tyle, co trzy kawy miesięcznie.",
+  "todayOutOfPlan": "Subskrypcja",
+  "todayGoalMet": "Gratulacje! 🎉 Waga, o którą chodziło, jest twoja, cel zamknięty. I zrobiłeś to ty, nie aplikacja. Przestawiam teraz normę na utrzymanie, żeby wynik z tobą został.",
 
 
   "noraName": "Nora",

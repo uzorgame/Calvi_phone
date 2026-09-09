@@ -43,7 +43,7 @@ void main() {
               child: child!,
             ),
           ),
-          home: TodayScreen(onSettings: () {}, onMeds: () {}),
+          home: TodayScreen(onSettings: () {}, onMeds: () {}, onPlan: () {}),
         ),
       ),
     );

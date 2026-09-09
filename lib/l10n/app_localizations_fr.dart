@@ -2365,9 +2365,6 @@ class LFr extends L {
   String get startAgreeTerms => 'conditions d\'utilisation';
 
   @override
-  String get startAllergies => 'Allergies';
-
-  @override
   String get startDeviceFirstRun => 'premier lancement';
 
   @override
@@ -2401,14 +2398,10 @@ class LFr extends L {
   String get startNorm => 'Ton repère';
 
   @override
+  String get startNormCounting => 'je calcule…';
+
+  @override
   String get startNormHold => 'à tenir';
-
-  @override
-  String get startNormNora => 'C\'est calculé. À partir d\'ici, c\'est plus simple.';
-
-  @override
-  String get startNormNoraHint =>
-      'Écris-le ou dis-le comme ça vient : «deux œufs et une tartine», «bu 300 d\'eau». Ce qu\'il me manque, je te le demande dans la conversation.';
 
   @override
   String get startNormNote =>
@@ -2564,6 +2557,10 @@ class LFr extends L {
   String get todayFailedRetry => 'Ça n\'a pas marché. Réessaie dans une minute.';
 
   @override
+  String get todayGoalMet =>
+      'Félicitations ! 🎉 Le poids que tu voulais est là, l’objectif est bouclé. Et c’est toi qui l’as fait, pas l’application. Je passe maintenant ta norme au maintien, pour que le résultat reste.';
+
+  @override
   String todayHowManyGrams(String dish) {
     return 'Ça faisait combien de grammes, $dish ?';
   }
@@ -2609,7 +2606,14 @@ class LFr extends L {
       'Pas de connexion. L\'entrée reste sur le téléphone et monte dès qu\'elle revient.';
 
   @override
-  String get todayOutOfTokens => 'Plus de jetons. Noter à la main marche toujours.';
+  String get todayOutOfBody =>
+      'Je me tais pour l’instant, mais saisir à la main marche toujours, et c’est gratuit. L’abonnement me rallume et coûte comme trois cafés par mois.';
+
+  @override
+  String get todayOutOfPlan => 'Abonnement';
+
+  @override
+  String get todayOutOfTokens => 'Les jetons sont épuisés.';
 
   @override
   String get todayPhotoMeal => 'Photo';

@@ -41,6 +41,8 @@ class BottomBar extends StatefulWidget {
     /* Обраний варіант відповіді на питання з кнопками. Текст варіанта їде в
        чат звичайним повідомленням. */
     this.onChoose,
+    /* Дотик по кнопці картки «токени скінчились». Веде до тарифів. */
+    this.onPlan,
     this.muteMic = false,
     this.away = false,
     this.tokensLeft,
@@ -67,6 +69,7 @@ class BottomBar extends StatefulWidget {
   final List<Msg> messages;
   final void Function(String id, int grams)? onWeigh;
   final void Function(String id, String option)? onChoose;
+  final VoidCallback? onPlan;
 
   /// While dictation is on, the small microphone steps aside for the big one.
   final bool muteMic;
@@ -390,6 +393,7 @@ class _BottomBarState extends State<BottomBar> {
                         messages: widget.messages,
                         onWeigh: widget.onWeigh,
                         onChoose: widget.onChoose,
+                        onPlan: widget.onPlan,
                         tokensLeft: widget.tokensLeft,
                         pro: widget.pro,
                       ),
@@ -425,6 +429,7 @@ class _Room extends StatelessWidget {
     required this.messages,
     this.onWeigh,
     this.onChoose,
+    this.onPlan,
     this.tokensLeft,
     this.pro = false,
   });
@@ -433,6 +438,7 @@ class _Room extends StatelessWidget {
   final List<Msg> messages;
   final void Function(String id, int grams)? onWeigh;
   final void Function(String id, String option)? onChoose;
+  final VoidCallback? onPlan;
   final int? tokensLeft;
   final bool pro;
 
@@ -494,7 +500,7 @@ class _Room extends StatelessWidget {
                   ? [CalviNora(text: L.of(context).barHint, hint: L.of(context).barHintMore)]
                   : [
                       for (final m in messages)
-                        _Bubble(msg: m, onWeigh: onWeigh, onChoose: onChoose),
+                        _Bubble(msg: m, onWeigh: onWeigh, onChoose: onChoose, onPlan: onPlan),
                     ],
             ),
           ),
@@ -506,16 +512,38 @@ class _Room extends StatelessWidget {
 
 /// One message, arriving from a little below.
 class _Bubble extends StatelessWidget {
-  const _Bubble({required this.msg, this.onWeigh, this.onChoose});
+  const _Bubble({required this.msg, this.onWeigh, this.onChoose, this.onPlan});
 
   final Msg msg;
   final void Function(String id, int grams)? onWeigh;
   final void Function(String id, String option)? onChoose;
+  final VoidCallback? onPlan;
 
   @override
   Widget build(BuildContext context) {
     final c = context.c;
     final mine = msg.from == MsgFrom.me;
+
+    /* Токени скінчились: не бульбашка, а картка з кнопкою.
+     *
+     * Вона навмисно та сама, що вітає в порожній розмові: біла поверхня з
+     * бейджем і двома рядками. Так її видно як стан застосунку, а не як чергову
+     * репліку, і вона не губиться серед сірих бульбашок вище. */
+    if (msg.card || msg.offer) {
+      final l = L.of(context);
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: CalviNora(
+          text: msg.text,
+          /* Другий рядок і кнопка є тільки в тарифів: там за карткою стоїть
+             дорога, якою треба пройти. Вітання з ціллю нікуди не веде, воно
+             саме по собі подія. */
+          hint: msg.offer ? l.todayOutOfBody : null,
+          action: msg.offer && onPlan != null ? l.todayOutOfPlan : null,
+          onAction: msg.offer ? onPlan : null,
+        ),
+      );
+    }
 
     return TweenAnimationBuilder<double>(
       key: ValueKey(msg.id),

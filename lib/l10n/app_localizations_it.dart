@@ -2355,9 +2355,6 @@ class LIt extends L {
   String get startAgreeTerms => 'condizioni d\'uso';
 
   @override
-  String get startAllergies => 'Allergie';
-
-  @override
   String get startDeviceFirstRun => 'primo avvio';
 
   @override
@@ -2391,14 +2388,10 @@ class LIt extends L {
   String get startNorm => 'La tua soglia';
 
   @override
+  String get startNormCounting => 'calcolo…';
+
+  @override
   String get startNormHold => 'mantenendo';
-
-  @override
-  String get startNormNora => 'Calcolata. Da qui in poi è più facile.';
-
-  @override
-  String get startNormNoraHint =>
-      'Scrivilo o dillo come ti viene: «due uova e un toast», «bevuto 300 di acqua». Il resto te lo chiedo nella conversazione.';
 
   @override
   String get startNormNote =>
@@ -2553,6 +2546,10 @@ class LIt extends L {
   String get todayFailedRetry => 'Non è andata. Riprova tra un minuto.';
 
   @override
+  String get todayGoalMet =>
+      'Complimenti! 🎉 Il peso che volevi è tuo, l’obiettivo è chiuso. E l’hai fatto tu, non l’app. Ora passo la tua norma al mantenimento, così il risultato resta.';
+
+  @override
   String todayHowManyGrams(String dish) {
     return 'Quanti grammi erano di $dish?';
   }
@@ -2598,7 +2595,14 @@ class LIt extends L {
       'Nessuna connessione. La voce resta sul telefono e sale quando torna.';
 
   @override
-  String get todayOutOfTokens => 'Token finiti. Registrare a mano funziona sempre.';
+  String get todayOutOfBody =>
+      'Per ora taccio, ma inserire a mano si può sempre, ed è gratis. L’abbonamento mi riaccende e costa quanto tre caffè al mese.';
+
+  @override
+  String get todayOutOfPlan => 'Abbonamento';
+
+  @override
+  String get todayOutOfTokens => 'I token sono finiti.';
 
   @override
   String get todayPhotoMeal => 'Foto';

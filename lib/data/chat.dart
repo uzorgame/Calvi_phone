@@ -71,6 +71,8 @@ class Msg {
     this.askId,
     this.options = const [],
     this.chosen,
+    this.offer = false,
+    this.card = false,
   });
 
   final String id;
@@ -125,6 +127,24 @@ class Msg {
   /// Який варіант обрали. Кнопки після цього зникають.
   final String? chosen;
 
+  /* Малюється карткою, а не бульбашкою.
+   *
+   * Бульбашка це репліка розмови. Картка це стан застосунку, сказаний голосом
+   * Нори: скінчились токени, досягнута ціль. Таке видно як подію, а сіра
+   * бульбашка загубилась би серед таких самих сірих бульбашок вище. */
+  final bool card;
+
+  /* Токени скінчились, і замість бульбашки стоїть картка з кнопкою.
+   *
+   * Досі це був рядок тексту. Сказано чесно, але далі людині нічого робити з
+   * цим знанням: щоб дійти до тарифів, треба здогадатись про меню, знайти в
+   * ньому підписку і повернутись. Тому тут не речення, а картка: одне
+   * пояснення і один дотик до того місця, де це вирішується.
+   *
+   * Малюється як картка порожньої розмови, а не як мова Нори: це не її репліка,
+   * а стан застосунку, сказаний її голосом. */
+  final bool offer;
+
   Msg picked(int grams) => Msg(
     id: id,
     from: from,
@@ -137,6 +157,8 @@ class Msg {
     askId: askId,
     options: options,
     chosen: chosen,
+    offer: offer,
+    card: card,
   );
 
   Msg chose(String option) => Msg(
@@ -151,6 +173,8 @@ class Msg {
     askId: askId,
     options: options,
     chosen: option,
+    offer: offer,
+    card: card,
   );
 
   Msg answered({required String text, MealPlate? plate}) => Msg(
@@ -165,6 +189,8 @@ class Msg {
     askId: askId,
     options: options,
     chosen: chosen,
+    offer: offer,
+    card: card,
   );
 }
 
@@ -180,6 +206,7 @@ Msg msg({
   List<int> weights = const [],
   String? askId,
   List<String> options = const [],
+  bool card = false,
 }) => Msg(
   id: 'm${++_seq}',
   from: from,
@@ -191,6 +218,7 @@ Msg msg({
   weights: weights,
   askId: askId,
   options: options,
+  card: card,
 );
 
 /* Fixed answers for the demo. The same figures the camera sheet showed, because

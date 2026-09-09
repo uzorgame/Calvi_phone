@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'theme.dart';
+import 'tokens.dart';
 
 /// Distance between ticks. One tick is one step of the value.
 const _gap = 11.0;
@@ -52,6 +53,7 @@ class CalviRuler extends StatefulWidget {
     required this.onChange,
     this.step = 0.1,
     this.showValue = true,
+    this.seek,
   });
 
   final double value;
@@ -60,6 +62,18 @@ class CalviRuler extends StatefulWidget {
   final double step;
   final String suffix;
   final ValueChanged<double> onChange;
+
+  /* Куди відвести барабан ззовні.
+   *
+   * Барабан від народження живе сам: [value] він читає один раз, а далі позиція
+   * його власна, і зовнішня зміна числа його не рухає. Для перетягування це
+   * правильно, але не для випадку, коли рішення приймає екран: людина
+   * натиснула «Тримати вагу», і стрічка має сама доїхати до її ваги, а не
+   * опинитись там.
+   *
+   * Тому окреме поле, а не [value]: змінилось воно, і барабан іде туди сам, з
+   * клацанням на кожній рисці, як під пальцем. */
+  final double? seek;
 
   /// Off where the figure already stands in a heading above the drum.
   final bool showValue;
@@ -85,6 +99,28 @@ class _CalviRulerState extends State<CalviRuler> {
   void initState() {
     super.initState();
     _c.addListener(_onScroll);
+  }
+
+  @override
+  void didUpdateWidget(CalviRuler old) {
+    super.didUpdateWidget(old);
+    // Ззовні сказали, куди стати: барабан їде туди сам.
+    if (widget.seek != null && widget.seek != old.seek) _walkTo(widget.seek!);
+  }
+
+  /* Дорога до значення, коли її обрав не палець.
+   *
+   * Тією ж тривалістю і тією ж кривою, що й решта рухів застосунку: швидко з
+   * місця, мʼяко в кінці. Клацання на рисках при цьому нікуди не дінеться, їх
+   * ставить `_onScroll`, якому байдуже, хто крутить стрічку. */
+  void _walkTo(double v) {
+    if (!_c.hasClients) return;
+    final idx = ((v - widget.min) / widget.step).round().clamp(0, _count - 1);
+    _c.animateTo(
+      idx * _gap,
+      duration: const Duration(milliseconds: 520),
+      curve: CalviMotion.easeRise,
+    );
   }
 
   @override

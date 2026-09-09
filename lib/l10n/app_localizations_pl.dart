@@ -2370,9 +2370,6 @@ class LPl extends L {
   String get startAgreeTerms => 'warunkami korzystania';
 
   @override
-  String get startAllergies => 'Alergie';
-
-  @override
   String get startDeviceFirstRun => 'pierwsze uruchomienie';
 
   @override
@@ -2406,14 +2403,10 @@ class LPl extends L {
   String get startNorm => 'Twoja norma';
 
   @override
+  String get startNormCounting => 'liczę…';
+
+  @override
   String get startNormHold => 'utrzymujemy';
-
-  @override
-  String get startNormNora => 'Policzone. Dalej jest prościej.';
-
-  @override
-  String get startNormNoraHint =>
-      'Pisz albo mów, jak ci wygodnie: „dwa jajka i tost”, „300 ml wody”. O resztę, jeśli będzie trzeba, dopytam w rozmowie.';
 
   @override
   String get startNormNote =>
@@ -2571,6 +2564,10 @@ class LPl extends L {
   String get todayFailedRetry => 'Nie udało się. Spróbuj jeszcze raz za minutę.';
 
   @override
+  String get todayGoalMet =>
+      'Gratulacje! 🎉 Waga, o którą chodziło, jest twoja, cel zamknięty. I zrobiłeś to ty, nie aplikacja. Przestawiam teraz normę na utrzymanie, żeby wynik z tobą został.';
+
+  @override
   String todayHowManyGrams(String dish) {
     return 'Ile gramów było: $dish?';
   }
@@ -2616,7 +2613,14 @@ class LPl extends L {
       'Nie mam sieci. Wpis zostanie na telefonie i pojedzie, gdy wróci.';
 
   @override
-  String get todayOutOfTokens => 'Skończyły się tokeny. Ręcznie zapisać można zawsze.';
+  String get todayOutOfBody =>
+      'Na razie milczę, ale wpisywać ręcznie możesz zawsze, i to za darmo. Subskrypcja włącza mnie z powrotem i kosztuje tyle, co trzy kawy miesięcznie.';
+
+  @override
+  String get todayOutOfPlan => 'Subskrypcja';
+
+  @override
+  String get todayOutOfTokens => 'Tokeny się skończyły.';
 
   @override
   String get todayPhotoMeal => 'Zdjęcie';

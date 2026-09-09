@@ -42,7 +42,7 @@ void main() {
               darkTheme: calviDarkTheme,
               themeMode: dark ? ThemeMode.dark : ThemeMode.light,
               scrollBehavior: const CalviScroll(),
-              home: TodayScreen(onSettings: () {}, onMeds: () {}),
+              home: TodayScreen(onSettings: () {}, onMeds: () {}, onPlan: () {}),
             ),
           );
         },
@@ -100,7 +100,7 @@ void main() {
               darkTheme: calviDarkTheme,
               themeMode: dark ? ThemeMode.dark : ThemeMode.light,
               scrollBehavior: const CalviScroll(),
-              home: TodayScreen(onSettings: () {}, onMeds: () {}),
+              home: TodayScreen(onSettings: () {}, onMeds: () {}, onPlan: () {}),
             ),
           );
         },

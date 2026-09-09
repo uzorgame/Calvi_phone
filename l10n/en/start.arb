@@ -42,14 +42,12 @@
   "startPaceWarning": "A pace like this is hard to hold and usually breaks. Under 0.8 kg a week the result comes slower but stays.",
 
   "startLife": "Lifestyle",
-  "startAllergies": "Allergies",
 
   "startNorm": "Your norm",
   "startNormPerDay": "kcal a day",
+  "startNormCounting": "counting…",
   "startNormWeeks": "weeks",
   "startNormHold": "holding",
-  "startNormNora": "Counted. It gets easier from here.",
-  "startNormNoraHint": "Write or say it however suits you: \"two eggs and toast\", \"drank 300 of water\". Whatever else I need, I will ask in the conversation.",
   "startNormNote": "This is the Mifflin-St Jeor formula, not medical advice. If you have a condition, are pregnant, or follow a prescribed diet, check with your doctor.",
 
   "startDeviceFirstRun": "first run",

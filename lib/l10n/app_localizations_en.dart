@@ -2349,9 +2349,6 @@ class LEn extends L {
   String get startAgreeTerms => 'terms of use';
 
   @override
-  String get startAllergies => 'Allergies';
-
-  @override
   String get startDeviceFirstRun => 'first run';
 
   @override
@@ -2385,14 +2382,10 @@ class LEn extends L {
   String get startNorm => 'Your norm';
 
   @override
+  String get startNormCounting => 'counting…';
+
+  @override
   String get startNormHold => 'holding';
-
-  @override
-  String get startNormNora => 'Counted. It gets easier from here.';
-
-  @override
-  String get startNormNoraHint =>
-      'Write or say it however suits you: \"two eggs and toast\", \"drank 300 of water\". Whatever else I need, I will ask in the conversation.';
 
   @override
   String get startNormNote =>
@@ -2547,6 +2540,10 @@ class LEn extends L {
   String get todayFailedRetry => 'Did not work. Try again in a minute.';
 
   @override
+  String get todayGoalMet =>
+      'Congratulations! 🎉 The weight you wanted is yours, and the goal is closed. And you did that, not the app. Now I am moving your norm to holding, so the result stays with you.';
+
+  @override
   String todayHowManyGrams(String dish) {
     return 'How many grams was the $dish?';
   }
@@ -2592,7 +2589,14 @@ class LEn extends L {
       'No connection. The entry stays on the phone and goes up when it returns.';
 
   @override
-  String get todayOutOfTokens => 'Out of tokens. Logging by hand always works.';
+  String get todayOutOfBody =>
+      'I am quiet for now, but writing entries by hand is always there, and it is free. A subscription switches me back on, and costs about three coffees a month.';
+
+  @override
+  String get todayOutOfPlan => 'Subscription';
+
+  @override
+  String get todayOutOfTokens => 'The tokens are gone.';
 
   @override
   String get todayPhotoMeal => 'Photo';

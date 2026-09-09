@@ -8,7 +8,9 @@ import 'package:calvi/data/day_stats.dart';
 import 'package:calvi/data/meds.dart';
 import 'package:calvi/data/settings.dart';
 import 'package:calvi/data/week.dart';
+import 'package:calvi/design/shell.dart';
 import 'package:calvi/design/theme.dart';
+import 'package:calvi/design/tokens.dart';
 import 'package:calvi/l10n/app_localizations.dart';
 import 'package:calvi/screens/analytics/analytics_screen.dart';
 import 'package:calvi/screens/meds/meds_screen.dart';
@@ -36,7 +38,7 @@ void main() {
   final langs = [for (final l in L.supportedLocales) l.languageCode];
 
   Map<String, Widget> screens() => {
-    'Сьогодні': TodayScreen(onSettings: () {}, onMeds: () {}),
+    'Сьогодні': TodayScreen(onSettings: () {}, onMeds: () {}, onPlan: () {}),
     'Тиждень': WeekScreen(
       summary: weekSummary(DayStats.demo(), initialSettings()),
       onSettings: () {},
@@ -51,6 +53,24 @@ void main() {
     ),
     'Налаштування': const SettingsScreen(),
     'Старт': StartScreen(onFinish: (_) {}),
+    /* Картка «токени скінчились» стоїть тут окремо, бо в самому дні вона
+       зʼявляється лише у відповідь сервера, а рядки в ній довгі й на восьми
+       мовах різні: німецьке «Die Tokens sind aufgebraucht» удвічі довше за
+       українське, і кнопка під ним має лишитись кнопкою, а не смугою. */
+    'Токени скінчились': Builder(
+      builder: (context) {
+        final l = L.of(context);
+        return Padding(
+          padding: const EdgeInsets.all(CalviSize.gutter),
+          child: CalviNora(
+            text: l.todayOutOfTokens,
+            hint: l.todayOutOfBody,
+            action: l.todayOutOfPlan,
+            onAction: () {},
+          ),
+        );
+      },
+    ),
   };
 
   Future<void> open(WidgetTester tester, Widget screen, String lang, Size size) async {

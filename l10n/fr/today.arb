@@ -44,7 +44,10 @@
   "todayLogFailed": "Je n'ai pas pu le noter. Réessaie.",
   "todayFailedRetry": "Ça n'a pas marché. Réessaie dans une minute.",
   "todayNoraSlow": "Nora réfléchit plus longtemps que d'habitude. Réessaie, le jeton n'a pas été dépensé.",
-  "todayOutOfTokens": "Plus de jetons. Noter à la main marche toujours.",
+  "todayOutOfTokens": "Les jetons sont épuisés.",
+  "todayOutOfBody": "Je me tais pour l’instant, mais saisir à la main marche toujours, et c’est gratuit. L’abonnement me rallume et coûte comme trois cafés par mois.",
+  "todayOutOfPlan": "Abonnement",
+  "todayGoalMet": "Félicitations ! 🎉 Le poids que tu voulais est là, l’objectif est bouclé. Et c’est toi qui l’as fait, pas l’application. Je passe maintenant ta norme au maintien, pour que le résultat reste.",
 
 
   "noraName": "Nora",

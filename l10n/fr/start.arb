@@ -38,14 +38,12 @@
   "startPaceWarning": "Un rythme pareil est dur à tenir et casse en général. En dessous de 0,8 kg par semaine le résultat vient plus lentement, mais il reste.",
 
   "startLife": "Mode de vie",
-  "startAllergies": "Allergies",
 
   "startNorm": "Ton repère",
   "startNormPerDay": "kcal par jour",
+  "startNormCounting": "je calcule…",
   "startNormWeeks": "semaines",
   "startNormHold": "à tenir",
-  "startNormNora": "C'est calculé. À partir d'ici, c'est plus simple.",
-  "startNormNoraHint": "Écris-le ou dis-le comme ça vient : «deux œufs et une tartine», «bu 300 d'eau». Ce qu'il me manque, je te le demande dans la conversation.",
   "startNormNote": "C'est la formule de Mifflin-St Jeor, pas un avis médical. Si tu as une pathologie, si tu es enceinte ou si tu suis un régime prescrit, parles-en à ton médecin.",
 
   "startDeviceFirstRun": "premier lancement",

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>Calvi</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Calvi</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<!-- Не FLUTTER_BUILD_NAME і не FLUTTER_BUILD_NUMBER: ці змінні приходять з
+	     Generated.xcconfig, який Flutter підкладає тільки телефонній цілі.
+	     Годинникова їх не бачить, і рядки лишились би порожніми. Значення
+	     проставляє ios/watch_target.rb, тими самими числами, що й у телефона. -->
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>watch-companion</string>
+	</array>
+	<!-- Кому належить цей годинниковий застосунок. Без цього рядка він не
+	     ставиться разом із телефонним і не бачить його пари. -->
+	<key>WKCompanionAppBundleIdentifier</key>
+	<string>com.calvi.calvi</string>
+	<key>WKApplication</key>
+	<true/>
+	<!-- Обидва дозволи потрібні саме тут, а не в телефонному plist: годинник
+	     питає їх сам, і текст показує теж він. -->
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Щоб записати сказане в щоденник.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Щоб розібрати сказане на страви.</string>
+</dict>
+</plist>

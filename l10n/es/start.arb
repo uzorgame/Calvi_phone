@@ -38,14 +38,12 @@
   "startPaceWarning": "Un ritmo así cuesta sostenerlo y suele romperse. Por debajo de 0,8 kg por semana el resultado llega más despacio, pero se queda.",
 
   "startLife": "Estilo de vida",
-  "startAllergies": "Alergias",
 
   "startNorm": "Tu norma",
   "startNormPerDay": "kcal al día",
+  "startNormCounting": "calculando…",
   "startNormWeeks": "semanas",
   "startNormHold": "manteniendo",
-  "startNormNora": "Calculado. A partir de aquí es más fácil.",
-  "startNormNoraHint": "Escríbelo o dilo como te salga: «dos huevos y una tostada», «bebí 300 de agua». Lo que me falte, te lo pregunto en la conversación.",
   "startNormNote": "Esta es la fórmula de Mifflin-St Jeor, no un consejo médico. Si tienes alguna condición, estás embarazada o sigues una dieta pautada, consúltalo con tu médico.",
 
   "startDeviceFirstRun": "primer inicio",
