@@ -44,13 +44,11 @@ enum Nora {
     request.setValue("application/json", forHTTPHeaderField: "content-type")
     request.setValue("Bearer \(token)", forHTTPHeaderField: "authorization")
 
-    /* Ті самі два заголовки, що шле телефон. Без них сервер рахує запит як
-       «невідомий клієнт» і без платформи: нічого не ламається, але в панелі
-       зʼявляється стовпчик нізвідки, і зростання мобільних виглядає меншим, ніж
-       воно є. Окремого значення під годинник поки немає, бо це зміна на сервері;
-       коли воно знадобиться, міняти треба буде тут і в `platform.ts`. */
+    /* Той самий клієнт, що й телефон, але своя платформа. Сервер рахує
+       годинник як iOS у профілі людини, а в панелі показує його час окремою
+       плиткою: та сама Нора, але своя дорога до сервера і своє чекання. */
     request.setValue("mobile", forHTTPHeaderField: "x-calvi-client")
-    request.setValue("ios", forHTTPHeaderField: "x-calvi-platform")
+    request.setValue("watchos", forHTTPHeaderField: "x-calvi-platform")
 
     request.timeoutInterval = 30
     return request
