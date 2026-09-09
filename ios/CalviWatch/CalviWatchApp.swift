@@ -438,18 +438,30 @@ struct Watch: View {
     do {
       return try await link.hear(file, lang: link.lang)
     } catch LinkTrouble.locked(let why) {
-      do {
-        let text = try await heardByServer(file, token: token)
-        // Сервер відповів, але без слів: «не почула», з позначкою, що це він.
-        guard !text.isEmpty else { throw LinkTrouble.failed(t.notHeard + "\n\nS · empty") }
-        return text
-      } catch NoraTrouble.stale {
-        throw NoraTrouble.stale
-      } catch LinkTrouble.failed(let said) {
-        throw LinkTrouble.failed(said)
-      } catch {
-        throw LinkTrouble.failed(why + "\n\nS · \(error)")
-      }
+      return try await orServer(file, token: token, otherwise: LinkTrouble.failed(why), tag: why)
+    } catch LinkTrouble.far {
+      /* Телефона поруч немає, але мережа в годинника може бути своя: Wi-Fi
+         або стільникова. Тоді сервер почує і без телефона. Без мережі
+         відповідь та сама, що й була: телефон далеко. */
+      return try await orServer(file, token: token, otherwise: LinkTrouble.far, tag: t.phoneFar)
+    }
+  }
+
+  /// Слова від сервера, а якщо він не зміг, та помилка, з якою сюди прийшли.
+  private func orServer(_ file: URL, token: String, otherwise: Error, tag: String) async throws -> String {
+    do {
+      let text = try await heardByServer(file, token: token)
+      // Сервер відповів, але без слів: «не почула», з позначкою, що це він.
+      guard !text.isEmpty else { throw LinkTrouble.failed(t.notHeard + "\n\nS · empty") }
+      return text
+    } catch NoraTrouble.stale {
+      throw NoraTrouble.stale
+    } catch LinkTrouble.failed(let said) {
+      throw LinkTrouble.failed(said)
+    } catch NoraTrouble.offline {
+      throw otherwise
+    } catch {
+      throw LinkTrouble.failed(tag + "\n\nS · \(error)")
     }
   }
 

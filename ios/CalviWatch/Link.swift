@@ -259,10 +259,12 @@ final class Link: NSObject, ObservableObject {
     let note = (message["note"] as? String).map { "\n\n" + $0 } ?? ""
     let why = (message["error"] as? String ?? Words.of(lang).notHeard) + note
     let result: Result<String, Error>
-    if let text = message["heard"] as? String {
-      let clean = text.trimmingCharacters(in: .whitespacesAndNewlines)
-      result = clean.isEmpty && !note.isEmpty ? .failure(LinkTrouble.failed(why)) : .success(clean)
-    } else if message["locked"] != nil {
+    /* «Замкнений» і «спробуй сервер» для годинника одне й те саме: звук іде
+       на сервер, а слова телефона лишаються на випадок, коли й він не почує. */
+    let toServer = message["locked"] != nil || message["fallback"] != nil
+    if let text = message["heard"] as? String, !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+      result = .success(text.trimmingCharacters(in: .whitespacesAndNewlines))
+    } else if toServer {
       result = .failure(LinkTrouble.locked(why))
     } else {
       result = .failure(LinkTrouble.failed(why))

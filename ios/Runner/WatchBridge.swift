@@ -410,7 +410,11 @@ enum Hearing {
       if let result, result.isFinal {
         let text = result.bestTranscription.formattedString
         var back: [String: Any] = ["heard": text]
-        if text.isEmpty { back["note"] = "\(locked ? "L" : "U") · \(stats) · empty" }
+        if text.isEmpty {
+          back["note"] = "\(locked ? "L" : "U") · \(stats) · empty"
+          // Порожньо від Apple ще не означає тишу: хай спробує сервер.
+          back["fallback"] = true
+        }
         finish(back)
       } else if let error {
         /* Причина лишається в журналі телефона, а годиннику йде одна з трьох:
@@ -420,6 +424,11 @@ enum Hearing {
         let network = (error as NSError).domain == NSURLErrorDomain
         var back: [String: Any] = ["error": say(locked ? .locked : network ? .noNetwork : .notHeard, lang)]
         if locked { back["locked"] = true }
+        /* Будь-яка відмова розпізнавача, крім мережі, це привід для годинника
+           спробувати сервер: він не залежить від замка, від стану застосунку і
+           від того, що саме не сподобалось Apple у файлі. Слова лишаються на
+           випадок, коли й сервер не почує. */
+        if !network { back["fallback"] = true }
         let e = error as NSError
         back["note"] = "\(locked ? "L" : "U") · \(stats) · \(e.domain) \(e.code)"
         finish(back)
