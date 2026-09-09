@@ -252,7 +252,10 @@ class _WeekScreenState extends State<WeekScreen> {
               Row(
                 children: [
                   _Fact(
-                    value: l.wkWaterValue((w.avgWaterMl / 1000).toStringAsFixed(1)),
+                    // Litres for the metric reader, fluid ounces for the other.
+                    value: dataUnits.volume == 'floz'
+                        ? dataUnits.volText(w.avgWaterMl)
+                        : l.wkWaterValue((w.avgWaterMl / 1000).toStringAsFixed(1)),
                     cap: l.wkWaterCap,
                   ),
                   _Fact(

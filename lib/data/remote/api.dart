@@ -308,6 +308,7 @@ class CalviApi {
          які ще висять у розмові з часів, коли питання було одне. */
       if (askId != null) 'ask_id': askId,
       'lang': dataLang,
+      if (dataUnits.wire != null) 'units': dataUnits.wire,
     });
     return NoraReply.fromWire(body, slot: slot, day: day);
   }
