@@ -22,6 +22,12 @@ import UIKit
   ) -> Bool {
     GeneratedPluginRegistrant.register(with: self)
 
+    /* Міст піднімається першим і без жодних умов. Коли годинник шле звук, iOS
+       запускає застосунок у фоні, без екрана, і саме в цьому запуску сесію
+       треба активувати, інакше повідомлення нікому прийняти. Канал до Dart
+       підключається нижче, окремо: він потрібен лише відкритому застосунку. */
+    watch = WatchBridge()
+
     /* flutter_local_notifications вимагає віддати себе делегатом центру
        сповіщень: без цього дотик по нагадуванню не доходить до Dart, і
        сповіщення у відкритому застосунку не показуються взагалі. */
@@ -50,7 +56,7 @@ import UIKit
         self?.play(named: name, in: controller, done: result)
       }
 
-      watch = WatchBridge.attach(to: controller.binaryMessenger)
+      watch?.attach(to: controller.binaryMessenger)
     }
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)

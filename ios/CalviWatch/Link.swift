@@ -140,8 +140,10 @@ final class Link: NSObject, ObservableObject {
   /// Тому телефон відповідає «прийняв» одразу, а слова шле окремим
   /// повідомленням, і на них годинник чекає стільки, скільки сам вирішив.
   func hear(_ file: URL, lang: String) async throws -> String {
+    /* Без перевірки `isReachable` наперед: вона буває несвіжою, а надсилання
+       й саме скаже «недосяжний», якщо телефона поруч немає. */
     let session = WCSession.default
-    guard session.activationState == .activated, session.isReachable else { throw LinkTrouble.far }
+    guard session.activationState == .activated else { throw LinkTrouble.far }
     let t = Words.of(lang)
     guard let audio = try? Data(contentsOf: file), !audio.isEmpty else {
       throw LinkTrouble.failed(t.notHeard)
@@ -159,7 +161,16 @@ final class Link: NSObject, ObservableObject {
             next.resume()
           }
         },
-        errorHandler: { error in next.resume(throwing: Self.trouble(error, t)) }
+        errorHandler: { error in
+          /* Прострочене «прийняв» це не «далеко». Телефон міг щойно
+             прокинутись у фоні і не встигнути відповісти, хоча звук уже в
+             нього; тоді слова чекаються далі, як і після «прийняв». */
+          if (error as? WCError)?.code == .messageReplyTimedOut {
+            next.resume()
+          } else {
+            next.resume(throwing: Self.trouble(error, t))
+          }
+        }
       )
     }
 
@@ -187,13 +198,10 @@ final class Link: NSObject, ObservableObject {
     }
   }
 
-  /* Не дістав або не дочекався: для людини це одне «телефон далеко». Решта
-     помилок каналу лягає в «не відповів», бо порада та сама: підійти. */
+  /* Не дістав: для людини це «телефон далеко». Решта помилок каналу лягає в
+     «не відповів», бо порада та сама: підійти. */
   private nonisolated static func trouble(_ error: Error, _ t: Words) -> LinkTrouble {
-    let code = (error as? WCError)?.code
-    return code == .notReachable || code == .messageReplyTimedOut
-      ? .far
-      : .failed(t.phoneSilent)
+    (error as? WCError)?.code == .notReachable ? .far : .failed(t.phoneSilent)
   }
 }
 

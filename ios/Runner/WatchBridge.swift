@@ -28,28 +28,31 @@ final class WatchBridge: NSObject {
     session?.activate()
   }
 
-  /// Підключає канал до Dart. Робиться один раз, при старті застосунку.
-  static func attach(to messenger: FlutterBinaryMessenger) -> WatchBridge {
-    let bridge = WatchBridge()
+  /// Підключає канал до Dart. Робиться один раз, при старті застосунку з
+  /// екраном. Сесія до цього моменту вже жива: її піднімає `init`, і в
+  /// фоновому запуску заради звуку з годинника канал не потрібен зовсім.
+  func attach(to messenger: FlutterBinaryMessenger) {
     let channel = FlutterMethodChannel(name: "calvi/watch", binaryMessenger: messenger)
 
-    channel.setMethodCallHandler { call, result in
+    channel.setMethodCallHandler { [weak self] call, result in
+      guard let self else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
       switch call.method {
       case "tell":
         guard let args = call.arguments as? [String: Any] else {
           result(FlutterMethodNotImplemented)
           return
         }
-        bridge.tell(args)
+        self.tell(args)
         result(nil)
       case "status":
-        result(bridge.status())
+        result(self.status())
       default:
         result(FlutterMethodNotImplemented)
       }
     }
-
-    return bridge
   }
 
   private func tell(_ state: [String: Any]) {
