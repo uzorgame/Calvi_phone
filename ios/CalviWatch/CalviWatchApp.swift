@@ -12,26 +12,22 @@ struct CalviWatchApp: App {
 }
 
 /// Де зараз стоїть застосунок. Кожен стан це один екран і нічого більше.
-enum Step: Equatable {
+enum Step: Hashable {
   case idle
   case hearing
   case analysing(String)
   case done([Dish])
   case dry
-  case queued
+  /// Сказане чекає на мережу; слова на екрані, щоб було видно, що саме чекає.
+  case queued(String)
   case trouble(String)
 }
 
 /// Годинниковий Calvi цілком: одна кнопка і те, що з неї виходить.
 ///
-/// **Кегль не переноситься з макета, а береться з системи.** Макет мальований на
-/// полотні 396 завширшки, а екран годинника 198 пунктів: числа звідти, взяті
-/// напряму, дали б підписи по сім пунктів, тобто вдвічі дрібніші за все, що
-/// малює watchOS. Тому тут стилі тексту системні: вони тримають ту саму
-/// ієрархію і слухаються розміру шрифта, який людина поставила собі на годиннику.
-///
-/// Розміри самих тіл, навпаки, рахуються від ширини екрана, як у макеті: кільце
-/// це 0.62 ширини і на сорок першому корпусі, і на сорок пʼятому.
+/// Макет це прототип 5200, і всі розміри тут його частки від ширини екрана:
+/// кільце 0.62, шапка 0.081, картка 0.071. Полотно прототипу 396 пікселів, а
+/// екран годинника 198 пунктів, і саме частки роблять їх одним малюнком.
 struct Watch: View {
   @StateObject private var link = Link.shared
   @StateObject private var ears = Ears()
@@ -51,7 +47,13 @@ struct Watch: View {
     VStack(spacing: 0) {
       Bar()
       screen(for: step)
+        /* Кожен екран приходить, як у прототипі: із прозорості, трохи знизу
+           і трохи меншим. Ключ по стану навмисно: екран народжується заново,
+           і разом із ним заново програються всі появи всередині. */
+        .id(step)
+        .transition(.opacity.combined(with: .offset(y: w * 0.03)).combined(with: .scale(scale: 0.965)))
     }
+    .animation(Motion.ease(0.34), value: step)
     /* Від верху, а не по центру. Без цього рядка стос розміром із вміст стояв
        посеред екрана, шапка «падала» на третину вниз, а розпірки всередині
        екранів не мали чого розпирати. */
@@ -98,20 +100,21 @@ struct Watch: View {
      * і відкривши наново. На телефоні це помітили б одразу, на годиннику це
      * взагалі вся взаємодія. */
     case .done(let dishes): done(dishes).onTapGesture { self.step = .idle }
-    case .dry:
-      note(t.dryHead, t.dryBody)
-        .onTapGesture { self.step = .idle }
-    case .queued:
-      note(t.queuedHead, t.queuedBody)
-        .onTapGesture { self.step = .idle }
+    case .dry: dry.onTapGesture { self.step = .idle }
+    case .queued(let heard): queued(heard).onTapGesture { self.step = .idle }
     case .trouble(let why):
-      note(t.failHead, why).onTapGesture { self.step = .idle }
+      VStack(spacing: 0) {
+        Spacer(minLength: 0)
+        Note(head: t.failHead, say: why)
+        Spacer(minLength: 0)
+      }
+      .onTapGesture { self.step = .idle }
     }
   }
 
   // MARK: Кільце дня з кнопкою всередині
 
-  /* Один круг несе і дію, і стан. Кільце каже, скільки норми лишилось, і його
+  /* Один круг несе і дію, і стан. Кільце каже, скільки дня вже зʼїдено, і його
      видно з відстані витягнутої руки; кнопка всередині це те єдине, заради чого
      застосунок відкривають. */
   private var idle: some View {
@@ -122,35 +125,37 @@ struct Watch: View {
         Task { await listen() }
       } label: {
         ZStack {
-          Circle().stroke(Palette.track, lineWidth: w * 0.034)
           /* Зʼїдене, як на кільці дня в телефоні: порожній ранок це порожнє
              кільце, і воно наповнюється разом із днем. Залишок стоїть словами
              під кнопкою. */
+          Ring(part: max(0, min(1, 1 - Double(link.left) / Double(max(link.norm, 1)))), width: w * 0.62)
+
           Circle()
-            .trim(from: 0, to: max(0, min(1, 1 - Double(link.left) / Double(max(link.norm, 1)))))
-            .stroke(Palette.ink, style: StrokeStyle(lineWidth: w * 0.034, lineCap: .round))
-            .rotationEffect(.degrees(-90))
-          Circle().fill(Palette.ink).padding(w * 0.111)
-          Image(systemName: "mic.fill")
-            .font(.system(size: w * 0.175))
-            .foregroundStyle(Palette.ground)
+            .fill(Palette.ink)
+            .shadow(color: Palette.shade, radius: 10, y: 6)
+            .padding(w * 0.111)
+            .modifier(Pop(delay: 0.12))
+
+          Mic().frame(width: w * 0.175, height: w * 0.175)
         }
         .frame(width: w * 0.62, height: w * 0.62)
       }
-      .buttonStyle(.plain)
+      .buttonStyle(Press(scale: 0.955))
       .disabled(!link.ready)
 
       Spacer(minLength: 0)
 
-      Text(link.ready ? t.say : t.openPhone)
-        .font(.headline)
-        .foregroundStyle(Palette.ink)
-        .multilineTextAlignment(.center)
-
-      if link.ready {
-        Text(String(format: t.leftOf, link.energyNum(link.left), link.energyText(link.norm)))
-          .font(.caption2)
-          .foregroundStyle(Palette.dim)
+      Under {
+        Text(link.ready ? t.say : t.openPhone)
+          .font(Palette.font(w * 0.081, .semibold))
+          .tracking(-0.02 * w * 0.081)
+          .foregroundStyle(Palette.text)
+          .multilineTextAlignment(.center)
+        if link.ready {
+          Text(String(format: t.leftOf, link.energyNum(link.left), link.energyText(link.norm)))
+            .font(Palette.font(w * 0.066))
+            .foregroundStyle(Palette.dim)
+        }
       }
     }
   }
@@ -163,35 +168,39 @@ struct Watch: View {
       Meter(level: ears.level).frame(width: w * 0.66, height: w * 0.3)
       Spacer(minLength: 0)
 
-      Text(t.listening)
-        .font(.headline)
-        .foregroundStyle(Palette.ink)
+      Under {
+        Text(t.listening)
+          .font(Palette.font(w * 0.081, .semibold))
+          .tracking(-0.02 * w * 0.081)
+          .foregroundStyle(Palette.text)
 
-      /* Скільки часу лишилось. Смужка наповнюється двадцять секунд, і коли
-         вона повна, запис зупиняється і йде далі сам, як після «Готово».
-         Без неї стеля була б невидимою: людина говорила б у вимкнений
-         мікрофон і не знала про це. */
-      GeometryReader { box in
-        ZStack(alignment: .leading) {
-          Capsule().fill(Palette.track)
-          Capsule().fill(Palette.dim).frame(width: box.size.width * ears.elapsed)
+        /* Скільки часу лишилось. Смужка наповнюється двадцять секунд, і коли
+           вона повна, запис зупиняється і йде далі сам, як після «Готово».
+           Без неї стеля була б невидимою: людина говорила б у вимкнений
+           мікрофон і не знала про це. */
+        GeometryReader { box in
+          ZStack(alignment: .leading) {
+            Capsule().fill(Palette.track)
+            Capsule().fill(Palette.dim).frame(width: box.size.width * ears.elapsed)
+          }
         }
+        .frame(height: max(1.5, w * 0.0076))
+        .padding(.top, w * 0.02)
+        .padding(.horizontal, w * 0.1)
       }
-      .frame(height: 3)
-      .padding(.top, w * 0.02)
-      .padding(.horizontal, w * 0.1)
 
       /* Одна широка кнопка. Скасування свайпом управо, як у всьому watchOS:
          друга кнопка поруч відібрала б половину ряду в головної дії заради
          того, що система і так уміє. */
       Button(t.done) { Task { await send() } }
-        .font(.body.weight(.semibold))
+        .font(Palette.font(w * 0.081, .semibold))
         .foregroundStyle(Palette.ground)
         .frame(maxWidth: .infinity)
         .padding(.vertical, w * 0.036)
         .background(Palette.ink, in: Capsule())
-        .buttonStyle(.plain)
+        .buttonStyle(Press(scale: 0.97))
         .padding(.top, w * 0.03)
+        .modifier(Rise(delay: 0.26))
     }
     // Стеля запису спрацювала: далі так само, як після «Готово».
     .onChange(of: ears.ended) { _, ended in
@@ -201,22 +210,22 @@ struct Watch: View {
 
   // MARK: Аналізує
 
-  /* Почуте на екрані одразу, щойно сервер його повернув, ще до відповіді про
+  /* Почуте на екрані одразу, щойно телефон його повернув, ще до відповіді про
      їжу. Без підтвердження людина каже вдруге і отримує подвійний запис. Поки
-     слова ще в дорозі, картки немає: порожні лапки читались би як «не почула». */
+     слова ще в дорозі, картки немає: порожні лапки читались би як «не почула».
+     Почуте не притиснуте до шапки: між ними лишається повітря, і речення
+     читається як цитата, а не як другий рядок заголовка. */
   private func analysing(_ heard: String) -> some View {
     VStack(spacing: 0) {
       if !heard.isEmpty {
-        Card { Text("«\(heard)»").font(.footnote).foregroundStyle(Palette.ink) }
-          .padding(.top, w * 0.05)
+        Heard(text: heard).padding(.top, w * 0.1)
       }
       Spacer(minLength: 0)
 
-      /* Індикатор це саме слово, а не значок поруч із ним: крутилка казала б те
-         саме, тільки чужим голосом. */
-      Text(t.analysing)
-        .font(.title3.weight(.semibold))
-        .foregroundStyle(Palette.dim)
+      /* Слово і є індикатором: чорнило проходить крізь літери зліва направо,
+         як погляд по рядку. Окремої крутилки поруч немає навмисно, бо вона
+         казала б те саме вдруге. */
+      Reading(text: t.analysing).modifier(Rise(delay: 0.16))
 
       Spacer(minLength: 0)
     }
@@ -225,56 +234,84 @@ struct Watch: View {
   // MARK: Записала
 
   private func done(_ dishes: [Dish]) -> some View {
-    VStack(alignment: .leading, spacing: w * 0.022) {
-      HStack(spacing: 4) {
-        Image(systemName: "checkmark")
+    VStack(alignment: .leading, spacing: 0) {
+      HStack(spacing: w * 0.025) {
+        Check().frame(width: w * 0.05, height: w * 0.05)
         Text(t.logged)
       }
-      .font(.headline)
+      .font(Palette.font(w * 0.081, .semibold))
       .foregroundStyle(Palette.good)
+      .padding(.bottom, w * 0.03)
+      .modifier(Rise(delay: 0, length: 0.34))
 
-      ForEach(dishes) { dish in
-        Card {
-          VStack(alignment: .leading, spacing: 1) {
-            Text(dish.name).font(.footnote.weight(.semibold)).foregroundStyle(Palette.ink)
-            // In the units the phone shows: the same dish must not read
-            // «340 г» on the wrist and «12.0 oz» in the pocket.
-            Text("\(link.portionText(dish.grams)) · \(link.energyText(dish.kcal))")
-              .font(.caption2)
-              .foregroundStyle(Palette.dim)
+      VStack(alignment: .leading, spacing: w * 0.022) {
+        ForEach(Array(dishes.enumerated()), id: \.element.id) { i, dish in
+          Card(horizontal: w * 0.042, vertical: w * 0.033, radius: w * 0.06) {
+            VStack(alignment: .leading, spacing: w * 0.008) {
+              Text(dish.name)
+                .font(Palette.font(w * 0.071, .semibold))
+                .tracking(-0.01 * w * 0.071)
+                .foregroundStyle(Palette.text)
+              // In the units the phone shows: the same dish must not read
+              // «340 г» on the wrist and «12.0 oz» in the pocket.
+              Text("\(link.portionText(dish.grams)) · \(link.energyText(dish.kcal))")
+                .font(Palette.font(w * 0.066))
+                .foregroundStyle(Palette.dim)
+            }
           }
+          .modifier(Rise(delay: 0.22 + Double(i) * 0.11, length: 0.42))
         }
       }
 
       Spacer(minLength: 0)
 
-      VStack(spacing: 1) {
-        Text(String(format: t.leftNow, link.energyText(link.left)))
-          .font(.caption)
-          .foregroundStyle(Palette.dim)
+      /* Число не підміняється, а їде від старого до нового: рух тут і є
+         відповіддю на «скільки з мене за це зняли». */
+      VStack(spacing: w * 0.008) {
+        Countdown(
+          from: link.left + dishes.reduce(0) { $0 + $1.kcal },
+          to: link.left,
+          words: t.leftNow,
+          number: { link.energyNum($0) },
+          unit: link.energyUnit()
+        )
 
         /* Похвала не на кожен запис і не завжди. Слово, яке чуєш щоразу, стає
            частиною інтерфейсу, а сказане тому, хто щойно перебрав норму, це не
-           підтримка, а брехня. */
+           підтримка, а брехня. Зелена, як галочка вгорі. */
         if logs % 5 == 0, link.left > 0 {
           Text(t.praise)
-            .font(.caption2)
+            .font(Palette.font(w * 0.066, .medium))
             .foregroundStyle(Palette.good)
+            .modifier(Rise(delay: 0.76, length: 0.42))
         }
       }
       .frame(maxWidth: .infinity)
+      .padding(.horizontal, w * 0.025)
+      .modifier(Rise(delay: 0.2))
     }
   }
 
-  private func note(_ head: String, _ say: String) -> some View {
-    VStack {
+  // MARK: Токени скінчились, у черзі
+
+  private var dry: some View {
+    VStack(spacing: 0) {
       Spacer(minLength: 0)
-      Card {
-        VStack(alignment: .leading, spacing: 4) {
-          Text(head).font(.headline).foregroundStyle(Palette.ink)
-          Text(say).font(.caption2).foregroundStyle(Palette.dim)
-        }
+      Note(head: t.dryHead, say: t.dryBody)
+      Spacer(minLength: 0)
+      Under {
+        Text(String(format: t.leftNow, link.energyText(link.left)))
+          .font(Palette.font(w * 0.066))
+          .foregroundStyle(Palette.dim)
       }
+    }
+  }
+
+  private func queued(_ heard: String) -> some View {
+    VStack(spacing: 0) {
+      Heard(text: heard)
+      Spacer(minLength: 0)
+      Note(head: t.queuedHead, say: t.queuedBody)
       Spacer(minLength: 0)
     }
   }
@@ -340,7 +377,7 @@ struct Watch: View {
       step = .dry
     } catch NoraTrouble.offline {
       Queue.add(heard, key: key)
-      step = .queued
+      step = .queued(heard)
     } catch NoraTrouble.stale {
       /* Сервер не впізнав токен: людина вийшла на телефоні або токен протух.
          Годинник забуває його сам, і головний екран каже, що робити. */
@@ -352,7 +389,7 @@ struct Watch: View {
   }
 }
 
-// MARK: Дрібниці
+// MARK: Частини екранів
 
 /// Шапка як у застосунку: назва чорнилом ліворуч, час тихим праворуч.
 private struct Bar: View {
@@ -361,12 +398,12 @@ private struct Bar: View {
   var body: some View {
     HStack {
       Text("Calvi")
-        .font(.system(size: w * 0.081, weight: .bold))
+        .font(Palette.font(w * 0.081, .bold))
         .tracking(-0.03 * w * 0.081)
-        .foregroundStyle(Palette.ink)
+        .foregroundStyle(Palette.text)
       Spacer()
       Text(.now, style: .time)
-        .font(.system(size: w * 0.071, weight: .medium).monospacedDigit())
+        .font(Palette.font(w * 0.071, .medium).monospacedDigit())
         .foregroundStyle(Palette.dim)
     }
     .padding(.horizontal, w * 0.022)
@@ -374,16 +411,264 @@ private struct Bar: View {
   }
 }
 
+/// Нижній блок: підпис під кільцем чи метром. Приходить знизу з затримкою.
+private struct Under<Content: View>: View {
+  @ViewBuilder let content: Content
+  private var w: CGFloat { WKInterfaceDevice.current().screenBounds.width }
+
+  var body: some View {
+    VStack(spacing: w * 0.008) { content }
+      .frame(maxWidth: .infinity)
+      .padding(.top, w * 0.03)
+      .modifier(Rise(delay: 0.2))
+  }
+}
+
 /// Біла картка з тінню: та сама, що скрізь у застосунку.
 private struct Card<Content: View>: View {
+  let horizontal: CGFloat
+  let vertical: CGFloat
+  let radius: CGFloat
   @ViewBuilder let content: Content
 
   var body: some View {
     content
       .frame(maxWidth: .infinity, alignment: .leading)
-      .padding(.horizontal, 10)
-      .padding(.vertical, 8)
-      .background(Palette.card, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+      .padding(.horizontal, horizontal)
+      .padding(.vertical, vertical)
+      .background(Palette.card, in: RoundedRectangle(cornerRadius: radius, style: .continuous))
+      .shadow(color: Palette.shade, radius: 10, y: 6)
+      .shadow(color: Palette.shade.opacity(0.8), radius: 1, y: 1)
+  }
+}
+
+/// Почуте, у лапках, як цитата.
+private struct Heard: View {
+  let text: String
+  private var w: CGFloat { WKInterfaceDevice.current().screenBounds.width }
+
+  var body: some View {
+    Card(horizontal: w * 0.045, vertical: w * 0.038, radius: w * 0.07) {
+      Text("«\(text)»")
+        .font(Palette.font(w * 0.071))
+        .lineSpacing(w * 0.071 * 0.35)
+        .foregroundStyle(Palette.text)
+    }
+    .modifier(Rise())
+  }
+}
+
+/// Картка з заголовком і поясненням: токени скінчились, у черзі, не вийшло.
+private struct Note: View {
+  let head: String
+  let say: String
+  private var w: CGFloat { WKInterfaceDevice.current().screenBounds.width }
+
+  var body: some View {
+    Card(horizontal: w * 0.042, vertical: w * 0.042, radius: w * 0.07) {
+      VStack(alignment: .leading, spacing: w * 0.018) {
+        Text(head)
+          .font(Palette.font(w * 0.081, .semibold))
+          .foregroundStyle(Palette.text)
+        Text(say)
+          .font(Palette.font(w * 0.066))
+          .lineSpacing(w * 0.066 * 0.4)
+          .foregroundStyle(Palette.dim)
+      }
+    }
+    .modifier(Rise(delay: 0.08, length: 0.4))
+  }
+}
+
+/// «Аналізую»: чорнило проходить крізь літери зліва направо, як погляд по рядку.
+private struct Reading: View {
+  let text: String
+  private var w: CGFloat { WKInterfaceDevice.current().screenBounds.width }
+  @State private var swept = false
+
+  var body: some View {
+    let label = Text(text)
+      .font(Palette.font(w * 0.101, .semibold))
+      .tracking(-0.02 * w * 0.101)
+
+    label
+      .foregroundStyle(Palette.faint)
+      .overlay {
+        GeometryReader { box in
+          LinearGradient(
+            stops: [
+              .init(color: Palette.faint, location: 0),
+              .init(color: Palette.faint, location: 0.38),
+              .init(color: Palette.text, location: 0.5),
+              .init(color: Palette.faint, location: 0.62),
+              .init(color: Palette.faint, location: 1),
+            ],
+            startPoint: .leading,
+            endPoint: .trailing
+          )
+          /* Утричі ширший за слово, з чорнилом посередині. Стартує зсунутим
+             ліворуч на дві ширини, тобто чорнило за лівим краєм, і їде до
+             нуля, тобто чорнило за правим: зліва направо, як погляд. */
+          .frame(width: box.size.width * 3)
+          .offset(x: swept ? 0 : -box.size.width * 2)
+          .animation(.linear(duration: 1.9).repeatForever(autoreverses: false), value: swept)
+        }
+        .mask(label)
+      }
+      .onAppear { swept = true }
+  }
+}
+
+/// Кільце дня: доріжка і зʼїдена частина, яка домальовується при появі.
+private struct Ring: View {
+  let part: Double
+  let width: CGFloat
+  @State private var drawn = false
+
+  var body: some View {
+    ZStack {
+      Circle().stroke(Palette.track, lineWidth: width * 0.055)
+      Circle()
+        .trim(from: 0, to: drawn ? part : 0)
+        .stroke(Palette.ink, style: StrokeStyle(lineWidth: width * 0.055, lineCap: .round))
+        .rotationEffect(.degrees(-90))
+        .animation(Motion.ease(0.9).delay(0.08), value: drawn)
+    }
+    .onAppear { drawn = true }
+  }
+}
+
+/// Мікрофон із прототипу, штрихом, а не системна заливка.
+private struct Mic: View {
+  var body: some View {
+    Canvas { paint, size in
+      let k = size.width / 24
+      var path = Path()
+      path.addRoundedRect(
+        in: CGRect(x: 9.2 * k, y: 3.5 * k, width: 5.6 * k, height: 10.6 * k),
+        cornerSize: CGSize(width: 2.8 * k, height: 2.8 * k)
+      )
+      /* Чаша під капсулою: від правого краю через низ до лівого. У SwiftUI
+         вісь y іде вниз, тому нуль градусів праворуч, дев'яносто внизу. */
+      path.move(to: CGPoint(x: 18.2 * k, y: 11.2 * k))
+      path.addArc(
+        center: CGPoint(x: 12 * k, y: 11.2 * k), radius: 6.2 * k,
+        startAngle: .degrees(0), endAngle: .degrees(180), clockwise: false
+      )
+      path.move(to: CGPoint(x: 12 * k, y: 17.4 * k))
+      path.addLine(to: CGPoint(x: 12 * k, y: 20.5 * k))
+      paint.stroke(path, with: .color(Palette.ground), style: StrokeStyle(lineWidth: 1.7 * k, lineCap: .round, lineJoin: .round))
+    }
+  }
+}
+
+/// Галочка «Записала», малюється штрихом при появі.
+private struct Check: View {
+  @State private var drawn = false
+
+  var body: some View {
+    GeometryReader { box in
+      let k = box.size.width / 24
+      Path { p in
+        p.move(to: CGPoint(x: 4 * k, y: 12.6 * k))
+        p.addLine(to: CGPoint(x: 9.2 * k, y: 17.8 * k))
+        p.addLine(to: CGPoint(x: 20 * k, y: 6.8 * k))
+      }
+      .trim(from: 0, to: drawn ? 1 : 0)
+      .stroke(Palette.good, style: StrokeStyle(lineWidth: 2.6 * k, lineCap: .round, lineJoin: .round))
+      .animation(Motion.ease(0.48).delay(0.12), value: drawn)
+    }
+    .onAppear { drawn = true }
+  }
+}
+
+/// «лишилось N ккал», де N їде від старого залишку до нового.
+private struct Countdown: View {
+  let from: Int
+  let to: Int
+  let words: String
+  let number: (Int) -> String
+  let unit: String
+  @State private var now: Int = 0
+  private var w: CGFloat { WKInterfaceDevice.current().screenBounds.width }
+
+  var body: some View {
+    /* Формат «лишилось %@» ріжеться на слово і хвіст, число стоїть чорнилом
+       між ними, як у прототипі. */
+    let parts = words.components(separatedBy: "%@")
+    HStack(spacing: 0) {
+      Text(parts.first ?? "")
+      Text(number(now))
+        .font(Palette.font(w * 0.071, .semibold))
+        .foregroundStyle(Palette.text)
+        .monospacedDigit()
+      Text(" \(unit)")
+      Text(parts.count > 1 ? parts[1] : "")
+    }
+    .font(Palette.font(w * 0.066))
+    .foregroundStyle(Palette.dim)
+    .task {
+      now = from
+      let steps = 22
+      for i in 1...steps {
+        try? await Task.sleep(for: .milliseconds(50))
+        let k = Double(i) / Double(steps)
+        // Швидко на початку, мʼяко в кінці: рух читається як зупинка, а не як обрив.
+        let e = 1 - pow(1 - k, 3)
+        now = from + Int((Double(to - from) * e).rounded())
+      }
+      now = to
+    }
+  }
+}
+
+// MARK: Рух
+
+/// Крива прототипу: `cubic-bezier(0.22, 0.61, 0.36, 1)`.
+enum Motion {
+  static func ease(_ length: Double) -> Animation {
+    .timingCurve(0.22, 0.61, 0.36, 1, duration: length)
+  }
+}
+
+/// Поява знизу: прозорість і зсув на 0.02 ширини, як `up` у прототипі.
+private struct Rise: ViewModifier {
+  var delay: Double = 0
+  var length: Double = 0.38
+  @State private var shown = false
+  private var w: CGFloat { WKInterfaceDevice.current().screenBounds.width }
+
+  func body(content: Content) -> some View {
+    content
+      .opacity(shown ? 1 : 0)
+      .offset(y: shown ? 0 : w * 0.02)
+      .animation(Motion.ease(length).delay(delay), value: shown)
+      .onAppear { shown = true }
+  }
+}
+
+/// Поява кнопки: з 0.8 до 1, як `pop` у прототипі.
+private struct Pop: ViewModifier {
+  var delay: Double = 0
+  @State private var shown = false
+
+  func body(content: Content) -> some View {
+    content
+      .opacity(shown ? 1 : 0)
+      .scaleEffect(shown ? 1 : 0.8)
+      .animation(Motion.ease(0.42).delay(delay), value: shown)
+      .onAppear { shown = true }
+  }
+}
+
+/// Дотик стискає кнопку, як `:active` у прототипі.
+private struct Press: ButtonStyle {
+  let scale: CGFloat
+
+  func makeBody(configuration: Configuration) -> some View {
+    configuration.label
+      .scaleEffect(configuration.isPressed ? scale : 1)
+      .animation(Motion.ease(0.18), value: configuration.isPressed)
   }
 }
 
@@ -391,10 +676,22 @@ private struct Card<Content: View>: View {
 enum Palette {
   static let ground = Color(red: 0.965, green: 0.965, blue: 0.973)
   static let card = Color.white
+  /// Текст: `--text`, майже чорний.
+  static let text = Color(red: 0.039, green: 0.039, blue: 0.039)
+  /// Кнопка, кільце, метр: `--button`.
   static let ink = Color(red: 0.11, green: 0.11, blue: 0.118)
   static let dim = Color(red: 0.557, green: 0.557, blue: 0.576)
+  static let faint = Color(red: 0.706, green: 0.706, blue: 0.733)
   static let track = Color(red: 0.937, green: 0.937, blue: 0.949)
   static let good = Color(red: 0.561, green: 0.682, blue: 0.529)
+  /// Тінь картки: `--shadow-card`.
+  static let shade = Color(red: 0.063, green: 0.063, blue: 0.078).opacity(0.05)
+
+  /// Шрифт застосунку, той самий Onest, що на телефоні; файли кладе в пакет
+  /// `watch_target.rb`. Без них система підставить свій тієї ж ваги.
+  static func font(_ size: CGFloat, _ weight: Font.Weight = .regular) -> Font {
+    Font.custom("Onest", size: size).weight(weight)
+  }
 }
 
 /// Тисячі нерозривним пробілом, як у застосунку.

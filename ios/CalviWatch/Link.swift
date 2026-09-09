@@ -47,8 +47,13 @@ final class Link: NSObject, ObservableObject {
     thousands(energy == "kj" ? Int((Double(kcal) * 4.184).rounded()) : kcal)
   }
 
+  /// Слово одиниці енергії: «ккал» або «кДж» мовою застосунку.
+  func energyUnit() -> String {
+    energy == "kj" ? Words.of(lang).kj : Words.of(lang).kcal
+  }
+
   func energyText(_ kcal: Int) -> String {
-    "\(energyNum(kcal)) \(energy == "kj" ? Words.of(lang).kj : Words.of(lang).kcal)"
+    "\(energyNum(kcal)) \(energyUnit())"
   }
 
   private override init() {

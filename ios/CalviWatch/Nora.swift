@@ -2,10 +2,10 @@ import Foundation
 
 /// Одна страва так, як її записала Нора.
 ///
-/// `Equatable` не для порівняння страв: без нього не збирається `Step`, бо
+/// `Hashable` не для порівняння страв: без нього не збирається `Step`, бо
 /// перелік зі списком страв усередині не вміє порівнювати сам себе, а SwiftUI
-/// вимагає цього від стану екрана.
-struct Dish: Identifiable, Codable, Equatable {
+/// вимагає цього від стану екрана і від ключа, за яким екран змінюється.
+struct Dish: Identifiable, Codable, Hashable {
   let id: String
   let name: String
   let grams: Int

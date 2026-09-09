@@ -72,6 +72,12 @@ group.new_reference(File.join(ROOT, 'ios', NAME, 'Info.plist'))
 icons = group.new_reference(File.join(ROOT, 'ios', NAME, 'Assets.xcassets'))
 watch.add_resources([icons])
 
+# Шрифт застосунку, той самий, що на телефоні. Файли беруться з `assets/fonts`
+# телефонного проєкту, щоб не тримати другу копію; імена в `UIAppFonts` у
+# plist годинника мають збігатися з ними.
+fonts = Dir.glob(File.join(ROOT, 'assets', 'fonts', 'Onest-*.ttf')).sort.map { |f| group.new_reference(f) }
+watch.add_resources(fonts)
+
 watch.build_configurations.each do |config|
   s = config.build_settings
   s['PRODUCT_BUNDLE_IDENTIFIER'] = WATCH_ID

@@ -34,5 +34,14 @@
 	     питає їх сам, і текст показує теж він. -->
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Щоб записати сказане в щоденник.</string>
+	<!-- Шрифт застосунку. Файли кладе в пакет ios/watch_target.rb з
+	     assets/fonts телефона. -->
+	<key>UIAppFonts</key>
+	<array>
+		<string>Onest-Regular.ttf</string>
+		<string>Onest-Medium.ttf</string>
+		<string>Onest-SemiBold.ttf</string>
+		<string>Onest-Bold.ttf</string>
+	</array>
 </dict>
 </plist>
