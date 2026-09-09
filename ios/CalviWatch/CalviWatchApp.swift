@@ -1,3 +1,4 @@
+import AVKit
 import SwiftUI
 import WatchKit
 
@@ -51,11 +52,27 @@ struct Watch: View {
       Bar()
       screen(for: step)
     }
-    /* Поля з боків ширші за верхнє і нижнє, і це не смак: кут екрана
-       заокруглений, і текст, поставлений урівень із краєм, підрізається склом. */
-    .padding(.horizontal, w * 0.06)
-    .padding(.vertical, w * 0.03)
+    /* Від верху, а не по центру. Без цього рядка стос розміром із вміст стояв
+       посеред екрана, шапка «падала» на третину вниз, а розпірки всередині
+       екранів не мали чого розпирати. */
+    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+    /* Поля з макета 5200: зверху менше, знизу більше, з боків найширше, бо кут
+       екрана заокруглений і текст урівень із краєм підрізається склом. */
+    .padding(.top, w * 0.075)
+    .padding(.horizontal, w * 0.085)
+    .padding(.bottom, w * 0.095)
+    .ignoresSafeArea(edges: .top)
     .background(Palette.ground.ignoresSafeArea())
+    /* Системний годинник watchOS білий і на світлому тлі невидимий, а свій час
+       у шапці вже є. Штатного способу сховати системний немає; невидимий
+       програвач відео змушує watchOS прибрати його самому, бо під відео час не
+       показують. */
+    .background(
+      VideoPlayer(player: nil)
+        .opacity(0)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    )
     /* Черга віддається тоді, коли зʼявився токен, а не тільки на відкритті.
      *
      * Доти це стояло в `task` без ключа: годинник, відкритий раніше, ніж
@@ -106,8 +123,11 @@ struct Watch: View {
       } label: {
         ZStack {
           Circle().stroke(Palette.track, lineWidth: w * 0.034)
+          /* Зʼїдене, як на кільці дня в телефоні: порожній ранок це порожнє
+             кільце, і воно наповнюється разом із днем. Залишок стоїть словами
+             під кнопкою. */
           Circle()
-            .trim(from: 0, to: max(0, min(1, Double(link.left) / Double(max(link.norm, 1)))))
+            .trim(from: 0, to: max(0, min(1, 1 - Double(link.left) / Double(max(link.norm, 1)))))
             .stroke(Palette.ink, style: StrokeStyle(lineWidth: w * 0.034, lineCap: .round))
             .rotationEffect(.degrees(-90))
           Circle().fill(Palette.ink).padding(w * 0.111)
@@ -336,13 +356,21 @@ struct Watch: View {
 
 /// Шапка як у застосунку: назва чорнилом ліворуч, час тихим праворуч.
 private struct Bar: View {
+  private var w: CGFloat { WKInterfaceDevice.current().screenBounds.width }
+
   var body: some View {
     HStack {
-      Text("Calvi").font(.headline).foregroundStyle(Palette.ink)
+      Text("Calvi")
+        .font(.system(size: w * 0.081, weight: .bold))
+        .tracking(-0.03 * w * 0.081)
+        .foregroundStyle(Palette.ink)
       Spacer()
-      Text(Date(), style: .time).font(.caption).foregroundStyle(Palette.dim)
+      Text(.now, style: .time)
+        .font(.system(size: w * 0.071, weight: .medium).monospacedDigit())
+        .foregroundStyle(Palette.dim)
     }
-    .padding(.bottom, 6)
+    .padding(.horizontal, w * 0.022)
+    .padding(.bottom, w * 0.03)
   }
 }
 
