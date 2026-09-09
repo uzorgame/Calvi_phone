@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../data/chat.dart';
+import '../../data/units.dart';
 import '../../design/icons.dart';
 import '../../design/shell.dart';
 import '../../design/theme.dart';
@@ -1298,7 +1299,7 @@ class _WeightPicks extends StatelessWidget {
                     border: i == 1 ? null : Border.all(color: c.cardBorder),
                   ),
                   child: Text(
-                    L.of(context).barGrams(g),
+                    L.of(context).barGrams(dataUnits.porText(g)),
                     style: context.t.labelLarge?.copyWith(
                       color: i == 1 ? c.buttonText : c.text,
                       fontFeatures: const [FontFeature.tabularFigures()],

@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../data/settings.dart';
+import '../../data/units.dart';
 import '../../design/icons.dart';
 import '../../design/ring.dart';
 import '../../design/ruler.dart';
@@ -16,7 +17,6 @@ import 'welcome.dart';
 import '../../design/wheel.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/labels.dart';
-import '../../format.dart';
 
 /* Скільки кроків у першому запуску.
  *
@@ -412,18 +412,7 @@ class _StartScreenState extends State<StartScreen> {
      Пʼять окремих питань, бо кухонні ваги в грамах цілком уживаються з вагою
      тіла у фунтах. */
   Widget _unitsStep() {
-    final groups = <({String key, String title, List<String> labels, List<String> values})>[
-      (key: 'mass', title: l.unitsMass, labels: [l.unitKg, 'lb', 'st'], values: ['kg', 'lb', 'st']),
-      (key: 'length', title: l.unitsLength, labels: [l.unitCm, 'in'], values: ['cm', 'in']),
-      (key: 'volume', title: l.unitsVolume, labels: [l.unitMl, 'fl oz'], values: ['ml', 'floz']),
-      (key: 'portion', title: l.unitsPortion, labels: [l.unitG, 'oz'], values: ['g', 'oz']),
-      (
-        key: 'energy',
-        title: l.unitsEnergy,
-        labels: [l.unitKcal, l.unitKj],
-        values: ['kcal', 'kj'],
-      ),
-    ];
+    final groups = unitGroups(l);
 
     return _Step(
       title: l.unitsTitle,
@@ -479,13 +468,14 @@ class _StartScreenState extends State<StartScreen> {
       ),
       _Block(
         title: l.startHeight,
-        aside: '$_heightCm ${l.unitCm}',
+        aside: _units.heightText(_heightCm),
         child: CalviWheel(
-          values: heights,
-          value: _heightCm,
-          suffix: l.unitCm,
+          values: _units.heightWheel,
+          value: _units.heightOut(_heightCm),
+          suffix: _units.length == 'in' ? '' : l.unitCm,
+          format: _units.length == 'in' ? _units.heightNum : null,
           compact: true,
-          onPick: (v) => setState(() => _heightCm = v),
+          onPick: (v) => setState(() => _heightCm = _units.heightIn(v)),
         ),
       ),
     ],
@@ -500,11 +490,11 @@ class _StartScreenState extends State<StartScreen> {
     middle: true,
     children: [
       CalviRuler(
-        value: _weightKg,
-        min: 40,
-        max: 180,
-        suffix: l.unitKg,
-        onChange: (v) => setState(() => _weightKg = v),
+        value: _units.massOut(_weightKg),
+        min: _units.massBound(40),
+        max: _units.massBound(180),
+        suffix: _units.massLabel,
+        onChange: (v) => setState(() => _weightKg = _units.massIn(v)),
       ),
     ],
   );
@@ -528,16 +518,16 @@ class _StartScreenState extends State<StartScreen> {
       if (_direction != Direction.keep || _walking)
         _Field(
           label: l.startTargetWeight,
-          value: _targetKg.toStringAsFixed(1),
-          unit: l.unitKg,
+          value: _units.massNum(_targetKg),
+          unit: _units.massLabel,
           child: CalviRuler(
             showValue: false,
-            value: _targetKg,
-            seek: _seek,
-            min: 40,
-            max: 180,
-            suffix: l.unitKg,
-            onChange: _aimAt,
+            value: _units.massOut(_targetKg),
+            seek: _seek == null ? null : _units.massOut(_seek!),
+            min: _units.massBound(40),
+            max: _units.massBound(180),
+            suffix: _units.massLabel,
+            onChange: (v) => _aimAt(_units.massIn(v)),
           ),
         ),
     ],
@@ -554,10 +544,10 @@ class _StartScreenState extends State<StartScreen> {
       children: [
         Text.rich(
           TextSpan(
-            text: _pace.toStringAsFixed(1),
+            text: _units.massNum(_pace),
             children: [
               TextSpan(
-                text: '  ${l.startPaceUnit}',
+                text: '  ${l.startPaceUnit(_units.massLabel)}',
                 style: context.t.bodyMedium?.copyWith(fontSize: CalviSize.fsBody),
               ),
             ],
@@ -639,6 +629,8 @@ class _StartScreenState extends State<StartScreen> {
      `_NormStep`: у нього свої таймери, і починатись вони мають, коли зʼявився
      він, а не коли зʼявився «Старт». */
   Widget _normStep() => _NormStep(
+    // The choice from step two, not the saved one: nothing is saved yet.
+    units: _units,
     kcal: calcKcal(_draft),
     weeks: weeksToTarget(_draft),
     protein: _protein,
@@ -648,8 +640,8 @@ class _StartScreenState extends State<StartScreen> {
        Числа беруться з відповідей, а не з прикладу: зріст із барабана, вага з
        лінійки, вік із барабана, спосіб життя з вибраної картки. */
     reads: [
-      '${l.startHeight} $_heightCm ${l.unitCm}',
-      '${l.weightTitle} ${_round(_weightKg)} ${l.unitKg}',
+      '${l.startHeight} ${_units.heightText(_heightCm)}',
+      '${l.weightTitle} ${_round(_units.massOut(_weightKg))} ${_units.massLabel}',
       '${l.startAge} ${l.startAgeYears(_age)}',
       activityTitle(context, _activity),
     ],
@@ -692,6 +684,7 @@ enum _Phase { read, land, done }
 
 class _NormStep extends StatefulWidget {
   const _NormStep({
+    required this.units,
     required this.kcal,
     required this.weeks,
     required this.reads,
@@ -701,6 +694,7 @@ class _NormStep extends StatefulWidget {
     required this.onNext,
   });
 
+  final Units units;
   final int kcal;
   final int weeks;
 
@@ -811,7 +805,7 @@ class _NormStepState extends State<_NormStep> with SingleTickerProviderStateMixi
                         scale: 1 + 0.05 * (1 - t),
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          thousands(reading ? _spin : widget.kcal),
+                          widget.units.enNum(reading ? _spin : widget.kcal),
                           style: context.t.displayLarge?.copyWith(
                             height: 1,
                             color: Color.lerp(c.textSecondary, c.text, t),
@@ -825,7 +819,7 @@ class _NormStepState extends State<_NormStep> with SingleTickerProviderStateMixi
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      reading ? l.startNormCounting : l.startNormPerDay,
+                      reading ? l.startNormCounting : l.startNormPerDay(widget.units.enLabel),
                       style: context.t.bodyMedium,
                     ),
                   ],
@@ -1302,7 +1296,8 @@ class _MacroDot extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              L.of(context).gramsUnit(value),
+              // Macros are grams in every unit system.
+              L.of(context).gramsUnit('$value ${L.of(context).unitG}'),
               style: context.t.titleMedium?.copyWith(fontSize: CalviSize.fsBody),
             ),
             const SizedBox(height: 8),

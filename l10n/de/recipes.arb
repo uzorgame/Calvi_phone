@@ -56,23 +56,17 @@
   },
   "rcPerServing": "pro Portion",
   "rcPerServingHead": "Pro Portion",
-  "rcWhole": "Ganzes Gericht: {kcal} kcal, {g} g",
+  "rcWhole": "Ganzes Gericht: {kcal}, {g}",
   "@rcWhole": {
     "placeholders": {
-      "kcal": {
-        "type": "int"
-      },
-      "g": {
-        "type": "int"
-      }
+      "kcal": { "type": "String" },
+      "g": { "type": "String" }
     }
   },
-  "rcPortion": "Portion {g} g",
+  "rcPortion": "Portion {g}",
   "@rcPortion": {
     "placeholders": {
-      "g": {
-        "type": "int"
-      }
+      "g": { "type": "String" }
     }
   },
   "rcOfDay": "das sind {p}% des Tagesrichtwerts",
@@ -84,12 +78,10 @@
     }
   },
   "rcItemsHead": "Zutaten",
-  "rcItemsTotal": "insgesamt {g} g",
+  "rcItemsTotal": "insgesamt {g}",
   "@rcItemsTotal": {
     "placeholders": {
-      "g": {
-        "type": "int"
-      }
+      "g": { "type": "String" }
     }
   },
   "rcToolsHead": "Was die Küche braucht",

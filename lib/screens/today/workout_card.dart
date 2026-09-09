@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../data/workout.dart';
+import '../../data/units.dart';
 import '../../design/icons.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
@@ -72,7 +73,7 @@ class _WorkoutCardState extends State<WorkoutCard> {
       icon: 'gym',
       title: L.of(context).workoutTitle,
       sub: _plural(widget.workouts.length),
-      badge: L.of(context).workoutBurned(burned),
+      badge: L.of(context).workoutBurned(dataUnits.enText(burned)),
       open: widget.open,
       onToggle: widget.onToggle,
       child: Column(
@@ -156,7 +157,10 @@ class _WorkoutRow extends StatelessWidget {
             children: [
               // Green, and negative: this is the one number on the day that
               // moves the norm the right way.
-              Text('−${workout.kcal}', style: context.t.titleMedium?.copyWith(color: c.success)),
+              Text(
+                '−${dataUnits.enNum(workout.kcal)}',
+                style: context.t.titleMedium?.copyWith(color: c.success),
+              ),
               Text(workout.time, style: context.t.labelSmall?.copyWith(fontSize: 11)),
             ],
           ),

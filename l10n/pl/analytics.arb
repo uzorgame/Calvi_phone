@@ -10,20 +10,20 @@
   "anForMonth": "w ciągu miesiąca",
 
   "anGoalProgress": "Postęp do celu",
-  "anStartKg": "start, kg",
-  "anNowKg": "teraz, kg",
-  "anTargetKg": "cel, kg",
+  "anStartKg": "start, {u}",
+  "anNowKg": "teraz, {u}",
+  "anTargetKg": "cel, {u}",
   "anWeightEmpty": "Krzywa pojawi się po drugim ważeniu. Powiedz Norze swoją wagę, a ona sama ją zapisze.",
   "anEtaHead": "W tym tempie cel około *{date}*",
 
   "anKcal": "Kalorie",
   "anShareOfNorm": "{share}% normy",
-  "anKcalTotal": "w okresie, kcal",
+  "anKcalTotal": "w okresie, {u}",
   "anKcalAvg": "średnio dziennie",
   "anKcalEmpty": "W tym okresie nic jeszcze nie zapisano. Zapisz, co jesz, a wykres zbuduje się sam.",
 
   "anWater": "Nawodnienie",
-  "anWaterAvg": "średnio, ml",
+  "anWaterAvg": "średnio, {u}",
 
   "anMeasures": "Pomiary",
   "anMeasuresChange": "zmiana {period}",
@@ -35,12 +35,12 @@
   "anMacrosAvg": "Makro średnio",
   "anMacrosEmpty": "Średnia pojawi się, gdy będzie co uśredniać: zapisz choć jeden dzień.",
   "anPerDay": "dziennie",
-  "anMacroGoal": "norma {grams} g",
+  "anMacroGoal": "norma {grams}",
 
   "anOneWeighing": "Na razie jeden pomiar. Drugi pokaże kierunek i od niego zacznie się linia.",
   "anChartGoal": "cel {value}",
 
-  "anWaterGoal": "norma {ml} ml",
+  "anWaterGoal": "norma {ml}",
   "anDaysInNorm": "dni w normie",
   "anDonePercent": "{percent}% zrobione"
 }

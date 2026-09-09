@@ -4,10 +4,10 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../data/day.dart';
-import '../../format.dart';
 import '../../data/app_scope.dart';
 import '../../data/settings.dart';
 import '../../data/week.dart';
+import '../../data/units.dart';
 import '../../design/ring.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
@@ -620,10 +620,10 @@ class _KcalState extends State<_Kcal> {
            * вранці. */
               Text.rich(
                 TextSpan(
-                  text: thousands(shownEaten),
+                  text: dataUnits.enNum(shownEaten),
                   children: [
                     TextSpan(
-                      text: L.of(context).heroKcal,
+                      text: L.of(context).heroKcal(dataUnits.enLabel),
                       style: context.t.bodyMedium?.copyWith(fontSize: 17),
                     ),
                   ],
@@ -637,14 +637,14 @@ class _KcalState extends State<_Kcal> {
                     if (left >= 0) ...[
                       TextSpan(text: L.of(context).heroLeft),
                       TextSpan(
-                        text: thousands(shownLeft),
+                        text: dataUnits.enNum(shownLeft),
                         style: TextStyle(color: c.text, fontWeight: FontWeight.w600),
                       ),
                       /* Норма моноширинними цифрами рівно тоді, коли вона
                          крутиться: інакше рядок смикався б туди-сюди на кожній
                          зміні, і рух читався б як збій, а не як робота. */
                       TextSpan(
-                        text: L.of(context).heroOf(thousands(_spin ?? goal.kcal)),
+                        text: L.of(context).heroOf(dataUnits.enNum(_spin ?? goal.kcal)),
                         style: _spin == null
                             ? null
                             : const TextStyle(fontFeatures: [FontFeature.tabularFigures()]),
@@ -652,11 +652,11 @@ class _KcalState extends State<_Kcal> {
                     ] else ...[
                       TextSpan(text: L.of(context).heroOver),
                       TextSpan(
-                        text: thousands(shownLeft.abs()),
+                        text: dataUnits.enNum(shownLeft.abs()),
                         style: TextStyle(color: c.protein, fontWeight: FontWeight.w600),
                       ),
                       TextSpan(
-                        text: L.of(context).heroFrom(thousands(_spin ?? goal.kcal)),
+                        text: L.of(context).heroFrom(dataUnits.enNum(_spin ?? goal.kcal)),
                         style: _spin == null
                             ? null
                             : const TextStyle(fontFeatures: [FontFeature.tabularFigures()]),
@@ -681,7 +681,7 @@ class _KcalState extends State<_Kcal> {
                     borderRadius: BorderRadius.circular(CalviSize.rPill),
                   ),
                   child: Text(
-                    L.of(context).heroBurned(burned),
+                    L.of(context).heroBurned(dataUnits.enText(burned)),
                     style: context.t.labelSmall?.copyWith(
                       color: c.success,
                       fontWeight: FontWeight.w600,
@@ -767,10 +767,10 @@ class _Week extends StatelessWidget {
            * пояснює, і сторона перестає бути на ряд вищою за решту колоди. */
           Text.rich(
             TextSpan(
-              text: thousands(summary.avgKcal),
+              text: dataUnits.enNum(summary.avgKcal),
               children: [
                 TextSpan(
-                  text: L.of(context).heroKcal,
+                  text: L.of(context).heroKcal(dataUnits.enLabel),
                   style: context.t.bodyMedium?.copyWith(fontSize: 15),
                 ),
               ],
@@ -895,14 +895,19 @@ class _Weight extends StatelessWidget {
         children: [
           Text.rich(
             TextSpan(
-              text: s.weightKg.toStringAsFixed(1),
-              children: [TextSpan(text: L.of(context).heroKg, style: context.t.headlineLarge)],
+              text: dataUnits.massNum(s.weightKg),
+              children: [
+                TextSpan(
+                  text: L.of(context).heroKg(dataUnits.massLabel),
+                  style: context.t.headlineLarge,
+                ),
+              ],
             ),
             style: context.t.displayLarge?.copyWith(height: 1),
           ),
           const SizedBox(height: 6),
           Text(
-            L.of(context).heroWeightFrom(s.goalStartKg.toStringAsFixed(1)),
+            L.of(context).heroWeightFrom(dataUnits.massText(s.goalStartKg)),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: context.t.bodyMedium?.copyWith(height: 1.25),
@@ -915,7 +920,7 @@ class _Weight extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              s.targetKg.toStringAsFixed(0),
+              dataUnits.massNum(s.targetKg, decimals: 0),
               style: context.t.headlineMedium?.copyWith(
                 fontSize: 24,
                 fontWeight: FontWeight.w700,
@@ -925,7 +930,7 @@ class _Weight extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             Text(
-              L.of(context).heroGoalKg,
+              L.of(context).heroGoalKg(dataUnits.massLabel),
               style: context.t.labelSmall?.copyWith(
                 fontSize: 9,
                 letterSpacing: 9 * 0.04,

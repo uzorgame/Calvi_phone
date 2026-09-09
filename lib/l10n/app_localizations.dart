@@ -627,14 +627,14 @@ abstract class L {
   /// No description provided for @anKcalTotal.
   ///
   /// In en, this message translates to:
-  /// **'over the period, kcal'**
-  String get anKcalTotal;
+  /// **'over the period, {u}'**
+  String anKcalTotal(Object u);
 
   /// No description provided for @anMacroGoal.
   ///
   /// In en, this message translates to:
-  /// **'norm {grams} g'**
-  String anMacroGoal(int grams);
+  /// **'norm {grams}'**
+  String anMacroGoal(String grams);
 
   /// No description provided for @anMacrosAvg.
   ///
@@ -687,8 +687,8 @@ abstract class L {
   /// No description provided for @anNowKg.
   ///
   /// In en, this message translates to:
-  /// **'now, kg'**
-  String get anNowKg;
+  /// **'now, {u}'**
+  String anNowKg(Object u);
 
   /// No description provided for @anOneReading.
   ///
@@ -723,14 +723,14 @@ abstract class L {
   /// No description provided for @anStartKg.
   ///
   /// In en, this message translates to:
-  /// **'start, kg'**
-  String get anStartKg;
+  /// **'start, {u}'**
+  String anStartKg(Object u);
 
   /// No description provided for @anTargetKg.
   ///
   /// In en, this message translates to:
-  /// **'goal, kg'**
-  String get anTargetKg;
+  /// **'goal, {u}'**
+  String anTargetKg(Object u);
 
   /// No description provided for @anTitle.
   ///
@@ -747,13 +747,13 @@ abstract class L {
   /// No description provided for @anWaterAvg.
   ///
   /// In en, this message translates to:
-  /// **'on average, ml'**
-  String get anWaterAvg;
+  /// **'on average, {u}'**
+  String anWaterAvg(Object u);
 
   /// No description provided for @anWaterGoal.
   ///
   /// In en, this message translates to:
-  /// **'norm {ml} ml'**
+  /// **'norm {ml}'**
   String anWaterGoal(String ml);
 
   /// No description provided for @anWeek.
@@ -1029,8 +1029,8 @@ abstract class L {
   /// No description provided for @barGrams.
   ///
   /// In en, this message translates to:
-  /// **'{grams} g'**
-  String barGrams(int grams);
+  /// **'{grams}'**
+  String barGrams(String grams);
 
   /// No description provided for @barHint.
   ///
@@ -1167,8 +1167,8 @@ abstract class L {
   /// No description provided for @camEstimate.
   ///
   /// In en, this message translates to:
-  /// **' kcal, an estimate'**
-  String get camEstimate;
+  /// **' {u}, an estimate'**
+  String camEstimate(Object u);
 
   /// No description provided for @camFlash.
   ///
@@ -1221,14 +1221,14 @@ abstract class L {
   /// No description provided for @camKcalFor.
   ///
   /// In en, this message translates to:
-  /// **' kcal for {grams} g'**
-  String camKcalFor(int grams);
+  /// **' {u} for {grams}'**
+  String camKcalFor(String grams, Object u);
 
   /// No description provided for @camKcalPer.
   ///
   /// In en, this message translates to:
-  /// **' kcal per {grams} g'**
-  String camKcalPer(int grams);
+  /// **' {u} per {grams}'**
+  String camKcalPer(String grams, Object u);
 
   /// No description provided for @camLabelAim.
   ///
@@ -1317,8 +1317,8 @@ abstract class L {
   /// No description provided for @camPortionPack.
   ///
   /// In en, this message translates to:
-  /// **'Portion from the packaging: {g} g. Figures are per portion.'**
-  String camPortionPack(int g);
+  /// **'Portion from the packaging: {g}. Figures are per portion.'**
+  String camPortionPack(String g);
 
   /// No description provided for @camReading.
   ///
@@ -1857,7 +1857,7 @@ abstract class L {
   /// No description provided for @goalDiff.
   ///
   /// In en, this message translates to:
-  /// **'{kg} kg apart'**
+  /// **'{kg} apart'**
   String goalDiff(String kg);
 
   /// No description provided for @goalDirection.
@@ -1875,7 +1875,7 @@ abstract class L {
   /// No description provided for @goalFromStart.
   ///
   /// In en, this message translates to:
-  /// **' from {kg} kg at the start. '**
+  /// **' from {kg} at the start. '**
   String goalFromStart(String kg);
 
   /// No description provided for @goalFromToday.
@@ -1935,8 +1935,8 @@ abstract class L {
   /// No description provided for @goalPaceUnit.
   ///
   /// In en, this message translates to:
-  /// **'kg a week'**
-  String get goalPaceUnit;
+  /// **'{u} a week'**
+  String goalPaceUnit(Object u);
 
   /// No description provided for @goalPaceUsual.
   ///
@@ -1947,7 +1947,7 @@ abstract class L {
   /// No description provided for @goalRange.
   ///
   /// In en, this message translates to:
-  /// **'{from} → {to} kg'**
+  /// **'{from} → {to}'**
   String goalRange(String from, String to);
 
   /// No description provided for @goalReplaceNote.
@@ -1977,8 +1977,8 @@ abstract class L {
   /// Weight with the unit.
   ///
   /// In en, this message translates to:
-  /// **'{grams} g'**
-  String gramsUnit(int grams);
+  /// **'{grams}'**
+  String gramsUnit(String grams);
 
   /// No description provided for @helloDishBread.
   ///
@@ -2025,8 +2025,8 @@ abstract class L {
   /// No description provided for @heroBurned.
   ///
   /// In en, this message translates to:
-  /// **'-{kcal} kcal from training'**
-  String heroBurned(int kcal);
+  /// **'-{kcal} from training'**
+  String heroBurned(String kcal);
 
   /// No description provided for @heroDays.
   ///
@@ -2043,20 +2043,20 @@ abstract class L {
   /// No description provided for @heroGoalKg.
   ///
   /// In en, this message translates to:
-  /// **'goal, kg'**
-  String get heroGoalKg;
+  /// **'goal, {u}'**
+  String heroGoalKg(Object u);
 
   /// No description provided for @heroKcal.
   ///
   /// In en, this message translates to:
-  /// **' kcal'**
-  String get heroKcal;
+  /// **' {u}'**
+  String heroKcal(Object u);
 
   /// No description provided for @heroKg.
   ///
   /// In en, this message translates to:
-  /// **' kg'**
-  String get heroKg;
+  /// **' {u}'**
+  String heroKg(Object u);
 
   /// No description provided for @heroLeft.
   ///
@@ -2085,14 +2085,14 @@ abstract class L {
   /// No description provided for @heroWeightFrom.
   ///
   /// In en, this message translates to:
-  /// **'now, from {kg} kg at the start of the goal'**
+  /// **'now, from {kg} at the start of the goal'**
   String heroWeightFrom(String kg);
 
   /// Calories with the unit, as it stands on badges and cards.
   ///
   /// In en, this message translates to:
-  /// **'{kcal} kcal'**
-  String kcalUnit(int kcal);
+  /// **'{kcal}'**
+  String kcalUnit(String kcal);
 
   /// No description provided for @langSection.
   ///
@@ -2217,8 +2217,8 @@ abstract class L {
   /// No description provided for @macroOfGrams.
   ///
   /// In en, this message translates to:
-  /// **' / {goal}g'**
-  String macroOfGrams(int goal);
+  /// **' / {goal}'**
+  String macroOfGrams(String goal);
 
   /// The same chip when nobody knows the figure. A question mark rather than a zero: a zero reads as a fact, and there is no fact here.
   ///
@@ -2265,8 +2265,8 @@ abstract class L {
   /// No description provided for @mealEditKcal.
   ///
   /// In en, this message translates to:
-  /// **'kcal'**
-  String get mealEditKcal;
+  /// **'{u}'**
+  String mealEditKcal(Object u);
 
   /// No description provided for @mealEditSave.
   ///
@@ -2283,8 +2283,8 @@ abstract class L {
   /// No description provided for @mealGrams.
   ///
   /// In en, this message translates to:
-  /// **'{grams} g'**
-  String mealGrams(int grams);
+  /// **'{grams}'**
+  String mealGrams(String grams);
 
   /// No description provided for @mealThinking.
   ///
@@ -2583,8 +2583,8 @@ abstract class L {
   /// Under the Diary row in the menu: what is eaten so far today.
   ///
   /// In en, this message translates to:
-  /// **'{n} kcal today'**
-  String menuHintKcal(int n);
+  /// **'{n} today'**
+  String menuHintKcal(String n);
 
   /// Tail of a list that does not fit on one line: 'Magnesium, Omega-3, +2'.
   ///
@@ -2697,7 +2697,7 @@ abstract class L {
   /// No description provided for @normAutoHint.
   ///
   /// In en, this message translates to:
-  /// **'from weight, height, age, activity and the goal: {kcal} kcal'**
+  /// **'from weight, height, age, activity and the goal: {kcal}'**
   String normAutoHint(String kcal);
 
   /// No description provided for @normAutoShort.
@@ -2751,20 +2751,20 @@ abstract class L {
   /// No description provided for @normGrams.
   ///
   /// In en, this message translates to:
-  /// **'{grams} g'**
-  String normGrams(int grams);
+  /// **'{grams}'**
+  String normGrams(String grams);
 
   /// No description provided for @normKcalOf.
   ///
   /// In en, this message translates to:
-  /// **'{kcal} kcal'**
+  /// **'{kcal}'**
   String normKcalOf(String kcal);
 
   /// No description provided for @normMacroSplit.
   ///
   /// In en, this message translates to:
-  /// **'{protein} / {fat} / {carbs} g'**
-  String normMacroSplit(int protein, int fat, int carbs);
+  /// **'{protein} / {fat} / {carbs}'**
+  String normMacroSplit(int protein, int fat, String carbs);
 
   /// No description provided for @normMacros.
   ///
@@ -2781,26 +2781,26 @@ abstract class L {
   /// No description provided for @normOf.
   ///
   /// In en, this message translates to:
-  /// **'of {kcal} kcal'**
+  /// **'of {kcal}'**
   String normOf(String kcal);
 
   /// No description provided for @normOffOver.
   ///
   /// In en, this message translates to:
-  /// **'The split gives {sum} kcal, {off} over the norm'**
+  /// **'The split gives {sum}, {off} over the norm'**
   String normOffOver(String sum, int off);
 
   /// No description provided for @normOffUnder.
   ///
   /// In en, this message translates to:
-  /// **'The split gives {sum} kcal, {off} under the norm'**
+  /// **'The split gives {sum}, {off} under the norm'**
   String normOffUnder(String sum, int off);
 
   /// No description provided for @normPerDay.
   ///
   /// In en, this message translates to:
-  /// **'kcal a day'**
-  String get normPerDay;
+  /// **'{u} a day'**
+  String normPerDay(Object u);
 
   /// No description provided for @normTitle.
   ///
@@ -2823,8 +2823,8 @@ abstract class L {
   /// No description provided for @normWaterPerKg.
   ///
   /// In en, this message translates to:
-  /// **'{ml} ml'**
-  String normWaterPerKg(int ml);
+  /// **'{ml}'**
+  String normWaterPerKg(String ml);
 
   /// No description provided for @normWaterTail.
   ///
@@ -3177,20 +3177,20 @@ abstract class L {
   /// No description provided for @plateFor.
   ///
   /// In en, this message translates to:
-  /// **'for {grams} g'**
-  String plateFor(int grams);
+  /// **'for {grams}'**
+  String plateFor(String grams);
 
   /// No description provided for @plateGrams.
   ///
   /// In en, this message translates to:
-  /// **' g'**
-  String get plateGrams;
+  /// **' {u}'**
+  String plateGrams(Object u);
 
   /// No description provided for @plateKcal.
   ///
   /// In en, this message translates to:
-  /// **'kcal'**
-  String get plateKcal;
+  /// **'{u}'**
+  String plateKcal(Object u);
 
   /// No description provided for @plateThinking.
   ///
@@ -3483,8 +3483,8 @@ abstract class L {
   /// No description provided for @rcItemsTotal.
   ///
   /// In en, this message translates to:
-  /// **'total {g} g'**
-  String rcItemsTotal(int g);
+  /// **'total {g}'**
+  String rcItemsTotal(String g);
 
   /// No description provided for @rcJustNow.
   ///
@@ -3537,8 +3537,8 @@ abstract class L {
   /// No description provided for @rcPortion.
   ///
   /// In en, this message translates to:
-  /// **'serving {g} g'**
-  String rcPortion(int g);
+  /// **'serving {g}'**
+  String rcPortion(String g);
 
   /// No description provided for @rcServingsFew.
   ///
@@ -3639,8 +3639,8 @@ abstract class L {
   /// No description provided for @rcWhole.
   ///
   /// In en, this message translates to:
-  /// **'Whole dish: {kcal} kcal, {g} g'**
-  String rcWhole(int kcal, int g);
+  /// **'Whole dish: {kcal}, {g}'**
+  String rcWhole(String kcal, String g);
 
   /// No description provided for @remAbout.
   ///
@@ -3999,7 +3999,7 @@ abstract class L {
   /// No description provided for @setGoalLine.
   ///
   /// In en, this message translates to:
-  /// **'{kg} kg, {pace}/week'**
+  /// **'{kg}, {pace}/week'**
   String setGoalLine(String kg, String pace);
 
   /// No description provided for @setGroupAbout.
@@ -4059,7 +4059,7 @@ abstract class L {
   /// No description provided for @setNormLine.
   ///
   /// In en, this message translates to:
-  /// **'{kcal} kcal'**
+  /// **'{kcal}'**
   String setNormLine(String kcal);
 
   /// No description provided for @setPlan.
@@ -4095,8 +4095,8 @@ abstract class L {
   /// The one-line summary under Profile: sex, age, height.
   ///
   /// In en, this message translates to:
-  /// **'{sex}, {age}, {height} cm'**
-  String setProfileLine(String sex, int age, int height);
+  /// **'{sex}, {age}, {height}'**
+  String setProfileLine(String sex, int age, String height);
 
   /// No description provided for @setReminders.
   ///
@@ -4127,6 +4127,12 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Settings'**
   String get setTitle;
+
+  /// No description provided for @setUnits.
+  ///
+  /// In en, this message translates to:
+  /// **'Units'**
+  String get setUnits;
 
   /// No description provided for @setUnset.
   ///
@@ -4197,8 +4203,8 @@ abstract class L {
   /// No description provided for @slotGrams.
   ///
   /// In en, this message translates to:
-  /// **'WEIGHT, G'**
-  String get slotGrams;
+  /// **'WEIGHT, {u}'**
+  String slotGrams(Object u);
 
   /// «Logged into breakfast». A whole phrase, not a preposition glued to the name: Ukrainian declines the noun after it («у вечерю», not «в вечеря») and alternates the preposition itself for sound, so neither half survives being assembled in code.
   ///
@@ -4233,8 +4239,8 @@ abstract class L {
   /// No description provided for @slotKcal.
   ///
   /// In en, this message translates to:
-  /// **'KCAL'**
-  String get slotKcal;
+  /// **'{u}'**
+  String slotKcal(Object u);
 
   /// No description provided for @slotLog.
   ///
@@ -4389,8 +4395,8 @@ abstract class L {
   /// No description provided for @startNormPerDay.
   ///
   /// In en, this message translates to:
-  /// **'kcal a day'**
-  String get startNormPerDay;
+  /// **'{u} a day'**
+  String startNormPerDay(Object u);
 
   /// No description provided for @startNormWeeks.
   ///
@@ -4431,8 +4437,8 @@ abstract class L {
   /// No description provided for @startPaceUnit.
   ///
   /// In en, this message translates to:
-  /// **'kg a week'**
-  String get startPaceUnit;
+  /// **'{u} a week'**
+  String startPaceUnit(Object u);
 
   /// No description provided for @startPaceUsual.
   ///
@@ -4701,8 +4707,8 @@ abstract class L {
   /// No description provided for @todayLoggedIntoWithNumbers.
   ///
   /// In en, this message translates to:
-  /// **'Logged {slotInto}: {dish}, {kcal} kcal per {grams} g.'**
-  String todayLoggedIntoWithNumbers(String slotInto, String dish, int kcal, int grams);
+  /// **'Logged {slotInto}: {dish}, {kcal} per {grams}.'**
+  String todayLoggedIntoWithNumbers(String slotInto, String dish, String kcal, String grams);
 
   /// No description provided for @todayNoraSlow.
   ///
@@ -4923,14 +4929,14 @@ abstract class L {
   /// No description provided for @waterLess.
   ///
   /// In en, this message translates to:
-  /// **'{step} ml less'**
-  String waterLess(int step);
+  /// **'{step} less'**
+  String waterLess(String step);
 
   /// No description provided for @waterMore.
   ///
   /// In en, this message translates to:
-  /// **'{step} ml more'**
-  String waterMore(int step);
+  /// **'{step} more'**
+  String waterMore(String step);
 
   /// No description provided for @waterNone.
   ///
@@ -4941,7 +4947,7 @@ abstract class L {
   /// No description provided for @waterOf.
   ///
   /// In en, this message translates to:
-  /// **' / {ml} ml'**
+  /// **' / {ml}'**
   String waterOf(String ml);
 
   /// No description provided for @waterShare.
@@ -5079,8 +5085,8 @@ abstract class L {
   /// No description provided for @wfBurned.
   ///
   /// In en, this message translates to:
-  /// **'Burned, kcal'**
-  String get wfBurned;
+  /// **'Burned, {u}'**
+  String wfBurned(Object u);
 
   /// No description provided for @wfDuration.
   ///
@@ -5109,8 +5115,8 @@ abstract class L {
   /// No description provided for @wfKcal.
   ///
   /// In en, this message translates to:
-  /// **' kcal'**
-  String get wfKcal;
+  /// **' {u}'**
+  String wfKcal(Object u);
 
   /// No description provided for @wfLog.
   ///
@@ -5121,8 +5127,8 @@ abstract class L {
   /// No description provided for @wfManualKcal.
   ///
   /// In en, this message translates to:
-  /// **'kcal by hand'**
-  String get wfManualKcal;
+  /// **'{u} by hand'**
+  String wfManualKcal(Object u);
 
   /// No description provided for @wfMin.
   ///
@@ -5349,8 +5355,8 @@ abstract class L {
   /// No description provided for @wkPerDay.
   ///
   /// In en, this message translates to:
-  /// **'kcal a day on average'**
-  String get wkPerDay;
+  /// **'{u} a day on average'**
+  String wkPerDay(Object u);
 
   /// No description provided for @wkPerDayAside.
   ///
@@ -5367,8 +5373,8 @@ abstract class L {
   /// No description provided for @wkTotalCap.
   ///
   /// In en, this message translates to:
-  /// **'kcal over the week'**
-  String get wkTotalCap;
+  /// **'{u} over the week'**
+  String wkTotalCap(Object u);
 
   /// No description provided for @wkWaterCap.
   ///
@@ -5397,8 +5403,8 @@ abstract class L {
   /// No description provided for @workoutBurned.
   ///
   /// In en, this message translates to:
-  /// **'−{kcal} kcal'**
-  String workoutBurned(int kcal);
+  /// **'−{kcal}'**
+  String workoutBurned(String kcal);
 
   /// No description provided for @workoutCollapse.
   ///

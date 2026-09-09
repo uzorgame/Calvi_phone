@@ -25,7 +25,7 @@
   "startTargetWeight": "Peso desejado",
 
   "startPace": "Em que ritmo",
-  "startPaceUnit": "kg por semana",
+  "startPaceUnit": "{u} por semana",
   "startPaceSlow": "devagar",
   "startPaceUsual": "constante",
   "startPaceFast": "rápido",
@@ -40,7 +40,7 @@
   "startLife": "Estilo de vida",
 
   "startNorm": "Sua referência",
-  "startNormPerDay": "kcal por dia",
+  "startNormPerDay": "{u} por dia",
   "startNormCounting": "a calcular…",
   "startNormWeeks": "semanas",
   "startNormHold": "mantendo",

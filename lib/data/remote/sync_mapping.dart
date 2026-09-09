@@ -362,7 +362,21 @@ Map<String, dynamic> profileToWire(ProfileData r) => {
   // Памʼять їде списком обʼєктів, а не рядком: на дроті вона така сама, як у
   // базі сервера, і зайвого розбору по дорозі не потрібно.
   'memory': jsonDecode(r.memory),
+  // Одиниці так само обʼєктом. Нора читає їх звідси, коли пише відповідь.
+  'units': _unitsWire(r.units),
 };
+
+/* Порожній рядок у старих рядках означає метричне, а зіпсований не має валити
+   синхронізацію цілком. */
+Map<String, dynamic> _unitsWire(String raw) {
+  if (raw.isEmpty) return const {};
+  try {
+    final j = jsonDecode(raw);
+    return j is Map<String, dynamic> ? j : const {};
+  } catch (_) {
+    return const {};
+  }
+}
 
 /// Профіль із сервера, готовий лягти на диск.
 ///
@@ -390,6 +404,9 @@ ProfileCompanion profileFromWire(Map<String, dynamic> p, {required String id}) =
   addressAs: Value(_text(p['address_as'])),
   tracked: Value(_text(p['tracked']) ?? ''),
   memory: Value(jsonEncode(p['memory'] ?? const [])),
+  /* Тільки якщо сервер їх прислав. Старий сервер поля не знає, і його відповідь
+     не має скидати вибір, зроблений на телефоні. */
+  units: p['units'] is Map ? Value(jsonEncode(p['units'])) : const Value.absent(),
 );
 
 /// Числа з JSON приходять то цілими, то дробовими: 74 і 74.0 це той самий вага.

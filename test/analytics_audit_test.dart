@@ -175,7 +175,7 @@ void main() {
     expect(find.text('74.0'), findsWidgets, reason: 'цілі немає');
 
     final l = await L.delegate.load(const Locale('uk'));
-    expect(find.text(l.anStartKg), findsOneWidget, reason: 'старт без підпису');
+    expect(find.text(l.anStartKg(l.unitKg)), findsOneWidget, reason: 'старт без підпису');
   });
 
   testWidgets('обидва графіки ваги показують одну й ту саму вагу', (tester) async {

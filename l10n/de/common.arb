@@ -1,11 +1,11 @@
 {
-  "kcalUnit": "{kcal} kcal",
+  "kcalUnit": "{kcal}",
   "@kcalUnit": {
-    "placeholders": { "kcal": { "type": "int" } }
+    "placeholders": { "kcal": { "type": "String" } }
   },
-  "gramsUnit": "{grams} g",
+  "gramsUnit": "{grams}",
   "@gramsUnit": {
-    "placeholders": { "grams": { "type": "int" } }
+    "placeholders": { "grams": { "type": "String" } }
   },
   "unitKcal": "kcal",
   "unitKg": "kg",
@@ -64,8 +64,8 @@
   "menuSettings": "Einstellungen",
   "menuAbout": "Über die App",
 
-  "menuHintKcal": "heute {n} kcal",
-  "@menuHintKcal": {"placeholders": {"n": {"type": "int"}}},
+  "menuHintKcal": "heute {n}",
+  "@menuHintKcal": {"placeholders": {"n": { "type": "String" }}},
   "menuHintNothing": "noch nichts eingetragen",
   "menuHintOnGoal": "{ok} von {total} im Ziel",
   "@menuHintOnGoal": {"placeholders": {"ok": {"type": "int"}, "total": {"type": "int"}}},

@@ -53,8 +53,8 @@ void main() {
     // Пʼять полів, і назва вже стоїть заголовком: її не питають удруге.
     expect(find.text('Борщ 500 грам'), findsOneWidget);
     for (final label in [
-      l.slotGrams,
-      l.slotKcal,
+      l.slotGrams(l.unitG.toUpperCase()),
+      l.slotKcal(l.unitKcal.toUpperCase()),
       l.macroProteinCaps,
       l.macroFatCaps,
       l.macroCarbsCaps,

@@ -26,8 +26,8 @@
   "camFromPack": "Chiffres de l'emballage. L'enregistrer ne coûte aucun jeton.",
   "camIngredients": "Ingrédients : {text}",
   "camAllergen": "Allergène !",
-  "camPortionPack": "Portion de l'emballage : {g} g. Les chiffres sont par portion.",
-  "@camPortionPack": { "placeholders": { "g": { "type": "int" } } },
+  "camPortionPack": "Portion de l'emballage : {g}. Les chiffres sont par portion.",
+  "@camPortionPack": { "placeholders": { "g": { "type": "String" } } },
   "camPer100": "Pas de poids exact sur l'emballage : les chiffres sont pour 100 g.",
   "camAllergyContains": "Contient ton allergène : {list}",
   "@camAllergyContains": { "placeholders": { "list": { "type": "String" } } },
@@ -55,7 +55,7 @@
   "camLabelAim": "vise le tableau nutritionnel",
   "camLabelReading": "Je recopie les chiffres du paquet…",
   "camLabelNoShot": "La photo n'a pas marché. Réessaie l'étiquette.",
-  "camEstimate": " kcal, estimation",
+  "camEstimate": " {u}, estimation",
   "camNotRead": "Je n'ai pas réussi à distinguer",
   "camShotReady": "La photo est prête",
   "camShotReadyNote": "Nora la lit et répond dans le chat : elle nomme le plat, estime la portion et montre d'où vient le chiffre. Cela coûte deux jetons.",
@@ -69,8 +69,8 @@
   "camOfflineShot": "Pas de connexion. Tu pourras envoyer la photo à Nora plus tard",
   "camNoTokens": "Plus de jetons",
 
-  "camKcalPer": " kcal pour {grams} g",
-  "@camKcalPer": {"placeholders":{"grams":{"type":"int"}}},
-  "camKcalFor": " kcal sur {grams} g",
-  "@camKcalFor": {"placeholders":{"grams":{"type":"int"}}}
+  "camKcalPer": " {u} pour {grams}",
+  "@camKcalPer": {"placeholders":{"grams":{ "type": "String" }}},
+  "camKcalFor": " {u} sur {grams}",
+  "@camKcalFor": {"placeholders":{"grams":{ "type": "String" }}}
 }

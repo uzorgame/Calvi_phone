@@ -2,6 +2,7 @@
 library;
 
 import '../l10n/data_lang.dart';
+import 'units.dart';
 
 /// One field of the tape.
 class MeasureField {
@@ -35,7 +36,14 @@ class MeasureField {
     _ => dataL.fieldBiceps,
   };
 
-  String get unit => inCm ? dataL.unitCm : dataL.unitKg;
+  String get unit => inCm ? dataUnits.lenLabel : dataUnits.massLabel;
+
+  /* The tape is stored metric and read in the person's units. Both scales are
+     proportional, so a difference between two readings converts the same way
+     as a reading. */
+  double shown(double v) => inCm ? dataUnits.lenOut(v) : dataUnits.massOut(v);
+
+  double stored(double v) => inCm ? dataUnits.lenIn(v) : dataUnits.massIn(v);
 
   /// Anything outside is dropped rather than stored: a slipped digit in one
   /// field would bend the chart for months.

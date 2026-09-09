@@ -129,7 +129,7 @@ class RecipeView extends StatelessWidget {
                         [
                           l.rcMinutes(r.minutes),
                           _servingsLabel(l, r.servings),
-                          l.rcPortion(r.gramsPerServing),
+                          l.rcPortion(dataUnits.porText(r.gramsPerServing)),
                         ].join(' · ').toUpperCase(),
                         style: context.t.labelSmall?.copyWith(
                           fontSize: 11,
@@ -228,10 +228,10 @@ class RecipeView extends StatelessWidget {
                        * порцій. */
                       Text.rich(
                         TextSpan(
-                          text: '${r.kcal} ',
+                          text: '${dataUnits.enNum(r.kcal)} ',
                           children: [
                             TextSpan(
-                              text: l.unitKcal,
+                              text: dataUnits.enLabel,
                               style: context.t.bodyMedium?.copyWith(
                                 color: c.textSecondary,
                                 fontWeight: FontWeight.w500,
@@ -246,7 +246,10 @@ class RecipeView extends StatelessWidget {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        l.rcWhole(r.kcal * r.servings, r.gramsPerServing * r.servings),
+                        l.rcWhole(
+                          dataUnits.enText(r.kcal * r.servings),
+                          dataUnits.porText(r.gramsPerServing * r.servings),
+                        ),
                         style: context.t.labelSmall,
                       ),
                       const SizedBox(height: 16),
@@ -284,7 +287,7 @@ class RecipeView extends StatelessWidget {
                 delay: 230,
                 child: _Section(
                   title: l.rcItemsHead,
-                  aside: l.rcItemsTotal(total),
+                  aside: l.rcItemsTotal(dataUnits.porText(total)),
                   child: Column(
                     children: [
                       /* Винний складник підсвічений просто в списку:
@@ -312,7 +315,7 @@ class RecipeView extends StatelessWidget {
                                 ),
                               ),
                               Text(
-                                l.gramsUnit(item.grams),
+                                l.gramsUnit(dataUnits.porText(item.grams)),
                                 style: context.t.bodyMedium?.copyWith(
                                   fontWeight: FontWeight.w600,
                                 ),

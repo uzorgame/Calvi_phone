@@ -10,6 +10,7 @@ import 'data/remote/sync_service.dart';
 import 'data/meds.dart';
 import 'data/watch.dart';
 import 'data/settings.dart';
+import 'data/units.dart';
 import 'data/app_scope.dart';
 import 'data/day_stats.dart';
 import 'data/local/day_reader.dart';
@@ -862,6 +863,11 @@ class _CalviAppState extends State<CalviApp> {
         home: Builder(
           builder: (context) {
             dataLang = Localizations.localeOf(context).languageCode;
+            /* Units next to the language: both are «how the numbers read»,
+               and both must be in place before the first screen draws. This
+               builder runs on every rebuild, so a change in settings reaches
+               the data layer the same frame it reaches the screens. */
+            dataUnits = _s.units;
             return _start(switch (_onboarding) {
               /* Диск ще не відповів. Порожній екран кольору застосунку триває
                  кадр або два і виглядає як продовження заставки; будь-що інше
@@ -920,6 +926,7 @@ Widget _start(Widget home) {
         'norm' => NormPanel(s: scope.s, set: scope.set),
         'theme' => ThemePanel(s: scope.s, set: scope.set),
         'lang' => LangPanel(s: scope.s, set: scope.set),
+        'units' => UnitsPanel(s: scope.s, set: scope.set),
         'plan' => const PlanPanel(),
         'privacy' => PrivacyPanel(s: scope.s, set: scope.set),
         'delete' => const DeletePanel(),

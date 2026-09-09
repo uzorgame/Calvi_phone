@@ -5,6 +5,7 @@ import '../../data/fixtures.dart';
 import '../../data/measure.dart';
 import '../../data/settings.dart';
 import '../../data/app_scope.dart';
+import '../../data/units.dart';
 import '../../design/icons.dart';
 import '../../design/macro_row.dart';
 import '../../design/section.dart';
@@ -203,8 +204,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 children: [
                   Flexible(
                     child: CalviFigure(
-                      value: s.goalStartKg.toStringAsFixed(1),
-                      cap: l.anStartKg,
+                      value: dataUnits.massNum(s.goalStartKg),
+                      cap: l.anStartKg(dataUnits.massLabel),
                       dim: true,
                       tight: true,
                     ),
@@ -236,8 +237,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                         ),
                         const SizedBox(height: 2),
                         CalviFigure(
-                          value: s.weightKg.toStringAsFixed(1),
-                          cap: l.anNowKg,
+                          value: dataUnits.massNum(s.weightKg),
+                          cap: l.anNowKg(dataUnits.massLabel),
                           tight: true,
                         ),
                       ],
@@ -246,8 +247,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   const Spacer(),
                   Flexible(
                     child: CalviFigure(
-                      value: s.targetKg.toStringAsFixed(1),
-                      cap: l.anTargetKg,
+                      value: dataUnits.massNum(s.targetKg),
+                      cap: l.anTargetKg(dataUnits.massLabel),
                       dim: true,
                       tight: true,
                     ),
@@ -273,10 +274,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                      бульбашка з тим самим числом лише повторювала його, а
                      заразом налазила на позначку цілі в кутку. */
                   return LineChart(
-                    values: curve.values,
+                    // The curve is drawn in the person's units: the number under
+                    // the finger and the goal mark must agree with the figures.
+                    values: [for (final v in curve.values) dataUnits.massOut(v)],
                     labels: curve.labels,
                     dates: curve.dates,
-                    goal: s.targetKg,
+                    goal: dataUnits.massOut(s.targetKg),
                     height: 132,
                   );
                 },
@@ -297,7 +300,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             children: [
               Row(
                 children: [
-                  CalviFigure(value: thousands(total), cap: l.anKcalTotal),
+                  CalviFigure(value: dataUnits.enNum(total), cap: l.anKcalTotal(dataUnits.enLabel)),
                   const SizedBox(width: 18),
                   Container(width: 1, height: 34, color: c.cardBorder),
                   const SizedBox(width: 18),
@@ -326,7 +329,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
         CalviStat(
           title: l.anWater,
-          aside: l.anWaterGoal(thousands(goal.waterMl)),
+          aside: l.anWaterGoal(dataUnits.volText(goal.waterMl)),
           child: Builder(
             builder: (context) {
               /* Water is asked of every day in the window, then drawn per
@@ -360,7 +363,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       const SizedBox(width: 18),
                       Container(width: 1, height: 34, color: c.cardBorder),
                       const SizedBox(width: 18),
-                      CalviFigure(value: thousands(avgMl), cap: l.anWaterAvg),
+                      CalviFigure(value: dataUnits.volNum(avgMl), cap: l.anWaterAvg(dataUnits.volLabel)),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -404,7 +407,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                           // chip changes: the same painter kept its finished
                           // animation.
                           key: ValueKey(field.key),
-                          values: [for (final m in points) m[field.key]!],
+                          values: [for (final m in points) field.shown(m[field.key]!)],
                           /* Дві дати, перша й остання, а не підпис під кожною
                              точкою.
                            *
@@ -523,7 +526,7 @@ class _TapeHead extends StatelessWidget {
             children: [
               Text.rich(
                 TextSpan(
-                  text: _trim(now.v),
+                  text: _trim(field.shown(now.v)),
                   children: [
                     TextSpan(
                       text: ' ${field.unit}',
@@ -545,7 +548,9 @@ class _TapeHead extends StatelessWidget {
             borderRadius: BorderRadius.circular(CalviSize.rPill),
           ),
           child: Text(
-            d == null ? L.of(context).anOneReading : '${d > 0 ? '+' : ''}${_trim(d)} ${field.unit}',
+            d == null
+                ? L.of(context).anOneReading
+                : '${d > 0 ? '+' : ''}${_trim(field.shown(d))} ${field.unit}',
             style: context.t.titleMedium?.copyWith(
               fontSize: 13,
               color: good == null

@@ -56,23 +56,17 @@
   },
   "rcPerServing": "por ración",
   "rcPerServingHead": "Por ración",
-  "rcWhole": "Plato entero: {kcal} kcal, {g} g",
+  "rcWhole": "Plato entero: {kcal}, {g}",
   "@rcWhole": {
     "placeholders": {
-      "kcal": {
-        "type": "int"
-      },
-      "g": {
-        "type": "int"
-      }
+      "kcal": { "type": "String" },
+      "g": { "type": "String" }
     }
   },
-  "rcPortion": "ración {g} g",
+  "rcPortion": "ración {g}",
   "@rcPortion": {
     "placeholders": {
-      "g": {
-        "type": "int"
-      }
+      "g": { "type": "String" }
     }
   },
   "rcOfDay": "eso es el {p}% de la norma diaria",
@@ -84,12 +78,10 @@
     }
   },
   "rcItemsHead": "Productos",
-  "rcItemsTotal": "en total {g} g",
+  "rcItemsTotal": "en total {g}",
   "@rcItemsTotal": {
     "placeholders": {
-      "g": {
-        "type": "int"
-      }
+      "g": { "type": "String" }
     }
   },
   "rcToolsHead": "Qué hace falta en la cocina",

@@ -56,23 +56,17 @@
   },
   "rcPerServing": "per serving",
   "rcPerServingHead": "Per serving",
-  "rcWhole": "Whole dish: {kcal} kcal, {g} g",
+  "rcWhole": "Whole dish: {kcal}, {g}",
   "@rcWhole": {
     "placeholders": {
-      "kcal": {
-        "type": "int"
-      },
-      "g": {
-        "type": "int"
-      }
+      "kcal": { "type": "String" },
+      "g": { "type": "String" }
     }
   },
-  "rcPortion": "serving {g} g",
+  "rcPortion": "serving {g}",
   "@rcPortion": {
     "placeholders": {
-      "g": {
-        "type": "int"
-      }
+      "g": { "type": "String" }
     }
   },
   "rcOfDay": "that is {p}% of the daily norm",
@@ -84,12 +78,10 @@
     }
   },
   "rcItemsHead": "Products",
-  "rcItemsTotal": "total {g} g",
+  "rcItemsTotal": "total {g}",
   "@rcItemsTotal": {
     "placeholders": {
-      "g": {
-        "type": "int"
-      }
+      "g": { "type": "String" }
     }
   },
   "rcToolsHead": "What the kitchen needs",

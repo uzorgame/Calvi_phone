@@ -1,6 +1,6 @@
 {
-  "kcalUnit": "{kcal} kcal",
-  "gramsUnit": "{grams} g",
+  "kcalUnit": "{kcal}",
+  "gramsUnit": "{grams}",
   "unitKcal": "kcal",
   "unitKg": "kg",
   "unitCm": "cm",
@@ -46,8 +46,8 @@
   "menuSettings": "Ustawienia",
   "menuAbout": "O aplikacji",
 
-  "menuHintKcal": "dziś {n} kcal",
-  "@menuHintKcal": {"placeholders": {"n": {"type": "int"}}},
+  "menuHintKcal": "dziś {n}",
+  "@menuHintKcal": {"placeholders": {"n": { "type": "String" }}},
   "menuHintNothing": "jeszcze nic nie zapisano",
   "menuHintOnGoal": "w normie {ok} z {total}",
   "@menuHintOnGoal": {"placeholders": {"ok": {"type": "int"}, "total": {"type": "int"}}},

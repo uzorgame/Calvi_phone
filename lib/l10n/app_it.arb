@@ -52,7 +52,7 @@
   "@anMacroGoal": {
     "placeholders": {
       "grams": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -111,7 +111,7 @@
   "@barGrams": {
     "placeholders": {
       "grams": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -146,14 +146,14 @@
   "@camKcalFor": {
     "placeholders": {
       "grams": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
   "@camKcalPer": {
     "placeholders": {
       "grams": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -167,7 +167,7 @@
   "@camPortionPack": {
     "placeholders": {
       "g": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -240,14 +240,14 @@
   "@gramsUnit": {
     "placeholders": {
       "grams": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
   "@heroBurned": {
     "placeholders": {
       "kcal": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -275,7 +275,7 @@
   "@kcalUnit": {
     "placeholders": {
       "kcal": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -313,7 +313,7 @@
   "@macroOfGrams": {
     "placeholders": {
       "goal": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -327,7 +327,7 @@
   "@mealGrams": {
     "placeholders": {
       "grams": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -375,7 +375,7 @@
   "@menuHintKcal": {
     "placeholders": {
       "n": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -406,7 +406,7 @@
   "@normGrams": {
     "placeholders": {
       "grams": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -426,7 +426,7 @@
         "type": "int"
       },
       "carbs": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -460,7 +460,7 @@
   "@normWaterPerKg": {
     "placeholders": {
       "ml": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -491,7 +491,7 @@
   "@plateFor": {
     "placeholders": {
       "grams": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -533,7 +533,7 @@
   "@rcItemsTotal": {
     "placeholders": {
       "g": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -554,7 +554,7 @@
   "@rcPortion": {
     "placeholders": {
       "g": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -575,10 +575,10 @@
   "@rcWhole": {
     "placeholders": {
       "kcal": {
-        "type": "int"
+        "type": "String"
       },
       "g": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -625,7 +625,7 @@
         "type": "int"
       },
       "height": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -711,10 +711,10 @@
         "type": "String"
       },
       "kcal": {
-        "type": "int"
+        "type": "String"
       },
       "grams": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -728,14 +728,14 @@
   "@waterLess": {
     "placeholders": {
       "step": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
   "@waterMore": {
     "placeholders": {
       "step": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -798,7 +798,7 @@
   "@workoutBurned": {
     "placeholders": {
       "kcal": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -895,8 +895,8 @@
   "anKcal": "Calorie",
   "anKcalAvg": "in media al giorno",
   "anKcalEmpty": "In questo periodo non c'è ancora niente. Di' a Nora che cosa hai mangiato e il grafico si costruisce da solo.",
-  "anKcalTotal": "nel periodo, kcal",
-  "anMacroGoal": "soglia {grams} g",
+  "anKcalTotal": "nel periodo, {u}",
+  "anMacroGoal": "soglia {grams}",
   "anMacrosAvg": "Macro in media",
   "anMacrosEmpty": "La media compare appena c'è qualcosa da mediare: registra almeno un giorno.",
   "anMeasures": "Misure",
@@ -905,18 +905,18 @@
   "anMeasuresEmptyHint": "Misurati una volta al mese e ti mostro che cosa si muove",
   "anMonth": "Mese",
   "anNow": "ora",
-  "anNowKg": "ora, kg",
+  "anNowKg": "ora, {u}",
   "anOneReading": "una misura",
   "anOneWeighing": "Per ora c'è una sola misura. La seconda mostra la direzione, e la linea parte da lì.",
   "anPerDay": "al giorno",
   "anQuarter": "3 mesi",
   "anShareOfNorm": "{share}% della soglia",
-  "anStartKg": "inizio, kg",
-  "anTargetKg": "obiettivo, kg",
+  "anStartKg": "inizio, {u}",
+  "anTargetKg": "obiettivo, {u}",
   "anTitle": "Statistiche",
   "anWater": "Idratazione",
-  "anWaterAvg": "in media, ml",
-  "anWaterGoal": "soglia {ml} ml",
+  "anWaterAvg": "in media, {u}",
+  "anWaterGoal": "soglia {ml}",
   "anWeek": "Settimana",
   "anWeightEmpty": "La curva compare dalla seconda pesata. Di' il tuo peso a Nora e lo annota lei.",
   "anYear": "Anno",
@@ -962,7 +962,7 @@
   "authSignUpLink": "Registrati",
   "authSignUpTitle": "Creiamo un account",
   "barCamera": "Fotocamera",
-  "barGrams": "{grams} g",
+  "barGrams": "{grams}",
   "barHint": "Ciao, sono Nora. Scrivi o parla come al solito, ti capisco.",
   "barHintBorscht": "Minestrone 300 g a pranzo",
   "barHintDelete": "Cancella l'ultima voce",
@@ -985,7 +985,7 @@
   "camBusy": "La fotocamera non si è aperta. Di solito la sta usando un'altra app.",
   "camCouldNotRead": "Non sono riuscita a leggere la foto",
   "camDish": "Foto",
-  "camEstimate": " kcal, stima",
+  "camEstimate": " {u}, stima",
   "camFlash": "Flash",
   "camFromPack": "Dati dalla confezione. Registrarlo non costa token.",
   "camGallery": "Dalla galleria",
@@ -994,8 +994,8 @@
   "camHintDish": "inquadra un piatto o una confezione",
   "camIngredients": "Ingredienti: {text}",
   "camIntoSlot": "in {slot}",
-  "camKcalFor": " kcal in {grams} g",
-  "camKcalPer": " kcal per {grams} g",
+  "camKcalFor": " {u} in {grams}",
+  "camKcalPer": " {u} per {grams}",
   "camLabelAim": "inquadra la tabella nutrizionale",
   "camLabelNoShot": "La foto non è riuscita. Prova a fotografare di nuovo l'etichetta.",
   "camLabelReading": "Copio i valori dalla confezione…",
@@ -1010,7 +1010,7 @@
   "camOfflineShot": "Nessuna connessione. Puoi mandare la foto a Nora più tardi",
   "camOfflineTitle": "Nessuna rete",
   "camPer100": "Sulla confezione non c'è un peso esatto: i valori sono per 100 g.",
-  "camPortionPack": "Porzione dalla confezione: {g} g. I valori sono per porzione.",
+  "camPortionPack": "Porzione dalla confezione: {g}. I valori sono per porzione.",
   "camReading": "Leggo…",
   "camSendToNora": "Manda a Nora",
   "camServerDown": "Non dipende dal codice né dalla fotocamera. Riprova tra un minuto.",
@@ -1100,10 +1100,10 @@
   "goalBecomes": "Diventa",
   "goalCurrent": "Obiettivo attuale ",
   "goalDailyNorm": "Soglia giornaliera",
-  "goalDiff": "{kg} kg di differenza",
+  "goalDiff": "{kg} di differenza",
   "goalDirection": "Direzione",
   "goalEta": "Obiettivo verso il",
-  "goalFromStart": " da {kg} kg all'inizio. ",
+  "goalFromStart": " da {kg} all'inizio. ",
   "goalFromToday": "Il nuovo obiettivo parte dal peso di oggi.",
   "goalKeepNote": "La soglia tiene il tuo peso attuale: rimetti esattamente quello che consumi.",
   "goalKeepShort": "Mantenere",
@@ -1113,14 +1113,14 @@
   "goalPaceFast": "Veloce",
   "goalPaceOk": "Questo è il ritmo che quasi tutti riescono a tenere senza spezzarsi.",
   "goalPaceSlow": "Lento",
-  "goalPaceUnit": "kg a settimana",
+  "goalPaceUnit": "{u} a settimana",
   "goalPaceUsual": "Consigliato",
-  "goalRange": "{from} → {to} kg",
+  "goalRange": "{from} → {to}",
   "goalReplaceNote": "Un obiettivo non si modifica, si sostituisce. L'avanzamento conterà dal peso di oggi, e quello vecchio resta nello storico. Confermi il cambio?",
   "goalSet": "Imposta",
   "goalTarget": "Peso obiettivo",
   "goalWas": "Era",
-  "gramsUnit": "{grams} g",
+  "gramsUnit": "{grams}",
   "helloDishBread": "Pane di segale",
   "helloDishEggs": "Uova strapazzate",
   "helloSaid": "due uova e un toast",
@@ -1128,18 +1128,18 @@
   "helloStepCount": "Conto le calorie",
   "helloStepLog": "Lo annoto nella tua giornata",
   "helloStepSay": "Di' che cosa hai mangiato",
-  "heroBurned": "-{kcal} kcal dall'allenamento",
+  "heroBurned": "-{kcal} dall'allenamento",
   "heroDays": "giorni",
   "heroFrom": " di {kcal}",
-  "heroGoalKg": "obiettivo, kg",
-  "heroKcal": " kcal",
-  "heroKg": " kg",
+  "heroGoalKg": "obiettivo, {u}",
+  "heroKcal": " {u}",
+  "heroKg": " {u}",
   "heroLeft": "restano ",
   "heroOf": " di {kcal}",
   "heroOver": "sforato di ",
   "heroWeekOpen": "La settimana intera",
-  "heroWeightFrom": "ora, da {kg} kg all'inizio dell'obiettivo",
-  "kcalUnit": "{kcal} kcal",
+  "heroWeightFrom": "ora, da {kg} all'inizio dell'obiettivo",
+  "kcalUnit": "{kcal}",
   "langSection": "Lingua dell'interfaccia",
   "langSystem": "Lingua del dispositivo",
   "legalOnTheWeb": "Open on the web",
@@ -1160,7 +1160,7 @@
   "macroFatCaps": "GRASSI",
   "macroFatLetter": "G",
   "macroMedsCaps": "FARMACI",
-  "macroOfGrams": " / {goal}g",
+  "macroOfGrams": " / {goal}",
   "macroPNone": "P ?",
   "macroPShort": "P {value}",
   "macroProtein": "Proteine",
@@ -1168,10 +1168,10 @@
   "macroProteinLetter": "P",
   "mealAuto": "auto ",
   "mealEditDelete": "Elimina la voce",
-  "mealEditKcal": "kcal",
+  "mealEditKcal": "{u}",
   "mealEditSave": "Salva",
   "mealEmpty": "Qui non c'è ancora niente. Scrivi che cos'era e lo registro.",
-  "mealGrams": "{grams} g",
+  "mealGrams": "{grams}",
   "mealThinking": "Nora sta contando…",
   "measureAdd": "Aggiungi una misura",
   "measureCollapse": "Chiudi",
@@ -1221,7 +1221,7 @@
   "menuAnalytics": "Statistiche",
   "menuDiary": "Diario",
   "menuHintFree": "gratuito",
-  "menuHintKcal": "oggi {n} kcal",
+  "menuHintKcal": "oggi {n}",
   "menuHintMore": "+{n}",
   "menuHintNoAllergy": "nessuna",
   "menuHintNoMeds": "nessun ciclo",
@@ -1240,7 +1240,7 @@
   "noraName": "Nora",
   "normAuto": "Calcolala automaticamente",
   "normAutoFrom": "Dal peso all'inizio dell'obiettivo, dall'altezza, dall'età, dall'attività e dal ritmo: ",
-  "normAutoHint": "dal peso, dall'altezza, dall'età, dall'attività e dall'obiettivo: {kcal} kcal",
+  "normAutoHint": "dal peso, dall'altezza, dall'età, dall'attività e dall'obiettivo: {kcal}",
   "normAutoShort": "Automatica",
   "normByHand": "Impostala a mano",
   "normByHandHint": "le statistiche conteranno su questo numero",
@@ -1249,19 +1249,19 @@
   "normCalculatedTail": ". Puoi tornarci scegliendo «Automatica».",
   "normFitCarbs": "Adatta i carboidrati alla soglia",
   "normFits": "La ripartizione torna con la soglia",
-  "normGrams": "{grams} g",
-  "normKcalOf": "{kcal} kcal",
-  "normMacroSplit": "{protein} / {fat} / {carbs} g",
+  "normGrams": "{grams}",
+  "normKcalOf": "{kcal}",
+  "normMacroSplit": "{protein} / {fat} / {carbs}",
   "normMacros": "Macro",
   "normManual": "impostata a mano",
-  "normOf": "di {kcal} kcal",
-  "normOffOver": "La ripartizione dà {sum} kcal, {off} sopra la soglia",
-  "normOffUnder": "La ripartizione dà {sum} kcal, {off} sotto la soglia",
-  "normPerDay": "kcal al giorno",
+  "normOf": "di {kcal}",
+  "normOffOver": "La ripartizione dà {sum}, {off} sopra la soglia",
+  "normOffUnder": "La ripartizione dà {sum}, {off} sotto la soglia",
+  "normPerDay": "{u} al giorno",
   "normTitle": "Soglia",
   "normWater": "Acqua",
   "normWaterHead": "Cioè ",
-  "normWaterPerKg": "{ml} ml",
+  "normWaterPerKg": "{ml}",
   "normWaterTail": " per chilo di peso. L'intervallo indicativo di solito è 30-40 ml, ma dipende dal caldo e dagli allenamenti, quindi il numero qui non è rigido.",
   "normWhere": "Da dove viene questo numero",
   "notifyChannel": "Promemoria",
@@ -1320,9 +1320,9 @@
   "planYear": "Anno",
   "planYearBilled": "{price} una volta all'anno",
   "planYearly": "Pro annuale",
-  "plateFor": "in {grams} g",
-  "plateGrams": " g",
-  "plateKcal": "kcal",
+  "plateFor": "in {grams}",
+  "plateGrams": " {u}",
+  "plateKcal": "{u}",
   "plateThinking": "ci penso",
   "plateTotal": "totale",
   "privacyCrash": "Segnalazioni di errore",
@@ -1371,7 +1371,7 @@
   "rcHeroB": "oggi",
   "rcHeroLede": "Di' che cosa hai in casa. Nora propone e calcola la porzione; va bene anche la tua ricetta.",
   "rcItemsHead": "Ingredienti",
-  "rcItemsTotal": "in tutto {g} g",
+  "rcItemsTotal": "in tutto {g}",
   "rcJustNow": "adesso",
   "rcLoadFailed": "Il ricettario non si è caricato. Tira per riprovare.",
   "rcMinutes": "{n} min",
@@ -1380,7 +1380,7 @@
   "rcPerServing": "a porzione",
   "rcPerServingHead": "A porzione",
   "rcPickTitle": "Scegli un piatto",
-  "rcPortion": "porzione {g} g",
+  "rcPortion": "porzione {g}",
   "rcServingsFew": "{n} porzioni",
   "rcServingsMany": "{n} porzioni",
   "rcServingsOne": "1 porzione",
@@ -1397,7 +1397,7 @@
   "rcToolPan": "Padella",
   "rcToolPot": "Pentola",
   "rcToolsHead": "Che cosa serve in cucina",
-  "rcWhole": "Piatto intero: {kcal} kcal, {g} g",
+  "rcWhole": "Piatto intero: {kcal}, {g}",
   "remAbout": "Su che cosa",
   "remAdd": "Aggiungi un promemoria",
   "remAt": "Alle",
@@ -1457,7 +1457,7 @@
   "setFreeTierWrite": "Scrivi allo sviluppatore e il piano a pagamento ti viene attivato lo stesso giorno.",
   "setGoal": "Obiettivo",
   "setGoalKeep": "mantenere il peso",
-  "setGoalLine": "{kg} kg, {pace}/settimana",
+  "setGoalLine": "{kg}, {pace}/settimana",
   "setGroupAbout": "Su di te",
   "setGroupAccount": "Account",
   "setGroupAssistant": "Assistente",
@@ -1467,18 +1467,19 @@
   "setMedical": "Avviso medico",
   "setMeds": "Farmaci",
   "setNorm": "Soglia",
-  "setNormLine": "{kcal} kcal",
+  "setNormLine": "{kcal}",
   "setPlan": "Abbonamento",
   "setPlanFree": "Gratis",
   "setPolicy": "Informativa sulla privacy",
   "setPrivacy": "Dati e statistiche",
   "setProfile": "Profilo",
-  "setProfileLine": "{sex}, {age}, {height} cm",
+  "setProfileLine": "{sex}, {age}, {height}",
   "setReminders": "Promemoria",
   "setRemindersOff": "disattivati",
   "setTerms": "Condizioni d'uso",
   "setTheme": "Tema",
   "setTitle": "Impostazioni",
+  "setUnits": "Unità",
   "setUnset": "non impostato",
   "sexOther": "Altro",
   "sexShortFemale": "D",
@@ -1490,13 +1491,13 @@
   "slotEraseBody": "«{name}» non ha ancora numeri. La riga esce dalla giornata.",
   "slotEraseDo": "Togli",
   "slotEraseTitle": "Togliere la bozza?",
-  "slotGrams": "PESO, G",
+  "slotGrams": "PESO, {u}",
   "slotIntoBreakfast": "a colazione",
   "slotIntoDinner": "a cena",
   "slotIntoLunch": "a pranzo",
   "slotIntoOther": "in «{name}»",
   "slotIntoSnack": "nello spuntino",
-  "slotKcal": "KCAL",
+  "slotKcal": "{u}",
   "slotLog": "Registra",
   "slotLunch": "Pranzo",
   "slotSnack": "Spuntino",
@@ -1522,14 +1523,14 @@
   "startNormCounting": "calcolo…",
   "startNormHold": "mantenendo",
   "startNormNote": "Questa è la formula di Mifflin-St Jeor, non un consiglio medico. Se hai una patologia, sei incinta o segui una dieta prescritta, parlane con il tuo medico.",
-  "startNormPerDay": "kcal al giorno",
+  "startNormPerDay": "{u} al giorno",
   "startNormWeeks": "settimane",
   "startPace": "A che ritmo",
   "startPaceEtaHead": "Obiettivo verso il ",
   "startPaceEtaTail": ", cioè ",
   "startPaceFast": "veloce",
   "startPaceSlow": "lento",
-  "startPaceUnit": "kg a settimana",
+  "startPaceUnit": "{u} a settimana",
   "startPaceUsual": "costante",
   "startPaceWarning": "Un ritmo così è difficile da tenere e di solito si spezza. Sotto gli 0,8 kg a settimana il risultato arriva più lento, ma resta.",
   "startPaceWeeks": "{count, plural, =1{1 settimana} other{{count} settimane}}",
@@ -1574,7 +1575,7 @@
   "todayLoggedAskWeightShort": "Registrato. Dimmi il peso se lo vuoi preciso.",
   "todayLoggedCount": "{count} registrati",
   "todayLoggedInto": "Registrato {slotInto}: {dish}.",
-  "todayLoggedIntoWithNumbers": "Registrato {slotInto}: {dish}, {kcal} kcal per {grams} g.",
+  "todayLoggedIntoWithNumbers": "Registrato {slotInto}: {dish}, {kcal} per {grams}.",
   "todayNoraSlow": "Nora ci sta pensando più del solito. Riprova, il token non è stato speso.",
   "todayOffline": "Nessuna connessione. Riprova quando torna.",
   "todayOfflineSaved": "Nessuna connessione. La voce resta sul telefono e sale quando torna.",
@@ -1611,10 +1612,10 @@
   "unitsTitle": "Quali unità",
   "unitsVolume": "Acqua",
   "waterGlasses": "circa {glasses} bicchieri",
-  "waterLess": "{step} ml in meno",
-  "waterMore": "{step} ml in più",
+  "waterLess": "{step} in meno",
+  "waterMore": "{step} in più",
   "waterNone": "niente bevuto",
-  "waterOf": " / {ml} ml",
+  "waterOf": " / {ml}",
   "waterShare": "{pct}% dell'obiettivo giornaliero",
   "waterTitle": "Acqua",
   "wcNoTime": "senza durata",
@@ -1637,14 +1638,14 @@
   "welToast": "Toast con burro",
   "welToastGrams": "50 g",
   "welTotal": "In tutto",
-  "wfBurned": "Bruciate, kcal",
+  "wfBurned": "Bruciate, {u}",
   "wfDuration": "Durata",
   "wfDurationCap": "Durata, min",
   "wfEstimate": "Una stima dal tuo peso e dal tipo di attività",
   "wfFromWatch": "Da un orologio o da un attrezzo",
-  "wfKcal": " kcal",
+  "wfKcal": " {u}",
   "wfLog": "Registra",
-  "wfManualKcal": "kcal a mano",
+  "wfManualKcal": "{u} a mano",
   "wfMin": "{min} min",
   "wfMinutes": "Minuti",
   "wfNote": "Nota",
@@ -1682,15 +1683,15 @@
   "wkPastEmpty": "Non ci sono ancora analisi passate. La prima comparirà qui lunedì prossimo.",
   "wkPastRow": "Settimana del {day}",
   "wkPastTitle": "Settimane passate",
-  "wkPerDay": "kcal al giorno in media",
+  "wkPerDay": "{u} al giorno in media",
   "wkPerDayAside": "al giorno in media",
   "wkTitle": "La settimana",
-  "wkTotalCap": "kcal nella settimana",
+  "wkTotalCap": "{u} nella settimana",
   "wkWaterCap": "di acqua al giorno",
   "wkWaterValue": "{l} l",
   "wkWeightCap": "peso questa settimana",
   "workoutAdd": "Aggiungi un allenamento",
-  "workoutBurned": "−{kcal} kcal",
+  "workoutBurned": "−{kcal}",
   "workoutCollapse": "Chiudi",
   "workoutMinUnit": "min",
   "workoutNone": "niente registrato",

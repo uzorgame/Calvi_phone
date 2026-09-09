@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../data/chat.dart';
+import '../../data/units.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import '../../l10n/app_localizations.dart';
@@ -118,7 +119,7 @@ class PlateStrip extends StatelessWidget {
                     if (item.grams != null) ...[
                       const SizedBox(width: 8),
                       Text(
-                        l.mealGrams(item.grams!.round()),
+                        l.mealGrams(dataUnits.porText(item.grams!)),
                         style: context.t.labelSmall?.copyWith(fontSize: CalviSize.fsMicro),
                       ),
                     ],
@@ -148,7 +149,7 @@ class PlateStrip extends StatelessWidget {
             children: [
               Flexible(
                 child: Text(
-                  '${plate.kcal}',
+                  dataUnits.enNum(plate.kcal),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: context.t.headlineMedium?.copyWith(fontSize: 19),
@@ -156,7 +157,7 @@ class PlateStrip extends StatelessWidget {
               ),
               const SizedBox(width: 6),
               Text(
-                L.of(context).plateKcal,
+                L.of(context).plateKcal(dataUnits.enLabel),
                 style: context.t.labelSmall?.copyWith(fontSize: CalviSize.fsMicro),
               ),
               const Spacer(),
@@ -170,7 +171,7 @@ class PlateStrip extends StatelessWidget {
                 )
               else if (plate.grams != null)
                 Text(
-                  L.of(context).plateFor(plate.grams!.round()),
+                  L.of(context).plateFor(dataUnits.porText(plate.grams!)),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: context.t.labelSmall?.copyWith(fontSize: CalviSize.fsMicro),
@@ -228,7 +229,8 @@ class PlateStrip extends StatelessWidget {
                                 ),
                               ),
                               TextSpan(
-                                text: L.of(context).plateGrams,
+                                // Macros stay in grams whatever the portions read in.
+                                text: L.of(context).plateGrams(L.of(context).unitG),
                                 style: context.t.labelSmall?.copyWith(
                                   fontSize: CalviSize.fsMicro,
                                   color: cell.$3,

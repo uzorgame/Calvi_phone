@@ -7,6 +7,7 @@ import '../data/app_scope.dart';
 import '../data/day.dart' show todayDate;
 import '../data/meds.dart';
 import '../data/week.dart';
+import '../data/units.dart';
 import '../design/icons.dart';
 import '../design/slide.dart';
 import '../design/theme.dart';
@@ -72,7 +73,7 @@ Future<void> showCalviMenu(BuildContext context) {
     _MenuRow(
       icon: 'book',
       title: l.menuDiary,
-      hint: kcal > 0 ? l.menuHintKcal(kcal) : l.menuHintNothing,
+      hint: kcal > 0 ? l.menuHintKcal(dataUnits.enText(kcal)) : l.menuHintNothing,
       open: () {
         nav.pop();
         nav.popUntil((r) => r.isFirst);

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../data/app_scope.dart';
 import '../../data/workout.dart';
+import '../../data/units.dart';
 import '../../design/icons.dart';
 import '../../design/shell.dart';
 import '../../design/theme.dart';
@@ -56,7 +57,8 @@ class _WorkoutFormState extends State<WorkoutForm> {
   /// Оцінка за вагою саме цієї людини, а не за вагою з демонстрації.
   int get _estimate =>
       burnEstimate(widget.activity.met, _minutes, weightKg: AppScope.of(context).s.weightKg);
-  int get _typedKcal => int.tryParse(_kcal.text) ?? 0;
+  // Typed in the person's energy unit, kept in kilocalories.
+  int get _typedKcal => dataUnits.enIn(int.tryParse(_kcal.text) ?? 0);
 
   bool get _valid => _manual ? _typedKcal > 0 && _typedKcal < 5000 : _minutes > 0;
 
@@ -110,14 +112,14 @@ class _WorkoutFormState extends State<WorkoutForm> {
         const SizedBox(height: 14),
 
         CalviSegments(
-          labels: [L.of(context).wfMinutes, L.of(context).wfManualKcal],
+          labels: [L.of(context).wfMinutes, L.of(context).wfManualKcal(dataUnits.enLabel)],
           index: _manual ? 1 : 0,
           onPick: (i) => setState(() => _manual = i == 1),
         ),
         const SizedBox(height: 14),
 
         if (_manual) ...[
-          _Label(L.of(context).wfBurned),
+          _Label(L.of(context).wfBurned(dataUnits.enLabel)),
           _Input(
             controller: _kcal,
             hint: L.of(context).wfFromWatch,
@@ -166,10 +168,10 @@ class _WorkoutFormState extends State<WorkoutForm> {
               children: [
                 Text.rich(
                   TextSpan(
-                    text: '≈ $_estimate',
+                    text: '≈ ${dataUnits.enNum(_estimate)}',
                     children: [
                       TextSpan(
-                        text: L.of(context).wfKcal,
+                        text: L.of(context).wfKcal(dataUnits.enLabel),
                         style: context.t.labelSmall?.copyWith(fontSize: 14),
                       ),
                     ],

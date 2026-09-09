@@ -196,7 +196,7 @@ class _AskBodyState extends State<_AskBody> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            '${l.rcMinutes(r.minutes)} · ${r.kcal} ${l.unitKcal} ${l.rcPerServing}',
+                            '${l.rcMinutes(r.minutes)} · ${dataUnits.enText(r.kcal)} ${l.rcPerServing}',
                             style: context.t.labelSmall,
                           ),
                           /* Алерген у складі не ховає страву, а підписує її.

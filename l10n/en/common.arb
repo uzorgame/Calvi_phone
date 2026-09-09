@@ -1,20 +1,16 @@
 {
-  "kcalUnit": "{kcal} kcal",
+  "kcalUnit": "{kcal}",
   "@kcalUnit": {
     "description": "Calories with the unit, as it stands on badges and cards.",
     "placeholders": {
-      "kcal": {
-        "type": "int"
-      }
+      "kcal": { "type": "String" }
     }
   },
-  "gramsUnit": "{grams} g",
+  "gramsUnit": "{grams}",
   "@gramsUnit": {
     "description": "Weight with the unit.",
     "placeholders": {
-      "grams": {
-        "type": "int"
-      }
+      "grams": { "type": "String" }
     }
   },
   "unitKcal": "kcal",
@@ -107,10 +103,10 @@
   "menuSettings": "Settings",
   "menuAbout": "About",
 
-  "menuHintKcal": "{n} kcal today",
+  "menuHintKcal": "{n} today",
   "@menuHintKcal": {
     "description": "Under the Diary row in the menu: what is eaten so far today.",
-    "placeholders": {"n": {"type": "int"}}
+    "placeholders": {"n": { "type": "String" }}
   },
   "menuHintNothing": "nothing logged yet",
   "menuHintOnGoal": "on goal {ok} of {total}",

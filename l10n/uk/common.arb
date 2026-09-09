@@ -1,6 +1,6 @@
 {
-  "kcalUnit": "{kcal} ккал",
-  "gramsUnit": "{grams} г",
+  "kcalUnit": "{kcal}",
+  "gramsUnit": "{grams}",
   "unitKcal": "ккал",
   "unitKg": "кг",
   "unitCm": "см",
@@ -46,8 +46,8 @@
   "menuSettings": "Налаштування",
   "menuAbout": "Про застосунок",
 
-  "menuHintKcal": "сьогодні {n} ккал",
-  "@menuHintKcal": {"placeholders": {"n": {"type": "int"}}},
+  "menuHintKcal": "сьогодні {n}",
+  "@menuHintKcal": {"placeholders": {"n": { "type": "String" }}},
   "menuHintNothing": "ще нічого не записано",
   "menuHintOnGoal": "у нормі {ok} із {total}",
   "@menuHintOnGoal": {"placeholders": {"ok": {"type": "int"}, "total": {"type": "int"}}},

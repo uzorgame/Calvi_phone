@@ -125,7 +125,7 @@ struct Watch: View {
         .multilineTextAlignment(.center)
 
       if link.ready {
-        Text("лишилось \(thousands(link.left)) з \(thousands(link.norm)) ккал")
+        Text("лишилось \(link.energyNum(link.left)) з \(link.energyText(link.norm))")
           .font(.caption2)
           .foregroundStyle(Palette.dim)
       }
@@ -193,7 +193,9 @@ struct Watch: View {
         Card {
           VStack(alignment: .leading, spacing: 1) {
             Text(dish.name).font(.footnote.weight(.semibold)).foregroundStyle(Palette.ink)
-            Text("\(dish.grams) г · \(dish.kcal) ккал")
+            // In the units the phone shows: the same dish must not read
+            // «340 г» on the wrist and «12.0 oz» in the pocket.
+            Text("\(link.portionText(dish.grams)) · \(link.energyText(dish.kcal))")
               .font(.caption2)
               .foregroundStyle(Palette.dim)
           }
@@ -203,7 +205,7 @@ struct Watch: View {
       Spacer(minLength: 0)
 
       VStack(spacing: 1) {
-        Text("лишилось \(thousands(link.left)) ккал")
+        Text("лишилось \(link.energyText(link.left))")
           .font(.caption)
           .foregroundStyle(Palette.dim)
 

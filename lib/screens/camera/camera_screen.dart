@@ -12,6 +12,7 @@ import '../../data/allergens.dart';
 import '../../data/app_scope.dart';
 import '../../data/remote/api.dart';
 import '../../data/remote/food_repository.dart';
+import '../../data/units.dart';
 import '../../design/icons.dart';
 import '../../design/shell.dart';
 import '../../design/theme.dart';
@@ -1901,10 +1902,10 @@ class _Result extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text.rich(
                   TextSpan(
-                    text: '${plate.kcal}',
+                    text: dataUnits.enNum(plate.kcal),
                     children: [
                       TextSpan(
-                        text: l.camKcalPer(plate.grams.round()),
+                        text: l.camKcalPer(dataUnits.porText(plate.grams), dataUnits.enLabel),
                         style: context.t.labelSmall?.copyWith(fontSize: 14),
                       ),
                     ],
@@ -1977,7 +1978,9 @@ class _Result extends StatelessWidget {
                    грамів, і це теж сказано прямо, бо «367 ккал» без ваги
                    виглядає як ціна всієї пачки, хоча нею не є. */
                 Text(
-                  item.portionG != null ? l.camPortionPack(item.portionG!.round()) : l.camPer100,
+                  item.portionG != null
+                      ? l.camPortionPack(dataUnits.porText(item.portionG!))
+                      : l.camPer100,
                   style: context.t.bodyMedium,
                 ),
                 Text(l.camFromPack, style: context.t.bodyMedium),

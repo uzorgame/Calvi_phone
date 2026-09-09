@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../format.dart';
+import '../../data/units.dart';
 import '../../design/icons.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
@@ -47,7 +47,7 @@ class WaterCard extends StatelessWidget {
       icon: 'drink',
       title: L.of(context).waterTitle,
       sub: glasses == 0 ? L.of(context).waterNone : L.of(context).waterGlasses(glasses),
-      badge: '${thousands(ml)} ${L.of(context).unitMl}',
+      badge: dataUnits.volText(ml),
       open: open,
       onToggle: onToggle,
       child: Padding(
@@ -56,8 +56,8 @@ class WaterCard extends StatelessWidget {
           children: [
             _Step(
               icon: 'minus',
-              label: L.of(context).waterLess(waterStep),
-              onTap: () => onChange((ml - waterStep).clamp(0, 1 << 30)),
+              label: L.of(context).waterLess(dataUnits.volText(dataUnits.volStep)),
+              onTap: () => onChange((ml - dataUnits.volStep).clamp(0, 1 << 30)),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -65,10 +65,10 @@ class WaterCard extends StatelessWidget {
                 children: [
                   Text.rich(
                     TextSpan(
-                      text: thousands(ml),
+                      text: dataUnits.volNum(ml),
                       children: [
                         TextSpan(
-                          text: L.of(context).waterOf(thousands(goalMl)),
+                          text: L.of(context).waterOf(dataUnits.volText(goalMl)),
                           style: context.t.labelSmall?.copyWith(fontSize: 13),
                         ),
                       ],
@@ -112,8 +112,8 @@ class WaterCard extends StatelessWidget {
             const SizedBox(width: 14),
             _Step(
               icon: 'plus',
-              label: L.of(context).waterMore(waterStep),
-              onTap: () => onChange(ml + waterStep),
+              label: L.of(context).waterMore(dataUnits.volText(dataUnits.volStep)),
+              onTap: () => onChange(ml + dataUnits.volStep),
             ),
           ],
         ),

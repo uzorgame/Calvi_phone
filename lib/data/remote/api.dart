@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
+import '../../data/units.dart';
 import '../../l10n/data_lang.dart';
 import 'zone.dart';
 
@@ -171,6 +172,11 @@ class CalviApi {
          картку і не питає ваги, а бере звичну порцію, коли її не названо.
          Продиктоване в чат: те саме про вагу, решта як у розмові. */
       if (card) 'entry': 'card' else if (voice) 'entry': 'voice',
+      /* The units the person reads in, when they are not metric. The server
+         keeps them in the profile too, but the profile syncs after the chat
+         message it would have to shape, and the first «8 oz» after switching
+         must not come back as «227 г». */
+      if (dataUnits.wire != null) 'units': dataUnits.wire,
       /* Кілька попередніх реплік, щоб розмова була розмовою.
        *
        * Доти кожне повідомлення йшло саме по собі, і Нора не памʼятала навіть

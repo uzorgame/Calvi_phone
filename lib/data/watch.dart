@@ -32,6 +32,10 @@ class Watch {
     required String lang,
     required int norm,
     required int left,
+    // The two units the watch shows: portions and energy. Body mass and the
+    // rest never appear on it.
+    String portion = 'g',
+    String energy = 'kcal',
   }) async {
     /* Тільки iPhone. На Android каналу немає взагалі, на вебі немає й самого
        поняття, і питати там нема кого. */
@@ -40,7 +44,7 @@ class Watch {
     // Без токена годиннику нема з чим іти на сервер: чекаємо, поки акаунт буде.
     if (token == null || token.isEmpty) return;
 
-    final now = '$token|$lang|$norm|$left';
+    final now = '$token|$lang|$norm|$left|$portion|$energy';
     if (now == _sent) return;
     _sent = now;
 
@@ -50,6 +54,8 @@ class Watch {
         'lang': lang,
         'norm': norm,
         'left': left,
+        'portion': portion,
+        'energy': energy,
       });
     } on PlatformException {
       /* Годинника може не бути зовсім, і це не помилка застосунку. Наступна

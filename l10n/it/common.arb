@@ -1,11 +1,11 @@
 {
-  "kcalUnit": "{kcal} kcal",
+  "kcalUnit": "{kcal}",
   "@kcalUnit": {
-    "placeholders": { "kcal": { "type": "int" } }
+    "placeholders": { "kcal": { "type": "String" } }
   },
-  "gramsUnit": "{grams} g",
+  "gramsUnit": "{grams}",
   "@gramsUnit": {
-    "placeholders": { "grams": { "type": "int" } }
+    "placeholders": { "grams": { "type": "String" } }
   },
   "unitKcal": "kcal",
   "unitKg": "kg",
@@ -64,8 +64,8 @@
   "menuSettings": "Impostazioni",
   "menuAbout": "Informazioni",
 
-  "menuHintKcal": "oggi {n} kcal",
-  "@menuHintKcal": {"placeholders": {"n": {"type": "int"}}},
+  "menuHintKcal": "oggi {n}",
+  "@menuHintKcal": {"placeholders": {"n": { "type": "String" }}},
   "menuHintNothing": "ancora nulla registrato",
   "menuHintOnGoal": "in obiettivo {ok} su {total}",
   "@menuHintOnGoal": {"placeholders": {"ok": {"type": "int"}, "total": {"type": "int"}}},

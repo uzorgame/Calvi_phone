@@ -10,6 +10,7 @@ import '../../data/allergens.dart';
 import '../../data/settings.dart' show Allergy, goalOf;
 import '../../data/local/chat_store.dart';
 import '../../data/remote/api.dart';
+import '../../data/units.dart';
 import '../../design/icons.dart';
 import '../../design/macro_row.dart';
 import '../../design/shell.dart';
@@ -437,10 +438,10 @@ class _Card extends StatelessWidget {
                        * покласти собі в тарілку. */
                       Text.rich(
                         TextSpan(
-                          text: '${r.kcal * r.servings} ',
+                          text: '${dataUnits.enNum(r.kcal * r.servings)} ',
                           children: [
                             TextSpan(
-                              text: l.unitKcal,
+                              text: dataUnits.enLabel,
                               style: context.t.labelSmall?.copyWith(fontWeight: FontWeight.w400),
                             ),
                           ],

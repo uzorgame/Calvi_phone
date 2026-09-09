@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../data/day.dart';
 import '../../data/meal.dart';
+import '../../data/units.dart';
 import '../../design/icons.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
@@ -535,7 +536,7 @@ class _Note extends StatelessWidget {
             borderRadius: BorderRadius.circular(CalviSize.rPill),
           ),
           child: Text(
-            l.kcalUnit(278),
+            l.kcalUnit(dataUnits.enText(278)),
             style: context.t.titleMedium?.copyWith(fontSize: CalviSize.fsMicro),
           ),
         ),
@@ -608,7 +609,7 @@ class _Deck extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        l.kcalUnit(kcal),
+                        l.kcalUnit(dataUnits.enText(kcal)),
                         style: context.t.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
                       ),
                     ],

@@ -8,6 +8,7 @@ import '../../data/local/chat_store.dart';
 import '../../data/remote/api.dart';
 import '../../data/settings.dart';
 import '../../data/week.dart';
+import '../../data/units.dart';
 import '../../design/fold.dart';
 import '../../design/icons.dart';
 import '../../design/macro_row.dart';
@@ -175,7 +176,7 @@ class _WeekScreenState extends State<WeekScreen> {
             children: [
               Row(
                 children: [
-                  CalviFigure(value: thousands(w.avgKcal), cap: l.wkPerDay),
+                  CalviFigure(value: dataUnits.enNum(w.avgKcal), cap: l.wkPerDay(dataUnits.enLabel)),
                   const _Sep(),
                   CalviFigure(
                     value: '${w.daysOnGoal}',
@@ -243,7 +244,7 @@ class _WeekScreenState extends State<WeekScreen> {
             children: [
               Row(
                 children: [
-                  _Fact(value: thousands(total), cap: l.wkTotalCap),
+                  _Fact(value: dataUnits.enNum(total), cap: l.wkTotalCap(dataUnits.enLabel)),
                   _Fact(value: l.wkLoggedValue(w.daysLogged), cap: l.wkLoggedCap),
                 ],
               ),
@@ -256,9 +257,7 @@ class _WeekScreenState extends State<WeekScreen> {
                   ),
                   _Fact(
                     // Прочерк там, де числа немає: коротка риска, не довга.
-                    value: dw == null
-                        ? '–'
-                        : '${dw > 0 ? '+' : ''}${dw.toStringAsFixed(1)} ${l.heroKg.trim()}',
+                    value: dw == null ? '–' : dataUnits.massDelta(dw),
                     cap: dw == null ? l.wkNoWeight : l.wkWeightCap,
                   ),
                 ],

@@ -10,9 +10,9 @@
   "anForMonth": "no mês",
 
   "anGoalProgress": "Progresso até a meta",
-  "anStartKg": "início, kg",
-  "anNowKg": "agora, kg",
-  "anTargetKg": "meta, kg",
+  "anStartKg": "início, {u}",
+  "anNowKg": "agora, {u}",
+  "anTargetKg": "meta, {u}",
   "anWeightEmpty": "A curva aparece a partir da segunda pesagem. Diga seu peso para a Nora e ela anota sozinha.",
   "anEtaHead": "Nesse ritmo você chega à meta por volta de *{date}*",
   "@anEtaHead": {
@@ -24,12 +24,12 @@
   "@anShareOfNorm": {
     "placeholders": { "share": { "type": "int" } }
   },
-  "anKcalTotal": "no período, kcal",
+  "anKcalTotal": "no período, {u}",
   "anKcalAvg": "em média por dia",
   "anKcalEmpty": "Ainda não há nada anotado neste período. Diga para a Nora o que você comeu e o gráfico se monta sozinho.",
 
   "anWater": "Hidratação",
-  "anWaterAvg": "em média, ml",
+  "anWaterAvg": "em média, {u}",
 
   "anMeasures": "Medidas",
   "anMeasuresChange": "variação {period}",
@@ -44,9 +44,9 @@
   "anMacrosAvg": "Macros em média",
   "anMacrosEmpty": "A média aparece assim que houver o que calcular: anote pelo menos um dia.",
   "anPerDay": "por dia",
-  "anMacroGoal": "referência {grams} g",
+  "anMacroGoal": "referência {grams}",
   "@anMacroGoal": {
-    "placeholders": { "grams": { "type": "int" } }
+    "placeholders": { "grams": { "type": "String" } }
   },
 
   "anOneWeighing": "Por enquanto há só uma medição. A segunda mostra a direção, e a linha começa nela.",
@@ -55,8 +55,8 @@
     "placeholders": { "value": { "type": "String" } }
   },
 
-  "anWaterGoal": "referência {ml} ml",
-  "@anWaterGoal": {"placeholders":{"ml":{"type":"String"}}},
+  "anWaterGoal": "referência {ml}",
+  "@anWaterGoal": {"placeholders":{"ml":{ "type": "String" }}},
   "anDaysInNorm": "dias dentro da meta",
   "anDonePercent": "{percent}% feito",
   "@anDonePercent": {"placeholders":{"percent":{"type":"int"}}}

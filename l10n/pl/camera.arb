@@ -23,7 +23,7 @@
   "camFromPack": "Liczby z opakowania. Zapis nie kosztuje tokenów.",
   "camIngredients": "Skład: {text}",
   "camAllergen": "Alergen!",
-  "camPortionPack": "Porcja z opakowania: {g} g. Liczby na porcję.",
+  "camPortionPack": "Porcja z opakowania: {g}. Liczby na porcję.",
   "camPer100": "Na opakowaniu nie ma dokładnej wagi: liczby na 100 g.",
   "camAllergyContains": "Zawiera twój alergen: {list}",
   "camAllergyTraces": "Może zawierać śladowe ilości: {list}",
@@ -48,7 +48,7 @@
   "camLabelAim": "wyceluj w tabelę wartości odżywczych",
   "camLabelReading": "Przepisuję liczby z opakowania…",
   "camLabelNoShot": "Zdjęcie się nie udało. Spróbuj sfotografować etykietę jeszcze raz.",
-  "camEstimate": " kcal, szacunkowo",
+  "camEstimate": " {u}, szacunkowo",
   "camNotRead": "Nie rozpoznałam",
   "camShotReady": "Zdjęcie gotowe",
   "camShotReadyNote": "Nora je przeanalizuje i odpowie na czacie: nazwie danie, oceni porcję i pokaże, skąd wzięła się liczba. Kosztuje dwa tokeny.",
@@ -59,6 +59,6 @@
   "camOfflineShot": "Nie mam sieci. Zdjęcie można wysłać Norze później",
   "camNoTokens": "Skończyły się tokeny",
 
-  "camKcalPer": " kcal na {grams} g",
-  "camKcalFor": " kcal za {grams} g"
+  "camKcalPer": " {u} na {grams}",
+  "camKcalFor": " {u} za {grams}"
 }

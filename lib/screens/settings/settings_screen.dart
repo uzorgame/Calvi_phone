@@ -7,6 +7,7 @@ import '../../data/allergens.dart';
 import '../../data/legal.dart';
 import '../../data/local/database.dart' show TokenStateData;
 import '../../data/settings.dart';
+import '../../data/units.dart';
 import '../../data/app_scope.dart';
 import '../meds/meds_route.dart';
 import '../menu.dart';
@@ -15,7 +16,6 @@ import '../../design/shell.dart';
 import '../../design/slide.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
-import '../../format.dart';
 import 'panel_allergy.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/labels.dart';
@@ -179,6 +179,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       'plan' => PlanPanel(onBack: _close, onSignIn: () => _open('profile')),
       'theme' => ThemePanel(s: s, set: set, onBack: _close),
       'lang' => LangPanel(s: s, set: set, onBack: _close),
+      'units' => UnitsPanel(s: s, set: set, onBack: _close),
       'privacy' => PrivacyPanel(s: s, set: set, onBack: _close),
       'terms' => LegalPanel(doc: terms, onBack: _close),
       'policy' => LegalPanel(doc: privacy, onBack: _close),
@@ -245,7 +246,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       icon: 'user',
                       title: l.setProfile,
                       first: true,
-                      value: l.setProfileLine(sexShort(context, s.sex), s.age, s.heightCm),
+                      value: l.setProfileLine(
+                        sexShort(context, s.sex),
+                        s.age,
+                        dataUnits.heightText(s.heightCm),
+                      ),
                       onTap: () => _open('profile'),
                     ),
                     /* Ваги тут немає навмисно.
@@ -259,7 +264,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       title: l.setGoal,
                       value: s.direction == Direction.keep
                           ? l.setGoalKeep
-                          : l.setGoalLine(s.targetKg.toStringAsFixed(1), s.pace.toStringAsFixed(1)),
+                          : l.setGoalLine(dataUnits.massText(s.targetKg), dataUnits.massNum(s.pace)),
                       onTap: () => _open('goal'),
                     ),
                   ],
@@ -275,7 +280,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       icon: 'flame',
                       title: l.setNorm,
                       first: true,
-                      value: l.setNormLine(thousands(dailyKcal(s))),
+                      value: l.setNormLine(dataUnits.enText(dailyKcal(s))),
                       onTap: () => _open('norm'),
                     ),
                   ],
@@ -332,6 +337,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       title: l.setLang,
                       value: langTitle(context, s.lang),
                       onTap: () => _open('lang'),
+                    ),
+                    CalviRow(
+                      icon: 'ruler',
+                      title: l.setUnits,
+                      value: s.units.line,
+                      onTap: () => _open('units'),
                     ),
                     /* «Дані і аналітика», а не «Приватність»: нижче стоїть
                        політика приватності, і два однакові слова на одному

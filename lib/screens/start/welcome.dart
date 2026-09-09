@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../data/units.dart';
 import '../../design/icons.dart';
 import '../../design/ring.dart';
 import '../../design/theme.dart';
@@ -198,10 +199,10 @@ class _Answer extends StatelessWidget {
                     text: '${l.welTotal} ',
                     children: [
                       TextSpan(
-                        text: '$value',
+                        text: dataUnits.enNum(value),
                         style: TextStyle(color: c.text, fontWeight: FontWeight.w700),
                       ),
-                      TextSpan(text: ' ${l.unitKcal}'),
+                      TextSpan(text: ' ${dataUnits.enLabel}'),
                     ],
                   ),
                   style: context.t.bodyLarge?.copyWith(color: c.textSecondary),

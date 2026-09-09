@@ -12,6 +12,7 @@ import '../../data/remote/api.dart' show SubscriptionState;
 
 import '../../data/legal.dart';
 import '../../data/settings.dart';
+import '../../data/units.dart';
 import '../../design/icons.dart';
 import '../../design/shell.dart';
 import '../menu.dart';
@@ -103,6 +104,45 @@ class LangPanel extends StatelessWidget {
               ),
           ],
         ),
+      ],
+    );
+  }
+}
+
+/// What the numbers read in.
+///
+/// The same five questions as on the start screen, and the answers may change
+/// at any time. The diary is metric underneath, so a person who moves to
+/// pounds sees every past weigh-in in pounds too, not only the ones ahead.
+class UnitsPanel extends StatelessWidget {
+  const UnitsPanel({super.key, required this.s, required this.set, this.onBack});
+
+  final SettingsState s;
+  final SetSettings set;
+  final VoidCallback? onBack;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    return CalviScreen(
+      trailing: const CalviMenuButton(),
+      onBack: onBack,
+      title: l.setUnits,
+      foot: CalviButton(label: l.actionDone, onTap: () => (onBack ?? Navigator.of(context).pop)()),
+      children: [
+        for (final g in unitGroups(l))
+          CalviSection(
+            title: g.title,
+            bare: true,
+            children: [
+              CalviSegments(
+                labels: g.labels,
+                index: g.values.indexOf(s.units.byKey(g.key)).clamp(0, g.values.length - 1),
+                onPick: (i) =>
+                    set((v) => v.copyWith(units: v.units.withKey(g.key, g.values[i]))),
+              ),
+            ],
+          ),
       ],
     );
   }

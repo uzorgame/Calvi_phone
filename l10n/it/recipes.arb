@@ -56,23 +56,17 @@
   },
   "rcPerServing": "a porzione",
   "rcPerServingHead": "A porzione",
-  "rcWhole": "Piatto intero: {kcal} kcal, {g} g",
+  "rcWhole": "Piatto intero: {kcal}, {g}",
   "@rcWhole": {
     "placeholders": {
-      "kcal": {
-        "type": "int"
-      },
-      "g": {
-        "type": "int"
-      }
+      "kcal": { "type": "String" },
+      "g": { "type": "String" }
     }
   },
-  "rcPortion": "porzione {g} g",
+  "rcPortion": "porzione {g}",
   "@rcPortion": {
     "placeholders": {
-      "g": {
-        "type": "int"
-      }
+      "g": { "type": "String" }
     }
   },
   "rcOfDay": "cioè il {p}% della soglia giornaliera",
@@ -84,12 +78,10 @@
     }
   },
   "rcItemsHead": "Ingredienti",
-  "rcItemsTotal": "in tutto {g} g",
+  "rcItemsTotal": "in tutto {g}",
   "@rcItemsTotal": {
     "placeholders": {
-      "g": {
-        "type": "int"
-      }
+      "g": { "type": "String" }
     }
   },
   "rcToolsHead": "Che cosa serve in cucina",

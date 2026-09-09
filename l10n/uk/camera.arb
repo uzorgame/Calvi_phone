@@ -23,8 +23,8 @@
   "camFromPack": "Числа з упаковки. Запис не коштує токенів.",
   "camIngredients": "Склад: {text}",
   "camAllergen": "Алерген!",
-  "camPortionPack": "Порція з упаковки: {g} г. Числа за порцію.",
-  "@camPortionPack": { "placeholders": { "g": { "type": "int" } } },
+  "camPortionPack": "Порція з упаковки: {g}. Числа за порцію.",
+  "@camPortionPack": { "placeholders": { "g": { "type": "String" } } },
   "camPer100": "Точної ваги на упаковці немає: числа за 100 г.",
   "camAllergyContains": "Містить твій алерген: {list}",
   "@camAllergyContains": { "placeholders": { "list": { "type": "String" } } },
@@ -52,7 +52,7 @@
   "camLabelAim": "наведи на таблицю поживності",
   "camLabelReading": "Переписую числа з пачки…",
   "camLabelNoShot": "Кадр не вийшов. Спробуй зняти етикетку ще раз.",
-  "camEstimate": " ккал, оцінка",
+  "camEstimate": " {u}, оцінка",
   "camNotRead": "Не розібрала",
   "camShotReady": "Знімок готовий",
   "camShotReadyNote": "Нора розбере його і відповість у чаті: назве страву, оцінить порцію і покаже, звідки взялося число. Коштує два токени.",
@@ -63,6 +63,6 @@
   "camOfflineShot": "Не дістаю мережі. Знімок можна надіслати Норі пізніше",
   "camNoTokens": "Токени скінчились",
 
-  "camKcalPer": " ккал на {grams} г",
-  "camKcalFor": " ккал за {grams} г"
+  "camKcalPer": " {u} на {grams}",
+  "camKcalFor": " {u} за {grams}"
 }

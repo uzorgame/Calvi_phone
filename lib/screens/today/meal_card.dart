@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../data/meal.dart';
+import '../../data/units.dart';
 import '../../design/icons.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
@@ -64,7 +65,7 @@ class MealCard extends StatelessWidget {
          2 записи, 5 записів»), англійська дві, і саме на цьому ламається будь-яке
          саморобне рішення. */
       sub: l.entries(meals.length),
-      badge: l.kcalUnit(kcal),
+      badge: l.kcalUnit(dataUnits.enText(kcal)),
       open: open,
       onToggle: onToggle,
       child: Column(
@@ -249,7 +250,7 @@ class _MacroChips extends StatelessWidget {
       spacing: 9,
       runSpacing: 2,
       children: [
-        Text(L.of(context).mealGrams(meal.grams), style: style),
+        Text(L.of(context).mealGrams(dataUnits.porText(meal.grams)), style: style),
         _Macro(colour: c.protein, value: meal.protein),
         _Macro(colour: c.fats, value: meal.fat),
         _Macro(colour: c.carbs, value: meal.carbs),

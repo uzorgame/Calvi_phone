@@ -306,11 +306,13 @@ class LUk extends L {
       'За цей період ще нічого не записано. Скажи Норі, що зʼїв, і графік почне збиратись сам.';
 
   @override
-  String get anKcalTotal => 'за період, ккал';
+  String anKcalTotal(Object u) {
+    return 'за період, $u';
+  }
 
   @override
-  String anMacroGoal(int grams) {
-    return 'норма $grams г';
+  String anMacroGoal(String grams) {
+    return 'норма $grams';
   }
 
   @override
@@ -341,7 +343,9 @@ class LUk extends L {
   String get anNow => 'зараз';
 
   @override
-  String get anNowKg => 'поточна, кг';
+  String anNowKg(Object u) {
+    return 'поточна, $u';
+  }
 
   @override
   String get anOneReading => 'один замір';
@@ -361,10 +365,14 @@ class LUk extends L {
   }
 
   @override
-  String get anStartKg => 'старт, кг';
+  String anStartKg(Object u) {
+    return 'старт, $u';
+  }
 
   @override
-  String get anTargetKg => 'ціль, кг';
+  String anTargetKg(Object u) {
+    return 'ціль, $u';
+  }
 
   @override
   String get anTitle => 'Аналітика';
@@ -373,11 +381,13 @@ class LUk extends L {
   String get anWater => 'Гідратація';
 
   @override
-  String get anWaterAvg => 'у середньому, мл';
+  String anWaterAvg(Object u) {
+    return 'у середньому, $u';
+  }
 
   @override
   String anWaterGoal(String ml) {
-    return 'норма $ml мл';
+    return 'норма $ml';
   }
 
   @override
@@ -525,8 +535,8 @@ class LUk extends L {
   String get barCamera => 'Камера';
 
   @override
-  String barGrams(int grams) {
-    return '$grams г';
+  String barGrams(String grams) {
+    return '$grams';
   }
 
   @override
@@ -601,7 +611,9 @@ class LUk extends L {
   String get camDish => 'Фото';
 
   @override
-  String get camEstimate => ' ккал, оцінка';
+  String camEstimate(Object u) {
+    return ' $u, оцінка';
+  }
 
   @override
   String get camFlash => 'Спалах';
@@ -632,13 +644,13 @@ class LUk extends L {
   }
 
   @override
-  String camKcalFor(int grams) {
-    return ' ккал за $grams г';
+  String camKcalFor(String grams, Object u) {
+    return ' $u за $grams';
   }
 
   @override
-  String camKcalPer(int grams) {
-    return ' ккал на $grams г';
+  String camKcalPer(String grams, Object u) {
+    return ' $u на $grams';
   }
 
   @override
@@ -689,8 +701,8 @@ class LUk extends L {
   String get camPer100 => 'Точної ваги на упаковці немає: числа за 100 г.';
 
   @override
-  String camPortionPack(int g) {
-    return 'Порція з упаковки: $g г. Числа за порцію.';
+  String camPortionPack(String g) {
+    return 'Порція з упаковки: $g. Числа за порцію.';
   }
 
   @override
@@ -993,7 +1005,7 @@ class LUk extends L {
 
   @override
   String goalDiff(String kg) {
-    return 'різниця $kg кг';
+    return 'різниця $kg';
   }
 
   @override
@@ -1004,7 +1016,7 @@ class LUk extends L {
 
   @override
   String goalFromStart(String kg) {
-    return ' від $kg кг на старті. ';
+    return ' від $kg на старті. ';
   }
 
   @override
@@ -1035,14 +1047,16 @@ class LUk extends L {
   String get goalPaceSlow => 'Повільно';
 
   @override
-  String get goalPaceUnit => 'кг на тиждень';
+  String goalPaceUnit(Object u) {
+    return '$u на тиждень';
+  }
 
   @override
   String get goalPaceUsual => 'Рекомендовано';
 
   @override
   String goalRange(String from, String to) {
-    return '$from → $to кг';
+    return '$from → $to';
   }
 
   @override
@@ -1059,8 +1073,8 @@ class LUk extends L {
   String get goalWas => 'Було';
 
   @override
-  String gramsUnit(int grams) {
-    return '$grams г';
+  String gramsUnit(String grams) {
+    return '$grams';
   }
 
   @override
@@ -1085,8 +1099,8 @@ class LUk extends L {
   String get helloStepSay => 'Скажи, що їв';
 
   @override
-  String heroBurned(int kcal) {
-    return '-$kcal ккал за тренування';
+  String heroBurned(String kcal) {
+    return '-$kcal за тренування';
   }
 
   @override
@@ -1098,13 +1112,19 @@ class LUk extends L {
   }
 
   @override
-  String get heroGoalKg => 'ціль, кг';
+  String heroGoalKg(Object u) {
+    return 'ціль, $u';
+  }
 
   @override
-  String get heroKcal => ' ккал';
+  String heroKcal(Object u) {
+    return ' $u';
+  }
 
   @override
-  String get heroKg => ' кг';
+  String heroKg(Object u) {
+    return ' $u';
+  }
 
   @override
   String get heroLeft => 'лишилось ';
@@ -1122,12 +1142,12 @@ class LUk extends L {
 
   @override
   String heroWeightFrom(String kg) {
-    return 'зараз, від $kg кг на старті цілі';
+    return 'зараз, від $kg на старті цілі';
   }
 
   @override
-  String kcalUnit(int kcal) {
-    return '$kcal ккал';
+  String kcalUnit(String kcal) {
+    return '$kcal';
   }
 
   @override
@@ -1200,8 +1220,8 @@ class LUk extends L {
   String get macroMedsCaps => 'ПРЕПАРАТИ';
 
   @override
-  String macroOfGrams(int goal) {
-    return ' / $goalг';
+  String macroOfGrams(String goal) {
+    return ' / $goal';
   }
 
   @override
@@ -1228,7 +1248,9 @@ class LUk extends L {
   String get mealEditDelete => 'Видалити запис';
 
   @override
-  String get mealEditKcal => 'ккал';
+  String mealEditKcal(Object u) {
+    return '$u';
+  }
 
   @override
   String get mealEditSave => 'Зберегти';
@@ -1237,8 +1259,8 @@ class LUk extends L {
   String get mealEmpty => 'Тут поки порожньо. Напиши, що було, і я запишу.';
 
   @override
-  String mealGrams(int grams) {
-    return '$grams г';
+  String mealGrams(String grams) {
+    return '$grams';
   }
 
   @override
@@ -1408,8 +1430,8 @@ class LUk extends L {
   String get menuHintFree => 'безкоштовний';
 
   @override
-  String menuHintKcal(int n) {
-    return 'сьогодні $n ккал';
+  String menuHintKcal(String n) {
+    return 'сьогодні $n';
   }
 
   @override
@@ -1472,7 +1494,7 @@ class LUk extends L {
 
   @override
   String normAutoHint(String kcal) {
-    return 'з ваги, зросту, віку, активності й цілі: $kcal ккал';
+    return 'з ваги, зросту, віку, активності й цілі: $kcal';
   }
 
   @override
@@ -1500,18 +1522,18 @@ class LUk extends L {
   String get normFits => 'Склад сходиться з нормою';
 
   @override
-  String normGrams(int grams) {
-    return '$grams г';
+  String normGrams(String grams) {
+    return '$grams';
   }
 
   @override
   String normKcalOf(String kcal) {
-    return '$kcal ккал';
+    return '$kcal';
   }
 
   @override
-  String normMacroSplit(int protein, int fat, int carbs) {
-    return '$protein / $fat / $carbs г';
+  String normMacroSplit(int protein, int fat, String carbs) {
+    return '$protein / $fat / $carbs';
   }
 
   @override
@@ -1522,21 +1544,23 @@ class LUk extends L {
 
   @override
   String normOf(String kcal) {
-    return 'з $kcal ккал';
+    return 'з $kcal';
   }
 
   @override
   String normOffOver(String sum, int off) {
-    return 'Склад дає $sum ккал, на $off більше за норму';
+    return 'Склад дає $sum, на $off більше за норму';
   }
 
   @override
   String normOffUnder(String sum, int off) {
-    return 'Склад дає $sum ккал, на $off менше за норму';
+    return 'Склад дає $sum, на $off менше за норму';
   }
 
   @override
-  String get normPerDay => 'ккал на день';
+  String normPerDay(Object u) {
+    return '$u на день';
+  }
 
   @override
   String get normTitle => 'Норма';
@@ -1548,8 +1572,8 @@ class LUk extends L {
   String get normWaterHead => 'Це ';
 
   @override
-  String normWaterPerKg(int ml) {
-    return '$ml мл';
+  String normWaterPerKg(String ml) {
+    return '$ml';
   }
 
   @override
@@ -1737,15 +1761,19 @@ class LUk extends L {
   String get planYearly => 'Pro річна';
 
   @override
-  String plateFor(int grams) {
-    return 'за $grams г';
+  String plateFor(String grams) {
+    return 'за $grams';
   }
 
   @override
-  String get plateGrams => ' г';
+  String plateGrams(Object u) {
+    return ' $u';
+  }
 
   @override
-  String get plateKcal => 'ккал';
+  String plateKcal(Object u) {
+    return '$u';
+  }
 
   @override
   String get plateThinking => 'думаю';
@@ -1904,8 +1932,8 @@ class LUk extends L {
   String get rcItemsHead => 'Продукти';
 
   @override
-  String rcItemsTotal(int g) {
-    return 'разом $g г';
+  String rcItemsTotal(String g) {
+    return 'разом $g';
   }
 
   @override
@@ -1937,8 +1965,8 @@ class LUk extends L {
   String get rcPickTitle => 'Обери страву';
 
   @override
-  String rcPortion(int g) {
-    return 'порція $g г';
+  String rcPortion(String g) {
+    return 'порція $g';
   }
 
   @override
@@ -1994,8 +2022,8 @@ class LUk extends L {
   String get rcToolsHead => 'Потрібно на кухні';
 
   @override
-  String rcWhole(int kcal, int g) {
-    return 'Уся страва: $kcal ккал, $g г';
+  String rcWhole(String kcal, String g) {
+    return 'Уся страва: $kcal, $g';
   }
 
   @override
@@ -2193,7 +2221,7 @@ class LUk extends L {
 
   @override
   String setGoalLine(String kg, String pace) {
-    return '$kg кг, $pace/тиждень';
+    return '$kg, $pace/тиждень';
   }
 
   @override
@@ -2225,7 +2253,7 @@ class LUk extends L {
 
   @override
   String setNormLine(String kcal) {
-    return '$kcal ккал';
+    return '$kcal';
   }
 
   @override
@@ -2244,8 +2272,8 @@ class LUk extends L {
   String get setProfile => 'Профіль';
 
   @override
-  String setProfileLine(String sex, int age, int height) {
-    return '$sex, $age, $height см';
+  String setProfileLine(String sex, int age, String height) {
+    return '$sex, $age, $height';
   }
 
   @override
@@ -2262,6 +2290,9 @@ class LUk extends L {
 
   @override
   String get setTitle => 'Налаштування';
+
+  @override
+  String get setUnits => 'Одиниці';
 
   @override
   String get setUnset => 'не вказано';
@@ -2299,7 +2330,9 @@ class LUk extends L {
   String get slotEraseTitle => 'Прибрати чернетку?';
 
   @override
-  String get slotGrams => 'ВАГА, Г';
+  String slotGrams(Object u) {
+    return 'ВАГА, $u';
+  }
 
   @override
   String get slotIntoBreakfast => 'в сніданок';
@@ -2319,7 +2352,9 @@ class LUk extends L {
   String get slotIntoSnack => 'в перекус';
 
   @override
-  String get slotKcal => 'ККАЛ';
+  String slotKcal(Object u) {
+    return '$u';
+  }
 
   @override
   String get slotLog => 'Записати';
@@ -2408,7 +2443,9 @@ class LUk extends L {
       'Це розрахунок за формулою Міффліна-Сан Жеора, а не медична рекомендація. Якщо є захворювання, вагітність або призначена дієта, звіряйся з лікарем.';
 
   @override
-  String get startNormPerDay => 'ккал на день';
+  String startNormPerDay(Object u) {
+    return '$u на день';
+  }
 
   @override
   String get startNormWeeks => 'тижнів';
@@ -2429,7 +2466,9 @@ class LUk extends L {
   String get startPaceSlow => 'повільно';
 
   @override
-  String get startPaceUnit => 'кг на тиждень';
+  String startPaceUnit(Object u) {
+    return '$u на тиждень';
+  }
 
   @override
   String get startPaceUsual => 'звично';
@@ -2591,8 +2630,8 @@ class LUk extends L {
   }
 
   @override
-  String todayLoggedIntoWithNumbers(String slotInto, String dish, int kcal, int grams) {
-    return 'Записала $slotInto: $dish, $kcal ккал за $grams г.';
+  String todayLoggedIntoWithNumbers(String slotInto, String dish, String kcal, String grams) {
+    return 'Записала $slotInto: $dish, $kcal за $grams.';
   }
 
   @override
@@ -2708,13 +2747,13 @@ class LUk extends L {
   }
 
   @override
-  String waterLess(int step) {
-    return 'Менше на $step мл';
+  String waterLess(String step) {
+    return 'Менше на $step';
   }
 
   @override
-  String waterMore(int step) {
-    return 'Більше на $step мл';
+  String waterMore(String step) {
+    return 'Більше на $step';
   }
 
   @override
@@ -2722,7 +2761,7 @@ class LUk extends L {
 
   @override
   String waterOf(String ml) {
-    return ' / $ml мл';
+    return ' / $ml';
   }
 
   @override
@@ -2795,7 +2834,9 @@ class LUk extends L {
   String get welTotal => 'Разом';
 
   @override
-  String get wfBurned => 'Спалено, ккал';
+  String wfBurned(Object u) {
+    return 'Спалено, $u';
+  }
 
   @override
   String get wfDuration => 'Тривалість';
@@ -2810,13 +2851,17 @@ class LUk extends L {
   String get wfFromWatch => 'З годинника або тренажера';
 
   @override
-  String get wfKcal => ' ккал';
+  String wfKcal(Object u) {
+    return ' $u';
+  }
 
   @override
   String get wfLog => 'Записати';
 
   @override
-  String get wfManualKcal => 'Вручну ккал';
+  String wfManualKcal(Object u) {
+    return 'Вручну $u';
+  }
 
   @override
   String wfMin(int min) {
@@ -2948,7 +2993,9 @@ class LUk extends L {
   String get wkPastTitle => 'Минулі';
 
   @override
-  String get wkPerDay => 'ккал у середньому за добу';
+  String wkPerDay(Object u) {
+    return '$u у середньому за добу';
+  }
 
   @override
   String get wkPerDayAside => 'у середньому за добу';
@@ -2957,7 +3004,9 @@ class LUk extends L {
   String get wkTitle => 'Тиждень';
 
   @override
-  String get wkTotalCap => 'ккал за тиждень';
+  String wkTotalCap(Object u) {
+    return '$u за тиждень';
+  }
 
   @override
   String get wkWaterCap => 'води за добу';
@@ -2974,8 +3023,8 @@ class LUk extends L {
   String get workoutAdd => 'Додати тренування';
 
   @override
-  String workoutBurned(int kcal) {
-    return '−$kcal ккал';
+  String workoutBurned(String kcal) {
+    return '−$kcal';
   }
 
   @override

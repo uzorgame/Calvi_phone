@@ -47,7 +47,7 @@ class _Cell extends StatelessWidget {
             children: [
               TextSpan(
                 // Той самий хвіст, що на картках дня.
-                text: L.of(context).macroOfGrams(m.goal),
+                text: L.of(context).macroOfGrams('${m.goal}${L.of(context).unitG}'),
                 style: context.t.labelSmall?.copyWith(fontWeight: FontWeight.w400),
               ),
             ],

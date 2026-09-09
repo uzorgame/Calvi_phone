@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../data/units.dart';
 import '../../design/fold.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
@@ -97,9 +98,12 @@ class _ManualFormState extends State<ManualForm> {
     super.dispose();
   }
 
-  int _num(TextEditingController c) {
+  int _num(TextEditingController c) => _raw(c).round();
+
+  /// As typed: «12.3» ounces must not become 12 before they become grams.
+  double _raw(TextEditingController c) {
     final v = double.tryParse(c.text.replaceAll(',', '.')) ?? 0;
-    return v.isFinite && v > 0 ? v.round() : 0;
+    return v.isFinite && v > 0 ? v : 0;
   }
 
   int get _fromMacros =>
@@ -107,11 +111,15 @@ class _ManualFormState extends State<ManualForm> {
 
   /// Скільки калорій піде в запис: своє число, якщо його вписали, інакше
   /// підказане з макросів.
-  int get _kcalValue => _ownKcal || _fromMacros == 0 ? _num(_kcal) : _fromMacros;
+  /* The field reads in the person's energy unit; the record keeps kilocalories.
+     The macro estimate is already kilocalories, so it converts only on the way
+     into the field. */
+  int get _kcalValue =>
+      _ownKcal || _fromMacros == 0 ? dataUnits.enIn(_num(_kcal)) : _fromMacros;
 
   void _suggest() {
     // Підказка живе в самому полі, щоб її було видно і можна було виправити.
-    if (!_ownKcal) _kcal.text = _fromMacros == 0 ? '' : '$_fromMacros';
+    if (!_ownKcal) _kcal.text = _fromMacros == 0 ? '' : '${dataUnits.enOut(_fromMacros)}';
     setState(() {});
   }
 
@@ -121,7 +129,7 @@ class _ManualFormState extends State<ManualForm> {
     widget.onSave(
       ManualEntry(
         title: widget.title,
-        grams: _num(_grams),
+        grams: dataUnits.porIn(_raw(_grams)),
         kcal: _kcalValue,
         protein: _num(_protein),
         fat: _num(_fat),
@@ -156,14 +164,14 @@ class _ManualFormState extends State<ManualForm> {
           Row(
             children: [
               _Field(
-                label: l.slotGrams,
+                label: l.slotGrams(dataUnits.porLabel.toUpperCase()),
                 ctrl: _grams,
                 onEdit: () => setState(() {}),
                 onDone: _save,
               ),
               const SizedBox(width: 6),
               _Field(
-                label: l.slotKcal,
+                label: l.slotKcal(dataUnits.enLabel.toUpperCase()),
                 ctrl: _kcal,
                 onEdit: () => setState(() => _ownKcal = true),
                 onDone: _save,

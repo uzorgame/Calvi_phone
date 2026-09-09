@@ -21,7 +21,25 @@ final class Link: NSObject, ObservableObject {
   @Published private(set) var norm: Int = 0
   @Published private(set) var left: Int = 0
 
+  /// Одиниці, у яких людина читає числа на телефоні: порції і енергія. Решта
+  /// на годиннику не показується.
+  @Published private(set) var portion = "g"
+  @Published private(set) var energy = "kcal"
+
   private let disk = UserDefaults.standard
+
+  /// Порція так, як її читає людина: грами цілі, унції з одним знаком.
+  func portionText(_ grams: Int) -> String {
+    portion == "oz" ? String(format: "%.1f oz", Double(grams) / 28.349523) : "\(grams) г"
+  }
+
+  func energyNum(_ kcal: Int) -> String {
+    thousands(energy == "kj" ? Int((Double(kcal) * 4.184).rounded()) : kcal)
+  }
+
+  func energyText(_ kcal: Int) -> String {
+    "\(energyNum(kcal)) \(energy == "kj" ? "кДж" : "ккал")"
+  }
 
   private override init() {
     super.init()
@@ -47,6 +65,8 @@ final class Link: NSObject, ObservableObject {
     lang = disk.string(forKey: "lang") ?? "en"
     norm = disk.integer(forKey: "norm")
     left = disk.integer(forKey: "left")
+    portion = disk.string(forKey: "portion") ?? "g"
+    energy = disk.string(forKey: "energy") ?? "kcal"
   }
 
   fileprivate func take(_ context: [String: Any]) {
@@ -65,6 +85,14 @@ final class Link: NSObject, ObservableObject {
     if let v = context["left"] as? Int {
       left = v
       disk.set(v, forKey: "left")
+    }
+    if let v = context["portion"] as? String {
+      portion = v
+      disk.set(v, forKey: "portion")
+    }
+    if let v = context["energy"] as? String {
+      energy = v
+      disk.set(v, forKey: "energy")
     }
   }
 }

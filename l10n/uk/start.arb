@@ -22,7 +22,7 @@
   "startTargetWeight": "Цільова вага",
 
   "startPace": "Як швидко",
-  "startPaceUnit": "кг на тиждень",
+  "startPaceUnit": "{u} на тиждень",
   "startPaceSlow": "повільно",
   "startPaceUsual": "звично",
   "startPaceFast": "швидко",
@@ -34,7 +34,7 @@
   "startLife": "Спосіб життя",
 
   "startNorm": "Твоя норма",
-  "startNormPerDay": "ккал на день",
+  "startNormPerDay": "{u} на день",
   "startNormCounting": "рахую…",
   "startNormWeeks": "тижнів",
   "startNormHold": "тримаємо",

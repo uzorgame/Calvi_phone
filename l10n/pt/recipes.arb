@@ -56,23 +56,17 @@
   },
   "rcPerServing": "por porção",
   "rcPerServingHead": "Por porção",
-  "rcWhole": "Prato inteiro: {kcal} kcal, {g} g",
+  "rcWhole": "Prato inteiro: {kcal}, {g}",
   "@rcWhole": {
     "placeholders": {
-      "kcal": {
-        "type": "int"
-      },
-      "g": {
-        "type": "int"
-      }
+      "kcal": { "type": "String" },
+      "g": { "type": "String" }
     }
   },
-  "rcPortion": "porção {g} g",
+  "rcPortion": "porção {g}",
   "@rcPortion": {
     "placeholders": {
-      "g": {
-        "type": "int"
-      }
+      "g": { "type": "String" }
     }
   },
   "rcOfDay": "isso é {p}% da referência do dia",
@@ -84,12 +78,10 @@
     }
   },
   "rcItemsHead": "Ingredientes",
-  "rcItemsTotal": "no total {g} g",
+  "rcItemsTotal": "no total {g}",
   "@rcItemsTotal": {
     "placeholders": {
-      "g": {
-        "type": "int"
-      }
+      "g": { "type": "String" }
     }
   },
   "rcToolsHead": "O que a cozinha precisa",

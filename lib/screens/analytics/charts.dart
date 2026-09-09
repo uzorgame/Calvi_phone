@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../data/units.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import '../../format.dart';
@@ -220,7 +221,7 @@ class _LineChartState extends State<LineChart> with SingleTickerProviderStateMix
                                Людина бачила цей хвіст замість своєї ваги. */
                             value:
                                 '${widget.values[i].toStringAsFixed(1)} '
-                                '${widget.unit ?? L.of(context).unitKg}',
+                                '${widget.unit ?? dataUnits.massLabel}',
                             note: _at != null && widget.dates != null && i < widget.dates!.length
                                 ? widget.dates![i]
                                 : widget.highlightNote,

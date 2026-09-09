@@ -56,23 +56,17 @@
   },
   "rcPerServing": "на порцію",
   "rcPerServingHead": "На порцію",
-  "rcWhole": "Уся страва: {kcal} ккал, {g} г",
+  "rcWhole": "Уся страва: {kcal}, {g}",
   "@rcWhole": {
     "placeholders": {
-      "kcal": {
-        "type": "int"
-      },
-      "g": {
-        "type": "int"
-      }
+      "kcal": { "type": "String" },
+      "g": { "type": "String" }
     }
   },
-  "rcPortion": "порція {g} г",
+  "rcPortion": "порція {g}",
   "@rcPortion": {
     "placeholders": {
-      "g": {
-        "type": "int"
-      }
+      "g": { "type": "String" }
     }
   },
   "rcOfDay": "це {p}% денної норми",
@@ -84,12 +78,10 @@
     }
   },
   "rcItemsHead": "Продукти",
-  "rcItemsTotal": "разом {g} г",
+  "rcItemsTotal": "разом {g}",
   "@rcItemsTotal": {
     "placeholders": {
-      "g": {
-        "type": "int"
-      }
+      "g": { "type": "String" }
     }
   },
   "rcToolsHead": "Потрібно на кухні",

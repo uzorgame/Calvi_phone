@@ -97,7 +97,7 @@ class _MeasureCardState extends State<MeasureCard> {
   String _value(String key) {
     if (_draft.containsKey(key)) return _draft[key]!;
     final v = _onThisDay(key);
-    return v == null ? '' : _trim(v);
+    return v == null ? '' : _trim(fieldFor(key).shown(v));
   }
 
   double? _onThisDay(String key) {
@@ -119,7 +119,7 @@ class _MeasureCardState extends State<MeasureCard> {
       if (v == null) continue;
       if (best == null || m.date > best.date) best = (v: v, date: m.date);
     }
-    return best == null ? null : _trim(best.v);
+    return best == null ? null : _trim(fieldFor(key).shown(best.v));
   }
 
   TextEditingController _controllerFor(String key) =>
@@ -131,7 +131,9 @@ class _MeasureCardState extends State<MeasureCard> {
     for (final key in widget.tracked) {
       final f = fieldFor(key);
       final raw = _value(key).replaceAll(',', '.');
-      final n = double.tryParse(raw);
+      final typed = double.tryParse(raw);
+      // Typed in the person's units, stored metric.
+      final n = typed == null ? null : f.stored(typed);
       // Out of range is dropped rather than stored: a slipped digit in one field
       // would bend the chart for months.
       if (n != null && n >= f.min && n <= f.max) values[key] = n;

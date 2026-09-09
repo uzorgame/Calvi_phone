@@ -10,9 +10,9 @@
   "anForMonth": "over the month",
 
   "anGoalProgress": "Progress to the goal",
-  "anStartKg": "start, kg",
-  "anNowKg": "now, kg",
-  "anTargetKg": "goal, kg",
+  "anStartKg": "start, {u}",
+  "anNowKg": "now, {u}",
+  "anTargetKg": "goal, {u}",
   "anWeightEmpty": "The curve appears after the second weigh-in. Tell Nora your weight and she will log it herself.",
   "anEtaHead": "At the current pace the goal is around *{date}*",
   "@anEtaHead": {
@@ -25,12 +25,12 @@
   "@anShareOfNorm": {
     "placeholders": { "share": { "type": "int" } }
   },
-  "anKcalTotal": "over the period, kcal",
+  "anKcalTotal": "over the period, {u}",
   "anKcalAvg": "on average a day",
   "anKcalEmpty": "Nothing logged for this period yet. Tell Nora what you ate and the chart will build itself.",
 
   "anWater": "Hydration",
-  "anWaterAvg": "on average, ml",
+  "anWaterAvg": "on average, {u}",
 
   "anMeasures": "Measurements",
   "anMeasuresChange": "change {period}",
@@ -45,9 +45,9 @@
   "anMacrosAvg": "Macros on average",
   "anMacrosEmpty": "An average appears as soon as there is something to average: log at least one day.",
   "anPerDay": "a day",
-  "anMacroGoal": "norm {grams} g",
+  "anMacroGoal": "norm {grams}",
   "@anMacroGoal": {
-    "placeholders": { "grams": { "type": "int" } }
+    "placeholders": { "grams": { "type": "String" } }
   },
 
   "anOneWeighing": "One reading so far. The second one shows the direction, and the line starts from it.",
@@ -56,8 +56,8 @@
     "placeholders": { "value": { "type": "String" } }
   },
 
-  "anWaterGoal": "norm {ml} ml",
-  "@anWaterGoal": {"placeholders":{"ml":{"type":"String"}}},
+  "anWaterGoal": "norm {ml}",
+  "@anWaterGoal": {"placeholders":{"ml":{ "type": "String" }}},
   "anDaysInNorm": "days on target",
   "anDonePercent": "{percent}% done",
   "@anDonePercent": {"placeholders":{"percent":{"type":"int"}}}

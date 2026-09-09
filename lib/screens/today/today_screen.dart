@@ -21,6 +21,7 @@ import '../../data/settings.dart';
 import '../../data/watch.dart';
 import '../../data/week.dart';
 import '../../data/workout.dart';
+import '../../data/units.dart';
 import '../../design/icons.dart';
 import '../../design/theme.dart';
 import '../../design/shell.dart';
@@ -543,7 +544,7 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
     final askId = at >= 0 ? _messages[at].askId : null;
     if (at >= 0) setState(() => _messages[at] = _messages[at].picked(grams));
 
-    final mine = msg(from: MsgFrom.me, text: l.gramsUnit(grams));
+    final mine = msg(from: MsgFrom.me, text: l.gramsUnit(dataUnits.porText(grams)));
     setState(() => _messages.add(mine));
     unawaited(_chat?.save(mine) ?? Future.value());
 
@@ -649,8 +650,8 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
       l.todayLoggedIntoWithNumbers(
         slotIntoLabel(context, slot),
         food.name,
-        plate.kcal,
-        plate.grams.round(),
+        dataUnits.enText(plate.kcal),
+        dataUnits.porText(plate.grams),
       ),
     );
     if (food.warnContains.isNotEmpty) {
@@ -1172,8 +1173,6 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
     if (db == null || meal.grams <= 0) return;
 
     var grams = meal.grams;
-    // Крок колеса: пʼять грамів. Точніше не міряє жодна домашня вага.
-    final steps = [for (var g = 10; g <= 1500; g += 5) g];
 
     calviSheet<void>(
       context,
@@ -1211,11 +1210,11 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
                  великим, під ними БЖВ крапками своїх кольорів. */
               Text.rich(
                 TextSpan(
-                  text: '${(meal.kcal * k).round()}',
+                  text: dataUnits.enNum((meal.kcal * k).round()),
                   style: sheetContext.t.headlineLarge?.copyWith(fontSize: 30, height: 1),
                   children: [
                     TextSpan(
-                      text: ' ${l.mealEditKcal}',
+                      text: ' ${l.mealEditKcal(dataUnits.enLabel)}',
                       style: sheetContext.t.bodyMedium?.copyWith(color: c.textSecondary),
                     ),
                   ],
@@ -1248,11 +1247,11 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
               ),
               const SizedBox(height: 10),
               CalviWheel(
-                values: steps,
-                value: (grams / 5).round().clamp(2, 300) * 5,
-                suffix: l.unitG,
+                values: dataUnits.porWheel,
+                value: dataUnits.porNotch(grams),
+                suffix: dataUnits.porLabel,
                 compact: true,
-                onPick: (g) => set(() => grams = g),
+                onPick: (g) => set(() => grams = dataUnits.porIn(g)),
               ),
             ],
           );
@@ -1299,7 +1298,7 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
                  каже саме колесо, другий рядок був би луною. */
               Text.rich(
                 TextSpan(
-                  text: '−${(w.kcal * mins / w.minutes).round()}',
+                  text: '−${dataUnits.enNum((w.kcal * mins / w.minutes).round())}',
                   style: sheetContext.t.headlineLarge?.copyWith(
                     fontSize: 30,
                     height: 1,
@@ -1307,7 +1306,7 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
                   ),
                   children: [
                     TextSpan(
-                      text: ' ${l.mealEditKcal}',
+                      text: ' ${l.mealEditKcal(dataUnits.enLabel)}',
                       style: sheetContext.t.bodyMedium?.copyWith(color: c.textSecondary),
                     ),
                   ],
@@ -1861,7 +1860,14 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
   /// Розповідає годиннику про день. Сам [Watch] мовчить, коли нічого не змінилось.
   Future<void> _tellWatch(AppScope scope, int norm, int left) async {
     _token ??= (await scope.db?.syncDao.state())?.accessToken;
-    await Watch.tell(token: _token, lang: dataLang, norm: norm, left: left);
+    await Watch.tell(
+      token: _token,
+      lang: dataLang,
+      norm: norm,
+      left: left,
+      portion: dataUnits.portion,
+      energy: dataUnits.energy,
+    );
   }
 
   /// Ідентифікатор картки за її написом.

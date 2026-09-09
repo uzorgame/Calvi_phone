@@ -301,11 +301,13 @@ class LFr extends L {
       'Rien n\'est encore noté sur cette période. Dis à Nora ce que tu as mangé et le graphique se construit tout seul.';
 
   @override
-  String get anKcalTotal => 'sur la période, kcal';
+  String anKcalTotal(Object u) {
+    return 'sur la période, $u';
+  }
 
   @override
-  String anMacroGoal(int grams) {
-    return 'repère $grams g';
+  String anMacroGoal(String grams) {
+    return 'repère $grams';
   }
 
   @override
@@ -336,7 +338,9 @@ class LFr extends L {
   String get anNow => 'maintenant';
 
   @override
-  String get anNowKg => 'maintenant, kg';
+  String anNowKg(Object u) {
+    return 'maintenant, $u';
+  }
 
   @override
   String get anOneReading => 'une mesure';
@@ -357,10 +361,14 @@ class LFr extends L {
   }
 
   @override
-  String get anStartKg => 'départ, kg';
+  String anStartKg(Object u) {
+    return 'départ, $u';
+  }
 
   @override
-  String get anTargetKg => 'objectif, kg';
+  String anTargetKg(Object u) {
+    return 'objectif, $u';
+  }
 
   @override
   String get anTitle => 'Statistiques';
@@ -369,11 +377,13 @@ class LFr extends L {
   String get anWater => 'Hydratation';
 
   @override
-  String get anWaterAvg => 'en moyenne, ml';
+  String anWaterAvg(Object u) {
+    return 'en moyenne, $u';
+  }
 
   @override
   String anWaterGoal(String ml) {
-    return 'repère $ml ml';
+    return 'repère $ml';
   }
 
   @override
@@ -523,8 +533,8 @@ class LFr extends L {
   String get barCamera => 'Caméra';
 
   @override
-  String barGrams(int grams) {
-    return '$grams g';
+  String barGrams(String grams) {
+    return '$grams';
   }
 
   @override
@@ -599,7 +609,9 @@ class LFr extends L {
   String get camDish => 'Photo';
 
   @override
-  String get camEstimate => ' kcal, estimation';
+  String camEstimate(Object u) {
+    return ' $u, estimation';
+  }
 
   @override
   String get camFlash => 'Flash';
@@ -631,13 +643,13 @@ class LFr extends L {
   }
 
   @override
-  String camKcalFor(int grams) {
-    return ' kcal sur $grams g';
+  String camKcalFor(String grams, Object u) {
+    return ' $u sur $grams';
   }
 
   @override
-  String camKcalPer(int grams) {
-    return ' kcal pour $grams g';
+  String camKcalPer(String grams, Object u) {
+    return ' $u pour $grams';
   }
 
   @override
@@ -688,8 +700,8 @@ class LFr extends L {
   String get camPer100 => 'Pas de poids exact sur l\'emballage : les chiffres sont pour 100 g.';
 
   @override
-  String camPortionPack(int g) {
-    return 'Portion de l\'emballage : $g g. Les chiffres sont par portion.';
+  String camPortionPack(String g) {
+    return 'Portion de l\'emballage : $g. Les chiffres sont par portion.';
   }
 
   @override
@@ -991,7 +1003,7 @@ class LFr extends L {
 
   @override
   String goalDiff(String kg) {
-    return '$kg kg d\'écart';
+    return '$kg d\'écart';
   }
 
   @override
@@ -1002,7 +1014,7 @@ class LFr extends L {
 
   @override
   String goalFromStart(String kg) {
-    return ' depuis $kg kg au départ. ';
+    return ' depuis $kg au départ. ';
   }
 
   @override
@@ -1034,14 +1046,16 @@ class LFr extends L {
   String get goalPaceSlow => 'Lent';
 
   @override
-  String get goalPaceUnit => 'kg par semaine';
+  String goalPaceUnit(Object u) {
+    return '$u par semaine';
+  }
 
   @override
   String get goalPaceUsual => 'Conseillé';
 
   @override
   String goalRange(String from, String to) {
-    return '$from → $to kg';
+    return '$from → $to';
   }
 
   @override
@@ -1058,8 +1072,8 @@ class LFr extends L {
   String get goalWas => 'Avant';
 
   @override
-  String gramsUnit(int grams) {
-    return '$grams g';
+  String gramsUnit(String grams) {
+    return '$grams';
   }
 
   @override
@@ -1084,8 +1098,8 @@ class LFr extends L {
   String get helloStepSay => 'Dis ce que tu as mangé';
 
   @override
-  String heroBurned(int kcal) {
-    return '-$kcal kcal grâce à l\'entraînement';
+  String heroBurned(String kcal) {
+    return '-$kcal grâce à l\'entraînement';
   }
 
   @override
@@ -1097,13 +1111,19 @@ class LFr extends L {
   }
 
   @override
-  String get heroGoalKg => 'objectif, kg';
+  String heroGoalKg(Object u) {
+    return 'objectif, $u';
+  }
 
   @override
-  String get heroKcal => ' kcal';
+  String heroKcal(Object u) {
+    return ' $u';
+  }
 
   @override
-  String get heroKg => ' kg';
+  String heroKg(Object u) {
+    return ' $u';
+  }
 
   @override
   String get heroLeft => 'reste ';
@@ -1121,12 +1141,12 @@ class LFr extends L {
 
   @override
   String heroWeightFrom(String kg) {
-    return 'maintenant, depuis $kg kg au début de l\'objectif';
+    return 'maintenant, depuis $kg au début de l\'objectif';
   }
 
   @override
-  String kcalUnit(int kcal) {
-    return '$kcal kcal';
+  String kcalUnit(String kcal) {
+    return '$kcal';
   }
 
   @override
@@ -1199,8 +1219,8 @@ class LFr extends L {
   String get macroMedsCaps => 'MÉDICAMENTS';
 
   @override
-  String macroOfGrams(int goal) {
-    return ' / ${goal}g';
+  String macroOfGrams(String goal) {
+    return ' / $goal';
   }
 
   @override
@@ -1227,7 +1247,9 @@ class LFr extends L {
   String get mealEditDelete => 'Supprimer l\'entrée';
 
   @override
-  String get mealEditKcal => 'kcal';
+  String mealEditKcal(Object u) {
+    return '$u';
+  }
 
   @override
   String get mealEditSave => 'Enregistrer';
@@ -1237,8 +1259,8 @@ class LFr extends L {
       'Il n\'y a rien ici pour l\'instant. Écris ce que c\'était et je le note.';
 
   @override
-  String mealGrams(int grams) {
-    return '$grams g';
+  String mealGrams(String grams) {
+    return '$grams';
   }
 
   @override
@@ -1408,8 +1430,8 @@ class LFr extends L {
   String get menuHintFree => 'gratuit';
 
   @override
-  String menuHintKcal(int n) {
-    return 'aujourd\'hui $n kcal';
+  String menuHintKcal(String n) {
+    return 'aujourd\'hui $n';
   }
 
   @override
@@ -1473,7 +1495,7 @@ class LFr extends L {
 
   @override
   String normAutoHint(String kcal) {
-    return 'à partir du poids, de la taille, de l\'âge, de l\'activité et de l\'objectif : $kcal kcal';
+    return 'à partir du poids, de la taille, de l\'âge, de l\'activité et de l\'objectif : $kcal';
   }
 
   @override
@@ -1501,18 +1523,18 @@ class LFr extends L {
   String get normFits => 'La répartition colle au repère';
 
   @override
-  String normGrams(int grams) {
-    return '$grams g';
+  String normGrams(String grams) {
+    return '$grams';
   }
 
   @override
   String normKcalOf(String kcal) {
-    return '$kcal kcal';
+    return '$kcal';
   }
 
   @override
-  String normMacroSplit(int protein, int fat, int carbs) {
-    return '$protein / $fat / $carbs g';
+  String normMacroSplit(int protein, int fat, String carbs) {
+    return '$protein / $fat / $carbs';
   }
 
   @override
@@ -1523,21 +1545,23 @@ class LFr extends L {
 
   @override
   String normOf(String kcal) {
-    return 'sur $kcal kcal';
+    return 'sur $kcal';
   }
 
   @override
   String normOffOver(String sum, int off) {
-    return 'La répartition donne $sum kcal, $off au-dessus du repère';
+    return 'La répartition donne $sum, $off au-dessus du repère';
   }
 
   @override
   String normOffUnder(String sum, int off) {
-    return 'La répartition donne $sum kcal, $off sous le repère';
+    return 'La répartition donne $sum, $off sous le repère';
   }
 
   @override
-  String get normPerDay => 'kcal par jour';
+  String normPerDay(Object u) {
+    return '$u par jour';
+  }
 
   @override
   String get normTitle => 'Repère';
@@ -1549,8 +1573,8 @@ class LFr extends L {
   String get normWaterHead => 'Cela fait ';
 
   @override
-  String normWaterPerKg(int ml) {
-    return '$ml ml';
+  String normWaterPerKg(String ml) {
+    return '$ml';
   }
 
   @override
@@ -1739,15 +1763,19 @@ class LFr extends L {
   String get planYearly => 'Pro annuel';
 
   @override
-  String plateFor(int grams) {
-    return 'sur $grams g';
+  String plateFor(String grams) {
+    return 'sur $grams';
   }
 
   @override
-  String get plateGrams => ' g';
+  String plateGrams(Object u) {
+    return ' $u';
+  }
 
   @override
-  String get plateKcal => 'kcal';
+  String plateKcal(Object u) {
+    return '$u';
+  }
 
   @override
   String get plateThinking => 'je réfléchis';
@@ -1908,8 +1936,8 @@ class LFr extends L {
   String get rcItemsHead => 'Ingrédients';
 
   @override
-  String rcItemsTotal(int g) {
-    return 'au total $g g';
+  String rcItemsTotal(String g) {
+    return 'au total $g';
   }
 
   @override
@@ -1941,8 +1969,8 @@ class LFr extends L {
   String get rcPickTitle => 'Choisis un plat';
 
   @override
-  String rcPortion(int g) {
-    return 'portion $g g';
+  String rcPortion(String g) {
+    return 'portion $g';
   }
 
   @override
@@ -1998,8 +2026,8 @@ class LFr extends L {
   String get rcToolsHead => 'Ce qu\'il faut en cuisine';
 
   @override
-  String rcWhole(int kcal, int g) {
-    return 'Plat entier : $kcal kcal, $g g';
+  String rcWhole(String kcal, String g) {
+    return 'Plat entier : $kcal, $g';
   }
 
   @override
@@ -2195,7 +2223,7 @@ class LFr extends L {
 
   @override
   String setGoalLine(String kg, String pace) {
-    return '$kg kg, $pace/semaine';
+    return '$kg, $pace/semaine';
   }
 
   @override
@@ -2227,7 +2255,7 @@ class LFr extends L {
 
   @override
   String setNormLine(String kcal) {
-    return '$kcal kcal';
+    return '$kcal';
   }
 
   @override
@@ -2246,8 +2274,8 @@ class LFr extends L {
   String get setProfile => 'Profil';
 
   @override
-  String setProfileLine(String sex, int age, int height) {
-    return '$sex, $age, $height cm';
+  String setProfileLine(String sex, int age, String height) {
+    return '$sex, $age, $height';
   }
 
   @override
@@ -2264,6 +2292,9 @@ class LFr extends L {
 
   @override
   String get setTitle => 'Réglages';
+
+  @override
+  String get setUnits => 'Unités';
 
   @override
   String get setUnset => 'non défini';
@@ -2301,7 +2332,9 @@ class LFr extends L {
   String get slotEraseTitle => 'Retirer le brouillon ?';
 
   @override
-  String get slotGrams => 'POIDS, G';
+  String slotGrams(Object u) {
+    return 'POIDS, $u';
+  }
 
   @override
   String get slotIntoBreakfast => 'au petit-déjeuner';
@@ -2321,7 +2354,9 @@ class LFr extends L {
   String get slotIntoSnack => 'dans la collation';
 
   @override
-  String get slotKcal => 'KCAL';
+  String slotKcal(Object u) {
+    return '$u';
+  }
 
   @override
   String get slotLog => 'Noter';
@@ -2408,7 +2443,9 @@ class LFr extends L {
       'C\'est la formule de Mifflin-St Jeor, pas un avis médical. Si tu as une pathologie, si tu es enceinte ou si tu suis un régime prescrit, parles-en à ton médecin.';
 
   @override
-  String get startNormPerDay => 'kcal par jour';
+  String startNormPerDay(Object u) {
+    return '$u par jour';
+  }
 
   @override
   String get startNormWeeks => 'semaines';
@@ -2429,7 +2466,9 @@ class LFr extends L {
   String get startPaceSlow => 'lent';
 
   @override
-  String get startPaceUnit => 'kg par semaine';
+  String startPaceUnit(Object u) {
+    return '$u par semaine';
+  }
 
   @override
   String get startPaceUsual => 'régulier';
@@ -2590,8 +2629,8 @@ class LFr extends L {
   }
 
   @override
-  String todayLoggedIntoWithNumbers(String slotInto, String dish, int kcal, int grams) {
-    return 'Noté $slotInto : $dish, $kcal kcal pour $grams g.';
+  String todayLoggedIntoWithNumbers(String slotInto, String dish, String kcal, String grams) {
+    return 'Noté $slotInto : $dish, $kcal pour $grams.';
   }
 
   @override
@@ -2709,13 +2748,13 @@ class LFr extends L {
   }
 
   @override
-  String waterLess(int step) {
-    return '$step ml de moins';
+  String waterLess(String step) {
+    return '$step de moins';
   }
 
   @override
-  String waterMore(int step) {
-    return '$step ml de plus';
+  String waterMore(String step) {
+    return '$step de plus';
   }
 
   @override
@@ -2723,7 +2762,7 @@ class LFr extends L {
 
   @override
   String waterOf(String ml) {
-    return ' / $ml ml';
+    return ' / $ml';
   }
 
   @override
@@ -2797,7 +2836,9 @@ class LFr extends L {
   String get welTotal => 'Au total';
 
   @override
-  String get wfBurned => 'Brûlées, kcal';
+  String wfBurned(Object u) {
+    return 'Brûlées, $u';
+  }
 
   @override
   String get wfDuration => 'Durée';
@@ -2812,13 +2853,17 @@ class LFr extends L {
   String get wfFromWatch => 'D\'une montre ou d\'une machine';
 
   @override
-  String get wfKcal => ' kcal';
+  String wfKcal(Object u) {
+    return ' $u';
+  }
 
   @override
   String get wfLog => 'Noter';
 
   @override
-  String get wfManualKcal => 'kcal à la main';
+  String wfManualKcal(Object u) {
+    return '$u à la main';
+  }
 
   @override
   String wfMin(int min) {
@@ -2951,7 +2996,9 @@ class LFr extends L {
   String get wkPastTitle => 'Semaines passées';
 
   @override
-  String get wkPerDay => 'kcal par jour en moyenne';
+  String wkPerDay(Object u) {
+    return '$u par jour en moyenne';
+  }
 
   @override
   String get wkPerDayAside => 'par jour en moyenne';
@@ -2960,7 +3007,9 @@ class LFr extends L {
   String get wkTitle => 'La semaine';
 
   @override
-  String get wkTotalCap => 'kcal dans la semaine';
+  String wkTotalCap(Object u) {
+    return '$u dans la semaine';
+  }
 
   @override
   String get wkWaterCap => 'd\'eau par jour';
@@ -2977,8 +3026,8 @@ class LFr extends L {
   String get workoutAdd => 'Ajouter un entraînement';
 
   @override
-  String workoutBurned(int kcal) {
-    return '−$kcal kcal';
+  String workoutBurned(String kcal) {
+    return '−$kcal';
   }
 
   @override

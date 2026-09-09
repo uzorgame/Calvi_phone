@@ -227,6 +227,7 @@ class CalviWheel extends StatelessWidget {
     required this.onPick,
     required this.suffix,
     this.compact = false,
+    this.format,
   });
 
   final List<int> values;
@@ -237,10 +238,16 @@ class CalviWheel extends StatelessWidget {
   /// Три ряди замість пʼяти, коли барабанів на екрані два.
   final bool compact;
 
+  /// Свій підпис на кожній поділці, коли число само по собі не читається:
+  /// зріст у футах і дюймах це «5′9″», а не «69».
+  final String Function(int)? format;
+
   @override
   Widget build(BuildContext context) => _Drum(
     height: compact ? _drumSmall : _drum,
-    children: [CalviWheelColumn(values: values, value: value, onPick: onPick, suffix: suffix)],
+    children: [
+      CalviWheelColumn(values: values, value: value, onPick: onPick, suffix: suffix, format: format),
+    ],
   );
 }
 

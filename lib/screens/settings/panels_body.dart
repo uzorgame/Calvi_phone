@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import '../../data/app_scope.dart';
 import '../../data/remote/api.dart';
 import '../../data/settings.dart';
+import '../../data/units.dart';
 import '../../design/ruler.dart';
 import '../../design/shell.dart';
 import '../menu.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import '../../design/wheel.dart';
-import '../../format.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/labels.dart';
 import 'account_block.dart';
@@ -52,10 +52,11 @@ class ProfilePanel extends StatelessWidget {
       title: L.of(context).profileHeight,
       onDone: () => set((v) => v.copyWith(heightCm: picked)),
       builder: (sheet) => CalviWheel(
-        values: heights,
-        value: s.heightCm,
-        suffix: L.of(sheet).unitCm,
-        onPick: (h) => picked = h,
+        values: dataUnits.heightWheel,
+        value: dataUnits.heightOut(s.heightCm),
+        suffix: dataUnits.length == 'in' ? '' : L.of(sheet).unitCm,
+        format: dataUnits.length == 'in' ? dataUnits.heightNum : null,
+        onPick: (h) => picked = dataUnits.heightIn(h),
       ),
     );
   }
@@ -112,7 +113,7 @@ class ProfilePanel extends StatelessWidget {
             CalviRow(
               icon: 'ruler',
               title: l.profileHeight,
-              value: '${s.heightCm} ${l.unitCm}',
+              value: dataUnits.heightText(s.heightCm),
               onTap: () => _pickHeight(context),
             ),
           ],
@@ -264,11 +265,11 @@ class WeightPanel extends StatelessWidget {
         _Titled(
           bare: true,
           child: CalviRuler(
-            value: s.weightKg,
-            min: 40,
-            max: 180,
-            suffix: l.unitKg,
-            onChange: (w) => set((v) => v.copyWith(weightKg: w)),
+            value: dataUnits.massOut(s.weightKg),
+            min: dataUnits.massBound(40),
+            max: dataUnits.massBound(180),
+            suffix: dataUnits.massLabel,
+            onChange: (w) => set((v) => v.copyWith(weightKg: dataUnits.massIn(w))),
           ),
         ),
         CalviNote(l.weightNote),
@@ -353,22 +354,22 @@ class _GoalPanelState extends State<GoalPanel> {
         if (s.direction != Direction.keep) ...[
           _Titled(
             title: l.goalTarget,
-            aside: l.goalDiff(diff.toStringAsFixed(1)),
+            aside: l.goalDiff(dataUnits.massText(diff)),
             bare: true,
             child: Column(
               children: [
                 CalviRuler(
-                  value: pending,
-                  min: 40,
-                  max: 180,
-                  suffix: l.unitKg,
-                  onChange: (v) => setState(() => _draft = v),
+                  value: dataUnits.massOut(pending),
+                  min: dataUnits.massBound(40),
+                  max: dataUnits.massBound(180),
+                  suffix: dataUnits.massLabel,
+                  onChange: (v) => setState(() => _draft = dataUnits.massIn(v)),
                 ),
                 if (_changed)
                   CalviNote.rich(
                     l.goalCurrent,
-                    bold: '${s.targetKg.toStringAsFixed(1)} ${l.unitKg}',
-                    rest: l.goalFromStart(s.goalStartKg.toStringAsFixed(1)) + l.goalFromToday,
+                    bold: dataUnits.massText(s.targetKg),
+                    rest: l.goalFromStart(dataUnits.massText(s.goalStartKg)) + l.goalFromToday,
                     lead: 12,
                   ),
               ],
@@ -386,7 +387,7 @@ class _GoalPanelState extends State<GoalPanel> {
                   child: Column(
                     children: [
                       Text(
-                        s.pace.toStringAsFixed(1),
+                        dataUnits.massNum(s.pace),
                         style: context.t.displayLarge?.copyWith(
                           fontSize: 40,
                           height: 1.26,
@@ -395,7 +396,7 @@ class _GoalPanelState extends State<GoalPanel> {
                       ),
                       Padding(
                         padding: const EdgeInsets.only(top: 6),
-                        child: Text(l.goalPaceUnit, style: context.t.bodyMedium),
+                        child: Text(l.goalPaceUnit(dataUnits.massLabel), style: context.t.bodyMedium),
                       ),
                     ],
                   ),
@@ -415,7 +416,7 @@ class _GoalPanelState extends State<GoalPanel> {
 
         CalviFacts(
           rows: [
-            (l.goalDailyNorm, l.normKcalOf(thousands(kcal))),
+            (l.goalDailyNorm, l.normKcalOf(dataUnits.enText(kcal))),
             if (weeks > 0) (l.goalEta, targetDate(weeks)),
           ],
           note: s.direction == Direction.keep
@@ -450,12 +451,12 @@ class _GoalPanelState extends State<GoalPanel> {
           children: [
             _Was(
               label: l.goalWas,
-              text: l.goalRange(s.goalStartKg.toStringAsFixed(1), s.targetKg.toStringAsFixed(1)),
+              text: l.goalRange(dataUnits.massNum(s.goalStartKg), dataUnits.massText(s.targetKg)),
               strong: false,
             ),
             _Was(
               label: l.goalBecomes,
-              text: l.goalRange(s.weightKg.toStringAsFixed(1), pending.toStringAsFixed(1)),
+              text: l.goalRange(dataUnits.massNum(s.weightKg), dataUnits.massText(pending)),
               strong: true,
             ),
             const SizedBox(height: 12),
@@ -556,7 +557,7 @@ class NormPanel extends StatelessWidget {
                   textBaseline: TextBaseline.alphabetic,
                   children: [
                     Text(
-                      thousands(kcal),
+                      dataUnits.enNum(kcal),
                       style: context.t.displayLarge?.copyWith(
                         fontSize: 34,
                         height: 1,
@@ -564,7 +565,7 @@ class NormPanel extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Expanded(child: Text(l.normPerDay, style: context.t.bodyMedium)),
+                    Expanded(child: Text(l.normPerDay(dataUnits.enLabel), style: context.t.bodyMedium)),
                     if (manual)
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
@@ -619,8 +620,8 @@ class NormPanel extends StatelessWidget {
                       ? l.normFits
                       // Напрям словами: «на 858 осторонь» не каже, куди саме.
                       : off < 0
-                      ? l.normOffUnder(thousands(sum), off.abs())
-                      : l.normOffOver(thousands(sum), off.abs()),
+                      ? l.normOffUnder(dataUnits.enText(sum), dataUnits.enOut(off.abs()))
+                      : l.normOffOver(dataUnits.enText(sum), dataUnits.enOut(off.abs())),
                   style: context.t.labelSmall?.copyWith(color: ok ? null : c.protein),
                 ),
 
@@ -680,7 +681,7 @@ class NormPanel extends StatelessWidget {
             if (!manual)
               CalviNote.rich(
                 l.normAutoFrom,
-                bold: l.normKcalOf(thousands(auto)),
+                bold: l.normKcalOf(dataUnits.enText(auto)),
                 rest: '.',
                 lead: 12,
               ),
@@ -691,15 +692,18 @@ class NormPanel extends StatelessWidget {
                  блоці першим і відступу не має, як і в демці. */
               const SizedBox(height: CalviSize.gapCard),
               CalviStepper(
-                value: s.kcalManual ?? auto,
-                step: 50,
-                min: 1200,
-                suffix: l.unitKcal,
-                onChange: (v) => set((x) => x.copyWith(kcalManual: v < 1200 ? 1200 : v)),
+                value: dataUnits.enOut(s.kcalManual ?? auto),
+                step: dataUnits.enStep,
+                min: dataUnits.enOut(1200),
+                suffix: dataUnits.enLabel,
+                onChange: (v) {
+                  final kcal = dataUnits.enIn(v);
+                  set((x) => x.copyWith(kcalManual: kcal < 1200 ? 1200 : kcal));
+                },
               ),
               CalviNote.rich(
                 l.normCalculatedHead,
-                bold: l.normKcalOf(thousands(auto)),
+                bold: l.normKcalOf(dataUnits.enText(auto)),
                 rest: l.normCalculatedTail,
                 lead: 12,
               ),
@@ -709,14 +713,14 @@ class NormPanel extends StatelessWidget {
 
         _Titled(
           title: l.normMacros,
-          aside: l.normMacroSplit(s.protein, s.fat, s.carbs),
+          aside: l.normMacroSplit(s.protein, s.fat, dataUnits.gramsText(s.carbs)),
           bare: true,
           child: Column(
             children: [
               /* Сума і кнопка підгонки переїхали в картку норми вгорі: там
                  вони стоять поруч із числом, проти якого рахуються, а тут
                  повторювали б його вдруге. */
-              _MacroRow(label: l.macroProtein, value: l.normGrams(s.protein)),
+              _MacroRow(label: l.macroProtein, value: l.normGrams(dataUnits.gramsText(s.protein))),
               CalviSlider(
                 value: s.protein.toDouble(),
                 min: 40,
@@ -724,7 +728,7 @@ class NormPanel extends StatelessWidget {
                 step: 5,
                 onChange: (v) => set((x) => x.copyWith(protein: v.round())),
               ),
-              _MacroRow(label: l.macroFat, value: l.normGrams(s.fat)),
+              _MacroRow(label: l.macroFat, value: l.normGrams(dataUnits.gramsText(s.fat))),
               CalviSlider(
                 value: s.fat.toDouble(),
                 min: 20,
@@ -732,7 +736,7 @@ class NormPanel extends StatelessWidget {
                 step: 2,
                 onChange: (v) => set((x) => x.copyWith(fat: v.round())),
               ),
-              _MacroRow(label: l.macroCarbs, value: l.normGrams(s.carbs)),
+              _MacroRow(label: l.macroCarbs, value: l.normGrams(dataUnits.gramsText(s.carbs))),
               CalviSlider(
                 value: s.carbs.toDouble(),
                 min: 40,
@@ -750,10 +754,10 @@ class NormPanel extends StatelessWidget {
           child: Column(
             children: [
               CalviStepper(
-                value: s.waterMl,
-                step: 100,
-                suffix: l.unitMl,
-                onChange: (v) => set((x) => x.copyWith(waterMl: v)),
+                value: dataUnits.volOut(s.waterMl),
+                step: dataUnits.volOut(dataUnits.volStep),
+                suffix: dataUnits.volLabel,
+                onChange: (v) => set((x) => x.copyWith(waterMl: dataUnits.volIn(v))),
               ),
               CalviNote.rich(
                 l.normWaterHead,

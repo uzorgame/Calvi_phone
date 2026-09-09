@@ -21,21 +21,17 @@
   "rcServingsMany": "{n} porcji",
   "rcPerServing": "na porcję",
   "rcPerServingHead": "Na porcję",
-  "rcWhole": "Całe danie: {kcal} kcal, {g} g",
+  "rcWhole": "Całe danie: {kcal}, {g}",
   "@rcWhole": {
     "placeholders": {
-      "kcal": {
-        "type": "int"
-      },
-      "g": {
-        "type": "int"
-      }
+      "kcal": { "type": "String" },
+      "g": { "type": "String" }
     }
   },
-  "rcPortion": "porcja {g} g",
+  "rcPortion": "porcja {g}",
   "rcOfDay": "to {p}% normy dziennej",
   "rcItemsHead": "Produkty",
-  "rcItemsTotal": "razem {g} g",
+  "rcItemsTotal": "razem {g}",
   "rcToolsHead": "Potrzebne w kuchni",
   "rcNoTools": "Nic poza nożem i miską",
   "rcStepsHead": "Jak przygotować",
