@@ -118,6 +118,18 @@ embed.symbol_dst_subfolder_spec = :products_directory
 embed.dst_path = '$(CONTENTS_FOLDER_PATH)/Watch'
 embed.add_file_reference(watch.product_reference).settings = { 'ATTRIBUTES' => ['RemoveHeadersOnCopy'] }
 
+# Перед скриптом Flutter «Thin Binary», а не в кінці списку.
+#
+# Нова фаза стає останньою, тобто після скриптів. Скрипт «Thin Binary»
+# оголошує весь Runner.app своїм результатом, а це копіювання пише всередину
+# того самого Runner.app: Xcode бачив, що копіювання чекає на скрипт, а скрипт
+# на вміст пакета, і зупиняв архів із «Cycle inside Runner». У проєктах, які
+# робить сам Xcode, «Embed Watch Content» стоїть серед фаз копіювання, до
+# будь-яких скриптів, і саме туди вона й переставляється.
+phases = phone.build_phases
+thin = phases.find { |p| p.respond_to?(:name) && p.name == 'Thin Binary' }
+phases.move(embed, phases.index(thin)) if thin
+
 # Телефонна ціль має чекати на годинникову, інакше вона копіює те, чого ще немає.
 phone.add_dependency(watch)
 
