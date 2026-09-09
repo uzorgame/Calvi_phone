@@ -1873,6 +1873,7 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
     await Watch.tell(
       token: _token,
       lang: dataLang,
+      direction: scope.s.direction.name,
       norm: norm,
       left: left,
       portion: dataUnits.portion,

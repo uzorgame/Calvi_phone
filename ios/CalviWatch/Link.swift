@@ -27,6 +27,10 @@ final class Link: NSObject, ObservableObject {
   @Published private(set) var portion = "g"
   @Published private(set) var energy = "kcal"
 
+  /// Куди людина йде: lose, keep, gain. Від цього залежить, коли день уже
+  /// читається як «план виконаний», за тим самим правилом, що в застосунку.
+  @Published private(set) var direction = "keep"
+
   private let disk = UserDefaults.standard
 
   /// Слова, на які годинник ще чекає від телефона, за номером запису.
@@ -95,6 +99,7 @@ final class Link: NSObject, ObservableObject {
     left = disk.integer(forKey: "left")
     portion = disk.string(forKey: "portion") ?? "g"
     energy = disk.string(forKey: "energy") ?? "kcal"
+    direction = disk.string(forKey: "direction") ?? "keep"
   }
 
   fileprivate func take(_ context: [String: Any]) {
@@ -127,6 +132,10 @@ final class Link: NSObject, ObservableObject {
     if let v = context["energy"] as? String {
       energy = v
       disk.set(v, forKey: "energy")
+    }
+    if let v = context["direction"] as? String {
+      direction = v
+      disk.set(v, forKey: "direction")
     }
   }
 

@@ -152,9 +152,13 @@ struct Watch: View {
           .foregroundStyle(Palette.text)
           .multilineTextAlignment(.center)
         if link.ready {
-          Text(String(format: t.leftOf, link.energyNum(link.left), link.energyText(link.norm)))
+          /* Один рядок і завжди цілий: «лишилось 1 160 з 2 220 ккал» на
+             екрані не вміщалось і обривалось трьома крапками. */
+          Text(status())
             .font(Palette.font(w * 0.066))
             .foregroundStyle(Palette.dim)
+            .lineLimit(1)
+            .minimumScaleFactor(0.85)
         }
       }
     }
@@ -268,13 +272,22 @@ struct Watch: View {
       /* Число не підміняється, а їде від старого до нового: рух тут і є
          відповіддю на «скільки з мене за це зняли». */
       VStack(spacing: w * 0.008) {
-        Countdown(
-          from: link.left + dishes.reduce(0) { $0 + $1.kcal },
-          to: link.left,
-          words: t.leftNow,
-          number: { link.energyNum($0) },
-          unit: link.energyUnit()
-        )
+        if remaining {
+          Countdown(
+            from: link.left + dishes.reduce(0) { $0 + $1.kcal },
+            to: link.left,
+            words: t.left,
+            number: { link.energyNum($0) }
+          )
+        } else {
+          /* Числу їхати нікуди: план виконаний або перевиконаний, і рядок каже
+             це словами, тими самими, що й головний екран. */
+          Text(status())
+            .font(Palette.font(w * 0.066))
+            .foregroundStyle(Palette.dim)
+            .lineLimit(1)
+            .minimumScaleFactor(0.85)
+        }
 
         /* Похвала не на кожен запис і не завжди. Слово, яке чуєш щоразу, стає
            частиною інтерфейсу, а сказане тому, хто щойно перебрав норму, це не
@@ -300,9 +313,11 @@ struct Watch: View {
       Note(head: t.dryHead, say: t.dryBody)
       Spacer(minLength: 0)
       Under {
-        Text(String(format: t.leftNow, link.energyText(link.left)))
+        Text(status())
           .font(Palette.font(w * 0.066))
           .foregroundStyle(Palette.dim)
+          .lineLimit(1)
+          .minimumScaleFactor(0.85)
       }
     }
   }
@@ -314,6 +329,24 @@ struct Watch: View {
       Note(head: t.queuedHead, say: t.queuedBody)
       Spacer(minLength: 0)
     }
+  }
+
+  // MARK: Рядок під кнопкою
+
+  /* Скільки нижче норми ще рахується виконаним планом: чотириста, як
+     `kcalSlack` у застосунку, для схуднення й утримання. Для набору план
+     виконаний лише від норми: там зʼїсти більше за ціль і є ціль. */
+  private var slack: Int { link.direction == "gain" ? 0 : 400 }
+
+  /// Залишок ще є сенс показувати числом.
+  private var remaining: Bool { link.left > slack }
+
+  /// Залишок числом або вирок дня словами. Пʼятсот і більше понад норму це
+  /// вже перевиконання; менше, або в межах запасу нижче норми, план виконаний.
+  private func status() -> String {
+    if link.left <= -500 { return t.planOver }
+    if !remaining { return t.planDone }
+    return String(format: t.left, link.energyNum(link.left))
   }
 
   // MARK: Дії
@@ -588,13 +621,12 @@ private struct Countdown: View {
   let to: Int
   let words: String
   let number: (Int) -> String
-  let unit: String
   @State private var now: Int = 0
   private var w: CGFloat { WKInterfaceDevice.current().screenBounds.width }
 
   var body: some View {
-    /* Формат «лишилось %@» ріжеться на слово і хвіст, число стоїть чорнилом
-       між ними, як у прототипі. */
+    /* Формат «Залишилось %@» ріжеться на слово і хвіст, число стоїть чорнилом
+       між ними, як у прототипі. Одиниці немає, як і на головному екрані. */
     let parts = words.components(separatedBy: "%@")
     HStack(spacing: 0) {
       Text(parts.first ?? "")
@@ -602,7 +634,6 @@ private struct Countdown: View {
         .font(Palette.font(w * 0.071, .semibold))
         .foregroundStyle(Palette.text)
         .monospacedDigit()
-      Text(" \(unit)")
       Text(parts.count > 1 ? parts[1] : "")
     }
     .font(Palette.font(w * 0.066))

@@ -77,6 +77,9 @@ class Watch {
     // rest never appear on it.
     String portion = 'g',
     String energy = 'kcal',
+    /// Where the person is heading: lose, keep, gain. The watch uses it to
+    /// decide when the day already reads "plan done", by the app's own rule.
+    String direction = 'keep',
   }) async {
     /* Тільки iPhone. На Android каналу немає взагалі, на вебі немає й самого
        поняття, і питати там нема кого. */
@@ -85,7 +88,7 @@ class Watch {
     // Без токена годиннику нема з чим іти на сервер: чекаємо, поки акаунт буде.
     if (token == null || token.isEmpty) return;
 
-    final now = '$token|$lang|$norm|$left|$portion|$energy';
+    final now = '$token|$lang|$norm|$left|$portion|$energy|$direction';
     if (now == _sent) return;
     _sent = now;
 
@@ -97,6 +100,7 @@ class Watch {
         'left': left,
         'portion': portion,
         'energy': energy,
+        'direction': direction,
       });
     } on PlatformException {
       /* Годинника може не бути зовсім, і це не помилка застосунку. Наступна

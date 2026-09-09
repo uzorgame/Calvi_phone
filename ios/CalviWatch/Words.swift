@@ -13,14 +13,16 @@ import Foundation
 struct Words {
   let say: String
   let openPhone: String
-  /// «лишилось %@ з %@»: залишок і норма.
-  let leftOf: String
+  /// «Залишилось %@»: тільки число, без норми й одиниці. Довший рядок не
+  /// вміщався на екрані годинника.
+  let left: String
+  /// Вирок дня замість залишку: план виконаний, план перевиконаний.
+  let planDone: String
+  let planOver: String
   let listening: String
   let done: String
   let analysing: String
   let logged: String
-  /// «лишилось %@».
-  let leftNow: String
   let praise: String
   let dryHead: String
   let dryBody: String
@@ -45,12 +47,13 @@ struct Words {
     "uk": Words(
       say: "Сказати",
       openPhone: "Відкрий Calvi на телефоні",
-      leftOf: "лишилось %@ з %@",
+      left: "Залишилось %@",
+      planDone: "План виконаний",
+      planOver: "План перевиконаний",
       listening: "Слухаю…",
       done: "Готово",
       analysing: "Аналізую",
       logged: "Записала",
-      leftNow: "лишилось %@",
       praise: "Ти гарно йдеш до цілі!",
       dryHead: "Токени скінчились",
       dryBody: "Я поки мовчу. Запис рукою в телефоні працює й далі, він безкоштовний.",
@@ -68,12 +71,13 @@ struct Words {
     "en": Words(
       say: "Speak",
       openPhone: "Open Calvi on your phone",
-      leftOf: "%@ of %@ left",
+      left: "%@ left",
+      planDone: "Plan done",
+      planOver: "Plan exceeded",
       listening: "Listening…",
       done: "Done",
       analysing: "Analysing",
       logged: "Logged",
-      leftNow: "%@ left",
       praise: "You are on track!",
       dryHead: "Out of tokens",
       dryBody: "I am quiet for now. Logging by hand on the phone still works, and it is free.",
@@ -91,12 +95,13 @@ struct Words {
     "es": Words(
       say: "Hablar",
       openPhone: "Abre Calvi en el teléfono",
-      leftOf: "quedan %@ de %@",
+      left: "Quedan %@",
+      planDone: "Plan cumplido",
+      planOver: "Plan superado",
       listening: "Escucho…",
       done: "Listo",
       analysing: "Analizo",
       logged: "Anotado",
-      leftNow: "quedan %@",
       praise: "¡Vas bien hacia tu meta!",
       dryHead: "Sin tokens",
       dryBody: "Por ahora callo. Anotar a mano en el teléfono sigue funcionando, y es gratis.",
@@ -114,12 +119,13 @@ struct Words {
     "it": Words(
       say: "Parla",
       openPhone: "Apri Calvi sul telefono",
-      leftOf: "restano %@ di %@",
+      left: "Restano %@",
+      planDone: "Piano completato",
+      planOver: "Piano superato",
       listening: "Ascolto…",
       done: "Fatto",
       analysing: "Analizzo",
       logged: "Registrato",
-      leftNow: "restano %@",
       praise: "Stai andando bene!",
       dryHead: "Token finiti",
       dryBody: "Per ora taccio. Registrare a mano sul telefono funziona ancora, ed è gratis.",
@@ -137,12 +143,13 @@ struct Words {
     "de": Words(
       say: "Sprechen",
       openPhone: "Öffne Calvi auf dem iPhone",
-      leftOf: "%@ von %@ übrig",
+      left: "Noch %@",
+      planDone: "Plan erfüllt",
+      planOver: "Plan übertroffen",
       listening: "Ich höre…",
       done: "Fertig",
       analysing: "Analysiere",
       logged: "Eingetragen",
-      leftNow: "%@ übrig",
       praise: "Du bist gut auf Kurs!",
       dryHead: "Keine Token mehr",
       dryBody: "Ich bin vorerst still. Von Hand eintragen am iPhone geht weiter, und das ist kostenlos.",
@@ -160,12 +167,13 @@ struct Words {
     "fr": Words(
       say: "Parler",
       openPhone: "Ouvre Calvi sur le téléphone",
-      leftOf: "il reste %@ sur %@",
+      left: "Il reste %@",
+      planDone: "Plan atteint",
+      planOver: "Plan dépassé",
       listening: "Je t’écoute…",
       done: "Terminé",
       analysing: "J’analyse",
       logged: "Noté",
-      leftNow: "il reste %@",
       praise: "Tu es sur la bonne voie !",
       dryHead: "Plus de jetons",
       dryBody: "Je me tais pour l’instant. Noter à la main sur le téléphone marche toujours, et c’est gratuit.",
@@ -183,12 +191,13 @@ struct Words {
     "pt": Words(
       say: "Falar",
       openPhone: "Abra o Calvi no telefone",
-      leftOf: "restam %@ de %@",
+      left: "Restam %@",
+      planDone: "Plano cumprido",
+      planOver: "Plano superado",
       listening: "Ouvindo…",
       done: "Pronto",
       analysing: "Analisando",
       logged: "Registrado",
-      leftNow: "restam %@",
       praise: "Você está no caminho certo!",
       dryHead: "Sem tokens",
       dryBody: "Fico em silêncio por ora. Registrar à mão no telefone continua funcionando, e é grátis.",
@@ -206,12 +215,13 @@ struct Words {
     "pl": Words(
       say: "Powiedz",
       openPhone: "Otwórz Calvi na telefonie",
-      leftOf: "zostało %@ z %@",
+      left: "Zostało %@",
+      planDone: "Plan wykonany",
+      planOver: "Plan przekroczony",
       listening: "Słucham…",
       done: "Gotowe",
       analysing: "Analizuję",
       logged: "Zapisane",
-      leftNow: "zostało %@",
       praise: "Dobrze idziesz do celu!",
       dryHead: "Brak tokenów",
       dryBody: "Na razie milczę. Ręczny zapis w telefonie nadal działa i jest bezpłatny.",
