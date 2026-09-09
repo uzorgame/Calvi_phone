@@ -328,16 +328,26 @@ enum Hearing {
       return
     }
 
+    /* Заблокований телефон. Розпізнавач Apple через мережу на ньому відмовляє,
+       і годинник чув «не почула» на кожне слово, хоч телефон усе отримав.
+       Прапорець системи каже саме про замок: він гасне, щойно екран замкнувся.
+       Відповідь із позначкою «замкнений» веде годинник на сервер, а слова в
+       ній лишаються на випадок, коли й сервер не чує. */
+    let locked = !UIApplication.shared.isProtectedDataAvailable
+    let lockedReply: [String: Any] = ["locked": true, "error": say(.locked, lang)]
+
     // Замок на мові: розпізнавач саме цієї локалі, а не «яку почує».
     let id = locales[lang] ?? "en-US"
     guard let recognizer = SFSpeechRecognizer(locale: Locale(identifier: id)) else {
-      done(["error": say(.noLanguage, lang)])
+      done(locked ? lockedReply : ["error": say(.noLanguage, lang)])
       return
     }
     /* Розпізнавач Apple працює через мережу, і «недоступний» майже завжди
-       означає, що телефон без неї. Так і кажемо, а не «мова недоступна». */
+       означає, що телефон без неї. Так і кажемо, а не «мова недоступна».
+       Під замком він теж буває «недоступний», і тоді відповідь та сама, що
+       для замка: годинник має піти на сервер, а не чути «немає мережі». */
     guard recognizer.isAvailable else {
-      done(["error": say(.noNetwork, lang)])
+      done(locked ? lockedReply : ["error": say(.noNetwork, lang)])
       return
     }
 
@@ -357,11 +367,6 @@ enum Hearing {
       UIApplication.shared.endBackgroundTask(task)
       task = .invalid
     }
-
-    /* Заблокований телефон. Розпізнавач Apple через мережу на ньому відмовляє,
-       і годинник чув «не почула» на кожне слово, хоч телефон усе отримав.
-       Прапорець системи каже саме про замок: він гасне, щойно екран замкнувся. */
-    let locked = !UIApplication.shared.isProtectedDataAvailable
 
     let source = louder(file) ?? file
     let request = SFSpeechURLRecognitionRequest(url: source)
@@ -388,7 +393,7 @@ enum Hearing {
        сервер, а слова лишає на випадок, коли сервер не чує. */
     if locked {
       guard recognizer.supportsOnDeviceRecognition else {
-        finish(["locked": true, "error": say(.locked, lang)])
+        finish(lockedReply)
         return
       }
       request.requiresOnDeviceRecognition = true
