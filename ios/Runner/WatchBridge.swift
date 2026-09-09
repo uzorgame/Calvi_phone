@@ -1,3 +1,4 @@
+import AVFoundation
 import Flutter
 import Speech
 import UIKit
@@ -201,6 +202,48 @@ enum Hearing {
     return (table[lang] ?? table["en"]!)[what]!
   }
 
+  /// Той самий запис, підтягнутий до нормальної гучності. Мікрофон годинника
+  /// тихий, і розпізнавач на тихому файлі відповідав «нічого не сказано».
+  /// Найгучніший відлік стає -1 дБ; запис, який і так гучний, лишається як є.
+  /// Порожньо, коли файл не прочитався: тоді хай розпізнавач пробує сирий.
+  private static func louder(_ url: URL) -> URL? {
+    guard let input = try? AVAudioFile(forReading: url) else { return nil }
+    let format = input.processingFormat
+    guard
+      input.length > 0,
+      let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(input.length)),
+      (try? input.read(into: buffer)) != nil,
+      let channels = buffer.floatChannelData,
+      buffer.frameLength > 0
+    else { return nil }
+
+    let frames = Int(buffer.frameLength)
+    let count = Int(format.channelCount)
+    var peak: Float = 0
+    for c in 0..<count {
+      let samples = channels[c]
+      for i in 0..<frames { peak = max(peak, abs(samples[i])) }
+    }
+    // Тиша не підсилюється: із шуму слів не зробиш, а стелю він продавив би.
+    guard peak > 0.001 else { return nil }
+    if peak > 0.5 { return url }
+
+    // Не більше за тридцять разів: далі це вже шум, а не голос.
+    let gain = min(0.9 / peak, 30)
+    for c in 0..<count {
+      let samples = channels[c]
+      for i in 0..<frames { samples[i] *= gain }
+    }
+
+    let out = url.deletingPathExtension().appendingPathExtension("caf")
+    guard
+      let output = try? AVAudioFile(
+        forWriting: out, settings: format.settings, commonFormat: .pcmFormatFloat32, interleaved: false),
+      (try? output.write(from: buffer)) != nil
+    else { return nil }
+    return out
+  }
+
   static func transcribe(_ audio: Data, lang: String, done: @escaping ([String: Any]) -> Void) {
     /* Дозвіл уже є: його просила диктовка в застосунку або екран «Доступ», і
        це той самий дозвіл. Просити тут не можна, бо застосунок може бути
@@ -240,7 +283,8 @@ enum Hearing {
       task = .invalid
     }
 
-    let request = SFSpeechURLRecognitionRequest(url: file)
+    let source = louder(file) ?? file
+    let request = SFSpeechURLRecognitionRequest(url: source)
     request.shouldReportPartialResults = false
     request.taskHint = .dictation
 
@@ -249,6 +293,7 @@ enum Hearing {
       guard !answered else { return }
       answered = true
       try? FileManager.default.removeItem(at: file)
+      try? FileManager.default.removeItem(at: source)
       done(reply)
       if task != .invalid {
         UIApplication.shared.endBackgroundTask(task)
@@ -259,9 +304,13 @@ enum Hearing {
     recognizer.recognitionTask(with: request) { result, error in
       if let result, result.isFinal {
         finish(["heard": result.bestTranscription.formattedString])
-      } else if error != nil {
-        // Тиша, шум або не та мова: для годинника це одне й те саме.
-        finish(["error": say(.notHeard, lang)])
+      } else if let error {
+        /* Причина лишається в журналі телефона, а годиннику йде одна з двох:
+           мережа, коли впала вона, інакше «не почула». Тиша, шум і не та
+           мова для годинника одне й те саме. */
+        NSLog("watch: розпізнавання не вдалось, \(error)")
+        let network = (error as NSError).domain == NSURLErrorDomain
+        finish(["error": say(network ? .noNetwork : .notHeard, lang)])
       }
     }
   }

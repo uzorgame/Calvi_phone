@@ -31,6 +31,14 @@ final class Ears: NSObject, ObservableObject {
   private var meter: Timer?
   private var file: URL?
 
+  /* Найгучніше з недавнього. Метр міряє голос відносно нього, а не в
+     абсолютних децибелах: шкала, взята з демки в браузері, розрахована на
+     мікрофон із підсиленням, а годинник тихіший, і на ній треба було кричати.
+     Стеля повільно опадає, тож після гучної фрази тиха знову видна. Нижче за
+     `quiet` вона не падає, інакше шум кімнати роздувся б до голосу. */
+  private var ceiling = Ears.quiet
+  private static let quiet = 0.05
+
   /* Стиснутий AAC, моно, 16 кГц, 20 кбіт/с: речення про обід це кілька
      десятків кілобайт. Межа має значення: одне повідомлення на телефон несе не
      більше за 64 кілобайти, і двадцять секунд на цій швидкості дають п'ятдесят,
@@ -54,6 +62,7 @@ final class Ears: NSObject, ObservableObject {
     level = 0
     elapsed = 0
     ended = false
+    ceiling = Self.quiet
 
     guard await AVAudioApplication.requestRecordPermission() else {
       trouble = t.micDenied
@@ -61,8 +70,11 @@ final class Ears: NSObject, ObservableObject {
     }
 
     do {
+      /* Режим `.default`, не `.measurement`. Той вимикає автоматичне
+         підсилення мікрофона, і сирий вхід годинника виходив таким тихим, що
+         метр ледве ворушився, а розпізнавач на телефоні чув тишу. */
       let session = AVAudioSession.sharedInstance()
-      try session.setCategory(.record, mode: .measurement, options: [])
+      try session.setCategory(.record, mode: .default, options: [])
       try session.setActive(true)
 
       let url = FileManager.default.temporaryDirectory.appendingPathComponent("said.m4a")
@@ -89,11 +101,13 @@ final class Ears: NSObject, ObservableObject {
   private func tick() {
     guard let r = recorder else { return }
     r.updateMeters()
-    /* Децибели від -160 до 0 переводяться в лінійну гучність, а та стискається
-       так само, як на телефоні: тихий голос уже видно, крик не впирається в
-       стелю. */
+    /* Децибели від -160 до 0 переводяться в лінійну гучність. Далі вона
+       ділиться на стелю, і стискається тим самим степенем, що й у демці: тихий
+       голос уже видно, крик не впирається в стелю. Стеля опадає приблизно на
+       десять відсотків за секунду при двадцяти відліках. */
     let linear = pow(10, Double(r.averagePower(forChannel: 0)) / 20)
-    level = min(1, pow(linear * 6.2, 0.72))
+    ceiling = max(Self.quiet, linear, ceiling * 0.995)
+    level = min(1, pow(linear / ceiling, 0.72))
     elapsed = min(1, r.currentTime / Self.longest)
   }
 
