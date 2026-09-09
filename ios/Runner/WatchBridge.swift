@@ -201,7 +201,7 @@ enum Hearing {
 
   /// Що телефон відповідає годиннику словами. Мовою застосунку, як і сам
   /// годинник: помилка українською на англійському екрані читалась би як збій.
-  enum Reply { case notHeard, needSpeech, noNetwork, noLanguage }
+  enum Reply { case notHeard, needSpeech, noNetwork, noLanguage, locked }
 
   static func say(_ what: Reply, _ lang: String) -> String {
     let table: [String: [Reply: String]] = [
@@ -210,48 +210,56 @@ enum Hearing {
         .needSpeech: "Дозволь розпізнавання мовлення: Calvi, Налаштування, Доступ",
         .noNetwork: "Відсутнє підключення до мережі",
         .noLanguage: "Розпізнавання цією мовою недоступне",
+        .locked: "Розблокуй телефон і скажи ще раз",
       ],
       "en": [
         .notHeard: "Did not catch that. Say it again",
         .needSpeech: "Allow speech recognition: Calvi, Settings, Access",
         .noNetwork: "No network connection",
         .noLanguage: "Recognition is not available in this language",
+        .locked: "Unlock the phone and say it again",
       ],
       "es": [
         .notHeard: "No te oí. Dilo otra vez",
         .needSpeech: "Permite el reconocimiento de voz: Calvi, Ajustes, Acceso",
         .noNetwork: "Sin conexión de red",
         .noLanguage: "El reconocimiento no está disponible en este idioma",
+        .locked: "Desbloquea el teléfono y dilo otra vez",
       ],
       "it": [
         .notHeard: "Non ho sentito. Ripeti",
         .needSpeech: "Consenti il riconoscimento vocale: Calvi, Impostazioni, Accesso",
         .noNetwork: "Nessuna connessione di rete",
         .noLanguage: "Il riconoscimento non è disponibile in questa lingua",
+        .locked: "Sblocca il telefono e ripeti",
       ],
       "de": [
         .notHeard: "Nicht verstanden. Sag es noch einmal",
         .needSpeech: "Erlaube die Spracherkennung: Calvi, Einstellungen, Zugriff",
         .noNetwork: "Keine Netzverbindung",
         .noLanguage: "Erkennung in dieser Sprache nicht verfügbar",
+        .locked: "Entsperre das Telefon und sag es noch einmal",
       ],
       "fr": [
         .notHeard: "Je n’ai pas entendu. Répète",
         .needSpeech: "Autorise la reconnaissance vocale : Calvi, Réglages, Accès",
         .noNetwork: "Pas de connexion réseau",
         .noLanguage: "La reconnaissance n’est pas disponible dans cette langue",
+        .locked: "Déverrouille le téléphone et répète",
       ],
       "pt": [
         .notHeard: "Não ouvi. Diga de novo",
         .needSpeech: "Permita o reconhecimento de fala: Calvi, Ajustes, Acesso",
         .noNetwork: "Sem conexão de rede",
         .noLanguage: "Reconhecimento indisponível neste idioma",
+        .locked: "Desbloqueie o telefone e diga de novo",
       ],
       "pl": [
         .notHeard: "Nie usłyszałam. Powtórz",
         .needSpeech: "Zezwól na rozpoznawanie mowy: Calvi, Ustawienia, Dostęp",
         .noNetwork: "Brak połączenia z siecią",
         .noLanguage: "Rozpoznawanie niedostępne w tym języku",
+        .locked: "Odblokuj telefon i powtórz",
       ],
     ]
     return (table[lang] ?? table["en"]!)[what]!
@@ -350,6 +358,11 @@ enum Hearing {
       task = .invalid
     }
 
+    /* Заблокований телефон. Розпізнавач Apple через мережу на ньому відмовляє,
+       і годинник чув «не почула» на кожне слово, хоч телефон усе отримав.
+       Прапорець системи каже саме про замок: він гасне, щойно екран замкнувся. */
+    let locked = !UIApplication.shared.isProtectedDataAvailable
+
     let source = louder(file) ?? file
     let request = SFSpeechURLRecognitionRequest(url: source)
     request.shouldReportPartialResults = false
@@ -368,16 +381,27 @@ enum Hearing {
       }
     }
 
+    /* На замкненому телефоні лишається розпізнавання на самому пристрої, без
+       мережі: воно не ходить до служби, яка відмовляє під замком. Є воно не
+       для кожної мови, і тоді чесна порада одна: розблокувати й повторити. */
+    if locked {
+      guard recognizer.supportsOnDeviceRecognition else {
+        finish(["error": say(.locked, lang)])
+        return
+      }
+      request.requiresOnDeviceRecognition = true
+    }
+
     recognizer.recognitionTask(with: request) { result, error in
       if let result, result.isFinal {
         finish(["heard": result.bestTranscription.formattedString])
       } else if let error {
-        /* Причина лишається в журналі телефона, а годиннику йде одна з двох:
-           мережа, коли впала вона, інакше «не почула». Тиша, шум і не та
-           мова для годинника одне й те саме. */
+        /* Причина лишається в журналі телефона, а годиннику йде одна з трьох:
+           замок, коли телефон замкнений, мережа, коли впала вона, інакше «не
+           почула». Тиша, шум і не та мова для годинника одне й те саме. */
         NSLog("watch: розпізнавання не вдалось, \(error)")
         let network = (error as NSError).domain == NSURLErrorDomain
-        finish(["error": say(network ? .noNetwork : .notHeard, lang)])
+        finish(["error": say(locked ? .locked : network ? .noNetwork : .notHeard, lang)])
       }
     }
   }
