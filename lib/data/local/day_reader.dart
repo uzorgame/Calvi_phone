@@ -248,8 +248,11 @@ class DayReader {
   /// is the one that has to keep working with no signal and no balance.
   /// Returns the id, so the caller can put real numbers on it once the food
   /// reference has answered.
-  Future<String> addTyped({required String slotId, required String text}) =>
-      db.diaryDao.addMeal(slot: slotId, name: text.trim(), kcal: 0);
+  /// `at` is the moment the entry belongs to: now for today, noon of the day
+  /// the screen shows for any other day. Without it a dish typed into last
+  /// Tuesday's lunch landed in today.
+  Future<String> addTyped({required String slotId, required String text, DateTime? at}) =>
+      db.diaryDao.addMeal(slot: slotId, name: text.trim(), kcal: 0, at: at);
 
   /// Страва з числами, які вписала людина.
   ///
@@ -264,10 +267,12 @@ class DayReader {
     required int protein,
     required int fat,
     required int carbs,
+    DateTime? at,
   }) => db.diaryDao.addMeal(
     slot: slotId,
     name: title.trim(),
     kcal: kcal,
+    at: at,
     // Нуль грамів це «не сказали», а не «нічого не важило»: у сховищі вага
     // необовʼязкова саме для таких записів.
     grams: grams > 0 ? grams.toDouble() : null,

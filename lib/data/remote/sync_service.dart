@@ -67,6 +67,9 @@ class SyncService with WidgetsBindingObserver {
     bool card = false,
     /// Продиктоване в чат: вагу без названої не питають, беруть звичну порцію.
     bool voice = false,
+    /// День, який відкритий на екрані, а не сьогодні: запис за вівторок має
+    /// лягти у вівторок і на телефоні, і на сервері.
+    DateTime? at,
   }) => ChatRepository(db, _api).send(
     text: text,
     slot: slot,
@@ -75,6 +78,7 @@ class SyncService with WidgetsBindingObserver {
     place: place,
     card: card,
     voice: voice,
+    at: at,
   );
 
   /* Тижневий розбір. Живе тут, а не в екрані, бо тут той самий клієнт, той
@@ -275,8 +279,8 @@ class SyncService with WidgetsBindingObserver {
   );
 
   /// Вага, обрана дотиком. Без токена: страву вже розібрано.
-  Future<NoraReply> weigh({required int grams, required String slot, String? askId}) =>
-      ChatRepository(db, _api).weigh(grams: grams, slot: slot, askId: askId);
+  Future<NoraReply> weigh({required int grams, required String slot, String? askId, DateTime? at}) =>
+      ChatRepository(db, _api).weigh(grams: grams, slot: slot, askId: askId, at: at);
 
   /// Що на знімку. Числа для картки сканера, без запису в день.
   Future<Analysis> look(Shot shot) => ChatRepository(db, _api).look(shot);

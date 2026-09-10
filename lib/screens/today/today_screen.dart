@@ -553,6 +553,7 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
         grams: grams,
         askId: askId,
         slot: _nextSlotId(_dayNow(scope)),
+        at: _when(),
       );
       if (!mounted) return;
 
@@ -804,6 +805,10 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
         /* Продиктоване в чат: без питання про вагу, решта як у розмові. Запис
            у картку і так не питає, тому ознака голосу йому не потрібна. */
         voice: draft == null && voice,
+        /* День, відкритий на екрані. Доти все йшло як «зараз», і сказане
+           про вчорашню вечерю записувалось у сьогодні, хоч екран показував
+           учора і пігулка казала «Записую в Вечерю». */
+        at: _when(),
       );
 
       /* Чернетка прибирається до перевірки `mounted`: записане на сервері вже
@@ -1070,6 +1075,8 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
       protein: entry.protein,
       fat: entry.fat,
       carbs: entry.carbs,
+      // День, відкритий на екрані: запис за вівторок лягає у вівторок.
+      at: _when(),
     );
     // Запис уже наш і повний, тож серверу лишається тільки про нього почути.
     unawaited(sync?.now() ?? Future<void>.value());
@@ -1094,7 +1101,7 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
   /// зовсім. Тепер рядок стоїть як «Нора рахує…», доки хтось не наповнить його
   /// числами, і переживає будь-яку мережу.
   Future<void> _typed(CalviDb db, SyncService? sync, String slotId, String text) async {
-    final id = await DayReader(db).addTyped(slotId: slotId, text: text);
+    final id = await DayReader(db).addTyped(slotId: slotId, text: text, at: _when());
     if (sync == null) return;
 
     if (await sync.enrich(id, text)) {
