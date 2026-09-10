@@ -53,7 +53,7 @@ struct Watch: View {
 
   var body: some View {
     VStack(spacing: 0) {
-      Bar()
+      Bar(time: step != .hearing)
       screen(for: step)
         /* Кожен екран приходить, як у прототипі: із прозорості, трохи знизу
            і трохи меншим. Ключ по стану навмисно: екран народжується заново,
@@ -634,6 +634,12 @@ struct Watch: View {
 
 /// Шапка як у застосунку: назва чорнилом ліворуч, час тихим праворуч.
 private struct Bar: View {
+  /* Час у правому куті, крім екрана, де слухає мікрофон. Поки мікрофон
+     увімкнений, watchOS ставить у той самий кут свій помаранчевий значок, і
+     сховати його не можна: він і є обіцянка системи, що запис не таємний.
+     Дві речі в одному куті перекривали одна одну, тож на час запису кут
+     віддається значку, а годинник повертається разом із рештою екранів. */
+  var time = true
   private var w: CGFloat { WKInterfaceDevice.current().screenBounds.width }
 
   var body: some View {
@@ -643,9 +649,11 @@ private struct Bar: View {
         .tracking(-0.03 * w * 0.081)
         .foregroundStyle(Palette.text)
       Spacer()
-      Text(.now, style: .time)
-        .font(Palette.font(w * 0.071, .medium).monospacedDigit())
-        .foregroundStyle(Palette.dim)
+      if time {
+        Text(.now, style: .time)
+          .font(Palette.font(w * 0.071, .medium).monospacedDigit())
+          .foregroundStyle(Palette.dim)
+      }
     }
     .padding(.horizontal, w * 0.022)
     .padding(.bottom, w * 0.03)
