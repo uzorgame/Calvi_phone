@@ -126,8 +126,26 @@ String themeHint(BuildContext context, AppTheme t) {
  * «Українська» лишається «Українська» і в англійському застосунку, бо цей рядок
  * читає той, хто саме шукає свою мову в чужому інтерфейсі. Перекладена назва
  * ховає її від єдиної людини, якій вона потрібна. */
+/* Якою мовою застосунок говорить просто зараз.
+ *
+ * Потрібно там, де показують список мов: поки вибору не робили, у профілі
+ * лежить [Lang.system], і позначити в списку нема чого. Мову бере не профіль,
+ * а сам Flutter, звіривши мову пристрою з нашим списком; ту саму відповідь
+ * і повертаємо. Чужа мова, якої в нас немає, дає англійську, як і в
+ * `supportedLocales`. */
+Lang langNow(BuildContext context) => switch (Localizations.localeOf(context).languageCode) {
+  'uk' => Lang.uk,
+  'es' => Lang.es,
+  'it' => Lang.it,
+  'de' => Lang.de,
+  'fr' => Lang.fr,
+  'pt' => Lang.pt,
+  'pl' => Lang.pl,
+  _ => Lang.en,
+};
+
 String langTitle(BuildContext context, Lang lang) => switch (lang) {
-  Lang.system => L.of(context).langSystem,
+  Lang.system => langTitle(context, langNow(context)),
   Lang.uk => 'Українська',
   Lang.en => 'English',
   Lang.es => 'Español',

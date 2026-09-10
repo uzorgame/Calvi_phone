@@ -96,10 +96,15 @@ class LangPanel extends StatelessWidget {
           title: l.langSection,
           bare: true,
           children: [
+            /* Позначка стоїть на мові, якою застосунок говорить зараз, а не
+               лише на обраній руками. Поки вибору не робили, мова приходить
+               від пристрою, і без цього список стояв би без жодної позначки:
+               людина бачила б німецький інтерфейс і жодного німецького
+               рядка, ніби мову вибрав хтось інший. */
             for (final option in langOptions)
               CalviPick(
                 label: langTitle(context, option),
-                on: s.lang == option,
+                on: s.lang == option || (s.lang == Lang.system && option == langNow(context)),
                 onTap: () => set((v) => v.copyWith(lang: option)),
               ),
           ],
