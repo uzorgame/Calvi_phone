@@ -134,7 +134,11 @@ String langTitle(BuildContext context, Lang lang) => switch (lang) {
   Lang.it => 'Italiano',
   Lang.de => 'Deutsch',
   Lang.fr => 'Français',
-  Lang.pt => 'Português',
+  /* Не просто «Português»: переклад бразильський, і це видно в кожному рядку,
+     від «você» до «registrado». Португалець, який вибере рядок без позначки,
+     отримає не свою португальську, і дізнається про це аж усередині. Та сама
+     назва стоїть локалізацією сторінки в App Store. */
+  Lang.pt => 'Português do Brasil',
   Lang.pl => 'Polski',
 };
 

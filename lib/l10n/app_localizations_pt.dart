@@ -1467,7 +1467,7 @@ class LPt extends L {
   String get menuHintNoMeds => 'sem cursos';
 
   @override
-  String get menuHintNothing => 'ainda nada registado';
+  String get menuHintNothing => 'ainda nada registrado';
 
   @override
   String menuHintOnGoal(int ok, int total) {
@@ -2717,7 +2717,7 @@ class LPt extends L {
   String get tourVoice => 'Voz ou texto';
 
   @override
-  String get tourVoiceHow => '«dois ovos e uma torrada», e fica registado';
+  String get tourVoiceHow => '«dois ovos e uma torrada», e fica registrado';
 
   @override
   String get tourWeek => 'Análise do dia e da semana';
