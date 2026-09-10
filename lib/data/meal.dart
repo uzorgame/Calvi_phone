@@ -13,6 +13,25 @@ library;
 /// that does not exist simply draws the plate, and that is the only rule.
 typedef FoodIcon = String;
 
+/// Назва запису з великої літери, решта рядка недоторкана.
+///
+/// Рядок у картці дня це підпис, а не уламок речення, і «яйце» поруч із
+/// «Тост з маслом» читається як недогляд. Саме перша літера, а не кожне слово:
+/// «Тост З Маслом» це вже вивіска.
+///
+/// Записам від Нори це не потрібно, вони приходять із сервера вже такими. Тут
+/// це для того, що людина вписала руками.
+String titled(String name) {
+  final clean = name.trim();
+  if (clean.isEmpty) return clean;
+
+  /* По рунах, а не по кодових одиницях: половина символу з пари сурогатів це
+     зіпсована назва. */
+  final runes = clean.runes.toList();
+  final first = String.fromCharCode(runes.first).toUpperCase();
+  return first + String.fromCharCodes(runes.skip(1));
+}
+
 class Meal {
   const Meal({
     required this.id,

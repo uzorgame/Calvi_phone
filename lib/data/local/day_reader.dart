@@ -252,7 +252,7 @@ class DayReader {
   /// the screen shows for any other day. Without it a dish typed into last
   /// Tuesday's lunch landed in today.
   Future<String> addTyped({required String slotId, required String text, DateTime? at}) =>
-      db.diaryDao.addMeal(slot: slotId, name: text.trim(), kcal: 0, at: at);
+      db.diaryDao.addMeal(slot: slotId, name: titled(text), kcal: 0, at: at);
 
   /// Страва з числами, які вписала людина.
   ///
@@ -270,7 +270,7 @@ class DayReader {
     DateTime? at,
   }) => db.diaryDao.addMeal(
     slot: slotId,
-    name: title.trim(),
+    name: titled(title),
     kcal: kcal,
     at: at,
     // Нуль грамів це «не сказали», а не «нічого не важило»: у сховищі вага
