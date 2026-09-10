@@ -16,6 +16,26 @@ struct Dish: Identifiable, Codable, Hashable {
 struct Answer {
   let dishes: [Dish]
   let balance: Int
+  /* Не тільки їжа. Нора з годинника чує те саме, що й у телефоні: воду, вагу,
+     тренування. Кожне сервер віддає своїм полем, і годинник показує своїм
+     екраном; порожній список страв після «випив пів літра» читався б як «не
+     записала». */
+  let water: Water?
+  let weightKg: Double?
+  let workout: Workout?
+  /// Речення Нори, коли записати не було чого: питання чи порада.
+  let reply: String?
+
+  struct Water {
+    let ml: Int
+    let total: Int
+  }
+
+  struct Workout {
+    let kind: String
+    let minutes: Int
+    let kcal: Int
+  }
 }
 
 enum NoraTrouble: Error {
@@ -137,7 +157,29 @@ enum Nora {
       )
     }
 
-    return Answer(dishes: logged, balance: json["balance"] as? Int ?? 0)
+    let water = (json["water"] as? [String: Any]).map {
+      Answer.Water(ml: Int($0["ml"] as? Double ?? 0), total: Int($0["total_ml"] as? Double ?? 0))
+    }
+    let weightKg = (json["measures"] as? [[String: Any]] ?? [])
+      .first { $0["part"] as? String == "weight" }
+      .flatMap { $0["value"] as? Double }
+    let workout = (json["workouts"] as? [[String: Any]] ?? []).first.map {
+      Answer.Workout(
+        kind: $0["kind"] as? String ?? "",
+        minutes: Int($0["minutes"] as? Double ?? 0),
+        kcal: Int($0["kcal"] as? Double ?? 0)
+      )
+    }
+
+    return Answer(
+      dishes: logged,
+      balance: json["balance"] as? Int ?? 0,
+      water: water,
+      weightKg: weightKg,
+      workout: workout,
+      reply: (json["reply"] as? String ?? json["text"] as? String)?
+        .trimmingCharacters(in: .whitespacesAndNewlines)
+    )
   }
 
   /* Картка за годиною, і правило тут не своє, а телефонне.

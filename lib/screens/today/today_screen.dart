@@ -1538,7 +1538,9 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
        Спалене тренуванням не віднімається, бо воно не зсуває норму й на картці:
        там воно стоїть окремою пігулкою. */
     WidgetsBinding.instance.addPostFrameCallback(
-      (_) => unawaited(_tellWatch(scope, goal.kcal, goal.kcal - totals.kcal)),
+      (_) => unawaited(
+        _tellWatch(scope, goal.kcal, goal.kcal - totals.kcal, workouts.fold<int>(0, (s, w) => s + w.kcal)),
+      ),
     );
 
     /* Тиждень зводиться раз і віддається обом читачам: третій стороні картки і
@@ -1870,11 +1872,18 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
   StreamSubscription<SyncMetaData?>? _stateFeed;
 
   /// Розповідає годиннику про день. Сам [Watch] мовчить, коли нічого не змінилось.
-  Future<void> _tellWatch(AppScope scope, int norm, int left) async {
+  Future<void> _tellWatch(AppScope scope, int norm, int left, int burned) async {
     if (_token == null) {
       final state = await scope.db?.syncDao.state();
       _token = state?.accessToken;
       _refresh = state?.refreshToken;
+    }
+    /* Вага тиждень тому для рядка «за тиждень» на годиннику: рівно сім днів
+       назад, а якщо того дня не зважувались, найближчий день до десяти назад.
+       Нічого не знайшлось, і рядка не буде: вигадувати різницю не можна. */
+    double? weekKg;
+    for (var back = 7; back <= 10 && weekKg == null; back++) {
+      weekKg = scope.stats.weightOn(-back);
     }
     await Watch.tell(
       token: _token,
@@ -1885,6 +1894,13 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
       left: left,
       portion: dataUnits.portion,
       energy: dataUnits.energy,
+      volume: dataUnits.volume,
+      mass: dataUnits.mass,
+      water: scope.s.waterMl,
+      burned: burned,
+      kg: scope.s.weightKg,
+      targetKg: scope.s.targetKg,
+      weekKg: weekKg,
     );
   }
 

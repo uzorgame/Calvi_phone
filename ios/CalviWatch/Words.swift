@@ -37,6 +37,17 @@ struct Words {
   let serverSilent: String
   let micDenied: String
   let micFailed: String
+  /// Екрани «Записала» для води, ваги і тренування. «%@» це число з одиницею.
+  let water: String
+  let perDay: String
+  let toNorm: String
+  let weight: String
+  let perWeek: String
+  let toGoal: String
+  let minutes: String
+  let burned: String
+  let ml: String
+  let kg: String
   let gram: String
   let kcal: String
   let kj: String
@@ -69,6 +80,16 @@ struct Words {
       serverSilent: "Сервер не відповів",
       micDenied: "Дозволь мікрофон у налаштуваннях",
       micFailed: "Мікрофон не відповів",
+      water: "Вода",
+      perDay: "за день %@",
+      toNorm: "Ще %@ до норми",
+      weight: "Вага",
+      perWeek: "%@ за тиждень",
+      toGoal: "До цілі %@",
+      minutes: "хв",
+      burned: "Спалено %@",
+      ml: "мл",
+      kg: "кг",
       gram: "г", kcal: "ккал", kj: "кДж"
     ),
     "en": Words(
@@ -94,6 +115,16 @@ struct Words {
       serverSilent: "Server did not answer",
       micDenied: "Allow the microphone in Settings",
       micFailed: "Microphone did not respond",
+      water: "Water",
+      perDay: "%@ today",
+      toNorm: "%@ to go",
+      weight: "Weight",
+      perWeek: "%@ this week",
+      toGoal: "%@ to goal",
+      minutes: "min",
+      burned: "Burned %@",
+      ml: "ml",
+      kg: "kg",
       gram: "g", kcal: "kcal", kj: "kJ"
     ),
     "es": Words(
@@ -119,6 +150,16 @@ struct Words {
       serverSilent: "El servidor no respondió",
       micDenied: "Permite el micrófono en Ajustes",
       micFailed: "El micrófono no respondió",
+      water: "Agua",
+      perDay: "%@ hoy",
+      toNorm: "Faltan %@",
+      weight: "Peso",
+      perWeek: "%@ esta semana",
+      toGoal: "%@ hasta la meta",
+      minutes: "min",
+      burned: "Quemadas %@",
+      ml: "ml",
+      kg: "kg",
       gram: "g", kcal: "kcal", kj: "kJ"
     ),
     "it": Words(
@@ -144,6 +185,16 @@ struct Words {
       serverSilent: "Il server non ha risposto",
       micDenied: "Consenti il microfono nelle Impostazioni",
       micFailed: "Il microfono non ha risposto",
+      water: "Acqua",
+      perDay: "%@ oggi",
+      toNorm: "Mancano %@",
+      weight: "Peso",
+      perWeek: "%@ questa settimana",
+      toGoal: "%@ all’obiettivo",
+      minutes: "min",
+      burned: "Bruciate %@",
+      ml: "ml",
+      kg: "kg",
       gram: "g", kcal: "kcal", kj: "kJ"
     ),
     "de": Words(
@@ -169,6 +220,16 @@ struct Words {
       serverSilent: "Der Server hat nicht geantwortet",
       micDenied: "Erlaube das Mikrofon in den Einstellungen",
       micFailed: "Das Mikrofon hat nicht reagiert",
+      water: "Wasser",
+      perDay: "%@ heute",
+      toNorm: "Noch %@",
+      weight: "Gewicht",
+      perWeek: "%@ diese Woche",
+      toGoal: "%@ bis zum Ziel",
+      minutes: "Min.",
+      burned: "Verbrannt %@",
+      ml: "ml",
+      kg: "kg",
       gram: "g", kcal: "kcal", kj: "kJ"
     ),
     "fr": Words(
@@ -194,6 +255,16 @@ struct Words {
       serverSilent: "Le serveur n’a pas répondu",
       micDenied: "Autorise le micro dans Réglages",
       micFailed: "Le micro n’a pas répondu",
+      water: "Eau",
+      perDay: "%@ aujourd’hui",
+      toNorm: "Encore %@",
+      weight: "Poids",
+      perWeek: "%@ cette semaine",
+      toGoal: "%@ avant l’objectif",
+      minutes: "min",
+      burned: "Brûlé %@",
+      ml: "ml",
+      kg: "kg",
       gram: "g", kcal: "kcal", kj: "kJ"
     ),
     "pt": Words(
@@ -219,6 +290,16 @@ struct Words {
       serverSilent: "O servidor não respondeu",
       micDenied: "Permita o microfone nos Ajustes",
       micFailed: "O microfone não respondeu",
+      water: "Água",
+      perDay: "%@ hoje",
+      toNorm: "Faltam %@",
+      weight: "Peso",
+      perWeek: "%@ nesta semana",
+      toGoal: "%@ até a meta",
+      minutes: "min",
+      burned: "Queimadas %@",
+      ml: "ml",
+      kg: "kg",
       gram: "g", kcal: "kcal", kj: "kJ"
     ),
     "pl": Words(
@@ -244,6 +325,16 @@ struct Words {
       serverSilent: "Serwer nie odpowiedział",
       micDenied: "Zezwól na mikrofon w Ustawieniach",
       micFailed: "Mikrofon nie odpowiedział",
+      water: "Woda",
+      perDay: "%@ dzisiaj",
+      toNorm: "Jeszcze %@",
+      weight: "Waga",
+      perWeek: "%@ w tym tygodniu",
+      toGoal: "%@ do celu",
+      minutes: "min",
+      burned: "Spalone %@",
+      ml: "ml",
+      kg: "kg",
       gram: "g", kcal: "kcal", kj: "kJ"
     ),
   ]

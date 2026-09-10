@@ -17,6 +17,14 @@ enum Step: Hashable {
   case hearing
   case analysing(String)
   case done([Dish])
+  /* Не тільки їжа: вода, вага і тренування мають свої екрани «Записала»,
+     один в один із демкою. Порожній список страв після «випив пів літра»
+     читався б як «не записала». */
+  case water(ml: Int, total: Int)
+  case weight(kg: Double)
+  case run(kind: String, minutes: Int, kcal: Int)
+  /// Нора відповіла словами, а записала нічого: питання чи порада.
+  case said(String)
   case dry
   /// Сказане чекає на мережу; слова на екрані, щоб було видно, що саме чекає.
   case queued(String)
@@ -100,6 +108,17 @@ struct Watch: View {
      * і відкривши наново. На телефоні це помітили б одразу, на годиннику це
      * взагалі вся взаємодія. */
     case .done(let dishes): done(dishes).onTapGesture { self.step = .idle }
+    case .water(let ml, let total): water(ml, total: total).onTapGesture { self.step = .idle }
+    case .weight(let kg): weight(kg).onTapGesture { self.step = .idle }
+    case .run(let kind, let minutes, let kcal):
+      run(kind, minutes: minutes, kcal: kcal).onTapGesture { self.step = .idle }
+    case .said(let words):
+      VStack(spacing: 0) {
+        Spacer(minLength: 0)
+        Note(head: "Nora", say: words)
+        Spacer(minLength: 0)
+      }
+      .onTapGesture { self.step = .idle }
     case .dry: dry.onTapGesture { self.step = .idle }
     case .queued(let heard): queued(heard).onTapGesture { self.step = .idle }
     case .trouble(let why):
@@ -331,6 +350,112 @@ struct Watch: View {
     }
   }
 
+  // MARK: Записала воду, вагу, тренування
+
+  /* Один в один із демкою: галочка зі словом, одна картка з назвою і другим
+     рядком, і рядок унизу з жирним числом. Ті самі частки, що й на екрані зі
+     стравами. Число внизу їде від старого до нового там, де є звідки їхати. */
+  private func water(_ ml: Int, total: Int) -> some View {
+    let goal = max(link.water, 1)
+    let part = min(1, Double(total) / Double(goal))
+    return loggedOne(
+      title: "\(t.water), \(volText(ml))",
+      sub: String(format: t.perDay, volText(total)),
+      gauge: part,
+      under: Under2(words: t.toNorm, from: volNum(max(0, goal - total + ml)), to: volNum(max(0, goal - total)), unit: volUnit)
+    )
+  }
+
+  private func weight(_ kg: Double) -> some View {
+    let week = link.weekKg.map { kg - $0 }
+    return loggedOne(
+      title: "\(t.weight), \(massText(kg))",
+      sub: week.map { String(format: t.perWeek, massText($0, signed: true)) } ?? "",
+      gauge: nil,
+      under: Under2(words: t.toGoal, from: nil, to: massNum(abs(kg - link.targetKg)), unit: massUnit)
+    )
+  }
+
+  private func run(_ kind: String, minutes: Int, kcal: Int) -> some View {
+    loggedOne(
+      title: "\(kind), \(minutes) \(t.minutes)",
+      sub: "−\(link.energyText(kcal))",
+      gauge: nil,
+      under: Under2(words: t.burned, from: link.energyNum(0), to: link.energyNum(link.burned), unit: link.energyUnit())
+    )
+  }
+
+  /// Рядок унизу: слова навколо числа, число жирне, за ним одиниця.
+  private struct Under2 {
+    let words: String
+    let from: String?
+    let to: String
+    let unit: String
+  }
+
+  private func loggedOne(title: String, sub: String, gauge: Double?, under: Under2) -> some View {
+    VStack(alignment: .leading, spacing: 0) {
+      HStack(spacing: w * 0.025) {
+        Check().frame(width: w * 0.05, height: w * 0.05)
+        Text(t.logged)
+      }
+      .font(Palette.font(w * 0.081, .semibold))
+      .foregroundStyle(Palette.good)
+      .padding(.bottom, w * 0.03)
+      .modifier(Rise(delay: 0, length: 0.34))
+
+      Card(horizontal: w * 0.042, vertical: w * 0.033, radius: w * 0.06) {
+        VStack(alignment: .leading, spacing: w * 0.008) {
+          Text(title)
+            .font(Palette.font(w * 0.071, .semibold))
+            .tracking(-0.01 * w * 0.071)
+            .foregroundStyle(Palette.text)
+          if !sub.isEmpty {
+            Text(sub)
+              .font(Palette.font(w * 0.066))
+              .foregroundStyle(Palette.dim)
+          }
+          if let gauge {
+            Gauge(part: gauge)
+              .frame(height: w * 0.012)
+              .padding(.top, w * 0.022)
+          }
+        }
+      }
+      .modifier(Rise(delay: 0.22, length: 0.42))
+
+      Spacer(minLength: 0)
+
+      HStack(spacing: 0) {
+        Spacer(minLength: 0)
+        UnderLine(words: under.words, from: under.from, to: under.to, unit: under.unit)
+        Spacer(minLength: 0)
+      }
+      .padding(.horizontal, w * 0.025)
+      .modifier(Rise(delay: 0.2))
+    }
+  }
+
+  // Обʼєм і маса словами людини: мл або fl oz, кг або lb, як на телефоні.
+  private var volUnit: String { link.volume == "floz" ? "fl oz" : t.ml }
+  private func volNum(_ ml: Int) -> String {
+    link.volume == "floz" ? "\(Int((Double(ml) / 29.5735).rounded()))" : thousands(ml)
+  }
+  private func volText(_ ml: Int) -> String { "\(volNum(ml)) \(volUnit)" }
+
+  private var massUnit: String { link.mass == "lb" ? "lb" : t.kg }
+  private func massNum(_ kg: Double, signed: Bool = false) -> String {
+    let shown = link.mass == "lb" ? kg * 2.2046226 : kg
+    var s = String(format: "%.1f", abs(shown))
+    // Кома, а не крапка, у всіх мовах застосунку, крім англійської.
+    if link.lang != "en" { s = s.replacingOccurrences(of: ".", with: ",") }
+    if signed { s = (shown < 0 ? "−" : "+") + s }
+    return s
+  }
+  private func massText(_ kg: Double, signed: Bool = false) -> String {
+    "\(massNum(kg, signed: signed)) \(massUnit)"
+  }
+
   // MARK: Рядок під кнопкою
 
   /* Скільки нижче норми ще рахується виконаним планом: чотириста, як
@@ -408,8 +533,25 @@ struct Watch: View {
     do {
       let answer = try await log(heard, key: key, token: token)
       logs += 1
-      link.spend(answer.dishes.reduce(0) { $0 + $1.kcal })
-      step = .done(answer.dishes)
+      /* Що саме записано, те й показується. Страви першими, бо це головне
+         призначення годинника; далі вода, вага і тренування своїми екранами;
+         а коли Нора лише відповіла словами, її речення карткою. */
+      if !answer.dishes.isEmpty {
+        link.spend(answer.dishes.reduce(0) { $0 + $1.kcal })
+        step = .done(answer.dishes)
+      } else if let water = answer.water {
+        step = .water(ml: water.ml, total: water.total)
+      } else if let kg = answer.weightKg {
+        link.weighed(kg)
+        step = .weight(kg: kg)
+      } else if let workout = answer.workout {
+        link.burn(workout.kcal)
+        step = .run(kind: workout.kind, minutes: workout.minutes, kcal: workout.kcal)
+      } else if let words = answer.reply, !words.isEmpty {
+        step = .said(words)
+      } else {
+        step = .trouble(t.notHeard)
+      }
     } catch NoraTrouble.dry {
       step = .dry
     } catch NoraTrouble.offline {
@@ -722,6 +864,69 @@ private struct Countdown: View {
         // Швидко на початку, мʼяко в кінці: рух читається як зупинка, а не як обрив.
         let e = 1 - pow(1 - k, 3)
         now = from + Int((Double(to - from) * e).rounded())
+      }
+      now = to
+    }
+  }
+}
+
+/// Смужка води під числом: як кільце для калорій, тільки пряма. Наповнюється
+/// зліва направо за ту саму криву, що й решта рухів.
+private struct Gauge: View {
+  let part: Double
+  @State private var shown = false
+
+  var body: some View {
+    GeometryReader { g in
+      ZStack(alignment: .leading) {
+        Capsule().fill(Palette.track)
+        Capsule()
+          .fill(Palette.ink)
+          .frame(width: g.size.width * (shown ? part : 0))
+      }
+    }
+    .onAppear {
+      withAnimation(Motion.ease(0.9).delay(0.2)) { shown = true }
+    }
+  }
+}
+
+/// Рядок унизу екрана «Записала»: слова з формату навколо числа, число жирне
+/// і чорнилом, за ним одиниця. Число їде від старого до нового, коли є звідки.
+private struct UnderLine: View {
+  let words: String
+  let from: String?
+  let to: String
+  let unit: String
+  @State private var now: String?
+  private var w: CGFloat { WKInterfaceDevice.current().screenBounds.width }
+
+  var body: some View {
+    let parts = words.components(separatedBy: "%@")
+    HStack(spacing: 0) {
+      Text(parts.first ?? "")
+      Text(now ?? from ?? to)
+        .font(Palette.font(w * 0.071, .semibold))
+        .foregroundStyle(Palette.text)
+        .monospacedDigit()
+      Text(" \(unit)")
+      Text(parts.count > 1 ? parts[1] : "")
+    }
+    .font(Palette.font(w * 0.066))
+    .foregroundStyle(Palette.dim)
+    .multilineTextAlignment(.center)
+    .task {
+      /* Їде тільки ціле число: обидва кінці мають бути числами без пробілів
+         усередині, інакше показується відразу кінцеве. */
+      guard let from, let a = Int(from.replacingOccurrences(of: " ", with: "")),
+        let b = Int(to.replacingOccurrences(of: " ", with: ""))
+      else { return }
+      let steps = 22
+      for i in 1...steps {
+        try? await Task.sleep(for: .milliseconds(50))
+        let k = Double(i) / Double(steps)
+        let e = 1 - pow(1 - k, 3)
+        now = thousands(a + Int((Double(b - a) * e).rounded()))
       }
       now = to
     }

@@ -86,6 +86,17 @@ class Watch {
     /// keeps it to renew the watch's token on request, even with the app
     /// closed, and never forwards it to the wrist.
     String? refresh,
+    /* What the wrist needs to show water, a weigh-in and a workout the way
+       the phone does: the units for volume and body mass, the water norm,
+       calories burned today, the current and target weight, and the weight a
+       week ago for the "this week" line. */
+    String volume = 'ml',
+    String mass = 'kg',
+    int water = 0,
+    int burned = 0,
+    double kg = 0,
+    double targetKg = 0,
+    double? weekKg,
   }) async {
     /* Тільки iPhone. На Android каналу немає взагалі, на вебі немає й самого
        поняття, і питати там нема кого. */
@@ -94,7 +105,8 @@ class Watch {
     // Без токена годиннику нема з чим іти на сервер: чекаємо, поки акаунт буде.
     if (token == null || token.isEmpty) return;
 
-    final now = '$token|$lang|$norm|$left|$portion|$energy|$direction|$refresh';
+    final now =
+        '$token|$lang|$norm|$left|$portion|$energy|$direction|$refresh|$volume|$mass|$water|$burned|$kg|$targetKg|$weekKg';
     if (now == _sent) return;
     _sent = now;
 
@@ -109,6 +121,13 @@ class Watch {
         'direction': direction,
         if (refresh != null) 'refresh': refresh,
         'api': apiBase,
+        'volume': volume,
+        'mass': mass,
+        'water': water,
+        'burned': burned,
+        'kg': kg,
+        'targetKg': targetKg,
+        if (weekKg != null) 'weekKg': weekKg,
       });
     } on PlatformException {
       /* Годинника може не бути зовсім, і це не помилка застосунку. Наступна

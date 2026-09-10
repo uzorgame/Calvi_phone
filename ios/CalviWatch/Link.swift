@@ -32,6 +32,17 @@ final class Link: NSObject, ObservableObject {
   /// читається як «план виконаний», за тим самим правилом, що в застосунку.
   @Published private(set) var direction = "keep"
 
+  /* Те, що потрібно, щоб показати воду, вагу і тренування так, як телефон:
+     одиниці обʼєму і маси, норма води, спалене за сьогодні, вага зараз і
+     ціль, вага тиждень тому для рядка «за тиждень». */
+  @Published private(set) var volume = "ml"
+  @Published private(set) var mass = "kg"
+  @Published private(set) var water = 0
+  @Published private(set) var burned = 0
+  @Published private(set) var kg = 0.0
+  @Published private(set) var targetKg = 0.0
+  @Published private(set) var weekKg: Double?
+
   private let disk = UserDefaults.standard
 
   /// Слова, на які годинник ще чекає від телефона, за номером запису.
@@ -116,6 +127,24 @@ final class Link: NSObject, ObservableObject {
     portion = disk.string(forKey: "portion") ?? "g"
     energy = disk.string(forKey: "energy") ?? "kcal"
     direction = disk.string(forKey: "direction") ?? "keep"
+    volume = disk.string(forKey: "volume") ?? "ml"
+    mass = disk.string(forKey: "mass") ?? "kg"
+    water = disk.integer(forKey: "water")
+    burned = disk.integer(forKey: "burned")
+    kg = disk.double(forKey: "kg")
+    targetKg = disk.double(forKey: "targetKg")
+    weekKg = disk.object(forKey: "weekKg") as? Double
+  }
+
+  /// Годинник сам щойно записав: цифри дня рухаються, не чекаючи на телефон.
+  func weighed(_ newKg: Double) {
+    kg = newKg
+    disk.set(newKg, forKey: "kg")
+  }
+
+  func burn(_ kcal: Int) {
+    burned += kcal
+    disk.set(burned, forKey: "burned")
   }
 
   fileprivate func take(_ context: [String: Any]) {
@@ -152,6 +181,38 @@ final class Link: NSObject, ObservableObject {
     if let v = context["direction"] as? String {
       direction = v
       disk.set(v, forKey: "direction")
+    }
+    if let v = context["volume"] as? String {
+      volume = v
+      disk.set(v, forKey: "volume")
+    }
+    if let v = context["mass"] as? String {
+      mass = v
+      disk.set(v, forKey: "mass")
+    }
+    if let v = context["water"] as? Int {
+      water = v
+      disk.set(v, forKey: "water")
+    }
+    if let v = context["burned"] as? Int {
+      burned = v
+      disk.set(v, forKey: "burned")
+    }
+    if let v = context["kg"] as? Double {
+      kg = v
+      disk.set(v, forKey: "kg")
+    }
+    if let v = context["targetKg"] as? Double {
+      targetKg = v
+      disk.set(v, forKey: "targetKg")
+    }
+    if let v = context["weekKg"] as? Double {
+      weekKg = v
+      disk.set(v, forKey: "weekKg")
+    } else if context["token"] != nil {
+      // Контекст цілий, а ваги тиждень тому в ньому немає: рядка не буде.
+      weekKg = nil
+      disk.removeObject(forKey: "weekKg")
     }
     showOnFace()
   }
