@@ -207,56 +207,56 @@ enum Hearing {
     let table: [String: [Reply: String]] = [
       "uk": [
         .notHeard: "Не почула. Скажи ще раз",
-        .needSpeech: "Дозволь розпізнавання мовлення: Calvi, Налаштування, Доступ",
+        .needSpeech: "На телефоні: Calvi, Налаштування, Доступ, увімкни розпізнавання мовлення",
         .noNetwork: "Відсутнє підключення до мережі",
         .noLanguage: "Розпізнавання цією мовою недоступне",
         .locked: "Розблокуй телефон і скажи ще раз",
       ],
       "en": [
         .notHeard: "Did not catch that. Say it again",
-        .needSpeech: "Allow speech recognition: Calvi, Settings, Access",
+        .needSpeech: "On the phone: Calvi, Settings, Access, turn on speech recognition",
         .noNetwork: "No network connection",
         .noLanguage: "Recognition is not available in this language",
         .locked: "Unlock the phone and say it again",
       ],
       "es": [
         .notHeard: "No te oí. Dilo otra vez",
-        .needSpeech: "Permite el reconocimiento de voz: Calvi, Ajustes, Acceso",
+        .needSpeech: "En el teléfono: Calvi, Ajustes, Acceso, activa el reconocimiento de voz",
         .noNetwork: "Sin conexión de red",
         .noLanguage: "El reconocimiento no está disponible en este idioma",
         .locked: "Desbloquea el teléfono y dilo otra vez",
       ],
       "it": [
         .notHeard: "Non ho sentito. Ripeti",
-        .needSpeech: "Consenti il riconoscimento vocale: Calvi, Impostazioni, Accesso",
+        .needSpeech: "Sul telefono: Calvi, Impostazioni, Accesso, attiva il riconoscimento vocale",
         .noNetwork: "Nessuna connessione di rete",
         .noLanguage: "Il riconoscimento non è disponibile in questa lingua",
         .locked: "Sblocca il telefono e ripeti",
       ],
       "de": [
         .notHeard: "Nicht verstanden. Sag es noch einmal",
-        .needSpeech: "Erlaube die Spracherkennung: Calvi, Einstellungen, Zugriff",
+        .needSpeech: "Am Telefon: Calvi, Einstellungen, Zugriff, Spracherkennung einschalten",
         .noNetwork: "Keine Netzverbindung",
         .noLanguage: "Erkennung in dieser Sprache nicht verfügbar",
         .locked: "Entsperre das Telefon und sag es noch einmal",
       ],
       "fr": [
         .notHeard: "Je n’ai pas entendu. Répète",
-        .needSpeech: "Autorise la reconnaissance vocale : Calvi, Réglages, Accès",
+        .needSpeech: "Sur le téléphone : Calvi, Réglages, Accès, active la reconnaissance vocale",
         .noNetwork: "Pas de connexion réseau",
         .noLanguage: "La reconnaissance n’est pas disponible dans cette langue",
         .locked: "Déverrouille le téléphone et répète",
       ],
       "pt": [
         .notHeard: "Não ouvi. Diga de novo",
-        .needSpeech: "Permita o reconhecimento de fala: Calvi, Ajustes, Acesso",
+        .needSpeech: "No telefone: Calvi, Ajustes, Acesso, ative o reconhecimento de fala",
         .noNetwork: "Sem conexão de rede",
         .noLanguage: "Reconhecimento indisponível neste idioma",
         .locked: "Desbloqueie o telefone e diga de novo",
       ],
       "pl": [
         .notHeard: "Nie usłyszałam. Powtórz",
-        .needSpeech: "Zezwól na rozpoznawanie mowy: Calvi, Ustawienia, Dostęp",
+        .needSpeech: "W telefonie: Calvi, Ustawienia, Dostęp, włącz rozpoznawanie mowy",
         .noNetwork: "Brak połączenia z siecią",
         .noLanguage: "Rozpoznawanie niedostępne w tym języku",
         .locked: "Odblokuj telefon i powtórz",
@@ -331,7 +331,11 @@ enum Hearing {
        це той самий дозвіл. Просити тут не можна, бо застосунок може бути
        піднятий у фоні, де вікна з питанням нема кому показати. */
     guard SFSpeechRecognizer.authorizationStatus() == .authorized else {
-      done(["error": say(.needSpeech, lang)])
+      /* Дозволу ще немає, і просити його з фону нема кому. Але звук уже є, і
+         сервер чує без жодних дозволів на телефоні: годинник іде туди, а
+         порада про «Доступ» лишається на випадок, коли й сервер не почув.
+         Так перший запуск працює одразу, а не після походу в налаштування. */
+      done(["error": say(.needSpeech, lang), "fallback": true])
       return
     }
 

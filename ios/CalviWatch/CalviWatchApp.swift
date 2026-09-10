@@ -113,19 +113,20 @@ struct Watch: View {
     case .run(let kind, let minutes, let kcal):
       run(kind, minutes: minutes, kcal: kcal).onTapGesture { self.step = .idle }
     case .said(let words):
-      VStack(spacing: 0) {
-        Spacer(minLength: 0)
+      ScrollView(showsIndicators: false) {
         Note(head: "Nora", say: words)
-        Spacer(minLength: 0)
+          .padding(.top, w * 0.06)
       }
       .onTapGesture { self.step = .idle }
     case .dry: dry.onTapGesture { self.step = .idle }
     case .queued(let heard): queued(heard).onTapGesture { self.step = .idle }
     case .trouble(let why):
-      VStack(spacing: 0) {
-        Spacer(minLength: 0)
+      /* Прокрутка, а не центрування: довга порада на малому екрані інакше
+         обрізалась трьома крапками, і людина не бачила, куди йти. Коротка
+         стоїть угорі, довга гортається коронкою. */
+      ScrollView(showsIndicators: false) {
         Note(head: t.failHead, say: why)
-        Spacer(minLength: 0)
+          .padding(.top, w * 0.06)
       }
       .onTapGesture { self.step = .idle }
     }
