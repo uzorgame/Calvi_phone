@@ -501,7 +501,7 @@ class LEn extends L {
   String get authForgotHint => 'We will send a code to your email, then you pick a new password.';
 
   @override
-  String get authForgotLink => 'Forgot it?';
+  String get authForgotLink => 'Forgot?';
 
   @override
   String get authForgotTitle => 'New password';
@@ -2418,6 +2418,9 @@ class LEn extends L {
   String get startDeviceFirstRun => 'first run';
 
   @override
+  String get startDocs => 'Documents';
+
+  @override
   String get startGoal => 'Where we are heading';
 
   @override
@@ -2440,6 +2443,12 @@ class LEn extends L {
 
   @override
   String get startHeight => 'Height';
+
+  @override
+  String get startHiHello => 'Welcome to';
+
+  @override
+  String get startHiNote => 'Six short questions, about a minute. Nora counts the rest.';
 
   @override
   String get startLife => 'Lifestyle';

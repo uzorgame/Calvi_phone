@@ -2424,6 +2424,9 @@ class LIt extends L {
   String get startDeviceFirstRun => 'primo avvio';
 
   @override
+  String get startDocs => 'Documenti';
+
+  @override
   String get startGoal => 'Dove andiamo';
 
   @override
@@ -2446,6 +2449,12 @@ class LIt extends L {
 
   @override
   String get startHeight => 'Altezza';
+
+  @override
+  String get startHiHello => 'Benvenuto in';
+
+  @override
+  String get startHiNote => 'Sei domande brevi, un minuto. Il resto lo calcola Nora.';
 
   @override
   String get startLife => 'Stile di vita';

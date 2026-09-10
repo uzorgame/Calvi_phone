@@ -3,6 +3,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../data/app_scope.dart';
+import '../../data/legal.dart';
 import '../../data/settings.dart';
 import '../../data/units.dart';
 import '../../design/icons.dart';
@@ -11,6 +13,7 @@ import '../../design/ruler.dart';
 import '../../design/shell.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
+import '../settings/panel_legal.dart';
 import 'nora_tour.dart';
 import 'sign_in.dart';
 import 'welcome.dart';
@@ -30,8 +33,13 @@ import '../../l10n/labels.dart';
  *
  * Вітання «Стіл» звідси пішло і стало заставкою при кожному запуску, див.
  * `hello.dart`. Тут воно було екраном, який нічого не питав, і його доводилось
- * закривати кнопкою: єдиний дотик за весь «Старт», який нічого не означав. */
-const startSteps = 9;
+ * закривати кнопкою: єдиний дотик за весь «Старт», який нічого не означав.
+ *
+ * Другим кроком стоїть «Ласкаво просимо»: єдиний екран анкети, який нічого не
+ * питає. Він каже, скільки триватиме те, що зараз почнеться. Людина щойно
+ * віддала пошту і не знає, чи це кінець, чи початок довгої форми; шість питань
+ * без попередження читаються довше, ніж шість питань, про які попередили. */
+const startSteps = 10;
 
 /// Три напрямки, словами тієї мови, якою зараз говорить застосунок.
 List<({Direction id, String label, String hint})> _goals(L l) => [
@@ -40,7 +48,7 @@ List<({Direction id, String label, String hint})> _goals(L l) => [
   (id: Direction.gain, label: l.startGoalGain, hint: l.startGoalGainHint),
 ];
 
-/// First run, nine screens.
+/// First run, ten screens.
 ///
 /// A competitor spends twenty eight of them, most on selling. We ask only what
 /// the daily norm cannot be calculated without, one question to a screen, and
@@ -267,8 +275,14 @@ class _StartScreenState extends State<StartScreen> {
    * На самому вході її немає: це перший екран застосунку, і позаду нього
    * нічого. На реєстрації вона повертає до входу, з підтвердження пошти до
    * реєстрації, з відновлення пароля до входу. Далі по анкеті це просто
-   * попередній крок. */
+   * попередній крок.
+   *
+   * На «Ласкаво просимо» її теж немає: акаунт уже створено, і повертати з
+   * цього екрана нема куди. Стрілка, яка веде на вхід після входу, обіцяла б
+   * скасувати те, чого скасувати не можна. Замість неї в тому кутку стоїть
+   * знак оклику з документами. */
   VoidCallback? get _back {
+    if (_step == 1) return null;
     if (_step > 0) return () => _go(_step - 1);
 
     return switch (_auth) {
@@ -277,6 +291,52 @@ class _StartScreenState extends State<StartScreen> {
       AuthPage.code => () => setState(() => _auth = AuthPage.up),
     };
   }
+
+  /* Мова, якою застосунок говорить просто зараз. У профілі до першого вибору
+     лежить [Lang.system], і показувати в кнопці «SY» не було б чого: код у
+     кутку читають як «зараз тут ця мова». */
+  Lang get _lang => AppScope.maybeOf(context)?.s.lang ?? Lang.system;
+
+  /* Мову міняє той самий профіль, що й у налаштуваннях: обрана на першому
+     екрані, вона лишається обраною там, а не питається вдруге. Поза
+     застосунком (демо-екран, тест) міняти нема чого, і кнопка просто
+     показує список. */
+  Future<void> _showLangs() => _cornerCard(
+    context,
+    fromRight: true,
+    width: 214,
+    rows: (card) => [
+      for (final option in langOptions)
+        _CardRow(
+          title: langTitle(context, option),
+          picked: _lang == option || (_lang == Lang.system && option == langNow(context)),
+          onTap: () {
+            Navigator.of(card).pop();
+            AppScope.maybeOf(context)?.set((v) => v.copyWith(lang: option));
+          },
+        ),
+    ],
+  );
+
+  /* Документи з кутка «Ласкаво просимо»: спершу картка з двома рядками, далі
+     сам документ аркушем. Назви рядків мовою застосунку, а не заголовки самих
+     документів: документи писані англійською і так називаються всередині, але
+     в меню людина шукає їх тими словами, якими згоду й давала. */
+  Future<void> _showDocs() => _cornerCard(
+    context,
+    fromRight: false,
+    width: 252,
+    rows: (card) => [
+      for (final (doc, name) in [(terms, l.setTerms), (privacy, l.setPolicy)])
+        _CardRow(
+          title: name,
+          onTap: () {
+            Navigator.of(card).pop();
+            unawaited(legalSheet(context, doc));
+          },
+        ),
+    ],
+  );
 
   /* Вхід відбувся, а профілю в акаунті не виявилось: анкету все одно треба
      пройти. Прапорець знімається, бо далі це звичайна дорога новачка. */
@@ -346,18 +406,56 @@ class _StartScreenState extends State<StartScreen> {
               padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 6, CalviSize.gutter, 22),
               child: Row(
                 children: [
-                  Visibility(
-                    visible: _back != null,
-                    maintainSize: true,
-                    maintainAnimation: true,
-                    maintainState: true,
-                    child: _Back(onTap: () => _back?.call()),
-                  ),
+                  /* Кут не пустує. На «Ласкаво просимо» стрілки немає, бо
+                     повертати звідти нема куди, і на її місце стає знак
+                     оклику: документи, які людина щойно прийняла на
+                     реєстрації, мусять бути під рукою на екрані, де вона їх
+                     прийняла, а не десь у налаштуваннях. Кнопка та сама, що й
+                     стрілка: те саме коло, той самий розмір, той самий
+                     натиск. */
+                  if (_step == 1)
+                    _Round(
+                      label: l.startDocs,
+                      onTap: _showDocs,
+                      child: const CalviIcon('alert', size: 19),
+                    )
+                  else
+                    Visibility(
+                      visible: _back != null,
+                      maintainSize: true,
+                      maintainAnimation: true,
+                      maintainState: true,
+                      child: _Round(
+                        label: l.actionBack,
+                        onTap: () => _back?.call(),
+                        child: Transform.rotate(
+                          angle: math.pi,
+                          child: const CalviIcon('chevron', size: 19),
+                        ),
+                      ),
+                    ),
                   const SizedBox(width: 14),
                   /* Крок плюс один: людина на першому питанні пройшла одну
                      сьому, а не нічого. Порожня смуга на екрані, де вже щось
                      роблять, читається як зламана. */
                   Expanded(child: _Progress(at: (_step + 1) / startSteps)),
+                  const SizedBox(width: 14),
+                  /* Мова в шапці, а не в налаштуваннях, куди з першого екрана
+                     не дістатись. Той, хто відкрив застосунок і побачив чужу
+                     мову, має перемкнути її тут, до першого питання, а не
+                     проходити анкету навпомацки. */
+                  _Round(
+                    label: l.setLang,
+                    onTap: _showLangs,
+                    child: Text(
+                      langCode(context, _lang),
+                      style: context.t.bodyMedium?.copyWith(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -394,13 +492,15 @@ class _StartScreenState extends State<StartScreen> {
       onEntered: _entered,
       returning: _returning,
     ),
-    1 => _aboutStep(),
-    2 => _unitsStep(),
-    3 => _weightStep(),
-    4 => _goalStep(),
-    5 => _paceStep(),
-    6 => _lifeStep(),
-    7 => _normStep(),
+    // Єдиний екран анкети без питання. Стоїть рівно між входом і першим із них.
+    1 => _Hi(onGo: () => _go(2)),
+    2 => _aboutStep(),
+    3 => _unitsStep(),
+    4 => _weightStep(),
+    5 => _goalStep(),
+    6 => _paceStep(),
+    7 => _lifeStep(),
+    8 => _normStep(),
     // Остання картка: що вміє Нора. За нею вже щоденник.
     _ => NoraTour(onDone: _done),
   };
@@ -417,7 +517,7 @@ class _StartScreenState extends State<StartScreen> {
     return _Step(
       title: l.unitsTitle,
       cta: l.actionNext,
-      onNext: () => _go(3),
+      onNext: () => _go(4),
       children: [
         for (final g in groups)
           _Block(
@@ -441,7 +541,7 @@ class _StartScreenState extends State<StartScreen> {
   Widget _aboutStep() => _Step(
     title: l.startAbout,
     cta: l.actionNext,
-    onNext: () => _go(2),
+    onNext: () => _go(3),
     children: [
       _Block(
         title: l.startSex,
@@ -486,7 +586,7 @@ class _StartScreenState extends State<StartScreen> {
   Widget _weightStep() => _Step(
     title: l.startWeightNow,
     cta: l.actionNext,
-    onNext: () => _go(4),
+    onNext: () => _go(5),
     middle: true,
     children: [
       CalviRuler(
@@ -503,7 +603,7 @@ class _StartScreenState extends State<StartScreen> {
     title: l.startGoal,
     cta: l.actionNext,
     // Holding weight needs no target and no pace, so the next step is skipped.
-    onNext: () => _go(_direction == Direction.keep ? 6 : 5),
+    onNext: () => _go(_direction == Direction.keep ? 7 : 6),
     children: [
       for (final g in _goals(l))
         CalviPick(
@@ -540,7 +640,7 @@ class _StartScreenState extends State<StartScreen> {
     return _Step(
       title: l.startPace,
       cta: l.actionNext,
-      onNext: () => _go(6),
+      onNext: () => _go(7),
       children: [
         Text.rich(
           TextSpan(
@@ -608,7 +708,7 @@ class _StartScreenState extends State<StartScreen> {
   Widget _lifeStep() => _Step(
     title: l.startLife,
     cta: l.actionNext,
-    onNext: () => _go(7),
+    onNext: () => _go(8),
     children: [
       for (final a in activityLevels)
         CalviPick(
@@ -645,7 +745,7 @@ class _StartScreenState extends State<StartScreen> {
       '${l.startAge} ${l.startAgeYears(_age)}',
       activityTitle(context, _activity),
     ],
-    onNext: () => _go(8),
+    onNext: () => _go(9),
   );
 
   /// Вага без хвоста, коли він нульовий: «80 кг», а не «80.0 кг».
@@ -1154,25 +1254,34 @@ class _Step extends StatelessWidget {
   }
 }
 
-/// The back mark of the flow. Plainer than [CalviBack] on purpose: the demo
-/// draws no ring here, because the bar beside it is already the progress.
-class _Back extends StatefulWidget {
-  const _Back({required this.onTap});
+/// A round tap target in the flow's header.
+///
+/// Three buttons share it: back, documents and the language code. Plainer than
+/// [CalviBack] on purpose, because the bar between them is already the
+/// progress; and one shape for all three, because circles of one size on one
+/// line read as a set rather than as three unrelated things.
+class _Round extends StatefulWidget {
+  const _Round({required this.onTap, required this.label, required this.child});
 
   final VoidCallback onTap;
 
+  /// What a screen reader calls it. There is no text under these circles.
+  final String label;
+
+  final Widget child;
+
   @override
-  State<_Back> createState() => _BackState();
+  State<_Round> createState() => _RoundState();
 }
 
-class _BackState extends State<_Back> {
+class _RoundState extends State<_Round> {
   bool _down = false;
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: L.of(context).actionBack,
+      label: widget.label,
       child: GestureDetector(
         onTap: widget.onTap,
         onTapDown: (_) => setState(() => _down = true),
@@ -1188,12 +1297,239 @@ class _BackState extends State<_Back> {
             height: 40,
             alignment: Alignment.center,
             decoration: BoxDecoration(shape: BoxShape.circle, color: context.c.fillSecondary),
-            child: Transform.rotate(angle: math.pi, child: const CalviIcon('chevron', size: 19)),
+            child: widget.child,
           ),
         ),
       ),
     );
   }
+}
+
+/* Картка з кута шапки: та сама, що меню застосунку, тільки з двома списками
+   замість дев'яти рядків. Не нижній аркуш: аркуш це мова рішень, а тут просто
+   вибір. Розкривається з того кута, звідки її покликали, і тап повз неї
+   закриває. Один в один із демкою 5300. */
+Future<void> _cornerCard(
+  BuildContext context, {
+  /// З якого кута шапки вона виїжджає: мова праворуч, документи ліворуч.
+  required bool fromRight,
+  required double width,
+  required List<Widget> Function(BuildContext card) rows,
+}) {
+  final c = context.c;
+  final pop = context.shadowPop;
+
+  return showGeneralDialog<void>(
+    context: context,
+    barrierDismissible: true,
+    barrierLabel: L.of(context).actionClose,
+    // Ледь помітна тінь: сторінка під карткою зараз не слухає, але нікуди не
+    // зникла.
+    barrierColor: c.text.withValues(alpha: 0.06),
+    transitionDuration: const Duration(milliseconds: 200),
+    pageBuilder: (card, _, _) => Stack(
+      children: [
+        Positioned(
+          // Під самою кнопкою: коло висотою 40 стоїть із відступом 6 від краю.
+          top: MediaQuery.paddingOf(card).top + 54,
+          left: fromRight ? null : CalviSize.gutter,
+          right: fromRight ? CalviSize.gutter : null,
+          width: width,
+          child: Material(
+            color: const Color(0x00000000),
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: c.card,
+                border: Border.all(color: c.cardBorder),
+                borderRadius: BorderRadius.circular(CalviSize.rLarge),
+                boxShadow: pop,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: rows(card),
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+    transitionBuilder: (card, anim, _, child) {
+      final t = CurvedAnimation(parent: anim, curve: CalviMotion.easeRise);
+      return Opacity(
+        opacity: t.value,
+        child: Transform.scale(
+          scale: 0.92 + 0.08 * t.value,
+          alignment: fromRight ? Alignment.topRight : Alignment.topLeft,
+          child: Transform.translate(offset: Offset(0, -6 * (1 - t.value)), child: child),
+        ),
+      );
+    },
+  );
+}
+
+/// One line of [_cornerCard]: a name, and a mark saying what it does.
+class _CardRow extends StatelessWidget {
+  const _CardRow({required this.title, required this.onTap, this.picked});
+
+  final String title;
+  final VoidCallback onTap;
+
+  /* Галочка на обраній мові, шеврон на документі, нічого на решті. `null`
+     означає «це не вибір», і саме тому не `false`: рядок документа з порожнім
+     місцем під галочку читався б як невибрана мова. */
+  final bool? picked;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 44),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: context.t.bodyLarge?.copyWith(fontSize: CalviSize.fsCaption),
+              ),
+            ),
+            const SizedBox(width: 10),
+            if (picked == null)
+              // Шеврон тихий: він каже «відкриється», а не кличе на себе.
+              CalviIcon('chevron', size: 16, color: c.textSecondary)
+            else if (picked!)
+              // Галочка обраної мови кольором дії, як у списках налаштувань.
+              CalviIcon('check', size: 16, color: c.button),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/* Ласкаво просимо: привітання, імʼя, кнопка.
+ *
+ * Три речі одна під одною і більше нічого. Заголовка ліворуч тут немає
+ * навмисно, хоч він і стоїть на решті кроків: цей екран нічого не питає, а
+ * імʼя застосунку не питання, і читати його треба з середини екрана, а не з
+ * кута.
+ *
+ * Рух грає сам і один раз. У демці тут стояло тепле світло, яке трималось
+ * курсора, і це була помилка: миша існує в браузері, а застосунок живе на
+ * телефоні, де рух вказівника приходить лише поки палець притиснутий.
+ * Лишилась поява: привітання, імʼя з-під власного рядка, кнопка, підпис. */
+class _Hi extends StatelessWidget {
+  const _Hi({required this.onGo});
+
+  final VoidCallback onGo;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final c = context.c;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: CalviSize.gutter),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _Rise(
+            delay: Duration.zero,
+            child: Text(
+              l.startHiHello,
+              textAlign: TextAlign.center,
+              style: context.t.bodyLarge?.copyWith(
+                fontSize: 20,
+                fontWeight: FontWeight.w500,
+                letterSpacing: -0.2,
+                color: c.textSecondary,
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          /* Та сама оправа, що в демці: кегль, накреслення, трекінг і чорнило
+             один в один. Назву застосунку в двох місцях поспіль не можна
+             писати по-різному. */
+          _Rise(
+            delay: const Duration(milliseconds: 90),
+            from: 26,
+            child: Text(
+              'Calvi',
+              style: context.t.displayLarge?.copyWith(
+                fontSize: 46,
+                letterSpacing: -0.92,
+                height: 1.05,
+                color: c.text,
+              ),
+            ),
+          ),
+          const SizedBox(height: 32),
+          /* Не на всю ширину: кнопка, яка нічого не підтверджує, а лише веде
+             далі, не має важити стільки ж, скільки «Створити акаунт». */
+          _Rise(
+            delay: const Duration(milliseconds: 420),
+            child: SizedBox(
+              width: 210,
+              child: CalviButton(label: l.welStart, onTap: onGo),
+            ),
+          ),
+          const SizedBox(height: 18),
+          /* Міра того, що починається, тихим рядком під кнопкою. Вона не
+             сперечається з іменем за увагу, але відповідає на єдине питання,
+             яке в цю мить є: скільки це триватиме. */
+          _Rise(
+            delay: const Duration(milliseconds: 620),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 260),
+              child: Text(
+                l.startHiNote,
+                textAlign: TextAlign.center,
+                style: context.t.bodyMedium?.copyWith(
+                  fontSize: CalviSize.fsMicro,
+                  height: 1.5,
+                  color: c.textSecondary,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Одна поява з затримкою, для екрана, де вони йдуть одна за одною.
+class _Rise extends StatelessWidget {
+  const _Rise({required this.child, required this.delay, this.from = 6});
+
+  final Widget child;
+  final Duration delay;
+
+  /// Наскільки знизу приходить. Імʼя піднімається далі за решту: саме цей рух
+  /// робить його подією, а не написом.
+  final double from;
+
+  @override
+  Widget build(BuildContext context) => TweenAnimationBuilder<double>(
+    tween: Tween(begin: 0, end: 1),
+    duration: Duration(milliseconds: 520) + delay,
+    curve: Interval(
+      delay.inMilliseconds / (520 + delay.inMilliseconds),
+      1,
+      curve: CalviMotion.easeRise,
+    ),
+    builder: (context, t, child) => Opacity(
+      opacity: t,
+      child: Transform.translate(offset: Offset(0, from * (1 - t)), child: child),
+    ),
+    child: child,
+  );
 }
 
 /// One option, as a card rather than a row: a first run has room for it, and a

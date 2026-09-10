@@ -2439,6 +2439,9 @@ class LPl extends L {
   String get startDeviceFirstRun => 'pierwsze uruchomienie';
 
   @override
+  String get startDocs => 'Dokumenty';
+
+  @override
   String get startGoal => 'Dokąd idziemy';
 
   @override
@@ -2461,6 +2464,12 @@ class LPl extends L {
 
   @override
   String get startHeight => 'Wzrost';
+
+  @override
+  String get startHiHello => 'Witamy w';
+
+  @override
+  String get startHiNote => 'Sześć krótkich pytań, minuta. Resztę policzy Nora.';
 
   @override
   String get startLife => 'Tryb życia';

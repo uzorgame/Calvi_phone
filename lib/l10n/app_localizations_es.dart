@@ -503,7 +503,7 @@ class LEs extends L {
       'Enviaremos un código a tu correo y luego eliges una nueva contraseña.';
 
   @override
-  String get authForgotLink => '¿La olvidaste?';
+  String get authForgotLink => '¿Olvidaste?';
 
   @override
   String get authForgotTitle => 'Nueva contraseña';
@@ -2419,6 +2419,9 @@ class LEs extends L {
   String get startDeviceFirstRun => 'primer inicio';
 
   @override
+  String get startDocs => 'Documentos';
+
+  @override
   String get startGoal => 'Hacia dónde vamos';
 
   @override
@@ -2441,6 +2444,12 @@ class LEs extends L {
 
   @override
   String get startHeight => 'Altura';
+
+  @override
+  String get startHiHello => 'Te damos la bienvenida a';
+
+  @override
+  String get startHiNote => 'Seis preguntas cortas, un minuto. El resto lo calcula Nora.';
 
   @override
   String get startLife => 'Estilo de vida';

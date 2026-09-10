@@ -64,6 +64,10 @@
   "startAgreeAnd": " und der ",
   "startAgreePrivacy": "Datenschutzerklärung zu",
 
+  "startHiHello": "Willkommen bei",
+  "startHiNote": "Sechs kurze Fragen, etwa eine Minute. Den Rest rechnet Nora.",
+  "startDocs": "Dokumente",
+
   "helloSaid": "zwei Eier und ein Toast",
   "helloSlotSub": "zwei Einträge",
   "helloDishEggs": "Rührei",

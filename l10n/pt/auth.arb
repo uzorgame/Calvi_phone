@@ -35,7 +35,7 @@
     "placeholders": { "sec": { "type": "int" } }
   },
 
-  "authForgotLink": "Esqueceste?",
+  "authForgotLink": "Esqueceu?",
   "authForgotTitle": "Nova palavra-passe",
   "authForgotHint": "Enviamos um código para o teu e-mail e depois escolhes uma nova palavra-passe.",
   "authForgotAction": "Enviar código",

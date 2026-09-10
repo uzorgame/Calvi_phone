@@ -35,7 +35,7 @@
     "placeholders": { "sec": { "type": "int" } }
   },
 
-  "authForgotLink": "Забули пароль?",
+  "authForgotLink": "Забули?",
   "authForgotTitle": "Новий пароль",
   "authForgotHint": "Надішлемо код на пошту, а тоді придумаєш новий пароль.",
   "authForgotAction": "Надіслати код",

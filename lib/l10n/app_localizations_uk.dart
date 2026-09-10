@@ -509,7 +509,7 @@ class LUk extends L {
   String get authForgotHint => 'Надішлемо код на пошту, а тоді придумаєш новий пароль.';
 
   @override
-  String get authForgotLink => 'Забули пароль?';
+  String get authForgotLink => 'Забули?';
 
   @override
   String get authForgotTitle => 'Новий пароль';
@@ -2434,6 +2434,9 @@ class LUk extends L {
   String get startDeviceFirstRun => 'перший запуск';
 
   @override
+  String get startDocs => 'Документи';
+
+  @override
   String get startGoal => 'Куди рухаємось';
 
   @override
@@ -2456,6 +2459,12 @@ class LUk extends L {
 
   @override
   String get startHeight => 'Зріст';
+
+  @override
+  String get startHiHello => 'Ласкаво просимо в';
+
+  @override
+  String get startHiNote => 'Шість коротких питань, хвилина. Далі Нора рахує сама.';
 
   @override
   String get startLife => 'Спосіб життя';

@@ -15,6 +15,7 @@ import 'theme.dart';
 /// Every mark in the set, as an SVG document. `currentColor` inside each one is
 /// what lets a single drawing serve every colour it is asked for.
 const calviIcons = <String, String>{
+  'alert': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 7.5v5.5" /><path d="M12 16.4h.01" /></svg>',
   'allergy': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.2l8.4 14.6H3.6z" /><path d="M12 9.8v4M12 16.4v.4" /></svg>',
   'apple': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.528V3a1 1 0 0 1 1-1h0" /><path d="M18.237 21A15 15 0 0 0 22 11a6 6 0 0 0-10-4.472A6 6 0 0 0 2 11a15.1 15.1 0 0 0 3.763 10 3 3 0 0 0 3.648.648 5.5 5.5 0 0 1 5.178 0A3 3 0 0 0 18.237 21" /></svg>',
   'avocado': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5.2c-2.9 0-5.1 3.1-5.1 6.8 0 4.3 2.4 8.2 5.1 8.2s5.1-3.9 5.1-8.2c0-3.7-2.2-6.8-5.1-6.8z" /><path d="M12 11.9a2.4 2.4 0 1 0 0 4.8 2.4 2.4 0 1 0 0-4.8z" /></svg>',

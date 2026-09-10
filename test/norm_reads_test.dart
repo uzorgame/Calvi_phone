@@ -37,7 +37,7 @@ void main() {
   testWidgets('прочитані рядки беруться з відповідей людини', (tester) async {
     // Крок «Спосіб життя»: звідси одним дотиком міняється те, що потім читає
     // Нора, і одним «Далі» видно результат.
-    await open(tester, 6);
+    await open(tester, 7);
 
     await tester.tap(find.text('Сидячий'));
     await tester.pumpAndSettle();
@@ -66,7 +66,7 @@ void main() {
   });
 
   testWidgets('інша активність дає інший рядок', (tester) async {
-    await open(tester, 6);
+    await open(tester, 7);
 
     await tester.tap(find.text('Дуже висока'));
     await tester.pumpAndSettle();

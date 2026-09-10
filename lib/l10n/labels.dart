@@ -144,6 +144,12 @@ Lang langNow(BuildContext context) => switch (Localizations.localeOf(context).la
   _ => Lang.en,
 };
 
+/* Дві літери мови для круглої кнопки в шапці «Старту», де на назву місця
+   немає. Режим «мова пристрою» показує ту мову, якою застосунок говорить
+   зараз: «SY» у кутку не означало б нічого. */
+String langCode(BuildContext context, Lang lang) =>
+    (lang == Lang.system ? langNow(context) : lang).name.toUpperCase();
+
 String langTitle(BuildContext context, Lang lang) => switch (lang) {
   Lang.system => langTitle(context, langNow(context)),
   Lang.uk => 'Українська',

@@ -64,6 +64,10 @@
   "startAgreeAnd": " e l'",
   "startAgreePrivacy": "informativa sulla privacy",
 
+  "startHiHello": "Benvenuto in",
+  "startHiNote": "Sei domande brevi, un minuto. Il resto lo calcola Nora.",
+  "startDocs": "Documenti",
+
   "helloSaid": "due uova e un toast",
   "helloSlotSub": "due voci",
   "helloDishEggs": "Uova strapazzate",

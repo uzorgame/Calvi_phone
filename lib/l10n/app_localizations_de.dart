@@ -2431,6 +2431,9 @@ class LDe extends L {
   String get startDeviceFirstRun => 'erster Start';
 
   @override
+  String get startDocs => 'Dokumente';
+
+  @override
   String get startGoal => 'Wohin geht es';
 
   @override
@@ -2453,6 +2456,12 @@ class LDe extends L {
 
   @override
   String get startHeight => 'Größe';
+
+  @override
+  String get startHiHello => 'Willkommen bei';
+
+  @override
+  String get startHiNote => 'Sechs kurze Fragen, etwa eine Minute. Den Rest rechnet Nora.';
 
   @override
   String get startLife => 'Lebensweise';

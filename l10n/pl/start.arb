@@ -55,6 +55,10 @@
   "startAgreeAnd": " i ",
   "startAgreePrivacy": "polityką prywatności",
 
+  "startHiHello": "Witamy w",
+  "startHiNote": "Sześć krótkich pytań, minuta. Resztę policzy Nora.",
+  "startDocs": "Dokumenty",
+
   "helloSaid": "dwa jajka i tost",
   "helloSlotSub": "dwa dania",
   "helloDishEggs": "Jajecznica z dwóch jajek",

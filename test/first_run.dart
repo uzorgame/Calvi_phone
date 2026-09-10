@@ -31,6 +31,10 @@ Future<void> toDay(WidgetTester tester) async {
   await tester.tap(find.text('Далі без акаунту'));
   await tester.pumpAndSettle();
 
+  // «Ласкаво просимо»: єдиний екран анкети, який нічого не питає.
+  await tester.tap(find.text('Почати'));
+  await tester.pumpAndSettle();
+
   // Про тебе, Одиниці, Вага, Ціль, Темп, Спосіб життя, Норма.
   // Settle rather than a fixed pump: the switcher keeps the outgoing step in
   // the tree for the length of the slide, and two «Далі» is an ambiguous tap.

@@ -11,8 +11,12 @@ import 'package:calvi/main.dart';
 /// документ. Досі вони вели в браузер: людина йшла читати і поверталась у
 /// знайомство, яке доводилось починати спочатку, а без мережі не поверталась
 /// узагалі. Тепер текст піднімається аркушем поверх того самого екрана.
+///
+/// Сама галочка стоїть на реєстрації, а не на вході: згоду дають один раз,
+/// коли акаунт заводять. Той, хто повертається, її вже дав, і питати вдруге
+/// означало б ставити умову на дорозі до власного щоденника.
 void main() {
-  Future<void> toSignIn(WidgetTester tester) async {
+  Future<void> toSignUp(WidgetTester tester) async {
     tester.platformDispatcher.localesTestValue = const [Locale('uk')];
     addTearDown(tester.platformDispatcher.clearLocalesTestValue);
 
@@ -24,10 +28,15 @@ void main() {
     await welcomeOut(tester);
 
     expect(find.text('Вхід'), findsOneWidget, reason: 'не дійшли до входу');
+
+    await tester.tap(find.text('Зареєструватись'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Заведімо акаунт'), findsOneWidget, reason: 'не дійшли до реєстрації');
   }
 
-  testWidgets('умови відкриваються аркушем просто з екрана входу', (tester) async {
-    await toSignIn(tester);
+  testWidgets('умови відкриваються аркушем просто з екрана реєстрації', (tester) async {
+    await toSignUp(tester);
 
     /* Фрагмент усередині складеного рядка, а не окремий віджет: звичайний
        find.text його не бачить. */
@@ -46,13 +55,13 @@ void main() {
       reason: 'аркуш порожній або в ньому немає медичного застереження',
     );
 
-    /* Екран входу лишається під аркушем. Якби документ приїхав окремим екраном,
+    /* Реєстрація лишається під аркушем. Якби документ приїхав окремим екраном,
        людина втратила б те, з чого його відкрила. */
-    expect(find.text('Вхід'), findsOneWidget);
+    expect(find.text('Заведімо акаунт'), findsOneWidget);
   });
 
   testWidgets('приватність відкривається тим самим шляхом', (tester) async {
-    await toSignIn(tester);
+    await toSignUp(tester);
 
     await tester.tapOnText(find.textRange.ofSubstring('політикою приватності'));
     await tester.pumpAndSettle();

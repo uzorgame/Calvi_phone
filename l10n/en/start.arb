@@ -71,6 +71,10 @@
   "startAgreeAnd": " and the ",
   "startAgreePrivacy": "privacy policy",
 
+  "startHiHello": "Welcome to",
+  "startHiNote": "Six short questions, about a minute. Nora counts the rest.",
+  "startDocs": "Documents",
+
   "helloSaid": "two eggs and toast",
   "@helloSaid": {
     "description": "Launch splash «Note»: the spoken phrase above the card. Kept short on purpose, it sits in a chat bubble on a screen that lasts two seconds."

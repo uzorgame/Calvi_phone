@@ -975,7 +975,7 @@ abstract class L {
   /// No description provided for @authForgotLink.
   ///
   /// In en, this message translates to:
-  /// **'Forgot it?'**
+  /// **'Forgot?'**
   String get authForgotLink;
 
   /// No description provided for @authForgotTitle.
@@ -4374,6 +4374,12 @@ abstract class L {
   /// **'first run'**
   String get startDeviceFirstRun;
 
+  /// No description provided for @startDocs.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents'**
+  String get startDocs;
+
   /// No description provided for @startGoal.
   ///
   /// In en, this message translates to:
@@ -4421,6 +4427,18 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Height'**
   String get startHeight;
+
+  /// No description provided for @startHiHello.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to'**
+  String get startHiHello;
+
+  /// No description provided for @startHiNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Six short questions, about a minute. Nora counts the rest.'**
+  String get startHiNote;
 
   /// No description provided for @startLife.
   ///

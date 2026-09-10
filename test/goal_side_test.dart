@@ -30,7 +30,7 @@ void main() {
         locale: const Locale('uk'),
         theme: calviLightTheme,
         scrollBehavior: const CalviScroll(),
-        home: StartScreen(step: 4, onFinish: (_) {}),
+        home: StartScreen(step: 5, onFinish: (_) {}),
       ),
     );
     await tester.pumpAndSettle();

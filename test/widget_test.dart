@@ -76,6 +76,13 @@ void main() {
     await tester.tap(find.text('Далі без акаунту'));
     await tester.pumpAndSettle();
 
+    /* Між входом і першим питанням стоїть «Ласкаво просимо»: єдиний екран
+       анкети, який нічого не питає, і тому кнопка на ньому веде далі, а не
+       відповідає. */
+    expect(find.text('Ласкаво просимо в'), findsOneWidget);
+    await tester.tap(find.text('Почати'));
+    await tester.pumpAndSettle();
+
     expect(find.text('Про тебе'), findsOneWidget);
     expect(find.text('Сніданок'), findsNothing, reason: 'день ще не заслужено');
 

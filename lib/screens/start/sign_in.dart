@@ -8,6 +8,7 @@ import 'package:flutter/services.dart'
 import '../../data/app_scope.dart';
 import '../../data/legal.dart';
 import '../../data/remote/login_service.dart';
+import '../../design/brand_marks.dart';
 import '../../design/icons.dart';
 import '../../design/shell.dart';
 import '../../design/theme.dart';
@@ -407,72 +408,81 @@ class _SignInState extends State<SignIn> {
     final login = _login;
 
     return [
-      // Nothing agreed to means nothing to press, and the row says so by going
-      // pale rather than by turning grey.
-      Opacity(
-        opacity: _agree ? 1 : 0.4,
-        child: IgnorePointer(
-          ignoring: !_agree,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              /* Кнопка є тільки тоді, коли за нею щось стоїть. Порожній
-                 ідентифікатор означає, що вхід не налаштований у цій збірці, і
-                 кнопка, яка нічого не зробить, гірша за одну кнопку менше. */
-              if (login?.available ?? false) ...[
-                CalviButton(
-                  label: _busyWith == 'google' ? l.startSignInBusy : l.startSignInGoogle,
-                  enabled: !_busy,
-                  onTap: () => unawaited(_provider('google')),
-                ),
-                const SizedBox(height: 10),
-              ],
-              if (login?.appleAvailable ?? false) ...[
-                CalviGhost(
-                  label: _busyWith == 'apple' ? l.startSignInBusy : l.startSignInApple,
-                  enabled: !_busy,
-                  onTap: () => unawaited(_provider('apple')),
-                ),
-                const SizedBox(height: 10),
-              ],
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+        /* Кнопка є тільки тоді, коли за нею щось стоїть. Порожній
+           ідентифікатор означає, що вхід не налаштований у цій збірці, і
+           кнопка, яка нічого не зробить, гірша за одну кнопку менше. */
+        /* Кожна кнопка провайдера зі своїм знаком і у своєму вигляді.
+         *
+         * Доти обидві були нашими кнопками з нашими словами, темна і
+         * прозора, без жодного знака. Дві однакові пігулки поспіль
+         * читались як «два способи чогось нашого», і людина шукала
+         * очима Google, якого на екрані не було. Знак упізнають раніше,
+         * ніж дочитують рядок, і саме на ньому тримається довіра.
+         *
+         * Вигляд не наш вибір: Google просить світлу кнопку зі своїм
+         * різнокольоровим знаком, Apple темну з монохромним яблуком у
+         * колір напису. */
+        if (login?.available ?? false) ...[
+          CalviButton(
+            label: _busyWith == 'google' ? l.startSignInBusy : l.startSignInGoogle,
+            enabled: !_busy,
+            light: true,
+            leading: const GoogleMark(size: 20),
+            onTap: () => unawaited(_provider('google')),
+          ),
+          const SizedBox(height: 10),
+        ],
+        if (login?.appleAvailable ?? false) ...[
+          CalviButton(
+            label: _busyWith == 'apple' ? l.startSignInBusy : l.startSignInApple,
+            enabled: !_busy,
+            leading: AppleMark(size: 20, color: context.c.buttonText),
+            onTap: () => unawaited(_provider('apple')),
+          ),
+          const SizedBox(height: 10),
+        ],
 
-              const SizedBox(height: 12),
-              _Or(l.authOr),
-              const SizedBox(height: 18),
+        const SizedBox(height: 12),
+        _Or(l.authOr),
+        const SizedBox(height: 18),
 
-              _field(
-                key: 'mail',
-                label: l.authMail,
-                controller: _mailCtl,
-                keyboard: TextInputType.emailAddress,
+        _field(
+          key: 'mail',
+          label: l.authMail,
+          controller: _mailCtl,
+          keyboard: TextInputType.emailAddress,
+        ),
+        const SizedBox(height: 16),
+        _field(
+          key: 'pass',
+          label: l.authPass,
+          controller: _passCtl,
+          secret: true,
+          /* «Забули?», без слова «пароль» і без риски. Слово стоїть у
+             підписі поля поруч, тому в питанні воно вдруге, а риска на
+             дрібному тексті збоку була б третім рівнем підкреслень на
+             екрані, де вже є два. */
+          aside: GestureDetector(
+            onTap: () => widget.onPage(AuthPage.forgot),
+            child: Text(
+              l.authForgotLink,
+              style: context.t.bodyMedium?.copyWith(
+                fontSize: CalviSize.fsMicro,
+                color: context.c.textSecondary,
               ),
-              const SizedBox(height: 16),
-              _field(
-                key: 'pass',
-                label: l.authPass,
-                controller: _passCtl,
-                secret: true,
-                aside: GestureDetector(
-                  onTap: () => widget.onPage(AuthPage.forgot),
-                  child: Text(
-                    l.authForgotLink,
-                    style: context.t.bodyMedium?.copyWith(
-                      fontSize: CalviSize.fsMicro,
-                      color: context.c.textSecondary,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 22),
-              CalviButton(
-                label: _busyWith == 'mail' ? l.startSignInBusy : l.authSignInAction,
-                enabled: !_busy,
-                onTap: () => unawaited(_enterByMail()),
-              ),
-            ],
+            ),
           ),
         ),
+        const SizedBox(height: 22),
+        CalviButton(
+          label: _busyWith == 'mail' ? l.startSignInBusy : l.authSignInAction,
+          enabled: !_busy,
+          onTap: () => unawaited(_enterByMail()),
+        ),
+        ],
       ),
 
       const SizedBox(height: 22),
@@ -534,8 +544,6 @@ class _SignInState extends State<SignIn> {
         ),
       ],
 
-      const SizedBox(height: 18),
-      _terms(),
     ];
   }
 
@@ -564,7 +572,6 @@ class _SignInState extends State<SignIn> {
                 label: l.authPass,
                 controller: _passCtl,
                 secret: true,
-                hint: l.authPassHint,
               ),
               const SizedBox(height: 16),
               _field(
@@ -572,7 +579,6 @@ class _SignInState extends State<SignIn> {
                 label: l.authAgain,
                 controller: _againCtl,
                 secret: true,
-                hint: l.authAgainHint,
               ),
               const SizedBox(height: 22),
               CalviButton(
@@ -633,7 +639,6 @@ class _SignInState extends State<SignIn> {
           label: l.authPassNew,
           controller: _passCtl,
           secret: true,
-          hint: l.authPassHint,
         ),
         const SizedBox(height: 22),
         CalviButton(

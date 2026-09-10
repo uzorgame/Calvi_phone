@@ -2434,6 +2434,9 @@ class LFr extends L {
   String get startDeviceFirstRun => 'premier lancement';
 
   @override
+  String get startDocs => 'Documents';
+
+  @override
   String get startGoal => 'Où on va';
 
   @override
@@ -2456,6 +2459,12 @@ class LFr extends L {
 
   @override
   String get startHeight => 'Taille';
+
+  @override
+  String get startHiHello => 'Bienvenue dans';
+
+  @override
+  String get startHiNote => 'Six questions courtes, une minute. Nora calcule le reste.';
 
   @override
   String get startLife => 'Mode de vie';

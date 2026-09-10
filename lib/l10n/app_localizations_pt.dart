@@ -502,7 +502,7 @@ class LPt extends L {
       'Enviamos um código para o teu e-mail e depois escolhes uma nova palavra-passe.';
 
   @override
-  String get authForgotLink => 'Esqueceste?';
+  String get authForgotLink => 'Esqueceu?';
 
   @override
   String get authForgotTitle => 'Nova palavra-passe';
@@ -2423,6 +2423,9 @@ class LPt extends L {
   String get startDeviceFirstRun => 'primeira abertura';
 
   @override
+  String get startDocs => 'Documentos';
+
+  @override
   String get startGoal => 'Para onde vamos';
 
   @override
@@ -2445,6 +2448,12 @@ class LPt extends L {
 
   @override
   String get startHeight => 'Altura';
+
+  @override
+  String get startHiHello => 'Boas-vindas ao';
+
+  @override
+  String get startHiNote => 'Seis perguntas curtas, um minuto. O resto a Nora calcula.';
 
   @override
   String get startLife => 'Estilo de vida';

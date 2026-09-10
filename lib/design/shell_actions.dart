@@ -16,12 +16,24 @@ class CalviButton extends StatefulWidget {
     this.busy = false,
     this.second,
     this.onSecond,
+    this.leading,
+    this.light = false,
   });
 
   final String label;
   final VoidCallback onTap;
   final bool enabled;
   final bool danger;
+
+  /* Знак перед написом: тільки для кнопок входу через провайдера. Google і
+     Apple упізнають раніше, ніж дочитують рядок, і саме на знаку тримається
+     довіра до входу. */
+  final Widget? leading;
+
+  /* Світла кнопка з тонкою межею замість залитої. Один випадок на застосунок:
+     Google просить саме такий вигляд під свій різнокольоровий знак, і темна
+     кнопка з ним порушувала б їхні правила. */
+  final bool light;
 
   /* Кнопку натиснули, і вона працює: кільце живе в ній самій, а колір
      лишається темним. Сіра «недоступність» брехала б, робота якраз іде. */
@@ -47,7 +59,10 @@ class _CalviButtonState extends State<CalviButton> {
         ? c.buttonDisabled
         : widget.danger
         ? c.protein
+        : widget.light
+        ? c.card
         : c.button;
+    final ink = widget.light ? c.text : c.buttonText;
 
     final button = GestureDetector(
       onTap: widget.enabled && !widget.busy ? widget.onTap : null,
@@ -65,17 +80,28 @@ class _CalviButtonState extends State<CalviButton> {
           decoration: BoxDecoration(
             color: fill,
             borderRadius: BorderRadius.circular(CalviSize.rPill),
+            // Світла кнопка тримається межею: без неї вона зникає на ґрунті.
+            border: widget.light ? Border.all(color: c.cardBorder) : null,
             /* Головна дія має вагу: тінь свого ж кольору. Вимкнена її не
-               кидає, бо натиснути її зараз не можна. */
-            boxShadow: widget.enabled
+               кидає, бо натиснути її зараз не можна. Світла кидає звичайну
+               тінь картки: тінь власного кольору в неї була б білою. */
+            boxShadow: !widget.enabled
+                ? null
+                : widget.light
                 ? [
+                    BoxShadow(
+                      color: c.shade,
+                      blurRadius: 14,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                : [
                     BoxShadow(
                       color: fill.withValues(alpha: 0.3),
                       blurRadius: 18,
                       offset: const Offset(0, 6),
                     ),
-                  ]
-                : null,
+                  ],
           ),
           /* Довгий напис стискається, а не ріжеться: у рядку з двох кнопок
              половина ширини дістається кожній, і «Так, видалити назавжди» має
@@ -93,17 +119,20 @@ class _CalviButtonState extends State<CalviButton> {
                       height: 16,
                       child: CircularProgressIndicator(
                         strokeWidth: 2.4,
-                        color: c.buttonText,
-                        backgroundColor: c.buttonText.withValues(alpha: 0.28),
+                        color: ink,
+                        backgroundColor: ink.withValues(alpha: 0.28),
                       ),
                     ),
                     const SizedBox(width: 9),
+                  ] else if (widget.leading != null) ...[
+                    widget.leading!,
+                    const SizedBox(width: 10),
                   ],
                   Text(
                     widget.label,
                     style: context.t.titleMedium?.copyWith(
                       fontSize: CalviSize.fsBody,
-                      color: c.buttonText,
+                      color: ink,
                     ),
                   ),
                 ],
