@@ -100,6 +100,30 @@ end
 phone = project.targets.find { |t| t.name == 'Runner' } or abort 'Немає цілі Runner'
 team = phone.build_configurations.first.build_settings['DEVELOPMENT_TEAM']
 
+# Мови самого пакета.
+#
+# App Store складає рядок «Languages» на сторінці застосунку з тек `.lproj`
+# усередині пакета, а не з ключа `CFBundleLocalizations` і не з локалізацій
+# сторінки в App Store Connect. Ключ у нас був, а магазин показував одну
+# англійську, бо у Flutter-проєкті лежить лише `Base.lproj`. Теки з
+# `InfoPlist.strings` на кожну мову лежать у репозиторії, а тут вони
+# підключаються до телефонної цілі однією варіантною групою і вписуються в
+# knownRegions, як зробив би сам Xcode.
+LANGS = %w[en uk es it de fr pt pl].freeze
+runner_group = project.main_group.find_subpath('Runner', false) or abort 'Немає групи Runner'
+if runner_group.children.any? { |c| c.respond_to?(:name) && c.name == 'InfoPlist.strings' }
+  puts 'Локалізації: вже підключені'
+else
+  strings = runner_group.new_variant_group('InfoPlist.strings')
+  LANGS.each do |lang|
+    ref = strings.new_reference("#{lang}.lproj/InfoPlist.strings")
+    ref.name = lang
+  end
+  phone.add_resources([strings])
+  project.root_object.known_regions = (project.root_object.known_regions | LANGS)
+  puts "Локалізації: підключено #{LANGS.join(', ')}"
+end
+
 watch = project.targets.find { |t| t.name == NAME }
 if watch
   stamp(watch, version, build)
