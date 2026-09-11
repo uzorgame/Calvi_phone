@@ -1,3 +1,4 @@
+import 'dart:async' show Timer, unawaited;
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -62,7 +63,20 @@ abstract class LiveSink {
 
 /// Живий запис, який уміє не робити зайвого.
 class LiveDay {
-  LiveDay({LiveSink? sink}) : _sink = sink ?? platformSink();
+  /* Вікно тиші між оновленнями.
+   *
+   * Кожне оновлення це анімація острівця, а числа приходять пачками: записали
+   * страву, перерахувалась норма, доїхала синхронізація, і все це за пів
+   * секунди. Поки застосунок відкритий, анімації не видно, а от пачка, яка
+   * наздогнала згортання, змушувала острівець програти появу вдруге.
+   *
+   * Перше оновлення йде одразу, бо чекати з новим числом немає за чим. Решта
+   * пачки згортається в одне: у системи опиняється останнє відоме число, а не
+   * всі проміжні. Нуль вимикає вікно взагалі, і це для тестів, де час
+   * несправжній. */
+  LiveDay({LiveSink? sink, Duration gap = const Duration(seconds: 1)})
+    : _sink = sink ?? platformSink(),
+      _gap = gap;
 
   /// Той шов, який годиться цій системі. Порожній там, де живих записів немає.
   static LiveSink platformSink() {
@@ -73,23 +87,50 @@ class LiveDay {
   }
 
   final LiveSink _sink;
+  final Duration _gap;
 
   /// Що вже показано. Потрібне, щоб не смикати систему тими самими числами:
   /// підсумки дня приходять потоком і часто повторюються.
   LiveFacts? _shown;
   bool _on = false;
 
+  /// Відлік вікна тиші і те, що чекає в ньому на свою чергу.
+  Timer? _quiet;
+  LiveFacts? _waiting;
+
   /// Показати або оновити. Поки застосунок живий, це можна кликати скільки
-  /// завгодно разів: однакові числа далі не йдуть.
+  /// завгодно разів: однакові числа далі не йдуть, а пачка згортається в одне.
   Future<void> put(LiveFacts facts) async {
     if (_on && _shown == facts) return;
+
+    /* Вікно ще не закрилось: число запамʼятовується і піде одне за всіх. Свіже
+       перебиває те, що чекало: проміжні числа нікому не потрібні. */
+    if (_quiet != null) {
+      _waiting = facts;
+      return;
+    }
+
     _shown = facts;
     _on = true;
     await _sink.show(facts);
+    _hush();
+  }
+
+  void _hush() {
+    if (_gap <= Duration.zero) return;
+    _quiet = Timer(_gap, () {
+      _quiet = null;
+      final next = _waiting;
+      _waiting = null;
+      if (next != null) unawaited(put(next));
+    });
   }
 
   /// Зняти. Викликається, коли застосунок закривають.
   Future<void> off() async {
+    _quiet?.cancel();
+    _quiet = null;
+    _waiting = null;
     if (!_on) return;
     _on = false;
     _shown = null;
@@ -107,6 +148,9 @@ class LiveDay {
    * Не `off()`: знімати нема чого, бо нічого й не висить, а зайвий виклик до
    * системи тут нічого б не виправив. */
   void forget() {
+    _quiet?.cancel();
+    _quiet = null;
+    _waiting = null;
     _on = false;
     _shown = null;
   }

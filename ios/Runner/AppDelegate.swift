@@ -137,6 +137,24 @@ final class LiveBridge {
   /// Сама активність, поки вона жива. Через неї йдуть і оновлення, і зняття.
   private var current: Any?
 
+  /* Черга роботи з активністю: одне за одним, а не все одразу.
+   *
+   * Кожне звернення до ActivityKit асинхронне, і доти кожне йшло власним
+   * завданням, нікого не чекаючи. Два оновлення поспіль, а вони тут звичайна
+   * річ (записали страву, перерахувалась норма), могли перетнутись, і система
+   * програвала дві анімації замість однієї, іноді в зворотному порядку. Тут
+   * кожне наступне чекає на попереднє, тому порядок завжди той, у якому його
+   * дали, а анімація одна. */
+  private var queue: Task<Void, Never>?
+
+  private func inTurn(_ work: @escaping () async -> Void) {
+    let earlier = queue
+    queue = Task {
+      await earlier?.value
+      await work()
+    }
+  }
+
   func attach(to messenger: FlutterBinaryMessenger) {
     let channel = FlutterMethodChannel(name: "calvi/live", binaryMessenger: messenger)
     channel.setMethodCallHandler { [weak self] call, result in
@@ -174,7 +192,7 @@ final class LiveBridge {
     /* Знімається все наше, а не тільки те, що завів цей запуск: лишити чуже
        означає лишити банер, оновлювати який більше нікому. */
     let all = live
-    Task {
+    inTurn {
       for activity in all {
         await activity.end(nil, dismissalPolicy: .immediate)
       }
@@ -225,7 +243,7 @@ final class LiveBridge {
     let standing = live
     if let activity = standing.first {
       let extra = standing.dropFirst()
-      Task {
+      inTurn {
         await activity.update(ActivityContent(state: state, staleDate: midnight))
         for old in extra {
           await old.end(nil, dismissalPolicy: .immediate)

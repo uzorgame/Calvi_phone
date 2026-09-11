@@ -20,7 +20,7 @@ class _Spy implements LiveSink {
 void main() {
   test('однакові числа не смикають систему двічі', () async {
     final spy = _Spy();
-    final live = LiveDay(sink: spy);
+    final live = LiveDay(sink: spy, gap: Duration.zero);
 
     const same = LiveFacts(left: 800, goal: 2200, eaten: 1400);
     await live.put(same);
@@ -32,7 +32,7 @@ void main() {
 
   test('нові числа оновлюють запис', () async {
     final spy = _Spy();
-    final live = LiveDay(sink: spy);
+    final live = LiveDay(sink: spy, gap: Duration.zero);
 
     await live.put(const LiveFacts(left: 800, goal: 2200, eaten: 1400));
     await live.put(const LiveFacts(left: 400, goal: 2200, eaten: 1800));
@@ -43,7 +43,7 @@ void main() {
 
   test('зняти можна лише те, що висить', () async {
     final spy = _Spy();
-    final live = LiveDay(sink: spy);
+    final live = LiveDay(sink: spy, gap: Duration.zero);
 
     await live.off();
     expect(spy.hidden, 0, reason: 'знімати нічого, а система отримала виклик');
@@ -56,7 +56,7 @@ void main() {
 
   test('після зняття ті самі числа показуються знову', () async {
     final spy = _Spy();
-    final live = LiveDay(sink: spy);
+    final live = LiveDay(sink: spy, gap: Duration.zero);
     const same = LiveFacts(left: 800, goal: 2200, eaten: 1400);
 
     await live.put(same);
@@ -64,6 +64,40 @@ void main() {
     await live.put(same);
 
     expect(spy.shown.length, 2, reason: 'запис зняли, отже його треба завести наново');
+  });
+
+  test('пачка оновлень згортається в одне', () async {
+    /* Числа приходять пачками: записали страву, перерахувалась норма, доїхала
+       синхронізація. Кожне оновлення це анімація острівця, і пачка, яка
+       наздогнала згортання застосунку, змушувала його програти появу вдруге.
+       Перше йде одразу, решта згортається в останнє відоме. */
+    final spy = _Spy();
+    final live = LiveDay(sink: spy, gap: const Duration(milliseconds: 40));
+
+    await live.put(const LiveFacts(left: 800, goal: 2200, eaten: 1400));
+    await live.put(const LiveFacts(left: 700, goal: 2200, eaten: 1500));
+    await live.put(const LiveFacts(left: 600, goal: 2200, eaten: 1600));
+
+    expect(spy.shown.length, 1, reason: 'уся пачка пішла в систему поспіль');
+
+    await Future<void>.delayed(const Duration(milliseconds: 80));
+
+    expect(spy.shown.length, 2, reason: 'проміжні числа мали згорнутись в одне');
+    expect(spy.shown.last.left, 600, reason: 'у системі має бути останнє число');
+  });
+
+  test('зняття скасовує те, що чекало у вікні', () async {
+    final spy = _Spy();
+    final live = LiveDay(sink: spy, gap: const Duration(milliseconds: 40));
+
+    await live.put(const LiveFacts(left: 800, goal: 2200, eaten: 1400));
+    await live.put(const LiveFacts(left: 700, goal: 2200, eaten: 1500));
+    await live.off();
+
+    await Future<void>.delayed(const Duration(milliseconds: 80));
+
+    expect(spy.hidden, 1);
+    expect(spy.shown.length, 1, reason: 'запис зняли, а число з черги його воскресило');
   });
 
   group('числа дня', () {
@@ -99,7 +133,7 @@ void main() {
    * запис при цьому інший. */
   test('новий останній запис оновлює острівець', () async {
     final spy = _Spy();
-    final live = LiveDay(sink: spy);
+    final live = LiveDay(sink: spy, gap: Duration.zero);
 
     await live.put(const LiveFacts(left: 800, goal: 2200, eaten: 1400, last: 320));
     await live.put(const LiveFacts(left: 800, goal: 2200, eaten: 1400, last: 320));
@@ -118,7 +152,7 @@ void main() {
    * запис ніби стоїть. Ті самі числа далі не пішли б нікуди. */
   test('після дозволу ті самі числа показуються знову', () async {
     final spy = _Spy();
-    final live = LiveDay(sink: spy);
+    final live = LiveDay(sink: spy, gap: Duration.zero);
     const same = LiveFacts(left: 800, goal: 2200, eaten: 1400);
 
     await live.put(same);
