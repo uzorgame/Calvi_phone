@@ -154,12 +154,31 @@ final class LiveBridge {
     self.channel = channel
   }
 
-  func hide() {
-    guard #available(iOS 16.2, *), let activity = current as? Activity<CalviLiveAttributes> else {
-      return
+  /* Усе, що зараз висить від нашого застосунку.
+   *
+   * Питаємо систему, а не свою памʼять. Памʼять живе рівно стільки, скільки
+   * процес: застосунок закрили, система забрала процес, а активність лишилась
+   * на замкненому екрані, бо вона й має пережити застосунок. Наступний запуск
+   * про неї не знав нічого і заводив другу поруч, тому на екрані стояло два
+   * однакових банери Calvi. */
+  @available(iOS 16.2, *)
+  private var live: [Activity<CalviLiveAttributes>] {
+    Activity<CalviLiveAttributes>.activities.filter {
+      $0.activityState == .active || $0.activityState == .stale
     }
+  }
+
+  func hide() {
+    guard #available(iOS 16.2, *) else { return }
     current = nil
-    Task { await activity.end(nil, dismissalPolicy: .immediate) }
+    /* Знімається все наше, а не тільки те, що завів цей запуск: лишити чуже
+       означає лишити банер, оновлювати який більше нікому. */
+    let all = live
+    Task {
+      for activity in all {
+        await activity.end(nil, dismissalPolicy: .immediate)
+      }
+    }
   }
 
   private func show(_ args: [String: Any]) {
@@ -194,16 +213,28 @@ final class LiveBridge {
        дозволяє кілька активностей одного застосунку, і без цієї гілки кожен
        запис страви заводив би ще одну.
      *
+     * Береться перша з тих, що система вважає нашими, а не тільки заведена цим
+     * запуском: після перезапуску застосунку своя памʼять порожня, а банер на
+     * екрані лишається, і саме звідти бралась друга картка. Зайві, якщо вони
+     * вже встигли накопичитись, гасяться тут же: людина має бачити один запис
+     * дня, а не стос однакових.
+     *
      * Стан перевіряється, бо активність могла вже померти без нас: людина
      * змахнула її з замкненого екрана, або система прибрала за часом. Тоді
      * оновлювати нічого, і треба заводити наново. */
-    if let activity = current as? Activity<CalviLiveAttributes> {
-      if activity.activityState == .active {
-        Task { await activity.update(ActivityContent(state: state, staleDate: midnight)) }
-        return
+    let standing = live
+    if let activity = standing.first {
+      let extra = standing.dropFirst()
+      Task {
+        await activity.update(ActivityContent(state: state, staleDate: midnight))
+        for old in extra {
+          await old.end(nil, dismissalPolicy: .immediate)
+        }
       }
-      current = nil
+      current = activity
+      return
     }
+    current = nil
 
     /* Людина може вимкнути живі активності для застосунку в налаштуваннях
        телефона, і це її право: мовчки нічого не робимо. */
