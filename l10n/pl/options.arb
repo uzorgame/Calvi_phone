@@ -48,5 +48,12 @@
   "reminderBodyMeds": "Według harmonogramu",
 
   "notifyChannel": "Przypomnienia",
-  "notifyChannelHint": "Przypomnienia o jedzeniu, wodzie, lekach i ważeniu"
+  "notifyChannelHint": "Przypomnienia o jedzeniu, wodzie, lekach i ważeniu",
+
+
+  "liveChannel": "Licznik dnia",
+  "liveChannelHint": "Ile zostało na dziś, dopóki aplikacja działa",
+  "liveLeft": "Zostało {kcal} kcal",
+  "liveOver": "{kcal} kcal ponad",
+  "liveBody": "zjedzone {eaten} z {goal}"
 }

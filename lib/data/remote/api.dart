@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
+import '../../data/nutrients.dart';
 import '../../data/units.dart';
 import '../../l10n/data_lang.dart';
 import 'zone.dart';
@@ -42,9 +43,21 @@ class CalviApi {
    * Заднім числом платформу взяти нізвідки: назва пристрою це вільний підпис
    * людини, а user-agent у Dart однаковий на обох системах. Тому вона теж
    * називається сама, тим самим способом, що й клієнт. */
-  static final _client_ = {
+  /* І якої збірки телефон.
+   *
+   * Ставиться один раз на старті, з `PackageInfo`. Потрібна для одного питання
+   * в панелі, на яке без неї не відповісти: людина, у якої зламалось, сидить на
+   * старій збірці чи на свіжій. Помилка, що живе лише до 1.3.0, і помилка, що
+   * живе в усіх, це два різні дні роботи.
+   *
+   * Порожньо доти, доки не поставили: запит без неї працює так само, сервер
+   * просто нічого про збірку не знає. */
+  static String version = '';
+
+  static Map<String, String> get _client_ => {
     'x-calvi-client': 'mobile',
     'x-calvi-platform': _platform,
+    if (version.isNotEmpty) 'x-calvi-version': version,
   };
 
   static String get _platform {
@@ -789,6 +802,7 @@ class FixedMeal {
     this.protein = 0,
     this.fat = 0,
     this.carbs = 0,
+    this.nutrients = Nutrients.none,
   });
 
   final String id;
@@ -798,6 +812,11 @@ class FixedMeal {
   final double protein;
   final double fat;
   final double carbs;
+
+  /* Перерахований другий рівень. Виправлена вага міняє і його, тому рядок
+     переписується цілим: інакше в записі стояли б калорії від нової ваги, а
+     клітковина від старої. */
+  final Nutrients nutrients;
 }
 
 /// Обліковий запис після входу через Google.
@@ -1066,6 +1085,7 @@ class NoraReply {
             carbs: (m['carbs_g'] as num?)?.toDouble() ?? 0,
             icon: m['icon'] as String? ?? 'plate',
             fromReference: m['from'] == 'reference',
+            nutrients: _tier(m),
           ),
       ],
       deleted: [
@@ -1082,6 +1102,7 @@ class NoraReply {
             protein: (m['protein_g'] as num?)?.toDouble() ?? 0,
             fat: (m['fat_g'] as num?)?.toDouble() ?? 0,
             carbs: (m['carbs_g'] as num?)?.toDouble() ?? 0,
+            nutrients: _tier(m),
           ),
       ]..removeWhere((m) => m.id.isEmpty),
       moved: [
@@ -1300,6 +1321,36 @@ class PouredWater {
   final int totalMl;
 }
 
+/* Пʼять чисел другого рівня з рядка відповіді.
+ *
+ * Відсутнє поле і поле зі значенням `null` тут одне й те саме: сервер не знає.
+ * Нуля замість них немає навмисно, і саме тому кожне читається окремо, а не
+ * через `?? 0`, яким записані білки. */
+Nutrients _tier(Map<String, dynamic> m) => Nutrients(
+  fiber: (m['fiber_g'] as num?)?.toDouble(),
+  sugar: (m['sugar_g'] as num?)?.toDouble(),
+  added: (m['added_sugar_g'] as num?)?.toDouble(),
+  sodiumMg: (m['sodium_mg'] as num?)?.toDouble(),
+  sat: (m['sat_fat_g'] as num?)?.toDouble(),
+);
+
+/* Та сама пʼятірка, але окремим обʼєктом і своїми іменами.
+ *
+ * Дві форми не через недогляд: у щоденнику це пʼять полів рядка, і вони їдуть
+ * тим самим написанням, що й `protein_g` поруч. У довіднику це окремий тип
+ * сервера, який живе цілим обʼєктом і має свої імена. Читати їх однією
+ * функцією означало б вигадати третє написання, якого немає ні там, ні там. */
+Nutrients _tierWhole(Object? raw) {
+  if (raw is! Map<String, dynamic>) return Nutrients.none;
+  return Nutrients(
+    fiber: (raw['fiberG'] as num?)?.toDouble(),
+    sugar: (raw['sugarG'] as num?)?.toDouble(),
+    added: (raw['addedSugarG'] as num?)?.toDouble(),
+    sodiumMg: (raw['sodiumMg'] as num?)?.toDouble(),
+    sat: (raw['satFatG'] as num?)?.toDouble(),
+  );
+}
+
 /// Страва, яку Нора щойно записала, з усіма її числами.
 ///
 /// Числа тут не для звірки, а для показу: у чаті вони малюються смужкою під
@@ -1318,6 +1369,7 @@ class LoggedMeal {
     this.carbs = 0,
     this.icon = 'plate',
     this.fromReference = false,
+    this.nutrients = Nutrients.none,
   });
 
   /// Ідентифікатор рядка, який сервер уже створив. За ним та сама страва
@@ -1346,6 +1398,11 @@ class LoggedMeal {
 
   /// Числа з довідника, а не оцінка на око. Різниця варта того, щоб її сказати.
   final bool fromReference;
+
+  /* Другий рівень нутрієнтів. Приїжджає разом із рештою відповіді, а не
+     наступною синхронізацією: людина дивиться на щойно записану страву саме
+     зараз. Порожні поля лишаються порожніми. */
+  final Nutrients nutrients;
 }
 
 /// Знімок дорогою до моделі. Живе рівно стільки, скільки триває запит.
@@ -1421,6 +1478,7 @@ class FoodHit {
     this.warnContains = const [],
     this.warnTraces = const [],
     this.warnSevere = false,
+    this.tier = Nutrients.none,
   });
 
   factory FoodHit.fromJson(
@@ -1450,6 +1508,9 @@ class FoodHit {
     warnContains: [...?(warns?['contains'] as List?)?.cast<String>()],
     warnTraces: [...?(warns?['traces'] as List?)?.cast<String>()],
     warnSevere: warns?['severe'] == true,
+    /* Другий рівень лежить окремим обʼєктом, бо на сервері це один тип, який
+       їздить цілим. Немає обʼєкта означає, що гілка вимкнена. */
+    tier: _tierWhole(j['tier']),
   );
 
   final String id;
@@ -1480,14 +1541,24 @@ class FoodHit {
   final List<String> warnTraces;
   final bool warnSevere;
 
+  /* Другий рівень на сто грамів. Порожньо частіше за макроси: клітковину і
+     натрій відкриті бази заповнюють рідше. */
+  final Nutrients tier;
+
   /// The numbers for a real plate. Without a weight the usual portion is used,
   /// and if the reference has none either, 100 g is the honest default.
   ///
   /// Невідоме множення не робить відомим: чого база не знає на сто грамів, того
   /// вона не знає і на сто тридцять.
-  ({int kcal, double? protein, double? fat, double? carbs, double grams}) forGrams([
-    double? grams,
-  ]) {
+  ({
+    int kcal,
+    double? protein,
+    double? fat,
+    double? carbs,
+    double grams,
+    Nutrients tier,
+  })
+  forGrams([double? grams]) {
     final g = grams ?? portionG ?? 100;
     final k = g / 100;
     return (
@@ -1496,6 +1567,7 @@ class FoodHit {
       fat: fatG == null ? null : fatG! * k,
       carbs: carbsG == null ? null : carbsG! * k,
       grams: g,
+      tier: tier.scaled(k),
     );
   }
 }

@@ -298,5 +298,21 @@
   "eraseDone": "Dziennik wyczyszczony. Czysta karta.",
   "eraseFailed": "Nie udało się wyczyścić: {why}",
   "eraseNoNet": "brak sieci. Włącz internet i spróbuj jeszcze raz",
-  "eraseSlow": "serwer długo odpowiada. Spróbuj jeszcze raz za minutę"
+  "eraseSlow": "serwer długo odpowiada. Spróbuj jeszcze raz za minutę",
+
+  "setCustom": "Personalizacja",
+  "setCustomNote": "Co pokazuje ekran dnia i jak liczymy sól",
+  "setNutriTitle": "Składniki",
+  "setNutriNote": "Błonnik, cukier, sód i tłuszcze nasycone pod makro",
+  "setNutriOff": "Nie pokazuj",
+  "setNutriOffHint": "Tylko białko, tłuszcze i węglowodany, jak dotąd",
+  "setNutriSmall": "Wierszem",
+  "setNutriSmallHint": "Cichy wiersz pod kartami: znak, liczba, kolor przy granicy",
+  "setNutriLarge": "Kartami",
+  "setNutriLargeHint": "Pięć kolumn z pierścieniami i podpisami, jak przy makro",
+  "setSaltTitle": "Jak solisz",
+  "setSaltNote": "Poprawka do soli, którą zakładamy w domowym daniu",
+  "setSaltLess": "Mniej niż zwykle",
+  "setSaltUsual": "Zwyczajnie",
+  "setSaltMore": "Więcej niż zwykle"
 }

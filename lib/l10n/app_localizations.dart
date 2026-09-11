@@ -438,6 +438,12 @@ abstract class L {
   /// **'Done'**
   String get actionDone;
 
+  /// No description provided for @actionGotIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get actionGotIt;
+
   /// No description provided for @actionNext.
   ///
   /// In en, this message translates to:
@@ -2172,6 +2178,36 @@ abstract class L {
   /// **'Updated {date}'**
   String legalUpdated(String date);
 
+  /// No description provided for @liveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{eaten} of {goal} eaten'**
+  String liveBody(String eaten, String goal);
+
+  /// Окремий канал сповіщень під живий запис дня. Найнижча важливість: це рядок стану, а не нагадування, і дзвеніти він не має.
+  ///
+  /// In en, this message translates to:
+  /// **'Day counter'**
+  String get liveChannel;
+
+  /// No description provided for @liveChannelHint.
+  ///
+  /// In en, this message translates to:
+  /// **'How much is left for today, while the app is running'**
+  String get liveChannelHint;
+
+  /// No description provided for @liveLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{kcal} kcal left'**
+  String liveLeft(String kcal);
+
+  /// No description provided for @liveOver.
+  ///
+  /// In en, this message translates to:
+  /// **'{kcal} kcal over'**
+  String liveOver(String kcal);
+
   /// No description provided for @loginNoToken.
   ///
   /// In en, this message translates to:
@@ -2910,6 +2946,240 @@ abstract class L {
   /// **'The phone refused notifications. Switch them on in the system settings and the reminders will work.'**
   String get notifyDenied;
 
+  /// No description provided for @nutriAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Added sugar'**
+  String get nutriAdded;
+
+  /// No description provided for @nutriAddedNorm.
+  ///
+  /// In en, this message translates to:
+  /// **'up to {g} g, better up to {better}'**
+  String nutriAddedNorm(int g, int better);
+
+  /// No description provided for @nutriAddedShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Added'**
+  String get nutriAddedShort;
+
+  /// No description provided for @nutriAddedSource.
+  ///
+  /// In en, this message translates to:
+  /// **'WHO: under 10% of calories, better under 5%'**
+  String get nutriAddedSource;
+
+  /// No description provided for @nutriAddedWhat.
+  ///
+  /// In en, this message translates to:
+  /// **'Sugar, syrups and honey put into a product. The sugar of fruit and milk is not counted here.'**
+  String get nutriAddedWhat;
+
+  /// No description provided for @nutriAtLeast.
+  ///
+  /// In en, this message translates to:
+  /// **'at least {text}'**
+  String nutriAtLeast(String text);
+
+  /// No description provided for @nutriFiber.
+  ///
+  /// In en, this message translates to:
+  /// **'Fibre'**
+  String get nutriFiber;
+
+  /// No description provided for @nutriFiberNorm.
+  ///
+  /// In en, this message translates to:
+  /// **'{g} g a day'**
+  String nutriFiberNorm(int g);
+
+  /// No description provided for @nutriFiberShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Fibre'**
+  String get nutriFiberShort;
+
+  /// No description provided for @nutriFiberSource.
+  ///
+  /// In en, this message translates to:
+  /// **'EFSA: at least 25 g, or 14 g per thousand calories'**
+  String get nutriFiberSource;
+
+  /// No description provided for @nutriFiberWhat.
+  ///
+  /// In en, this message translates to:
+  /// **'The part of plant food the body does not digest. Keeps digestion going and keeps you full longer.'**
+  String get nutriFiberWhat;
+
+  /// No description provided for @nutriFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Where from today'**
+  String get nutriFrom;
+
+  /// No description provided for @nutriGap.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{One dish without these numbers, so this is a minimum.} other{{count} dishes without these numbers, so this is a minimum.}}'**
+  String nutriGap(int count);
+
+  /// No description provided for @nutriGapAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is known about this today: no dish of the day carries these numbers.'**
+  String get nutriGapAll;
+
+  /// No description provided for @nutriNone.
+  ///
+  /// In en, this message translates to:
+  /// **'These meals were not counted'**
+  String get nutriNone;
+
+  /// No description provided for @nutriNoneYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrients appear with the first entry'**
+  String get nutriNoneYet;
+
+  /// No description provided for @nutriNorm.
+  ///
+  /// In en, this message translates to:
+  /// **'Norm'**
+  String get nutriNorm;
+
+  /// No description provided for @nutriNowGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'{now} g today of {goal}'**
+  String nutriNowGoal(String now, int goal);
+
+  /// No description provided for @nutriNowSodium.
+  ///
+  /// In en, this message translates to:
+  /// **'{now} g today, that is {salt} g of salt'**
+  String nutriNowSodium(String now, String salt);
+
+  /// No description provided for @nutriNowSugar.
+  ///
+  /// In en, this message translates to:
+  /// **'{now} g today, added of it {added}'**
+  String nutriNowSugar(String now, String added);
+
+  /// No description provided for @nutriRest.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{and {count} more} other{and {count} more}}'**
+  String nutriRest(int count);
+
+  /// No description provided for @nutriSat.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturated fat'**
+  String get nutriSat;
+
+  /// No description provided for @nutriSatNorm.
+  ///
+  /// In en, this message translates to:
+  /// **'up to {g} g a day'**
+  String nutriSatNorm(int g);
+
+  /// No description provided for @nutriSatShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturated'**
+  String get nutriSatShort;
+
+  /// No description provided for @nutriSatSource.
+  ///
+  /// In en, this message translates to:
+  /// **'WHO 2023: under 10% of calories'**
+  String get nutriSatSource;
+
+  /// No description provided for @nutriSatWhat.
+  ///
+  /// In en, this message translates to:
+  /// **'Fats of animal products, butter and cheese, and of coconut and palm oil.'**
+  String get nutriSatWhat;
+
+  /// No description provided for @nutriSodium.
+  ///
+  /// In en, this message translates to:
+  /// **'Sodium'**
+  String get nutriSodium;
+
+  /// No description provided for @nutriSodiumNorm.
+  ///
+  /// In en, this message translates to:
+  /// **'up to 2 g a day, that is 5 g of salt'**
+  String get nutriSodiumNorm;
+
+  /// No description provided for @nutriSodiumNote.
+  ///
+  /// In en, this message translates to:
+  /// **'In a home dish the cook decides the salt. We take the usual amount for that kind of dish, and you can correct it in personalisation.'**
+  String get nutriSodiumNote;
+
+  /// No description provided for @nutriSodiumShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Sodium'**
+  String get nutriSodiumShort;
+
+  /// No description provided for @nutriSodiumSource.
+  ///
+  /// In en, this message translates to:
+  /// **'WHO. Does not depend on calories'**
+  String get nutriSodiumSource;
+
+  /// No description provided for @nutriSodiumWhat.
+  ///
+  /// In en, this message translates to:
+  /// **'Salt is sodium times 2.5. Most of it comes from bread, cured meat, cheese and food away from home, not from the salt shaker.'**
+  String get nutriSodiumWhat;
+
+  /// No description provided for @nutriSugar.
+  ///
+  /// In en, this message translates to:
+  /// **'Sugar'**
+  String get nutriSugar;
+
+  /// No description provided for @nutriSugarNorm.
+  ///
+  /// In en, this message translates to:
+  /// **'no norm'**
+  String get nutriSugarNorm;
+
+  /// No description provided for @nutriSugarNote.
+  ///
+  /// In en, this message translates to:
+  /// **'A scale under total sugar would call an apple a problem. Look at the number next to it.'**
+  String get nutriSugarNote;
+
+  /// No description provided for @nutriSugarShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Sugar'**
+  String get nutriSugarShort;
+
+  /// No description provided for @nutriSugarSource.
+  ///
+  /// In en, this message translates to:
+  /// **'WHO and EFSA limit added sugar, not the total'**
+  String get nutriSugarSource;
+
+  /// No description provided for @nutriSugarWhat.
+  ///
+  /// In en, this message translates to:
+  /// **'All sugars together: added ones and the sugars of fruit and milk.'**
+  String get nutriSugarWhat;
+
+  /// No description provided for @nutriUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'not counted today yet'**
+  String get nutriUnknown;
+
   /// No description provided for @photoDish.
   ///
   /// In en, this message translates to:
@@ -3384,47 +3654,11 @@ abstract class L {
   /// **'Contains {names}, which is on your allergy list. Be careful with this one.'**
   String rcAllergyWarn(String names);
 
-  /// No description provided for @rcAsk.
-  ///
-  /// In en, this message translates to:
-  /// **'Ask Nora for a recipe'**
-  String get rcAsk;
-
-  /// No description provided for @rcAskAbout.
-  ///
-  /// In en, this message translates to:
-  /// **'Ask Nora about this recipe'**
-  String get rcAskAbout;
-
-  /// No description provided for @rcAskCancel.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel'**
-  String get rcAskCancel;
-
-  /// No description provided for @rcAskGo.
-  ///
-  /// In en, this message translates to:
-  /// **'Ask'**
-  String get rcAskGo;
-
   /// No description provided for @rcAskPlaceholder.
   ///
   /// In en, this message translates to:
   /// **'chicken, broccoli, rice'**
   String get rcAskPlaceholder;
-
-  /// No description provided for @rcAskTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'What is in the kitchen?'**
-  String get rcAskTitle;
-
-  /// No description provided for @rcAsking.
-  ///
-  /// In en, this message translates to:
-  /// **'Thinking…'**
-  String get rcAsking;
 
   /// No description provided for @rcChatGreet.
   ///
@@ -3432,11 +3666,47 @@ abstract class L {
   /// **'Ask about \"{name}\": what to swap, how not to ruin it, what to prep ahead.'**
   String rcChatGreet(String name);
 
-  /// No description provided for @rcChatPlaceholder.
+  /// No description provided for @rcChatHello.
   ///
   /// In en, this message translates to:
-  /// **'Ask about this recipe'**
-  String get rcChatPlaceholder;
+  /// **'Tell me what is in the kitchen and I will build a recipe.'**
+  String get rcChatHello;
+
+  /// No description provided for @rcChatHint.
+  ///
+  /// In en, this message translates to:
+  /// **'\"chicken, broccoli, rice\": I will suggest a few dishes and count the serving'**
+  String get rcChatHint;
+
+  /// No description provided for @rcChatHintDinner.
+  ///
+  /// In en, this message translates to:
+  /// **'A 500 kcal dinner'**
+  String get rcChatHintDinner;
+
+  /// No description provided for @rcChatHintEggs.
+  ///
+  /// In en, this message translates to:
+  /// **'A quick breakfast with eggs'**
+  String get rcChatHintEggs;
+
+  /// No description provided for @rcChatHintMince.
+  ///
+  /// In en, this message translates to:
+  /// **'What can I make with mince?'**
+  String get rcChatHintMince;
+
+  /// No description provided for @rcChatHintOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Only cheese and pasta left'**
+  String get rcChatHintOnly;
+
+  /// No description provided for @rcChatPicks.
+  ///
+  /// In en, this message translates to:
+  /// **'Here is what you can cook from that. Pick a dish and the recipe lands in the book.'**
+  String get rcChatPicks;
 
   /// No description provided for @rcCount.
   ///
@@ -3480,6 +3750,36 @@ abstract class L {
   /// **'Delete this recipe?'**
   String get rcDeleteTitle;
 
+  /// No description provided for @rcDishHint.
+  ///
+  /// In en, this message translates to:
+  /// **'\"what can replace rice?\", \"how not to dry out the fillet?\", \"can I prep ahead?\"'**
+  String get rcDishHint;
+
+  /// No description provided for @rcDishHintAhead.
+  ///
+  /// In en, this message translates to:
+  /// **'Can I prep this ahead?'**
+  String get rcDishHintAhead;
+
+  /// No description provided for @rcDishHintDry.
+  ///
+  /// In en, this message translates to:
+  /// **'How not to dry out the fillet?'**
+  String get rcDishHintDry;
+
+  /// No description provided for @rcDishHintKeeps.
+  ///
+  /// In en, this message translates to:
+  /// **'How long does it keep?'**
+  String get rcDishHintKeeps;
+
+  /// No description provided for @rcDishHintSwap.
+  ///
+  /// In en, this message translates to:
+  /// **'What can replace rice?'**
+  String get rcDishHintSwap;
+
   /// No description provided for @rcEmpty.
   ///
   /// In en, this message translates to:
@@ -3509,6 +3809,12 @@ abstract class L {
   /// In en, this message translates to:
   /// **'From Nora'**
   String get rcFromNora;
+
+  /// No description provided for @rcHelps.
+  ///
+  /// In en, this message translates to:
+  /// **'Nora will help you build a recipe'**
+  String get rcHelps;
 
   /// No description provided for @rcHeroA.
   ///
@@ -3581,12 +3887,6 @@ abstract class L {
   /// In en, this message translates to:
   /// **'Per serving'**
   String get rcPerServingHead;
-
-  /// No description provided for @rcPickTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Pick a dish'**
-  String get rcPickTitle;
 
   /// No description provided for @rcPortion.
   ///
@@ -3996,6 +4296,18 @@ abstract class L {
   /// **'{name}, {count} in memory'**
   String setAssistantLine(String name, int count);
 
+  /// No description provided for @setCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Personalisation'**
+  String get setCustom;
+
+  /// No description provided for @setCustomNote.
+  ///
+  /// In en, this message translates to:
+  /// **'What the day screen shows and how we count salt'**
+  String get setCustomNote;
+
   /// No description provided for @setDeleteAccount.
   ///
   /// In en, this message translates to:
@@ -4122,6 +4434,54 @@ abstract class L {
   /// **'{kcal}'**
   String setNormLine(String kcal);
 
+  /// No description provided for @setNutriLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Cards'**
+  String get setNutriLarge;
+
+  /// No description provided for @setNutriLargeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Five columns with rings and labels, like the macros'**
+  String get setNutriLargeHint;
+
+  /// No description provided for @setNutriNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Fibre, sugar, sodium and saturated fat under the macros'**
+  String get setNutriNote;
+
+  /// No description provided for @setNutriOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not show'**
+  String get setNutriOff;
+
+  /// No description provided for @setNutriOffHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Only protein, fat and carbs, as before'**
+  String get setNutriOffHint;
+
+  /// No description provided for @setNutriSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'A row'**
+  String get setNutriSmall;
+
+  /// No description provided for @setNutriSmallHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A quiet line under the cards: mark, number, colour at the limit'**
+  String get setNutriSmallHint;
+
+  /// No description provided for @setNutriTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrients'**
+  String get setNutriTitle;
+
   /// No description provided for @setPlan.
   ///
   /// In en, this message translates to:
@@ -4169,6 +4529,36 @@ abstract class L {
   /// In en, this message translates to:
   /// **'off'**
   String get setRemindersOff;
+
+  /// No description provided for @setSaltLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Less than usual'**
+  String get setSaltLess;
+
+  /// No description provided for @setSaltMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More than usual'**
+  String get setSaltMore;
+
+  /// No description provided for @setSaltNote.
+  ///
+  /// In en, this message translates to:
+  /// **'A correction to the salt we assume in home cooking'**
+  String get setSaltNote;
+
+  /// No description provided for @setSaltTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How you salt'**
+  String get setSaltTitle;
+
+  /// No description provided for @setSaltUsual.
+  ///
+  /// In en, this message translates to:
+  /// **'The usual way'**
+  String get setSaltUsual;
 
   /// No description provided for @setTerms.
   ///

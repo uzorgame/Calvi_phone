@@ -2,6 +2,7 @@
 library;
 
 import 'measure.dart';
+import 'nutrients.dart';
 import 'repeat.dart';
 
 import 'day.dart';
@@ -235,6 +236,8 @@ class SettingsState {
     required this.theme,
     required this.lang,
     this.units = metricUnits,
+    this.nutri = NutriLevel.small,
+    this.saltHand = SaltHand.usual,
   });
 
   final Sex sex;
@@ -286,6 +289,17 @@ class SettingsState {
   /// В яких одиницях людина себе важить і міряє. Питається один раз, на «Старті».
   final Units units;
 
+  /* Чи показувати другий рівень нутрієнтів і яким.
+   *
+   * Замовчування малий: клітковина, цукор і натрій це нагляд, а не план дня,
+   * і поруч із БЖВ вони мають бути рядком, а не пʼятьма картками. Великий
+   * лишається як персоналізація для тих, хто справді добирає клітковину. */
+  final NutriLevel nutri;
+
+  /* Як людина солить. Не смак, а поправка: скільки солі в домашній страві,
+     знає тільки той, хто її солив, і сервер множить на це своє припущення. */
+  final SaltHand saltHand;
+
   SettingsState copyWith({
     Sex? sex,
     int? age,
@@ -312,6 +326,8 @@ class SettingsState {
     AppTheme? theme,
     Lang? lang,
     Units? units,
+    NutriLevel? nutri,
+    SaltHand? saltHand,
   }) => SettingsState(
     sex: sex ?? this.sex,
     age: age ?? this.age,
@@ -337,6 +353,8 @@ class SettingsState {
     theme: theme ?? this.theme,
     lang: lang ?? this.lang,
     units: units ?? this.units,
+    nutri: nutri ?? this.nutri,
+    saltHand: saltHand ?? this.saltHand,
   );
 }
 

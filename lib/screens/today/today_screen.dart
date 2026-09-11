@@ -7,6 +7,7 @@ import '../../data/chat.dart';
 import '../../data/day.dart';
 import '../../data/fixtures.dart';
 import '../../data/meal.dart';
+import '../../data/nutrients.dart';
 import '../../data/app_scope.dart';
 // Only the handle: the generated row classes carry names the screens already
 // use for their own models, and `Workout` is one of them.
@@ -41,6 +42,7 @@ import 'hero_card.dart';
 import 'macro_cards.dart';
 import 'manual_form.dart';
 import 'meal_card.dart';
+import 'nutri_row.dart';
 import 'measure_card.dart';
 import 'slot_card.dart';
 import 'water_card.dart';
@@ -690,6 +692,10 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
       icon: food.icon,
       canonicalName: food.canonicalName,
       source: 'barcode',
+      /* На пакованому ці числа найточніші: вони переписані з етикетки, а не
+         вгадані за назвою. Не покласти їх тут означало б, що людина зі
+         сканером бачить порожньо саме там, де правда відома напевно. */
+      nutrients: plate.tier,
     );
 
     unawaited(scope.sync?.now() ?? Future.value());
@@ -1201,6 +1207,9 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
                 protein: (meal.protein * k).roundToDouble(),
                 fat: (meal.fat * k).roundToDouble(),
                 carbs: (meal.carbs * k).roundToDouble(),
+                // Той самий множник, що й для калорій: два різні дали б рядок,
+                // у якому вага одна, а клітковина від іншої.
+                nutrients: meal.nutrients.scaled(k),
               )
               .then((_) => scope.sync?.now()),
         );
@@ -1682,8 +1691,31 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
                               // Галочки того дня, який показано, а не сьогоднішні.
                               takes: day.medTakes,
                               onMeds: widget.onMeds,
+                              // Під ними стане великий ряд нутрієнтів: висоту
+                              // вони віддають йому, як у демці.
+                              short: scope.s.nutri == NutriLevel.large,
                             ),
-                            const SizedBox(height: CalviSize.gapSection),
+
+                            /* Другий рівень нутрієнтів під картками, а не між
+                               ними: це нагляд, а не норма дня. Вимкнений він у
+                               тих, хто його не просив, і не займає ні пікселя.
+                             *
+                             * Відступи як у демці: вісім над смугою, бо вона
+                             * продовження ряду макросів, а не окремий розділ, і
+                             * звичайний міжкартковий під нею. Розділовий тут
+                             * відсував сніданок так далеко, що смуга ставала
+                             * хвостом порожнечі. */
+                            if (scope.s.nutri != NutriLevel.off) ...[
+                              const SizedBox(height: 8),
+                              NutriRow(
+                                day: nutrientsOver([for (final m in day.meals) m.nutrients]),
+                                goal: nutrientGoals(goal.kcal),
+                                meals: day.meals,
+                                large: scope.s.nutri == NutriLevel.large,
+                              ),
+                              const SizedBox(height: CalviSize.gapCard),
+                            ] else
+                              const SizedBox(height: CalviSize.gapSection),
 
                             /* Meals, then water, then training, then the tape: the order
                      the day is lived in. Water sits above training because it is

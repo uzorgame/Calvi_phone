@@ -48,5 +48,12 @@
   "reminderBodyMeds": "Toca según el horario",
 
   "notifyChannel": "Recordatorios",
-  "notifyChannelHint": "Recordatorios de comida, agua, medicamentos y pesajes"
+  "notifyChannelHint": "Recordatorios de comida, agua, medicamentos y pesajes",
+
+
+  "liveChannel": "Contador del día",
+  "liveChannelHint": "Cuánto queda para hoy mientras la app está abierta",
+  "liveLeft": "Quedan {kcal} kcal",
+  "liveOver": "{kcal} kcal de más",
+  "liveBody": "{eaten} de {goal} comidas"
 }

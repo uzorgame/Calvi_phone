@@ -29,6 +29,12 @@ enum Repeats { once, daily, weekly }
 /// прийшло» і «прийшло не те».
 abstract class NotificationSink {
   Future<void> ready();
+
+  /* Прибрати чергу: те, що заплановано і ще не показано.
+   *
+   * Саме чергу, а не все підряд. Показане лишається на місці, і живий запис дня
+   * теж: він висить тим самим механізмом, і гасити його при кожній перестановці
+   * нагадувань означало б гасити острівець від дотику по тумблеру. */
   Future<void> clearAll();
   Future<void> put({
     required int id,
@@ -41,8 +47,16 @@ abstract class NotificationSink {
     required String from,
   });
 
-  /// Питає дозвіл. Повертає, чи його дали.
+  /// Питає дозвіл показувати сповіщення. Повертає, чи його дали.
   Future<bool> ask();
+
+  /* Окремо просить точний будильник, і це не дрібниця.
+   *
+   * На Android це не віконце поверх застосунку, а повноекранна сторінка
+   * системних налаштувань: людину виносить із застосунку геть. Доречно, коли
+   * вона щойно ввімкнула нагадування і розуміє, за чим її туди повели; дико,
+   * коли вона просто відкрила день. Тому два дозволи просяться окремо. */
+  Future<void> askExactAlarms();
 
   /// Чи дозволено показувати сповіщення просто зараз, без питання.
   Future<bool> granted();
@@ -85,9 +99,13 @@ class Notifications {
 
   /// Питає дозвіл показувати сповіщення.
   ///
-  /// Питається на першому запуску, разом із камерою (див. `main.dart`), і ще
-  /// раз на першому нагадуванні, якщо тоді відмовили.
+  /// Питається при вході на головний екран (див. `main.dart`) і ще раз на
+  /// першому нагадуванні, якщо тоді відмовили.
   Future<bool> ask() => _sink.ask();
+
+  /// Точний будильник. Питається тільки там, де людина щойно ввімкнула
+  /// нагадування: на Android це повноекранні налаштування, а не віконце.
+  Future<void> askExactAlarms() => _sink.askExactAlarms();
 
   /// Чи дозволено показувати сповіщення просто зараз.
   ///
@@ -373,11 +391,9 @@ class LocalSink implements NotificationSink {
     final android = _plugin
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
     if (android != null) {
-      final allowed = await android.requestNotificationsPermission() ?? false;
-      // Точний будильник це окремий дозвіл: без нього система має право зсунути
-      // показ на десятки хвилин.
-      await android.requestExactAlarmsPermission();
-      return allowed;
+      /* Тільки сповіщення. Точний будильник питається окремо, бо він відкриває
+         повноекранні налаштування і виносить людину із застосунку. */
+      return await android.requestNotificationsPermission() ?? false;
     }
 
     final ios = _plugin.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
@@ -386,8 +402,34 @@ class LocalSink implements NotificationSink {
     return await ios?.requestPermissions(alert: true, sound: true, badge: true) ?? false;
   }
 
+  /* Точний будильник: без нього система має право зсунути показ на десятки
+   * хвилин. На iOS такого дозволу немає взагалі, і питати нема чого. */
   @override
-  Future<void> clearAll() => _plugin.cancelAll();
+  Future<void> askExactAlarms() async {
+    await ready();
+    await _plugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestExactAlarmsPermission();
+  }
+
+  @override
+  /* Прибираються заплановані, а не всі поспіль.
+   *
+   * Тут стояло `cancelAll`, і воно збивало не лише чергу нагадувань. Живий
+   * запис дня це теж сповіщення цього застосунку, тільки вже показане, і кожна
+   * перестановка нагадувань гасила його разом із чергою: острівець на Android
+   * зникав від дотику по перемикачу в налаштуваннях і вертався аж із наступною
+   * записаною стравою.
+   *
+   * `pendingNotificationRequests` це рівно черга: те, що заплановано і ще не
+   * показано. Показане лишається на місці, і це доречно й саме по собі:
+   * нагадування, яке людина вже бачила, не має зникати з шторки від того, що
+   * вона перемкнула тумблер. */
+  Future<void> clearAll() async {
+    for (final planned in await _plugin.pendingNotificationRequests()) {
+      await _plugin.cancel(id: planned.id);
+    }
+  }
 
   @override
   Future<void> put({

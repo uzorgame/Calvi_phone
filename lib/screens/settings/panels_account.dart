@@ -11,6 +11,7 @@ import '../../data/day_stats.dart';
 import '../../data/remote/api.dart' show SubscriptionState;
 
 import '../../data/legal.dart';
+import '../../data/nutrients.dart';
 import '../../data/settings.dart';
 import '../../data/units.dart';
 import '../../design/icons.dart';
@@ -52,15 +53,22 @@ class ThemePanel extends StatelessWidget {
         CalviSection(
           title: l.themeSectionLook,
           bare: true,
+          trail: 0,
           children: [
-            for (final t in themeOptions)
-              CalviPick(
-                label: themeTitle(context, t.id),
-                hint: themeHint(context, t.id),
-                icon: t.icon,
-                on: s.theme == t.id,
-                onTap: () => set((v) => v.copyWith(theme: t.id)),
-              ),
+            CalviPicks(
+              children: [
+                for (final t in themeOptions)
+                  /* Без знака: підпис під назвою вже каже, що це за тема, а
+                     пʼять різних знаків у стовпчик читаються як пʼять різних
+                     розділів, а не як пʼять відповідей на одне питання. */
+                  CalviPick(
+                    label: themeTitle(context, t.id),
+                    hint: themeHint(context, t.id),
+                    on: s.theme == t.id,
+                    onTap: () => set((v) => v.copyWith(theme: t.id)),
+                  ),
+              ],
+            ),
           ],
         ),
       ],
@@ -95,18 +103,107 @@ class LangPanel extends StatelessWidget {
         CalviSection(
           title: l.langSection,
           bare: true,
+          trail: 0,
           children: [
             /* Позначка стоїть на мові, якою застосунок говорить зараз, а не
                лише на обраній руками. Поки вибору не робили, мова приходить
                від пристрою, і без цього список стояв би без жодної позначки:
                людина бачила б німецький інтерфейс і жодного німецького
                рядка, ніби мову вибрав хтось інший. */
-            for (final option in langOptions)
-              CalviPick(
-                label: langTitle(context, option),
-                on: s.lang == option || (s.lang == Lang.system && option == langNow(context)),
-                onTap: () => set((v) => v.copyWith(lang: option)),
-              ),
+            CalviPicks(
+              children: [
+                for (final option in langOptions)
+                  CalviPick(
+                    label: langTitle(context, option),
+                    on: s.lang == option || (s.lang == Lang.system && option == langNow(context)),
+                    onTap: () => set((v) => v.copyWith(lang: option)),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/* Персоналізація: що показує екран дня і як ми рахуємо сіль.
+ *
+ * Два питання під одним дахом, і спільне в них те, що обидва міняють не дані, а
+ * те, як їх читати. Другий рівень нутрієнтів вимикається тими, кому він не
+ * потрібен, і збільшується тими, хто справді добирає клітковину. Рука з сіллю
+ * поправляє припущення сервера про домашню страву: скільки її кинув кухар, не
+ * знає ніхто, і один вибір тут дешевший за поправку в кожному записі.
+ *
+ * Не в «Темі», хоч і поруч із нею. Тема це вигляд усього застосунку, а це
+ * налаштування одного екрана і одного розрахунку. */
+class CustomPanel extends StatelessWidget {
+  const CustomPanel({super.key, required this.s, required this.set, this.onBack});
+
+  final SettingsState s;
+  final SetSettings set;
+  final VoidCallback? onBack;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+
+    return CalviScreen(
+      trailing: const CalviMenuButton(),
+      onBack: onBack,
+      title: l.setCustom,
+      foot: CalviButton(label: l.actionDone, onTap: () => (onBack ?? Navigator.of(context).pop)()),
+      children: [
+        CalviSection(
+          title: l.setNutriTitle,
+          note: l.setNutriNote,
+          bare: true,
+          trail: 0,
+          children: [
+            CalviPicks(
+              children: [
+                for (final level in nutriLevelOptions)
+                  CalviPick(
+                    label: nutriTitle(context, level),
+                    hint: nutriHint(context, level),
+                    /* Знак каже, як воно виглядатиме: риска це рядок, кільця це
+                       картки, а мінус це «нічого». */
+                    icon: switch (level) {
+                      NutriLevel.off => 'minus',
+                      NutriLevel.small => 'equal',
+                      NutriLevel.large => 'chart',
+                    },
+                    on: s.nutri == level,
+                    onTap: () => set((v) => v.copyWith(nutri: level)),
+                  ),
+              ],
+            ),
+          ],
+        ),
+        CalviSection(
+          title: l.setSaltTitle,
+          note: l.setSaltNote,
+          bare: true,
+          trail: 0,
+          children: [
+            CalviPicks(
+              children: [
+                for (final hand in saltHandOptions)
+                  CalviPick(
+                    label: saltHandTitle(context, hand),
+                    /* Сільничка лишається середньому, а краї беруть стрілки: три
+                       однакові знаки поспіль не кажуть нічого, а вибір тут саме
+                       між «менше» і «більше». */
+                    icon: switch (hand) {
+                      SaltHand.less => 'down',
+                      SaltHand.usual => 'salt',
+                      SaltHand.more => 'up',
+                    },
+                    on: s.saltHand == hand,
+                    onTap: () => set((v) => v.copyWith(saltHand: hand)),
+                  ),
+              ],
+            ),
           ],
         ),
       ],
@@ -684,7 +781,13 @@ class PrivacyPanel extends StatelessWidget {
     return CalviScreen(
       trailing: const CalviMenuButton(),
       onBack: onBack,
-      title: l.privacyTitle,
+      /* Та сама назва, що в рядку, який сюди веде: «Дані і аналітика».
+       *
+       * Рядок казав одне, сторінка за ним називалась інакше, «Приватність», а
+       * поруч у списку стоїть ще й «Політика приватності». Два схожі слова на
+       * одному екрані означають, що людина відкриє не те: тут перемикачі, там
+       * документ. */
+      title: l.setPrivacy,
       foot: CalviButton(label: l.actionDone, onTap: () => (onBack ?? Navigator.of(context).pop)()),
       children: [
         /* Три обіцянки трьома рядками, а не абзацом.

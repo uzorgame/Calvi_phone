@@ -9,6 +9,7 @@ import '../../data/recipes_demo.dart';
 import '../../data/allergens.dart';
 import '../../data/settings.dart' show Allergy, goalOf;
 import '../../data/local/chat_store.dart';
+import '../../data/local/database.dart' show TokenStateData;
 import '../../data/remote/api.dart';
 import '../../data/units.dart';
 import '../../design/icons.dart';
@@ -19,8 +20,11 @@ import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import '../../l10n/app_localizations.dart';
 import '../menu.dart';
+import '../today/bottom_bar.dart';
+import '../voice/dictation.dart';
+import '../voice/voice_overlay.dart';
 
-part 'ask_nora.dart';
+part 'recipe_talk.dart';
 part 'recipe_view.dart';
 
 /* Рецепти: те, що вже приготували або збираються приготувати.
@@ -35,8 +39,13 @@ part 'recipe_view.dart';
  *
  * Перенесено з демки 5300 один в один: обкладинка з засічковим заголовком,
  * перемикач джерела, картки на три рядки, сторінка рецепта з рядом БЖВ у
- * кільцях, вибір із трьох порад Нори і розмова про рецепт тією ж мовою, що
- * діалог під розбором тижня. */
+ * кільцях і розмова з Норою тією самою смугою, що на дні.
+ *
+ * **Просять Нору внизу, а не кнопкою.** Тут стояла кнопка «Попросити рецепт у
+ * Нори», яка відкривала аркуш з одним полем, тобто друге місце, куди пишуть
+ * Норі, зі своїм виглядом і своїми правилами. Писати Норі в застосунку вміють в
+ * одному місці, унизу екрана, і книга рецептів не має бути винятком: замість
+ * кнопки лишився рядок, який каже, що там на неї чекають. */
 
 /// Засічковий голос обкладинки. Системний: Georgia на iOS, Noto Serif на
 /// Android, нуль завантаження. Єдине місце в застосунку з цим шрифтом.
@@ -116,10 +125,28 @@ class RecipesScreen extends StatefulWidget {
 }
 
 class _RecipesScreenState extends State<RecipesScreen> {
-  List<RecipeData>? _book;
-  bool _failed = false;
+  /* Книга і розмова живуть в одному місці на весь розділ: сторінка страви
+     працює з тими самими, а не зі своїми копіями. */
+  final _desk = RecipeDesk();
   bool _asked = false;
   int _tab = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _desk.addListener(_redraw);
+  }
+
+  void _redraw() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _desk.removeListener(_redraw);
+    _desk.dispose();
+    super.dispose();
+  }
 
   @override
   void didChangeDependencies() {
@@ -138,13 +165,13 @@ class _RecipesScreenState extends State<RecipesScreen> {
   Future<void> _load() async {
     final scope = AppScope.of(context);
     if (!scope.real || scope.sync == null) {
-      setState(() => _book = demoRecipeBook());
+      _desk.shelve(demoRecipeBook());
       return;
     }
 
     final snap = await scope.sync!.recipesSnapshot();
     if (!mounted) return;
-    if (snap != null) setState(() => _book = snap);
+    if (snap != null) _desk.shelve(snap);
 
     /* Мережа чекає, поки сторінка доїде: перебудова списку посеред переходу
        і є той самий «лаг». Пів секунди свіжості книга рецептів переживе.
@@ -156,45 +183,28 @@ class _RecipesScreenState extends State<RecipesScreen> {
     try {
       final rows = await scope.sync!.recipes();
       if (!mounted) return;
-      setState(() {
-        _book = rows;
-        _failed = false;
-      });
+      _desk.shelve(rows);
     } catch (_) {
       if (!mounted) return;
       // Знімок є, значить є що показувати: збій дотягування не стирає книгу.
-      if (_book != null) return;
-      setState(() {
-        _book = const [];
-        _failed = true;
-      });
+      if (_desk.book != null) return;
+      _desk.shelve(const [], failed: true);
     }
   }
 
   Future<void> _openDish(RecipeData r) async {
-    final gone = await Navigator.of(context).push(slideRoute(RecipeView(recipe: r)));
+    final gone = await Navigator.of(
+      context,
+    ).push(slideRoute(RecipeView(recipe: r, desk: _desk)));
     // Сторінка закрилась через видалення: список прибирає картку одразу,
     // знімок уже схуд усередині deleteRecipe.
-    if (gone == true && mounted) {
-      setState(() => _book = [
-        for (final x in _book ?? const <RecipeData>[])
-          if (x.id != r.id) x,
-      ]);
-    }
-  }
-
-  Future<void> _ask() async {
-    final picked = await askNoraForRecipe(context);
-    if (picked == null || !mounted) return;
-    // Знімок уже оновив saveRecipe: тут лишається тільки екран.
-    setState(() => _book = [picked, ..._book ?? const []]);
-    _openDish(picked);
+    if (gone == true && mounted) _desk.drop(r.id);
   }
 
   @override
   Widget build(BuildContext context) {
     final l = L.of(context);
-    final book = _book ?? const <RecipeData>[];
+    final book = _desk.book ?? const <RecipeData>[];
 
     final shown = switch (_tab) {
       1 => [for (final r in book) if (r.origin == 'nora') r],
@@ -205,6 +215,12 @@ class _RecipesScreenState extends State<RecipesScreen> {
     return CalviScreen(
       title: l.rcTitle,
       trailing: const CalviMenuButton(),
+      /* Місце під смугу розмови: без нього остання картка книги ховалась би за
+         полем. Смуга це 92 пікселі плюс безпечна зона телефона, яку вона
+         тримає в собі, і сторінка мусить рахувати те саме, бо сама вона під
+         ту зону заходить. */
+      padding: EdgeInsets.only(bottom: 104 + MediaQuery.paddingOf(context).bottom),
+      bar: RecipeBar(desk: _desk, onOpened: _openDish),
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 4, CalviSize.gutter, 0),
@@ -213,7 +229,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
             children: [
               /* Сторінка вмикається поетапно, як аналітика: обкладинка,
                  перемикач, картки одна за одною. */
-              _Rise(delay: 0, child: _Hero(count: book.length, onAsk: _ask)),
+              _Rise(delay: 0, child: _Hero(count: book.length)),
               const SizedBox(height: 14),
               _Rise(
                 delay: 110,
@@ -224,7 +240,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
                 ),
               ),
               const SizedBox(height: 14),
-              if (_failed && book.isEmpty)
+              if (_desk.failed && book.isEmpty)
                 _Rise(
                   delay: 180,
                   child: Padding(
@@ -237,7 +253,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
                 )
               /* Книга ще їде з сервера: тиша чесніша за «Тут порожньо», яке
                  через пів секунди зміниться картками. */
-              else if (_book == null)
+              else if (_desk.book == null)
                 const SizedBox.shrink()
               else if (shown.isEmpty)
                 _Rise(
@@ -272,12 +288,14 @@ class _RecipesScreenState extends State<RecipesScreen> {
 
 /* Обкладинка: звичайна картка, характер несуть слова. Капс-рядок «Кухня» і
    лічильник, засічковий заголовок із курсивним теплим словом, речення суті
-   і головна дія. */
+   і рядок про те, хто тут допоможе.
+
+   Кнопки більше немає: замість неї рядок, який відсилає до поля внизу. Тут не
+   тиснуть, тут читають і йдуть просити. */
 class _Hero extends StatelessWidget {
-  const _Hero({required this.count, required this.onAsk});
+  const _Hero({required this.count});
 
   final int count;
-  final VoidCallback onAsk;
 
   @override
   Widget build(BuildContext context) {
@@ -316,27 +334,198 @@ class _Hero extends StatelessWidget {
             style: context.t.labelSmall?.copyWith(height: 1.4),
           ),
           const SizedBox(height: 14),
-          GestureDetector(
-            onTap: onAsk,
-            behavior: HitTestBehavior.opaque,
-            child: Container(
-              height: 48,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: c.button,
-                borderRadius: BorderRadius.circular(CalviSize.rPill),
-              ),
-              child: Text(
-                l.rcAsk,
-                style: context.t.bodyMedium?.copyWith(
-                  color: c.buttonText,
-                  fontWeight: FontWeight.w600,
+          /* Той самий бейдж, що вітає в порожній розмові внизу: рядок і поле це
+             одна Нора, і однаковий знак каже це швидше за будь-яке пояснення. */
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+            decoration: BoxDecoration(
+              color: c.fillSecondary,
+              borderRadius: BorderRadius.circular(CalviSize.rCard),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 24,
+                  height: 24,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(shape: BoxShape.circle, color: c.button),
+                  // Та сама літера, що на бейджі порожньої розмови: імʼя Нори
+                  // однакове всіма мовами, і перекладати тут нема чого.
+                  child: Text(
+                    'N',
+                    style: context.t.labelSmall?.copyWith(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: c.buttonText,
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    l.rcHelps,
+                    style: context.t.labelSmall?.copyWith(height: 1.4),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+/* Смуга розмови книги рецептів: та сама, що на дні.
+ *
+ * Та сама кімната, ті самі бульбашки, те саме кільце очікування, той самий
+ * лічильник токенів. Інші тільки три речі, і кожна з них про те, що це інша
+ * розмова: немає камери (страви ще не існує, знімати нічого), немає пігулки
+ * «Записую в Обід» (звідси в щоденник не йде нічого) і свої приклади в полі.
+ *
+ * Один віджет на обидва маршрути: список показує його без страви, сторінка
+ * рецепта зі стравою, і від цього міняються вітання, приклади й тема. */
+class RecipeBar extends StatefulWidget {
+  const RecipeBar({super.key, required this.desk, required this.onOpened, this.dish});
+
+  final RecipeDesk desk;
+  final RecipeData? dish;
+
+  /// Куди йти з обраною стравою. Список її відкриває, сторінка підміняє себе.
+  final ValueChanged<RecipeData> onOpened;
+
+  @override
+  State<RecipeBar> createState() => _RecipeBarState();
+}
+
+class _RecipeBarState extends State<RecipeBar> {
+  /* Диктування, точно як на дні: той самий мікрофон, та сама накладка, та сама
+     стрічка рівнів. Продиктоване стає тим самим проханням, що й набране, бо
+     сказати «курка, броколі, рис» голосом швидше, ніж набрати. */
+  final Dictation _ears = Dictation.shared;
+  ({VoiceOrigin from, bool leaving})? _dictating;
+  bool _listening = false;
+  DateTime? _heldFrom;
+  Timer? _showing;
+
+  /// Накладка зʼявляється не з першим дотиком, а коли палець справді лежить.
+  static const _holdBefore = Duration(milliseconds: 200);
+
+  /// Коротший дотик це промах по кнопці, а не фраза.
+  static const _minPhrase = Duration(milliseconds: 420);
+
+  @override
+  void dispose() {
+    _showing?.cancel();
+    if (_listening) unawaited(_ears.cancel());
+    super.dispose();
+  }
+
+  Future<void> _hold(Offset at, double size) async {
+    if (_dictating != null || _listening) return;
+    _listening = true;
+
+    _heldFrom = DateTime.now();
+    _showing?.cancel();
+    _showing = Timer(_holdBefore, () {
+      if (!mounted || !_listening) return;
+      setState(() => _dictating = (from: VoiceOrigin(at: at, size: size), leaving: false));
+    });
+
+    final ok = await _ears.start(onWords: (_) {});
+    if (!mounted || ok) return;
+
+    _showing?.cancel();
+    _listening = false;
+    _heldFrom = null;
+    setState(() => _dictating = null);
+    _trouble();
+  }
+
+  Future<void> _letGo() async {
+    if (!_listening) return;
+
+    _showing?.cancel();
+    _showing = null;
+
+    final held = _heldFrom == null ? Duration.zero : DateTime.now().difference(_heldFrom!);
+    _heldFrom = null;
+
+    final was = _dictating;
+    if (was == null || held < _minPhrase) {
+      _listening = false;
+      if (was != null) setState(() => _dictating = null);
+      unawaited(_ears.cancel());
+      return;
+    }
+
+    setState(() => _dictating = (from: was.from, leaving: true));
+
+    final text = (await _ears.stop()).trim();
+    _listening = false;
+    if (!mounted) return;
+
+    if (text.isEmpty) {
+      _trouble();
+      return;
+    }
+    unawaited(askNoraInBook(context, widget.desk, text, dish: widget.dish));
+  }
+
+  void _trouble() {
+    final why = _ears.failure;
+    if (why == null || !mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(why)));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final desk = widget.desk;
+    final dish = widget.dish;
+
+    /* Обидва шари на весь екран, і це не косметика.
+     *
+     * Стос за умовчанням дає дитині волю розміру і кладе її в лівий верхній
+     * кут. Смуга сама по собі заввишки з поле, і без цього рядка вона ставала
+     * саме туди, поверх кнопки «назад»: її власний перехоплювач непрозорий і
+     * їв дотик, а замість повернення піднімався чат. */
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        StreamBuilder<TokenStateData?>(
+          stream: AppScope.maybeOf(context)?.db?.syncDao.watchTokens(),
+          builder: (context, snap) => BottomBar(
+            tokensLeft: snap.data?.syncedAt == null || snap.data?.unlimited == true
+                ? null
+                : snap.data?.balance,
+            pro: snap.data?.syncedAt != null && snap.data?.unlimited == true,
+            open: desk.open,
+            onOpen: (_) => desk.raise(),
+            onClose: desk.lower,
+            muteMic: _dictating != null,
+            messages: desk.messages,
+            greet: recipeGreet(l, dish),
+            hints: recipeHints(l, dish: dish != null),
+            onSend: (text) => askNoraInBook(context, desk, text, dish: dish),
+            onPick: (at, pick) async {
+              final saved = await takeDish(context, desk, at, pick);
+              if (saved != null && context.mounted) widget.onOpened(saved);
+            },
+            onHold: _hold,
+            onLetGo: _letGo,
+          ),
+        ),
+
+        // Диктування накриває все, зокрема й смугу, яка його почала.
+        if (_dictating case final d?)
+          VoiceOverlay(
+            origin: d.from,
+            leaving: d.leaving,
+            onClosed: () => setState(() => _dictating = null),
+            source: _ears,
+          ),
+      ],
     );
   }
 }

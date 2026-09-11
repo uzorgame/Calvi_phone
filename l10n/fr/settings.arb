@@ -340,5 +340,21 @@
   "eraseFailed": "L'effacement n'a pas marché : {why}",
   "@eraseFailed": {"placeholders":{"why":{"type":"String"}}},
   "eraseNoNet": "pas de réseau. Active internet et réessaie",
-  "eraseSlow": "le serveur prend trop de temps. Réessaie dans une minute"
+  "eraseSlow": "le serveur prend trop de temps. Réessaie dans une minute",
+
+  "setCustom": "Personnalisation",
+  "setCustomNote": "Ce que montre lʼécran du jour et comment nous comptons le sel",
+  "setNutriTitle": "Nutriments",
+  "setNutriNote": "Fibres, sucre, sodium et graisses saturées sous les macros",
+  "setNutriOff": "Ne pas montrer",
+  "setNutriOffHint": "Seulement protéines, lipides et glucides, comme avant",
+  "setNutriSmall": "En ligne",
+  "setNutriSmallHint": "Une ligne discrète sous les cartes : signe, chiffre, couleur à la limite",
+  "setNutriLarge": "En cartes",
+  "setNutriLargeHint": "Cinq colonnes avec anneaux et libellés, comme les macros",
+  "setSaltTitle": "Comment tu sales",
+  "setSaltNote": "Une correction du sel que nous supposons dans un plat maison",
+  "setSaltLess": "Moins que dʼhabitude",
+  "setSaltUsual": "Comme dʼhabitude",
+  "setSaltMore": "Plus que dʼhabitude"
 }

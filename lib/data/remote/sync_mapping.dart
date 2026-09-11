@@ -43,6 +43,13 @@ Map<String, dynamic> mealToChange(MealRow r) => envelope(
     'protein_g': r.proteinG,
     'fat_g': r.fatG,
     'carbs_g': r.carbsG,
+    /* Другий рівень. Порожнє їде порожнім і не стає нулем: сервер розрізняє
+       «не знаємо» і «немає», і телефон не має права це змішувати дорогою. */
+    'fiber_g': r.fiberG,
+    'sugar_g': r.sugarG,
+    'added_sugar_g': r.addedSugarG,
+    'sodium_mg': r.sodiumMg,
+    'sat_fat_g': r.satFatG,
     'source': r.source,
     'note': r.note,
   },
@@ -89,6 +96,14 @@ MealsCompanion mealFromChange(Map<String, dynamic> c) {
     proteinG: Value(_dec(d['protein_g']) ?? 0),
     fatG: Value(_dec(d['fat_g']) ?? 0),
     carbsG: Value(_dec(d['carbs_g']) ?? 0),
+    /* Без `?? 0`, на відміну від макросів вище, і саме в цьому суть: поле,
+       якого сервер не прислав, лишається порожнім. Нуль тут означав би, що
+       клітковини в страві немає, а правда в тому, що її ще ніхто не рахував. */
+    fiberG: Value(_dec(d['fiber_g'])),
+    sugarG: Value(_dec(d['sugar_g'])),
+    addedSugarG: Value(_dec(d['added_sugar_g'])),
+    sodiumMg: Value(_dec(d['sodium_mg'])),
+    satFatG: Value(_dec(d['sat_fat_g'])),
     source: Value(_text(d['source']) ?? 'manual'),
     note: Value(_text(d['note'])),
   );
@@ -364,6 +379,9 @@ Map<String, dynamic> profileToWire(ProfileData r) => {
   'memory': jsonDecode(r.memory),
   // Одиниці так само обʼєктом. Нора читає їх звідси, коли пише відповідь.
   'units': _unitsWire(r.units),
+  /* Як людина солить. Сервер бере це на себе при розрахунку солі, тому воно
+     має доїхати раніше за перший запис, а не разом із ним. */
+  'salt_hand': r.saltHand,
 };
 
 /* Порожній рядок у старих рядках означає метричне, а зіпсований не має валити
@@ -407,6 +425,14 @@ ProfileCompanion profileFromWire(Map<String, dynamic> p, {required String id}) =
   /* Тільки якщо сервер їх прислав. Старий сервер поля не знає, і його відповідь
      не має скидати вибір, зроблений на телефоні. */
   units: p['units'] is Map ? Value(jsonEncode(p['units'])) : const Value.absent(),
+  /* Те саме правило і тут, і воно не теоретичне: рука з сіллю зʼявилась на
+     телефоні раніше, ніж у відповіді профілю на всіх серверах. Порожнє поле
+     від того, хто про нього не знає, це не «людина не обирала», а мовчання, і
+     прийняти його за відповідь означало б скинути вибір при першому ж обміні.
+     Коли поле є, навіть порожнє, слово за сервером. */
+  saltHand: p.containsKey('salt_hand')
+      ? Value(p['salt_hand'] as String?)
+      : const Value.absent(),
 );
 
 /// Числа з JSON приходять то цілими, то дробовими: 74 і 74.0 це той самий вага.

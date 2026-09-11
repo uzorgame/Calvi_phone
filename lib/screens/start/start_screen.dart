@@ -42,10 +42,13 @@ import '../../l10n/labels.dart';
 const startSteps = 10;
 
 /// Три напрямки, словами тієї мови, якою зараз говорить застосунок.
-List<({Direction id, String label, String hint})> _goals(L l) => [
-  (id: Direction.lose, label: l.startGoalLose, hint: l.startGoalLoseHint),
-  (id: Direction.keep, label: l.startGoalKeep, hint: l.startGoalKeepHint),
-  (id: Direction.gain, label: l.startGoalGain, hint: l.startGoalGainHint),
+/* Знак у кожного напрямку, як у демці: стрілка вниз, риска, стрілка вгору.
+   Три слова без знаків читаються однаково швидко, але знак каже напрямок ще до
+   того, як око дійшло до слова. */
+List<({Direction id, String label, String hint, String icon})> _goals(L l) => [
+  (id: Direction.lose, label: l.startGoalLose, hint: l.startGoalLoseHint, icon: 'down'),
+  (id: Direction.keep, label: l.startGoalKeep, hint: l.startGoalKeepHint, icon: 'minus'),
+  (id: Direction.gain, label: l.startGoalGain, hint: l.startGoalGainHint, icon: 'up'),
 ];
 
 /// First run, ten screens.
@@ -605,13 +608,18 @@ class _StartScreenState extends State<StartScreen> {
     // Holding weight needs no target and no pace, so the next step is skipped.
     onNext: () => _go(_direction == Direction.keep ? 7 : 6),
     children: [
-      for (final g in _goals(l))
-        CalviPick(
-          label: g.label,
-          hint: g.hint,
-          on: _direction == g.id,
-          onTap: () => _pickGoal(g.id),
-        ),
+      CalviPicks(
+        children: [
+          for (final g in _goals(l))
+            CalviPick(
+              label: g.label,
+              hint: g.hint,
+              icon: g.icon,
+              on: _direction == g.id,
+              onTap: () => _pickGoal(g.id),
+            ),
+        ],
+      ),
       /* Поки стрічка їде до ваги, вона лишається на екрані, хоч напрямок уже
          «Тримати». Інакше рух, заради якого все це, стався б за зачиненими
          дверима: картка спалахнула б, а стрічка зникла б разом із ним. */
@@ -642,59 +650,46 @@ class _StartScreenState extends State<StartScreen> {
       cta: l.actionNext,
       onNext: () => _go(7),
       children: [
-        Text.rich(
-          TextSpan(
-            text: _units.massNum(_pace),
-            children: [
-              TextSpan(
-                text: '  ${l.startPaceUnit(_units.massLabel)}',
-                style: context.t.bodyMedium?.copyWith(fontSize: CalviSize.fsBody),
-              ),
-            ],
+        CalviPaceCard(
+          value: _units.massNum(_pace),
+          unit: l.startPaceUnit(_units.massLabel),
+          slider: CalviSlider(
+            value: _pace,
+            min: 0.2,
+            max: 1.2,
+            step: 0.1,
+            marks: [l.startPaceSlow, l.startPaceUsual, l.startPaceFast],
+            onChange: (v) => setState(() => _pace = v),
           ),
-          style: context.t.displayLarge?.copyWith(height: 1),
-        ),
-        const SizedBox(height: 26),
-        CalviSlider(
-          value: _pace,
-          min: 0.2,
-          max: 1.2,
-          step: 0.1,
-          marks: [l.startPaceSlow, l.startPaceUsual, l.startPaceFast],
-          onChange: (v) => setState(() => _pace = v),
         ),
         if (weeks > 0)
           Padding(
             padding: const EdgeInsets.only(top: 16),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              decoration: BoxDecoration(
-                color: context.c.fillSecondary,
-                borderRadius: BorderRadius.circular(CalviSize.rCard),
+            /* Прогноз тихим рядком під карткою, а не блідим прямокутником.
+             * Прямокутник на світлому ґрунті ледь видно, і він читається як
+             * недомальована картка; тут це просто речення, яке відповідає на
+             * «і коли ж».
+             *
+             * Речення трьома шматками, бо дата і строк у ньому жирні. Скільки
+             * тижнів це окремий рядок із множиною, а не число плюс слово:
+             * українська має тут три форми, і склеєне в коді давало «5 тижні». */
+            child: Text.rich(
+              TextSpan(
+                text: l.startPaceEtaHead,
+                children: [
+                  TextSpan(
+                    text: targetDate(weeks),
+                    style: TextStyle(color: context.c.text, fontWeight: FontWeight.w600),
+                  ),
+                  TextSpan(text: l.startPaceEtaTail),
+                  TextSpan(
+                    text: l.startPaceWeeks(weeks),
+                    style: TextStyle(color: context.c.text, fontWeight: FontWeight.w600),
+                  ),
+                ],
               ),
-              /* Речення трьома шматками, бо дата і строк у ньому жирні.
-               *
-               * Скільки тижнів це окремий рядок із множиною, а не число плюс
-               * слово: українська має тут три форми, і склеєне в коді давало
-               * «5 тижні». */
-              child: Text.rich(
-                TextSpan(
-                  text: l.startPaceEtaHead,
-                  children: [
-                    TextSpan(
-                      text: targetDate(weeks),
-                      style: TextStyle(color: context.c.text, fontWeight: FontWeight.w600),
-                    ),
-                    TextSpan(text: l.startPaceEtaTail),
-                    TextSpan(
-                      text: l.startPaceWeeks(weeks),
-                      style: TextStyle(color: context.c.text, fontWeight: FontWeight.w600),
-                    ),
-                  ],
-                ),
-                style: context.t.bodyMedium,
-              ),
+              textAlign: TextAlign.center,
+              style: context.t.bodyMedium?.copyWith(height: 1.5),
             ),
           ),
 
@@ -710,13 +705,17 @@ class _StartScreenState extends State<StartScreen> {
     cta: l.actionNext,
     onNext: () => _go(8),
     children: [
-      for (final a in activityLevels)
-        CalviPick(
-          label: activityTitle(context, a.v),
-          hint: activityHint(context, a.v),
-          on: _activity == a.v,
-          onTap: () => setState(() => _activity = a.v),
-        ),
+      CalviPicks(
+        children: [
+          for (final a in activityLevels)
+            CalviPick(
+              label: activityTitle(context, a.v),
+              hint: activityHint(context, a.v),
+              on: _activity == a.v,
+              onTap: () => setState(() => _activity = a.v),
+            ),
+        ],
+      ),
       /* Тут стояли алергії, девʼять чипів під питанням про спосіб життя.
          Пішли, і це не спрощення заради спрощення: алергія це не крок анкети, а
          постійна властивість людини, і живе вона в налаштуваннях, де її можна
@@ -876,12 +875,13 @@ class _NormStepState extends State<_NormStep> with SingleTickerProviderStateMixi
       onNext: widget.onNext,
       busy: !done,
       children: [
+        /* Картка норми без обведення, як усі поверхні тепер: поверхню і так
+           відділяє колір із тінню, а лінія навколо казала те саме втретє. */
         Container(
           padding: const EdgeInsets.all(22),
           decoration: BoxDecoration(
             color: c.card,
-            border: Border.all(color: c.cardBorder),
-            borderRadius: BorderRadius.circular(CalviSize.rLarge),
+            borderRadius: BorderRadius.circular(CalviSize.rGroup),
             boxShadow: context.shadowCard,
           ),
           child: Row(

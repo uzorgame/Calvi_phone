@@ -340,5 +340,21 @@
   "eraseFailed": "Löschen ging nicht: {why}",
   "@eraseFailed": {"placeholders":{"why":{"type":"String"}}},
   "eraseNoNet": "kein Netz. Schalte das Internet ein und versuch es noch einmal",
-  "eraseSlow": "der Server braucht zu lange. Versuch es in einer Minute"
+  "eraseSlow": "der Server braucht zu lange. Versuch es in einer Minute",
+
+  "setCustom": "Personalisierung",
+  "setCustomNote": "Was der Tagesbildschirm zeigt und wie wir Salz rechnen",
+  "setNutriTitle": "Nährstoffe",
+  "setNutriNote": "Ballaststoffe, Zucker, Natrium und gesättigte Fette unter den Makros",
+  "setNutriOff": "Nicht zeigen",
+  "setNutriOffHint": "Nur Eiweiß, Fett und Kohlenhydrate, wie bisher",
+  "setNutriSmall": "Als Zeile",
+  "setNutriSmallHint": "Eine ruhige Zeile unter den Karten: Zeichen, Zahl, Farbe an der Grenze",
+  "setNutriLarge": "Als Karten",
+  "setNutriLargeHint": "Fünf Spalten mit Ringen und Beschriftung, wie bei den Makros",
+  "setSaltTitle": "Wie du salzt",
+  "setSaltNote": "Eine Korrektur des Salzes, das wir in hausgemachten Gerichten annehmen",
+  "setSaltLess": "Weniger als üblich",
+  "setSaltUsual": "Wie üblich",
+  "setSaltMore": "Mehr als üblich"
 }

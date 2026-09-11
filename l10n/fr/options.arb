@@ -48,5 +48,12 @@
   "reminderBodyMeds": "Selon l'horaire",
 
   "notifyChannel": "Rappels",
-  "notifyChannelHint": "Rappels pour les repas, l'eau, les médicaments et les pesées"
+  "notifyChannelHint": "Rappels pour les repas, l'eau, les médicaments et les pesées",
+
+
+  "liveChannel": "Compteur du jour",
+  "liveChannelHint": "Ce qu’il reste pour aujourd’hui, tant que l’app tourne",
+  "liveLeft": "Il reste {kcal} kcal",
+  "liveOver": "{kcal} kcal de trop",
+  "liveBody": "{eaten} sur {goal} mangées"
 }

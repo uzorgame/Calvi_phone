@@ -309,6 +309,33 @@
       }
     }
   },
+  "@liveBody": {
+    "placeholders": {
+      "eaten": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "String"
+      }
+    }
+  },
+  "@liveChannel": {
+    "description": "Окремий канал сповіщень під живий запис дня. Найнижча важливість: це рядок стану, а не нагадування, і дзвеніти він не має."
+  },
+  "@liveLeft": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      }
+    }
+  },
+  "@liveOver": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      }
+    }
+  },
   "@loginServer": {
     "placeholders": {
       "why": {
@@ -491,6 +518,81 @@
     "placeholders": {
       "ml": {
         "type": "String"
+      }
+    }
+  },
+  "@nutriAddedNorm": {
+    "placeholders": {
+      "g": {
+        "type": "int"
+      },
+      "better": {
+        "type": "int"
+      }
+    }
+  },
+  "@nutriAtLeast": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "@nutriFiberNorm": {
+    "placeholders": {
+      "g": {
+        "type": "int"
+      }
+    }
+  },
+  "@nutriGap": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@nutriNowGoal": {
+    "placeholders": {
+      "now": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "int"
+      }
+    }
+  },
+  "@nutriNowSodium": {
+    "placeholders": {
+      "now": {
+        "type": "String"
+      },
+      "salt": {
+        "type": "String"
+      }
+    }
+  },
+  "@nutriNowSugar": {
+    "placeholders": {
+      "now": {
+        "type": "String"
+      },
+      "added": {
+        "type": "String"
+      }
+    }
+  },
+  "@nutriRest": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@nutriSatNorm": {
+    "placeholders": {
+      "g": {
+        "type": "int"
       }
     }
   },
@@ -919,6 +1021,7 @@
   "actionClose": "Close",
   "actionDelete": "Delete",
   "actionDone": "Done",
+  "actionGotIt": "Got it",
   "actionNext": "Next",
   "actionSave": "Save",
   "activityHigh": "High",
@@ -1208,6 +1311,11 @@
   "langSystem": "Device language",
   "legalOnTheWeb": "Open on the web",
   "legalUpdated": "Updated {date}",
+  "liveBody": "{eaten} of {goal} eaten",
+  "liveChannel": "Day counter",
+  "liveChannelHint": "How much is left for today, while the app is running",
+  "liveLeft": "{kcal} kcal left",
+  "liveOver": "{kcal} kcal over",
   "loginNoToken": "Google did not return a token",
   "loginNotConfigured": "sign-in is not configured in this build",
   "loginNotSynced": "Not every entry has reached the server yet. Try again in a minute: signing in erases nothing until everything is saved",
@@ -1331,6 +1439,45 @@
   "notifyChannel": "Reminders",
   "notifyChannelHint": "Reminders about food, water, medications and weigh-ins",
   "notifyDenied": "The phone refused notifications. Switch them on in the system settings and the reminders will work.",
+  "nutriAdded": "Added sugar",
+  "nutriAddedNorm": "up to {g} g, better up to {better}",
+  "nutriAddedShort": "Added",
+  "nutriAddedSource": "WHO: under 10% of calories, better under 5%",
+  "nutriAddedWhat": "Sugar, syrups and honey put into a product. The sugar of fruit and milk is not counted here.",
+  "nutriAtLeast": "at least {text}",
+  "nutriFiber": "Fibre",
+  "nutriFiberNorm": "{g} g a day",
+  "nutriFiberShort": "Fibre",
+  "nutriFiberSource": "EFSA: at least 25 g, or 14 g per thousand calories",
+  "nutriFiberWhat": "The part of plant food the body does not digest. Keeps digestion going and keeps you full longer.",
+  "nutriFrom": "Where from today",
+  "nutriGap": "{count, plural, one{One dish without these numbers, so this is a minimum.} other{{count} dishes without these numbers, so this is a minimum.}}",
+  "nutriGapAll": "Nothing is known about this today: no dish of the day carries these numbers.",
+  "nutriNone": "These meals were not counted",
+  "nutriNoneYet": "Nutrients appear with the first entry",
+  "nutriNorm": "Norm",
+  "nutriNowGoal": "{now} g today of {goal}",
+  "nutriNowSodium": "{now} g today, that is {salt} g of salt",
+  "nutriNowSugar": "{now} g today, added of it {added}",
+  "nutriRest": "{count, plural, one{and {count} more} other{and {count} more}}",
+  "nutriSat": "Saturated fat",
+  "nutriSatNorm": "up to {g} g a day",
+  "nutriSatShort": "Saturated",
+  "nutriSatSource": "WHO 2023: under 10% of calories",
+  "nutriSatWhat": "Fats of animal products, butter and cheese, and of coconut and palm oil.",
+  "nutriSodium": "Sodium",
+  "nutriSodiumNorm": "up to 2 g a day, that is 5 g of salt",
+  "nutriSodiumNote": "In a home dish the cook decides the salt. We take the usual amount for that kind of dish, and you can correct it in personalisation.",
+  "nutriSodiumShort": "Sodium",
+  "nutriSodiumSource": "WHO. Does not depend on calories",
+  "nutriSodiumWhat": "Salt is sodium times 2.5. Most of it comes from bread, cured meat, cheese and food away from home, not from the salt shaker.",
+  "nutriSugar": "Sugar",
+  "nutriSugarNorm": "no norm",
+  "nutriSugarNote": "A scale under total sugar would call an apple a problem. Look at the number next to it.",
+  "nutriSugarShort": "Sugar",
+  "nutriSugarSource": "WHO and EFSA limit added sugar, not the total",
+  "nutriSugarWhat": "All sugars together: added ones and the sugars of fruit and milk.",
+  "nutriUnknown": "not counted today yet",
   "photoDish": "Dish",
   "photoNotRecognized": "I could not recognise the dish in this shot",
   "planBuy": "Subscribe",
@@ -1410,15 +1557,15 @@
   "profileHeight": "Height",
   "profileSex": "Sex",
   "rcAllergyWarn": "Contains {names}, which is on your allergy list. Be careful with this one.",
-  "rcAsk": "Ask Nora for a recipe",
-  "rcAskAbout": "Ask Nora about this recipe",
-  "rcAskCancel": "Cancel",
-  "rcAskGo": "Ask",
   "rcAskPlaceholder": "chicken, broccoli, rice",
-  "rcAskTitle": "What is in the kitchen?",
-  "rcAsking": "Thinking…",
   "rcChatGreet": "Ask about \"{name}\": what to swap, how not to ruin it, what to prep ahead.",
-  "rcChatPlaceholder": "Ask about this recipe",
+  "rcChatHello": "Tell me what is in the kitchen and I will build a recipe.",
+  "rcChatHint": "\"chicken, broccoli, rice\": I will suggest a few dishes and count the serving",
+  "rcChatHintDinner": "A 500 kcal dinner",
+  "rcChatHintEggs": "A quick breakfast with eggs",
+  "rcChatHintMince": "What can I make with mince?",
+  "rcChatHintOnly": "Only cheese and pasta left",
+  "rcChatPicks": "Here is what you can cook from that. Pick a dish and the recipe lands in the book.",
   "rcCount": "{n} recipes",
   "rcCountFew": "{n} recipes",
   "rcCountOne": "1 recipe",
@@ -1426,11 +1573,17 @@
   "rcDeleteCta": "Delete",
   "rcDeleteFailed": "Could not delete. Try again.",
   "rcDeleteTitle": "Delete this recipe?",
+  "rcDishHint": "\"what can replace rice?\", \"how not to dry out the fillet?\", \"can I prep ahead?\"",
+  "rcDishHintAhead": "Can I prep this ahead?",
+  "rcDishHintDry": "How not to dry out the fillet?",
+  "rcDishHintKeeps": "How long does it keep?",
+  "rcDishHintSwap": "What can replace rice?",
   "rcEmpty": "Nothing here yet. Tell Nora what is in the kitchen and the first recipe appears.",
   "rcEmptyMine": "No recipes of your own yet. Dictate any to Nora and it lands here.",
   "rcEyebrow": "The kitchen",
   "rcFromMine": "Mine",
   "rcFromNora": "From Nora",
+  "rcHelps": "Nora will help you build a recipe",
   "rcHeroA": "What to cook",
   "rcHeroB": "today",
   "rcHeroLede": "Say what you have at home. Nora suggests and counts the serving; your own recipe works too.",
@@ -1443,7 +1596,6 @@
   "rcOfDay": "that is {p}% of the daily norm",
   "rcPerServing": "per serving",
   "rcPerServingHead": "Per serving",
-  "rcPickTitle": "Pick a dish",
   "rcPortion": "serving {g}",
   "rcServingsFew": "{n} servings",
   "rcServingsMany": "{n} servings",
@@ -1512,6 +1664,8 @@
   "setAccess": "Access",
   "setAllergies": "Allergies",
   "setAssistantLine": "{name}, {count} in memory",
+  "setCustom": "Personalisation",
+  "setCustomNote": "What the day screen shows and how we count salt",
   "setDeleteAccount": "Delete account and data",
   "setFreeTierHead": "For Ukraine's defenders, and for those serving in the Armed Forces, the State Emergency Service, DTEK, medics, volunteers and teachers in front-line areas, the paid plan is ",
   "setFreeTierHow": " How to get it",
@@ -1533,6 +1687,14 @@
   "setMeds": "Medications",
   "setNorm": "Norm",
   "setNormLine": "{kcal}",
+  "setNutriLarge": "Cards",
+  "setNutriLargeHint": "Five columns with rings and labels, like the macros",
+  "setNutriNote": "Fibre, sugar, sodium and saturated fat under the macros",
+  "setNutriOff": "Do not show",
+  "setNutriOffHint": "Only protein, fat and carbs, as before",
+  "setNutriSmall": "A row",
+  "setNutriSmallHint": "A quiet line under the cards: mark, number, colour at the limit",
+  "setNutriTitle": "Nutrients",
   "setPlan": "Subscription",
   "setPlanFree": "Free",
   "setPolicy": "Privacy policy",
@@ -1541,6 +1703,11 @@
   "setProfileLine": "{sex}, {age}, {height}",
   "setReminders": "Reminders",
   "setRemindersOff": "off",
+  "setSaltLess": "Less than usual",
+  "setSaltMore": "More than usual",
+  "setSaltNote": "A correction to the salt we assume in home cooking",
+  "setSaltTitle": "How you salt",
+  "setSaltUsual": "The usual way",
   "setTerms": "Terms of use",
   "setTheme": "Theme",
   "setTitle": "Settings",

@@ -59,5 +59,7 @@
   "menuHintNoAllergy": "немає",
   "menuHintMore": "ще {n}",
   "@menuHintMore": {"placeholders": {"n": {"type": "int"}}},
-  "menuHintFree": "безкоштовний"
+  "menuHintFree": "безкоштовний",
+
+  "actionGotIt": "Зрозуміло"
 }

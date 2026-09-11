@@ -64,12 +64,17 @@ void main() {
       ),
     );
 
+    /* Прокручуємо до самого низу, а не «доки стане видно».
+     *
+     * Кнопка «Готово» висить над списком, і рядок, який щойно зʼявився в нижній
+     * частині екрана, лежить під нею: дотик дістається кнопці, а не рядку. У
+     * застосунку так не буває, бо під списком лишається місце під саму кнопку і
+     * останній рядок доїжджає вище за неї; у тесті цього треба дочекатись. */
     Future<void> reachErase(WidgetTester tester, L l) async {
-      await tester.scrollUntilVisible(
-        find.text(l.eraseDataTitle),
-        160,
-        scrollable: find.byType(Scrollable).first,
-      );
+      final list = find.byType(Scrollable).first;
+      await tester.scrollUntilVisible(find.text(l.eraseDataTitle), 160, scrollable: list);
+      await tester.drag(list, const Offset(0, -400));
+      await tester.pumpAndSettle();
       await tester.tap(find.text(l.eraseDataTitle));
       await tester.pumpAndSettle();
     }

@@ -340,5 +340,21 @@
   "eraseFailed": "Não consegui apagar: {why}",
   "@eraseFailed": {"placeholders":{"why":{"type":"String"}}},
   "eraseNoNet": "sem rede. Ligue a internet e tente de novo",
-  "eraseSlow": "o servidor está demorando demais. Tente daqui a um minuto"
+  "eraseSlow": "o servidor está demorando demais. Tente daqui a um minuto",
+
+  "setCustom": "Personalização",
+  "setCustomNote": "O que o ecrã do dia mostra e como contamos o sal",
+  "setNutriTitle": "Nutrientes",
+  "setNutriNote": "Fibra, açúcar, sódio e gorduras saturadas sob os macros",
+  "setNutriOff": "Não mostrar",
+  "setNutriOffHint": "Só proteína, gordura e hidratos, como antes",
+  "setNutriSmall": "Em linha",
+  "setNutriSmallHint": "Uma linha discreta sob os cartões: sinal, número e cor no limite",
+  "setNutriLarge": "Em cartões",
+  "setNutriLargeHint": "Cinco colunas com anéis e legendas, como os macros",
+  "setSaltTitle": "Como salgas",
+  "setSaltNote": "Uma correção ao sal que assumimos num prato caseiro",
+  "setSaltLess": "Menos do que o costume",
+  "setSaltUsual": "Como de costume",
+  "setSaltMore": "Mais do que o costume"
 }

@@ -184,6 +184,57 @@ class $MealsTable extends Meals with TableInfo<$MealsTable, MealRow> {
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _fiberGMeta = const VerificationMeta('fiberG');
+  @override
+  late final GeneratedColumn<double> fiberG = GeneratedColumn<double>(
+    'fiber_g',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sugarGMeta = const VerificationMeta('sugarG');
+  @override
+  late final GeneratedColumn<double> sugarG = GeneratedColumn<double>(
+    'sugar_g',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _addedSugarGMeta = const VerificationMeta(
+    'addedSugarG',
+  );
+  @override
+  late final GeneratedColumn<double> addedSugarG = GeneratedColumn<double>(
+    'added_sugar_g',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sodiumMgMeta = const VerificationMeta(
+    'sodiumMg',
+  );
+  @override
+  late final GeneratedColumn<double> sodiumMg = GeneratedColumn<double>(
+    'sodium_mg',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _satFatGMeta = const VerificationMeta(
+    'satFatG',
+  );
+  @override
+  late final GeneratedColumn<double> satFatG = GeneratedColumn<double>(
+    'sat_fat_g',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _sourceMeta = const VerificationMeta('source');
   @override
   late final GeneratedColumn<String> source = GeneratedColumn<String>(
@@ -231,6 +282,11 @@ class $MealsTable extends Meals with TableInfo<$MealsTable, MealRow> {
     proteinG,
     fatG,
     carbsG,
+    fiberG,
+    sugarG,
+    addedSugarG,
+    sodiumMg,
+    satFatG,
     source,
     note,
     askId,
@@ -363,6 +419,39 @@ class $MealsTable extends Meals with TableInfo<$MealsTable, MealRow> {
         carbsG.isAcceptableOrUnknown(data['carbs_g']!, _carbsGMeta),
       );
     }
+    if (data.containsKey('fiber_g')) {
+      context.handle(
+        _fiberGMeta,
+        fiberG.isAcceptableOrUnknown(data['fiber_g']!, _fiberGMeta),
+      );
+    }
+    if (data.containsKey('sugar_g')) {
+      context.handle(
+        _sugarGMeta,
+        sugarG.isAcceptableOrUnknown(data['sugar_g']!, _sugarGMeta),
+      );
+    }
+    if (data.containsKey('added_sugar_g')) {
+      context.handle(
+        _addedSugarGMeta,
+        addedSugarG.isAcceptableOrUnknown(
+          data['added_sugar_g']!,
+          _addedSugarGMeta,
+        ),
+      );
+    }
+    if (data.containsKey('sodium_mg')) {
+      context.handle(
+        _sodiumMgMeta,
+        sodiumMg.isAcceptableOrUnknown(data['sodium_mg']!, _sodiumMgMeta),
+      );
+    }
+    if (data.containsKey('sat_fat_g')) {
+      context.handle(
+        _satFatGMeta,
+        satFatG.isAcceptableOrUnknown(data['sat_fat_g']!, _satFatGMeta),
+      );
+    }
     if (data.containsKey('source')) {
       context.handle(
         _sourceMeta,
@@ -458,6 +547,26 @@ class $MealsTable extends Meals with TableInfo<$MealsTable, MealRow> {
         DriftSqlType.double,
         data['${effectivePrefix}carbs_g'],
       )!,
+      fiberG: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}fiber_g'],
+      ),
+      sugarG: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}sugar_g'],
+      ),
+      addedSugarG: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}added_sugar_g'],
+      ),
+      sodiumMg: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}sodium_mg'],
+      ),
+      satFatG: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}sat_fat_g'],
+      ),
       source: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}source'],
@@ -515,6 +624,11 @@ class MealRow extends DataClass implements Insertable<MealRow> {
   final double proteinG;
   final double fatG;
   final double carbsG;
+  final double? fiberG;
+  final double? sugarG;
+  final double? addedSugarG;
+  final double? sodiumMg;
+  final double? satFatG;
 
   /// manual, chat, photo, barcode, copy. Decides whether it cost a token.
   final String source;
@@ -538,6 +652,11 @@ class MealRow extends DataClass implements Insertable<MealRow> {
     required this.proteinG,
     required this.fatG,
     required this.carbsG,
+    this.fiberG,
+    this.sugarG,
+    this.addedSugarG,
+    this.sodiumMg,
+    this.satFatG,
     required this.source,
     this.note,
     this.askId,
@@ -570,6 +689,21 @@ class MealRow extends DataClass implements Insertable<MealRow> {
     map['protein_g'] = Variable<double>(proteinG);
     map['fat_g'] = Variable<double>(fatG);
     map['carbs_g'] = Variable<double>(carbsG);
+    if (!nullToAbsent || fiberG != null) {
+      map['fiber_g'] = Variable<double>(fiberG);
+    }
+    if (!nullToAbsent || sugarG != null) {
+      map['sugar_g'] = Variable<double>(sugarG);
+    }
+    if (!nullToAbsent || addedSugarG != null) {
+      map['added_sugar_g'] = Variable<double>(addedSugarG);
+    }
+    if (!nullToAbsent || sodiumMg != null) {
+      map['sodium_mg'] = Variable<double>(sodiumMg);
+    }
+    if (!nullToAbsent || satFatG != null) {
+      map['sat_fat_g'] = Variable<double>(satFatG);
+    }
     map['source'] = Variable<String>(source);
     if (!nullToAbsent || note != null) {
       map['note'] = Variable<String>(note);
@@ -605,6 +739,21 @@ class MealRow extends DataClass implements Insertable<MealRow> {
       proteinG: Value(proteinG),
       fatG: Value(fatG),
       carbsG: Value(carbsG),
+      fiberG: fiberG == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fiberG),
+      sugarG: sugarG == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sugarG),
+      addedSugarG: addedSugarG == null && nullToAbsent
+          ? const Value.absent()
+          : Value(addedSugarG),
+      sodiumMg: sodiumMg == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sodiumMg),
+      satFatG: satFatG == null && nullToAbsent
+          ? const Value.absent()
+          : Value(satFatG),
       source: Value(source),
       note: note == null && nullToAbsent ? const Value.absent() : Value(note),
       askId: askId == null && nullToAbsent
@@ -636,6 +785,11 @@ class MealRow extends DataClass implements Insertable<MealRow> {
       proteinG: serializer.fromJson<double>(json['proteinG']),
       fatG: serializer.fromJson<double>(json['fatG']),
       carbsG: serializer.fromJson<double>(json['carbsG']),
+      fiberG: serializer.fromJson<double?>(json['fiberG']),
+      sugarG: serializer.fromJson<double?>(json['sugarG']),
+      addedSugarG: serializer.fromJson<double?>(json['addedSugarG']),
+      sodiumMg: serializer.fromJson<double?>(json['sodiumMg']),
+      satFatG: serializer.fromJson<double?>(json['satFatG']),
       source: serializer.fromJson<String>(json['source']),
       note: serializer.fromJson<String?>(json['note']),
       askId: serializer.fromJson<String?>(json['askId']),
@@ -662,6 +816,11 @@ class MealRow extends DataClass implements Insertable<MealRow> {
       'proteinG': serializer.toJson<double>(proteinG),
       'fatG': serializer.toJson<double>(fatG),
       'carbsG': serializer.toJson<double>(carbsG),
+      'fiberG': serializer.toJson<double?>(fiberG),
+      'sugarG': serializer.toJson<double?>(sugarG),
+      'addedSugarG': serializer.toJson<double?>(addedSugarG),
+      'sodiumMg': serializer.toJson<double?>(sodiumMg),
+      'satFatG': serializer.toJson<double?>(satFatG),
       'source': serializer.toJson<String>(source),
       'note': serializer.toJson<String?>(note),
       'askId': serializer.toJson<String?>(askId),
@@ -686,6 +845,11 @@ class MealRow extends DataClass implements Insertable<MealRow> {
     double? proteinG,
     double? fatG,
     double? carbsG,
+    Value<double?> fiberG = const Value.absent(),
+    Value<double?> sugarG = const Value.absent(),
+    Value<double?> addedSugarG = const Value.absent(),
+    Value<double?> sodiumMg = const Value.absent(),
+    Value<double?> satFatG = const Value.absent(),
     String? source,
     Value<String?> note = const Value.absent(),
     Value<String?> askId = const Value.absent(),
@@ -709,6 +873,11 @@ class MealRow extends DataClass implements Insertable<MealRow> {
     proteinG: proteinG ?? this.proteinG,
     fatG: fatG ?? this.fatG,
     carbsG: carbsG ?? this.carbsG,
+    fiberG: fiberG.present ? fiberG.value : this.fiberG,
+    sugarG: sugarG.present ? sugarG.value : this.sugarG,
+    addedSugarG: addedSugarG.present ? addedSugarG.value : this.addedSugarG,
+    sodiumMg: sodiumMg.present ? sodiumMg.value : this.sodiumMg,
+    satFatG: satFatG.present ? satFatG.value : this.satFatG,
     source: source ?? this.source,
     note: note.present ? note.value : this.note,
     askId: askId.present ? askId.value : this.askId,
@@ -736,6 +905,13 @@ class MealRow extends DataClass implements Insertable<MealRow> {
       proteinG: data.proteinG.present ? data.proteinG.value : this.proteinG,
       fatG: data.fatG.present ? data.fatG.value : this.fatG,
       carbsG: data.carbsG.present ? data.carbsG.value : this.carbsG,
+      fiberG: data.fiberG.present ? data.fiberG.value : this.fiberG,
+      sugarG: data.sugarG.present ? data.sugarG.value : this.sugarG,
+      addedSugarG: data.addedSugarG.present
+          ? data.addedSugarG.value
+          : this.addedSugarG,
+      sodiumMg: data.sodiumMg.present ? data.sodiumMg.value : this.sodiumMg,
+      satFatG: data.satFatG.present ? data.satFatG.value : this.satFatG,
       source: data.source.present ? data.source.value : this.source,
       note: data.note.present ? data.note.value : this.note,
       askId: data.askId.present ? data.askId.value : this.askId,
@@ -762,6 +938,11 @@ class MealRow extends DataClass implements Insertable<MealRow> {
           ..write('proteinG: $proteinG, ')
           ..write('fatG: $fatG, ')
           ..write('carbsG: $carbsG, ')
+          ..write('fiberG: $fiberG, ')
+          ..write('sugarG: $sugarG, ')
+          ..write('addedSugarG: $addedSugarG, ')
+          ..write('sodiumMg: $sodiumMg, ')
+          ..write('satFatG: $satFatG, ')
           ..write('source: $source, ')
           ..write('note: $note, ')
           ..write('askId: $askId')
@@ -770,7 +951,7 @@ class MealRow extends DataClass implements Insertable<MealRow> {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     updatedAt,
     deletedAt,
@@ -788,10 +969,15 @@ class MealRow extends DataClass implements Insertable<MealRow> {
     proteinG,
     fatG,
     carbsG,
+    fiberG,
+    sugarG,
+    addedSugarG,
+    sodiumMg,
+    satFatG,
     source,
     note,
     askId,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -813,6 +999,11 @@ class MealRow extends DataClass implements Insertable<MealRow> {
           other.proteinG == this.proteinG &&
           other.fatG == this.fatG &&
           other.carbsG == this.carbsG &&
+          other.fiberG == this.fiberG &&
+          other.sugarG == this.sugarG &&
+          other.addedSugarG == this.addedSugarG &&
+          other.sodiumMg == this.sodiumMg &&
+          other.satFatG == this.satFatG &&
           other.source == this.source &&
           other.note == this.note &&
           other.askId == this.askId);
@@ -836,6 +1027,11 @@ class MealsCompanion extends UpdateCompanion<MealRow> {
   final Value<double> proteinG;
   final Value<double> fatG;
   final Value<double> carbsG;
+  final Value<double?> fiberG;
+  final Value<double?> sugarG;
+  final Value<double?> addedSugarG;
+  final Value<double?> sodiumMg;
+  final Value<double?> satFatG;
   final Value<String> source;
   final Value<String?> note;
   final Value<String?> askId;
@@ -858,6 +1054,11 @@ class MealsCompanion extends UpdateCompanion<MealRow> {
     this.proteinG = const Value.absent(),
     this.fatG = const Value.absent(),
     this.carbsG = const Value.absent(),
+    this.fiberG = const Value.absent(),
+    this.sugarG = const Value.absent(),
+    this.addedSugarG = const Value.absent(),
+    this.sodiumMg = const Value.absent(),
+    this.satFatG = const Value.absent(),
     this.source = const Value.absent(),
     this.note = const Value.absent(),
     this.askId = const Value.absent(),
@@ -881,6 +1082,11 @@ class MealsCompanion extends UpdateCompanion<MealRow> {
     this.proteinG = const Value.absent(),
     this.fatG = const Value.absent(),
     this.carbsG = const Value.absent(),
+    this.fiberG = const Value.absent(),
+    this.sugarG = const Value.absent(),
+    this.addedSugarG = const Value.absent(),
+    this.sodiumMg = const Value.absent(),
+    this.satFatG = const Value.absent(),
     this.source = const Value.absent(),
     this.note = const Value.absent(),
     this.askId = const Value.absent(),
@@ -910,6 +1116,11 @@ class MealsCompanion extends UpdateCompanion<MealRow> {
     Expression<double>? proteinG,
     Expression<double>? fatG,
     Expression<double>? carbsG,
+    Expression<double>? fiberG,
+    Expression<double>? sugarG,
+    Expression<double>? addedSugarG,
+    Expression<double>? sodiumMg,
+    Expression<double>? satFatG,
     Expression<String>? source,
     Expression<String>? note,
     Expression<String>? askId,
@@ -933,6 +1144,11 @@ class MealsCompanion extends UpdateCompanion<MealRow> {
       if (proteinG != null) 'protein_g': proteinG,
       if (fatG != null) 'fat_g': fatG,
       if (carbsG != null) 'carbs_g': carbsG,
+      if (fiberG != null) 'fiber_g': fiberG,
+      if (sugarG != null) 'sugar_g': sugarG,
+      if (addedSugarG != null) 'added_sugar_g': addedSugarG,
+      if (sodiumMg != null) 'sodium_mg': sodiumMg,
+      if (satFatG != null) 'sat_fat_g': satFatG,
       if (source != null) 'source': source,
       if (note != null) 'note': note,
       if (askId != null) 'ask_id': askId,
@@ -958,6 +1174,11 @@ class MealsCompanion extends UpdateCompanion<MealRow> {
     Value<double>? proteinG,
     Value<double>? fatG,
     Value<double>? carbsG,
+    Value<double?>? fiberG,
+    Value<double?>? sugarG,
+    Value<double?>? addedSugarG,
+    Value<double?>? sodiumMg,
+    Value<double?>? satFatG,
     Value<String>? source,
     Value<String?>? note,
     Value<String?>? askId,
@@ -981,6 +1202,11 @@ class MealsCompanion extends UpdateCompanion<MealRow> {
       proteinG: proteinG ?? this.proteinG,
       fatG: fatG ?? this.fatG,
       carbsG: carbsG ?? this.carbsG,
+      fiberG: fiberG ?? this.fiberG,
+      sugarG: sugarG ?? this.sugarG,
+      addedSugarG: addedSugarG ?? this.addedSugarG,
+      sodiumMg: sodiumMg ?? this.sodiumMg,
+      satFatG: satFatG ?? this.satFatG,
       source: source ?? this.source,
       note: note ?? this.note,
       askId: askId ?? this.askId,
@@ -1042,6 +1268,21 @@ class MealsCompanion extends UpdateCompanion<MealRow> {
     if (carbsG.present) {
       map['carbs_g'] = Variable<double>(carbsG.value);
     }
+    if (fiberG.present) {
+      map['fiber_g'] = Variable<double>(fiberG.value);
+    }
+    if (sugarG.present) {
+      map['sugar_g'] = Variable<double>(sugarG.value);
+    }
+    if (addedSugarG.present) {
+      map['added_sugar_g'] = Variable<double>(addedSugarG.value);
+    }
+    if (sodiumMg.present) {
+      map['sodium_mg'] = Variable<double>(sodiumMg.value);
+    }
+    if (satFatG.present) {
+      map['sat_fat_g'] = Variable<double>(satFatG.value);
+    }
     if (source.present) {
       map['source'] = Variable<String>(source.value);
     }
@@ -1077,6 +1318,11 @@ class MealsCompanion extends UpdateCompanion<MealRow> {
           ..write('proteinG: $proteinG, ')
           ..write('fatG: $fatG, ')
           ..write('carbsG: $carbsG, ')
+          ..write('fiberG: $fiberG, ')
+          ..write('sugarG: $sugarG, ')
+          ..write('addedSugarG: $addedSugarG, ')
+          ..write('sodiumMg: $sodiumMg, ')
+          ..write('satFatG: $satFatG, ')
           ..write('source: $source, ')
           ..write('note: $note, ')
           ..write('askId: $askId, ')
@@ -5346,6 +5592,26 @@ class $ProfileTable extends Profile with TableInfo<$ProfileTable, ProfileData> {
     requiredDuringInsert: false,
     defaultValue: const Constant('{}'),
   );
+  static const VerificationMeta _saltHandMeta = const VerificationMeta(
+    'saltHand',
+  );
+  @override
+  late final GeneratedColumn<String> saltHand = GeneratedColumn<String>(
+    'salt_hand',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _nutriMeta = const VerificationMeta('nutri');
+  @override
+  late final GeneratedColumn<String> nutri = GeneratedColumn<String>(
+    'nutri',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _addressAsMeta = const VerificationMeta(
     'addressAs',
   );
@@ -5414,6 +5680,8 @@ class $ProfileTable extends Profile with TableInfo<$ProfileTable, ProfileData> {
     theme,
     lang,
     units,
+    saltHand,
+    nutri,
     addressAs,
     memory,
     reminders,
@@ -5561,6 +5829,18 @@ class $ProfileTable extends Profile with TableInfo<$ProfileTable, ProfileData> {
         units.isAcceptableOrUnknown(data['units']!, _unitsMeta),
       );
     }
+    if (data.containsKey('salt_hand')) {
+      context.handle(
+        _saltHandMeta,
+        saltHand.isAcceptableOrUnknown(data['salt_hand']!, _saltHandMeta),
+      );
+    }
+    if (data.containsKey('nutri')) {
+      context.handle(
+        _nutriMeta,
+        nutri.isAcceptableOrUnknown(data['nutri']!, _nutriMeta),
+      );
+    }
     if (data.containsKey('address_as')) {
       context.handle(
         _addressAsMeta,
@@ -5678,6 +5958,14 @@ class $ProfileTable extends Profile with TableInfo<$ProfileTable, ProfileData> {
         DriftSqlType.string,
         data['${effectivePrefix}units'],
       )!,
+      saltHand: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}salt_hand'],
+      ),
+      nutri: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}nutri'],
+      ),
       addressAs: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}address_as'],
@@ -5736,6 +6024,8 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
   final String theme;
   final String lang;
   final String units;
+  final String? saltHand;
+  final String? nutri;
 
   /// Як звертатись до людини. Порожньо, поки вона не сказала.
   final String? addressAs;
@@ -5764,6 +6054,8 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
     required this.theme,
     required this.lang,
     required this.units,
+    this.saltHand,
+    this.nutri,
     this.addressAs,
     required this.memory,
     required this.reminders,
@@ -5813,6 +6105,12 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
     map['theme'] = Variable<String>(theme);
     map['lang'] = Variable<String>(lang);
     map['units'] = Variable<String>(units);
+    if (!nullToAbsent || saltHand != null) {
+      map['salt_hand'] = Variable<String>(saltHand);
+    }
+    if (!nullToAbsent || nutri != null) {
+      map['nutri'] = Variable<String>(nutri);
+    }
     if (!nullToAbsent || addressAs != null) {
       map['address_as'] = Variable<String>(addressAs);
     }
@@ -5861,6 +6159,12 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
       theme: Value(theme),
       lang: Value(lang),
       units: Value(units),
+      saltHand: saltHand == null && nullToAbsent
+          ? const Value.absent()
+          : Value(saltHand),
+      nutri: nutri == null && nullToAbsent
+          ? const Value.absent()
+          : Value(nutri),
       addressAs: addressAs == null && nullToAbsent
           ? const Value.absent()
           : Value(addressAs),
@@ -5897,6 +6201,8 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
       theme: serializer.fromJson<String>(json['theme']),
       lang: serializer.fromJson<String>(json['lang']),
       units: serializer.fromJson<String>(json['units']),
+      saltHand: serializer.fromJson<String?>(json['saltHand']),
+      nutri: serializer.fromJson<String?>(json['nutri']),
       addressAs: serializer.fromJson<String?>(json['addressAs']),
       memory: serializer.fromJson<String>(json['memory']),
       reminders: serializer.fromJson<String>(json['reminders']),
@@ -5928,6 +6234,8 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
       'theme': serializer.toJson<String>(theme),
       'lang': serializer.toJson<String>(lang),
       'units': serializer.toJson<String>(units),
+      'saltHand': serializer.toJson<String?>(saltHand),
+      'nutri': serializer.toJson<String?>(nutri),
       'addressAs': serializer.toJson<String?>(addressAs),
       'memory': serializer.toJson<String>(memory),
       'reminders': serializer.toJson<String>(reminders),
@@ -5957,6 +6265,8 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
     String? theme,
     String? lang,
     String? units,
+    Value<String?> saltHand = const Value.absent(),
+    Value<String?> nutri = const Value.absent(),
     Value<String?> addressAs = const Value.absent(),
     String? memory,
     String? reminders,
@@ -5983,6 +6293,8 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
     theme: theme ?? this.theme,
     lang: lang ?? this.lang,
     units: units ?? this.units,
+    saltHand: saltHand.present ? saltHand.value : this.saltHand,
+    nutri: nutri.present ? nutri.value : this.nutri,
     addressAs: addressAs.present ? addressAs.value : this.addressAs,
     memory: memory ?? this.memory,
     reminders: reminders ?? this.reminders,
@@ -6015,6 +6327,8 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
       theme: data.theme.present ? data.theme.value : this.theme,
       lang: data.lang.present ? data.lang.value : this.lang,
       units: data.units.present ? data.units.value : this.units,
+      saltHand: data.saltHand.present ? data.saltHand.value : this.saltHand,
+      nutri: data.nutri.present ? data.nutri.value : this.nutri,
       addressAs: data.addressAs.present ? data.addressAs.value : this.addressAs,
       memory: data.memory.present ? data.memory.value : this.memory,
       reminders: data.reminders.present ? data.reminders.value : this.reminders,
@@ -6046,6 +6360,8 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
           ..write('theme: $theme, ')
           ..write('lang: $lang, ')
           ..write('units: $units, ')
+          ..write('saltHand: $saltHand, ')
+          ..write('nutri: $nutri, ')
           ..write('addressAs: $addressAs, ')
           ..write('memory: $memory, ')
           ..write('reminders: $reminders, ')
@@ -6077,6 +6393,8 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
     theme,
     lang,
     units,
+    saltHand,
+    nutri,
     addressAs,
     memory,
     reminders,
@@ -6107,6 +6425,8 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
           other.theme == this.theme &&
           other.lang == this.lang &&
           other.units == this.units &&
+          other.saltHand == this.saltHand &&
+          other.nutri == this.nutri &&
           other.addressAs == this.addressAs &&
           other.memory == this.memory &&
           other.reminders == this.reminders &&
@@ -6135,6 +6455,8 @@ class ProfileCompanion extends UpdateCompanion<ProfileData> {
   final Value<String> theme;
   final Value<String> lang;
   final Value<String> units;
+  final Value<String?> saltHand;
+  final Value<String?> nutri;
   final Value<String?> addressAs;
   final Value<String> memory;
   final Value<String> reminders;
@@ -6162,6 +6484,8 @@ class ProfileCompanion extends UpdateCompanion<ProfileData> {
     this.theme = const Value.absent(),
     this.lang = const Value.absent(),
     this.units = const Value.absent(),
+    this.saltHand = const Value.absent(),
+    this.nutri = const Value.absent(),
     this.addressAs = const Value.absent(),
     this.memory = const Value.absent(),
     this.reminders = const Value.absent(),
@@ -6190,6 +6514,8 @@ class ProfileCompanion extends UpdateCompanion<ProfileData> {
     this.theme = const Value.absent(),
     this.lang = const Value.absent(),
     this.units = const Value.absent(),
+    this.saltHand = const Value.absent(),
+    this.nutri = const Value.absent(),
     this.addressAs = const Value.absent(),
     this.memory = const Value.absent(),
     this.reminders = const Value.absent(),
@@ -6219,6 +6545,8 @@ class ProfileCompanion extends UpdateCompanion<ProfileData> {
     Expression<String>? theme,
     Expression<String>? lang,
     Expression<String>? units,
+    Expression<String>? saltHand,
+    Expression<String>? nutri,
     Expression<String>? addressAs,
     Expression<String>? memory,
     Expression<String>? reminders,
@@ -6247,6 +6575,8 @@ class ProfileCompanion extends UpdateCompanion<ProfileData> {
       if (theme != null) 'theme': theme,
       if (lang != null) 'lang': lang,
       if (units != null) 'units': units,
+      if (saltHand != null) 'salt_hand': saltHand,
+      if (nutri != null) 'nutri': nutri,
       if (addressAs != null) 'address_as': addressAs,
       if (memory != null) 'memory': memory,
       if (reminders != null) 'reminders': reminders,
@@ -6277,6 +6607,8 @@ class ProfileCompanion extends UpdateCompanion<ProfileData> {
     Value<String>? theme,
     Value<String>? lang,
     Value<String>? units,
+    Value<String?>? saltHand,
+    Value<String?>? nutri,
     Value<String?>? addressAs,
     Value<String>? memory,
     Value<String>? reminders,
@@ -6305,6 +6637,8 @@ class ProfileCompanion extends UpdateCompanion<ProfileData> {
       theme: theme ?? this.theme,
       lang: lang ?? this.lang,
       units: units ?? this.units,
+      saltHand: saltHand ?? this.saltHand,
+      nutri: nutri ?? this.nutri,
       addressAs: addressAs ?? this.addressAs,
       memory: memory ?? this.memory,
       reminders: reminders ?? this.reminders,
@@ -6379,6 +6713,12 @@ class ProfileCompanion extends UpdateCompanion<ProfileData> {
     if (units.present) {
       map['units'] = Variable<String>(units.value);
     }
+    if (saltHand.present) {
+      map['salt_hand'] = Variable<String>(saltHand.value);
+    }
+    if (nutri.present) {
+      map['nutri'] = Variable<String>(nutri.value);
+    }
     if (addressAs.present) {
       map['address_as'] = Variable<String>(addressAs.value);
     }
@@ -6421,6 +6761,8 @@ class ProfileCompanion extends UpdateCompanion<ProfileData> {
           ..write('theme: $theme, ')
           ..write('lang: $lang, ')
           ..write('units: $units, ')
+          ..write('saltHand: $saltHand, ')
+          ..write('nutri: $nutri, ')
           ..write('addressAs: $addressAs, ')
           ..write('memory: $memory, ')
           ..write('reminders: $reminders, ')
@@ -8242,6 +8584,11 @@ typedef $$MealsTableCreateCompanionBuilder =
       Value<double> proteinG,
       Value<double> fatG,
       Value<double> carbsG,
+      Value<double?> fiberG,
+      Value<double?> sugarG,
+      Value<double?> addedSugarG,
+      Value<double?> sodiumMg,
+      Value<double?> satFatG,
       Value<String> source,
       Value<String?> note,
       Value<String?> askId,
@@ -8266,6 +8613,11 @@ typedef $$MealsTableUpdateCompanionBuilder =
       Value<double> proteinG,
       Value<double> fatG,
       Value<double> carbsG,
+      Value<double?> fiberG,
+      Value<double?> sugarG,
+      Value<double?> addedSugarG,
+      Value<double?> sodiumMg,
+      Value<double?> satFatG,
       Value<String> source,
       Value<String?> note,
       Value<String?> askId,
@@ -8362,6 +8714,31 @@ class $$MealsTableFilterComposer extends Composer<_$CalviDb, $MealsTable> {
 
   ColumnFilters<double> get carbsG => $composableBuilder(
     column: $table.carbsG,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get fiberG => $composableBuilder(
+    column: $table.fiberG,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get sugarG => $composableBuilder(
+    column: $table.sugarG,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get addedSugarG => $composableBuilder(
+    column: $table.addedSugarG,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get sodiumMg => $composableBuilder(
+    column: $table.sodiumMg,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get satFatG => $composableBuilder(
+    column: $table.satFatG,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -8474,6 +8851,31 @@ class $$MealsTableOrderingComposer extends Composer<_$CalviDb, $MealsTable> {
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get fiberG => $composableBuilder(
+    column: $table.fiberG,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get sugarG => $composableBuilder(
+    column: $table.sugarG,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get addedSugarG => $composableBuilder(
+    column: $table.addedSugarG,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get sodiumMg => $composableBuilder(
+    column: $table.sodiumMg,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get satFatG => $composableBuilder(
+    column: $table.satFatG,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get source => $composableBuilder(
     column: $table.source,
     builder: (column) => ColumnOrderings(column),
@@ -8553,6 +8955,23 @@ class $$MealsTableAnnotationComposer extends Composer<_$CalviDb, $MealsTable> {
   GeneratedColumn<double> get carbsG =>
       $composableBuilder(column: $table.carbsG, builder: (column) => column);
 
+  GeneratedColumn<double> get fiberG =>
+      $composableBuilder(column: $table.fiberG, builder: (column) => column);
+
+  GeneratedColumn<double> get sugarG =>
+      $composableBuilder(column: $table.sugarG, builder: (column) => column);
+
+  GeneratedColumn<double> get addedSugarG => $composableBuilder(
+    column: $table.addedSugarG,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get sodiumMg =>
+      $composableBuilder(column: $table.sodiumMg, builder: (column) => column);
+
+  GeneratedColumn<double> get satFatG =>
+      $composableBuilder(column: $table.satFatG, builder: (column) => column);
+
   GeneratedColumn<String> get source =>
       $composableBuilder(column: $table.source, builder: (column) => column);
 
@@ -8608,6 +9027,11 @@ class $$MealsTableTableManager
                 Value<double> proteinG = const Value.absent(),
                 Value<double> fatG = const Value.absent(),
                 Value<double> carbsG = const Value.absent(),
+                Value<double?> fiberG = const Value.absent(),
+                Value<double?> sugarG = const Value.absent(),
+                Value<double?> addedSugarG = const Value.absent(),
+                Value<double?> sodiumMg = const Value.absent(),
+                Value<double?> satFatG = const Value.absent(),
                 Value<String> source = const Value.absent(),
                 Value<String?> note = const Value.absent(),
                 Value<String?> askId = const Value.absent(),
@@ -8630,6 +9054,11 @@ class $$MealsTableTableManager
                 proteinG: proteinG,
                 fatG: fatG,
                 carbsG: carbsG,
+                fiberG: fiberG,
+                sugarG: sugarG,
+                addedSugarG: addedSugarG,
+                sodiumMg: sodiumMg,
+                satFatG: satFatG,
                 source: source,
                 note: note,
                 askId: askId,
@@ -8654,6 +9083,11 @@ class $$MealsTableTableManager
                 Value<double> proteinG = const Value.absent(),
                 Value<double> fatG = const Value.absent(),
                 Value<double> carbsG = const Value.absent(),
+                Value<double?> fiberG = const Value.absent(),
+                Value<double?> sugarG = const Value.absent(),
+                Value<double?> addedSugarG = const Value.absent(),
+                Value<double?> sodiumMg = const Value.absent(),
+                Value<double?> satFatG = const Value.absent(),
                 Value<String> source = const Value.absent(),
                 Value<String?> note = const Value.absent(),
                 Value<String?> askId = const Value.absent(),
@@ -8676,6 +9110,11 @@ class $$MealsTableTableManager
                 proteinG: proteinG,
                 fatG: fatG,
                 carbsG: carbsG,
+                fiberG: fiberG,
+                sugarG: sugarG,
+                addedSugarG: addedSugarG,
+                sodiumMg: sodiumMg,
+                satFatG: satFatG,
                 source: source,
                 note: note,
                 askId: askId,
@@ -10690,6 +11129,8 @@ typedef $$ProfileTableCreateCompanionBuilder =
       Value<String> theme,
       Value<String> lang,
       Value<String> units,
+      Value<String?> saltHand,
+      Value<String?> nutri,
       Value<String?> addressAs,
       Value<String> memory,
       Value<String> reminders,
@@ -10719,6 +11160,8 @@ typedef $$ProfileTableUpdateCompanionBuilder =
       Value<String> theme,
       Value<String> lang,
       Value<String> units,
+      Value<String?> saltHand,
+      Value<String?> nutri,
       Value<String?> addressAs,
       Value<String> memory,
       Value<String> reminders,
@@ -10836,6 +11279,16 @@ class $$ProfileTableFilterComposer extends Composer<_$CalviDb, $ProfileTable> {
 
   ColumnFilters<String> get units => $composableBuilder(
     column: $table.units,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get saltHand => $composableBuilder(
+    column: $table.saltHand,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nutri => $composableBuilder(
+    column: $table.nutri,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -10974,6 +11427,16 @@ class $$ProfileTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get saltHand => $composableBuilder(
+    column: $table.saltHand,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nutri => $composableBuilder(
+    column: $table.nutri,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get addressAs => $composableBuilder(
     column: $table.addressAs,
     builder: (column) => ColumnOrderings(column),
@@ -11071,6 +11534,12 @@ class $$ProfileTableAnnotationComposer
   GeneratedColumn<String> get units =>
       $composableBuilder(column: $table.units, builder: (column) => column);
 
+  GeneratedColumn<String> get saltHand =>
+      $composableBuilder(column: $table.saltHand, builder: (column) => column);
+
+  GeneratedColumn<String> get nutri =>
+      $composableBuilder(column: $table.nutri, builder: (column) => column);
+
   GeneratedColumn<String> get addressAs =>
       $composableBuilder(column: $table.addressAs, builder: (column) => column);
 
@@ -11133,6 +11602,8 @@ class $$ProfileTableTableManager
                 Value<String> theme = const Value.absent(),
                 Value<String> lang = const Value.absent(),
                 Value<String> units = const Value.absent(),
+                Value<String?> saltHand = const Value.absent(),
+                Value<String?> nutri = const Value.absent(),
                 Value<String?> addressAs = const Value.absent(),
                 Value<String> memory = const Value.absent(),
                 Value<String> reminders = const Value.absent(),
@@ -11160,6 +11631,8 @@ class $$ProfileTableTableManager
                 theme: theme,
                 lang: lang,
                 units: units,
+                saltHand: saltHand,
+                nutri: nutri,
                 addressAs: addressAs,
                 memory: memory,
                 reminders: reminders,
@@ -11189,6 +11662,8 @@ class $$ProfileTableTableManager
                 Value<String> theme = const Value.absent(),
                 Value<String> lang = const Value.absent(),
                 Value<String> units = const Value.absent(),
+                Value<String?> saltHand = const Value.absent(),
+                Value<String?> nutri = const Value.absent(),
                 Value<String?> addressAs = const Value.absent(),
                 Value<String> memory = const Value.absent(),
                 Value<String> reminders = const Value.absent(),
@@ -11216,6 +11691,8 @@ class $$ProfileTableTableManager
                 theme: theme,
                 lang: lang,
                 units: units,
+                saltHand: saltHand,
+                nutri: nutri,
                 addressAs: addressAs,
                 memory: memory,
                 reminders: reminders,

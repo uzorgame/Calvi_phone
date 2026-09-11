@@ -342,5 +342,21 @@
   "eraseFailed": "Could not erase: {why}",
   "@eraseFailed": {"placeholders":{"why":{"type":"String"}}},
   "eraseNoNet": "no network. Turn on the internet and try again",
-  "eraseSlow": "the server is taking too long. Try again in a minute"
+  "eraseSlow": "the server is taking too long. Try again in a minute",
+
+  "setCustom": "Personalisation",
+  "setCustomNote": "What the day screen shows and how we count salt",
+  "setNutriTitle": "Nutrients",
+  "setNutriNote": "Fibre, sugar, sodium and saturated fat under the macros",
+  "setNutriOff": "Do not show",
+  "setNutriOffHint": "Only protein, fat and carbs, as before",
+  "setNutriSmall": "A row",
+  "setNutriSmallHint": "A quiet line under the cards: mark, number, colour at the limit",
+  "setNutriLarge": "Cards",
+  "setNutriLargeHint": "Five columns with rings and labels, like the macros",
+  "setSaltTitle": "How you salt",
+  "setSaltNote": "A correction to the salt we assume in home cooking",
+  "setSaltLess": "Less than usual",
+  "setSaltUsual": "The usual way",
+  "setSaltMore": "More than usual"
 }

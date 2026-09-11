@@ -33,6 +33,25 @@ class Meals extends Table with Synced {
   RealColumn get fatG => real().withDefault(const Constant(0))();
   RealColumn get carbsG => real().withDefault(const Constant(0))();
 
+  /* Другий рівень нутрієнтів: клітковина, цукор, доданий цукор, натрій,
+     насичені жири.
+   *
+   * Усі пʼять **необовʼязкові**, і це не недбалість. Три макроси приходять
+   * майже завжди, а ці пʼять приходять нерівно: сервер рахує їх тільки для
+   * страв, які встиг оцінити, а довідник наповнюється роками. Порожньо означає
+   * «ще не знаємо», нуль означає «цього тут немає», і в мʼясі справді немає
+   * клітковини. Записати друге замість першого означає збрехати людині, яка
+   * стежить за цукром.
+   *
+   * Натрій у міліграмах, решта в грамах: так друкують на пачках, так віддають
+   * відкриті бази і так лежить на сервері. Сіль окремо не тримаємо, вона це
+   * той самий натрій, помножений на 2.5. */
+  RealColumn get fiberG => real().nullable()();
+  RealColumn get sugarG => real().nullable()();
+  RealColumn get addedSugarG => real().nullable()();
+  RealColumn get sodiumMg => real().nullable()();
+  RealColumn get satFatG => real().nullable()();
+
   /// manual, chat, photo, barcode, copy. Decides whether it cost a token.
   TextColumn get source => text().withDefault(const Constant('manual'))();
   TextColumn get note => text().nullable()();

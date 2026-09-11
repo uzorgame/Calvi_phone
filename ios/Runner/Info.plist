@@ -26,6 +26,10 @@
 		<string>pt</string>
 		<string>pl</string>
 	</array>
+	<!-- Живі активності: острівець і банер на замкненому екрані. Без цього
+	     ключа ActivityKit відмовляє на першому ж запиті, і мовчки. -->
+	<key>NSSupportsLiveActivities</key>
+	<true/>
 	<key>CFBundleDisplayName</key>
 	<string>Calvi</string>
 	<key>CFBundleExecutable</key>

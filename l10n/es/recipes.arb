@@ -21,7 +21,6 @@
   "rcHeroA": "Qué cocinar",
   "rcHeroB": "hoy",
   "rcHeroLede": "Di qué tienes en casa. Nora propone y calcula la ración; tu propia receta también vale.",
-  "rcAsk": "Pídele una receta a Nora",
   "rcTabAll": "Todas",
   "rcTabNora": "De Nora",
   "rcTabMine": "Mías",
@@ -59,14 +58,20 @@
   "rcWhole": "Plato entero: {kcal}, {g}",
   "@rcWhole": {
     "placeholders": {
-      "kcal": { "type": "String" },
-      "g": { "type": "String" }
+      "kcal": {
+        "type": "String"
+      },
+      "g": {
+        "type": "String"
+      }
     }
   },
   "rcPortion": "ración {g}",
   "@rcPortion": {
     "placeholders": {
-      "g": { "type": "String" }
+      "g": {
+        "type": "String"
+      }
     }
   },
   "rcOfDay": "eso es el {p}% de la norma diaria",
@@ -81,19 +86,15 @@
   "rcItemsTotal": "en total {g}",
   "@rcItemsTotal": {
     "placeholders": {
-      "g": { "type": "String" }
+      "g": {
+        "type": "String"
+      }
     }
   },
   "rcToolsHead": "Qué hace falta en la cocina",
   "rcNoTools": "Nada más que un cuchillo y un bol",
   "rcStepsHead": "Cómo cocinarlo",
-  "rcAskAbout": "Pregúntale a Nora por esta receta",
-  "rcAsking": "Pensando…",
-  "rcAskTitle": "¿Qué hay en la cocina?",
-  "rcPickTitle": "Elige un plato",
   "rcAskPlaceholder": "pollo, brócoli, arroz",
-  "rcAskGo": "Preguntar",
-  "rcAskCancel": "Cancelar",
   "rcJustNow": "ahora mismo",
   "rcToolOven": "Horno",
   "rcToolPan": "Sartén",
@@ -109,14 +110,38 @@
       }
     }
   },
-  "rcChatPlaceholder": "Pregunta sobre esta receta",
   "rcLoadFailed": "El recetario no se cargó. Tira para reintentar.",
   "rcSuggestFailed": "Nora no pudo componer recetas. Inténtalo otra vez.",
   "rcDeleteTitle": "¿Eliminar esta receta?",
   "rcDeleteBody": "«{name}» saldrá del recetario. Los registros del diario hechos desde ella se quedan.",
-  "@rcDeleteBody": { "placeholders": { "name": { "type": "String" } } },
+  "@rcDeleteBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "rcDeleteCta": "Eliminar",
   "rcDeleteFailed": "No se pudo eliminar. Inténtalo otra vez.",
   "rcAllergyWarn": "Contiene {names}, que está en tu lista de alergias. Ten cuidado con esta.",
-  "@rcAllergyWarn": { "placeholders": { "names": { "type": "String" } } }
+  "@rcAllergyWarn": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "rcHelps": "Nora te ayuda a crear una receta",
+  "rcChatHello": "Dime qué hay en la cocina y te armo una receta.",
+  "rcChatHint": "«pollo, brócoli, arroz»: te propongo varios platos y calculo la ración",
+  "rcChatHintMince": "¿Qué hago con carne picada?",
+  "rcChatHintDinner": "Una cena de 500 kcal",
+  "rcChatHintEggs": "Desayuno rápido con huevos",
+  "rcChatHintOnly": "Solo queda queso y pasta",
+  "rcChatPicks": "Esto se puede cocinar con eso. Elige un plato y la receta va al libro.",
+  "rcDishHint": "«¿con qué cambio el arroz?», «¿cómo no secar el filete?», «¿puedo dejarlo hecho?»",
+  "rcDishHintSwap": "¿Con qué cambio el arroz?",
+  "rcDishHintDry": "¿Cómo no secar el filete?",
+  "rcDishHintAhead": "¿Puedo dejarlo hecho antes?",
+  "rcDishHintKeeps": "¿Cuánto aguanta?"
 }

@@ -54,6 +54,10 @@ workflows:
           # скрипт викликається вдруге, коли він порахований.
           export CALVI_BUILD=1
           ruby ios/watch_target.rb
+          # Жива активність: розширення острівця. Та сама причина робити це
+          # скриптом, і той самий порядок, до сертифікатів: профіль треба
+          # замовляти на ціль, яка вже існує.
+          ruby ios/live_target.rb
 
       - name: Дістати сертифікати Apple
         script: |
@@ -170,6 +174,7 @@ workflows:
           export CALVI_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: *//' | cut -d+ -f1)
           export CALVI_BUILD=$((BUILD + 1))
           ruby ios/watch_target.rb
+          ruby ios/live_target.rb
 
       - name: Схема Google для входу
         script: |

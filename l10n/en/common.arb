@@ -125,5 +125,7 @@
     "description": "Tail of a list that does not fit on one line: 'Magnesium, Omega-3, +2'.",
     "placeholders": {"n": {"type": "int"}}
   },
-  "menuHintFree": "free"
+  "menuHintFree": "free",
+
+  "actionGotIt": "Got it"
 }

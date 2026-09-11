@@ -210,6 +210,9 @@ class _Spy implements NotificationSink {
   var cancels = 0;
 
   @override
+  Future<void> askExactAlarms() async {}
+
+  @override
   set onTap(void Function(String from)? handler) {}
 
   @override

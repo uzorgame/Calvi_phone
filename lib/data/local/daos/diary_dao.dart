@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../nutrients.dart';
 import '../database.dart';
 import '../tables/meals.dart';
 import '../tables/measurements.dart';
@@ -66,6 +67,7 @@ class DiaryDao extends DatabaseAccessor<CalviDb> with _$DiaryDaoMixin {
     String source = 'manual',
     String? canonicalName,
     String? note,
+    Nutrients nutrients = Nutrients.none,
   }) async {
     final when = at ?? DateTime.now();
     final id = _uuid.v4();
@@ -84,6 +86,11 @@ class DiaryDao extends DatabaseAccessor<CalviDb> with _$DiaryDaoMixin {
         proteinG: Value(protein),
         fatG: Value(fat),
         carbsG: Value(carbs),
+        fiberG: _keep(nutrients, nutrients.fiber),
+        sugarG: _keep(nutrients, nutrients.sugar),
+        addedSugarG: _keep(nutrients, nutrients.added),
+        sodiumMg: _keep(nutrients, nutrients.sodiumMg),
+        satFatG: _keep(nutrients, nutrients.sat),
         icon: Value(icon),
         source: Value(source),
         canonicalName: Value(canonicalName),
@@ -118,6 +125,7 @@ class DiaryDao extends DatabaseAccessor<CalviDb> with _$DiaryDaoMixin {
     double protein = 0,
     double fat = 0,
     double carbs = 0,
+    Nutrients nutrients = Nutrients.none,
   }) => (update(meals)..where((m) => m.id.equals(id))).write(
     MealsCompanion(
       name: Value(name),
@@ -126,10 +134,25 @@ class DiaryDao extends DatabaseAccessor<CalviDb> with _$DiaryDaoMixin {
       proteinG: Value(protein),
       fatG: Value(fat),
       carbsG: Value(carbs),
+      fiberG: _keep(nutrients, nutrients.fiber),
+      sugarG: _keep(nutrients, nutrients.sugar),
+      addedSugarG: _keep(nutrients, nutrients.added),
+      sodiumMg: _keep(nutrients, nutrients.sodiumMg),
+      satFatG: _keep(nutrients, nutrients.sat),
       updatedAt: Value(DateTime.now()),
       dirty: const Value(false),
     ),
   );
+
+  /* Другий рівень або переписується цілим, або не чіпається взагалі.
+   *
+   * Порожня пʼятірка означає «сервер про це нічого не сказав»: або гілка
+   * вимкнена, або відповідає ще стара версія. Записати таку порожнечу поверх
+   * відомих чисел означало б стерти їх на рівному місці. А коли сказано хоч
+   * щось, іде вся пʼятірка разом із порожніми полями: вони перераховані під
+   * нову вагу, і лишати серед них старе число не можна. */
+  static Value<double?> _keep(Nutrients n, double? v) =>
+      n.knownAny ? Value(v) : const Value.absent();
 
   /* Перенесений запис: міняється місце, а не зміст.
    *
@@ -163,6 +186,7 @@ class DiaryDao extends DatabaseAccessor<CalviDb> with _$DiaryDaoMixin {
     double fat = 0,
     double carbs = 0,
     String icon = 'plate',
+    Nutrients nutrients = Nutrients.none,
   }) => into(meals).insertOnConflictUpdate(
     MealsCompanion.insert(
       id: id,
@@ -178,6 +202,11 @@ class DiaryDao extends DatabaseAccessor<CalviDb> with _$DiaryDaoMixin {
       proteinG: Value(protein),
       fatG: Value(fat),
       carbsG: Value(carbs),
+      fiberG: _keep(nutrients, nutrients.fiber),
+      sugarG: _keep(nutrients, nutrients.sugar),
+      addedSugarG: _keep(nutrients, nutrients.added),
+      sodiumMg: _keep(nutrients, nutrients.sodiumMg),
+      satFatG: _keep(nutrients, nutrients.sat),
       icon: Value(icon),
       source: const Value('chat'),
     ),
@@ -199,6 +228,7 @@ class DiaryDao extends DatabaseAccessor<CalviDb> with _$DiaryDaoMixin {
     required String icon,
     required String canonicalName,
     double? grams,
+    Nutrients nutrients = Nutrients.none,
   }) async {
     await (update(meals)..where((m) => m.id.equals(id) & m.deletedAt.isNull())).write(
       MealsCompanion(
@@ -206,6 +236,11 @@ class DiaryDao extends DatabaseAccessor<CalviDb> with _$DiaryDaoMixin {
         proteinG: Value(protein),
         fatG: Value(fat),
         carbsG: Value(carbs),
+        fiberG: _keep(nutrients, nutrients.fiber),
+        sugarG: _keep(nutrients, nutrients.sugar),
+        addedSugarG: _keep(nutrients, nutrients.added),
+        sodiumMg: _keep(nutrients, nutrients.sodiumMg),
+        satFatG: _keep(nutrients, nutrients.sat),
         icon: Value(icon),
         canonicalName: Value(canonicalName),
         grams: Value(grams),
@@ -228,6 +263,7 @@ class DiaryDao extends DatabaseAccessor<CalviDb> with _$DiaryDaoMixin {
     required double protein,
     required double fat,
     required double carbs,
+    Nutrients nutrients = Nutrients.none,
   }) async {
     await (update(meals)..where((m) => m.id.equals(id) & m.deletedAt.isNull())).write(
       MealsCompanion(
@@ -236,6 +272,14 @@ class DiaryDao extends DatabaseAccessor<CalviDb> with _$DiaryDaoMixin {
         proteinG: Value(protein),
         fatG: Value(fat),
         carbsG: Value(carbs),
+        /* Другий рівень їде за вагою разом з усім іншим. Без цього в рядку
+           лишались калорії від нової ваги і клітковина від попередньої, і
+           виправлення «ні, двісті грамів» тихо ламало підсумок дня. */
+        fiberG: _keep(nutrients, nutrients.fiber),
+        sugarG: _keep(nutrients, nutrients.sugar),
+        addedSugarG: _keep(nutrients, nutrients.added),
+        sodiumMg: _keep(nutrients, nutrients.sodiumMg),
+        satFatG: _keep(nutrients, nutrients.sat),
         updatedAt: Value(DateTime.now()),
         dirty: const Value(true),
       ),

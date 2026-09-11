@@ -477,6 +477,9 @@ class _CalviSliderState extends State<CalviSlider> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                /* Позначка, під якою зараз повзунок, чорнилом, а не акцентом.
+                   Теплий акцент був єдиною плямою кольору на екрані і тягнув
+                   око на підпис замість числа, заради якого екран відкрили. */
                 for (final (i, m) in widget.marks.indexed)
                   // Flexible, so a wider font shortens the words rather than
                   // running them off the end of the track.
@@ -487,7 +490,7 @@ class _CalviSliderState extends State<CalviSlider> {
                       overflow: TextOverflow.ellipsis,
                       style: context.t.labelSmall?.copyWith(
                         fontWeight: i == lit ? FontWeight.w600 : FontWeight.w400,
-                        color: i == lit ? c.accent : c.textSecondary,
+                        color: i == lit ? c.text : c.textSecondary,
                       ),
                     ),
                   ),

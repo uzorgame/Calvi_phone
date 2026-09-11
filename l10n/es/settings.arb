@@ -340,5 +340,21 @@
   "eraseFailed": "No se pudo borrar: {why}",
   "@eraseFailed": {"placeholders":{"why":{"type":"String"}}},
   "eraseNoNet": "sin red. Enciende internet e inténtalo otra vez",
-  "eraseSlow": "el servidor tarda demasiado. Prueba dentro de un minuto"
+  "eraseSlow": "el servidor tarda demasiado. Prueba dentro de un minuto",
+
+  "setCustom": "Personalización",
+  "setCustomNote": "Qué muestra la pantalla del día y cómo contamos la sal",
+  "setNutriTitle": "Nutrientes",
+  "setNutriNote": "Fibra, azúcar, sodio y grasas saturadas bajo los macros",
+  "setNutriOff": "No mostrar",
+  "setNutriOffHint": "Solo proteína, grasas e hidratos, como antes",
+  "setNutriSmall": "En una línea",
+  "setNutriSmallHint": "Una línea discreta bajo las tarjetas: icono, número y color en el límite",
+  "setNutriLarge": "En tarjetas",
+  "setNutriLargeHint": "Cinco columnas con anillos y etiquetas, como los macros",
+  "setSaltTitle": "Cómo salas",
+  "setSaltNote": "Una corrección a la sal que suponemos en la comida casera",
+  "setSaltLess": "Menos de lo normal",
+  "setSaltUsual": "Lo normal",
+  "setSaltMore": "Más de lo normal"
 }

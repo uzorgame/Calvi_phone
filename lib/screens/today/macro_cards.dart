@@ -22,6 +22,7 @@ class MacroCards extends StatelessWidget {
     required this.meds,
     required this.onMeds,
     this.takes = const {},
+    this.short = false,
   });
 
   final DayTotals totals;
@@ -31,6 +32,13 @@ class MacroCards extends StatelessWidget {
 
   /// Прийняті дози показаного дня, парами «препарат|година».
   final Set<String> takes;
+
+  /* Під цим рядом стоїть великий ряд нутрієнтів, тому картки трохи нижчі.
+   *
+   * Два ряди карток поспіль відсувають сніданок так далеко, що день починається
+   * з прокрутки. Стискається саме висота, а не кегль: числа лишаються такими
+   * самими, як у всіх інших. Те саме правило в демці зветься `.macros--tight`. */
+  final bool short;
 
   @override
   Widget build(BuildContext context) {
@@ -68,6 +76,7 @@ class MacroCards extends StatelessWidget {
                 progress: goal.protein == 0 ? 0 : totals.protein / goal.protein,
                 colour: c.protein,
                 tight: four,
+                short: short,
               ),
               const SizedBox(width: gap),
               _Card(
@@ -79,6 +88,7 @@ class MacroCards extends StatelessWidget {
                 progress: goal.fat == 0 ? 0 : totals.fat / goal.fat,
                 colour: c.fats,
                 tight: four,
+                short: short,
               ),
               const SizedBox(width: gap),
               _Card(
@@ -90,6 +100,7 @@ class MacroCards extends StatelessWidget {
                 progress: goal.carbs == 0 ? 0 : totals.carbs / goal.carbs,
                 colour: c.carbs,
                 tight: four,
+                short: short,
               ),
               if (t > 0) ...[
                 const SizedBox(width: gap),
@@ -107,6 +118,7 @@ class MacroCards extends StatelessWidget {
                   progress: taken.ratio,
                   colour: ink,
                   tight: true,
+                  short: short,
                   onTap: onMeds,
                 ),
               ],
@@ -128,6 +140,7 @@ class _Card extends StatelessWidget {
     required this.progress,
     required this.colour,
     required this.tight,
+    required this.short,
     this.onTap,
   });
 
@@ -144,6 +157,9 @@ class _Card extends StatelessWidget {
   /* Four cards in the width of three need narrower type, otherwise «30 / 135г»
      wraps and the row grows a line taller the moment the fourth appears. */
   final bool tight;
+
+  /// Великий ряд нутрієнтів під цим: висота віддається йому, кегль лишається.
+  final bool short;
 
   /// Only the fourth card leads anywhere; the three macros are figures.
   final VoidCallback? onTap;
@@ -177,7 +193,14 @@ class _Card extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: tight ? 5 : 14, vertical: tight ? 15 : 16),
+        padding: EdgeInsets.symmetric(
+          horizontal: tight || short ? 5 : 14,
+          vertical: short
+              ? 11
+              : tight
+              ? 15
+              : 16,
+        ),
         decoration: BoxDecoration(
           color: c.card,
           border: Border.all(color: c.cardBorder),
@@ -206,7 +229,7 @@ class _Card extends StatelessWidget {
                 FittedBox(fit: BoxFit.scaleDown, child: _line(context)),
               ],
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: short ? 7 : 10),
             CalviRing(
               progress: progress,
               size: 46,
@@ -214,7 +237,7 @@ class _Card extends StatelessWidget {
               color: colour,
               child: CalviIcon(icon, size: 15, color: colour),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: short ? 7 : 10),
             /* Зменшується, а не втрачає літери.
              *
              * Переносити не можна: другий рядок під однією карткою робить весь

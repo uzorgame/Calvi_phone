@@ -3,6 +3,7 @@ import 'dart:async';
 import '../day.dart';
 import '../day_stats.dart';
 import '../measure.dart';
+import '../nutrients.dart';
 import '../meal.dart';
 import '../workout.dart';
 import 'database.dart';
@@ -130,8 +131,18 @@ class DayReader {
         burned[key] = (burned[key] ?? 0) + w.kcal;
       }
 
+      /* Останній сьогоднішній запис, за часом самої страви. Потрібен живому
+         запису на острівці, і рахується тут, бо тут і так ідеться по всіх
+         стравах: другий прохід по тих самих рядках заради одного числа. */
+      DateTime? lastAt;
+      int? lastKcal;
+
       for (final m in rows.meals) {
         final key = _dayOffset(m.day);
+        if (key == 0 && (lastAt == null || m.at.isAfter(lastAt))) {
+          lastAt = m.at;
+          lastKcal = m.kcal;
+        }
         final was = totals[key];
         totals[key] = DayTotals(
           kcal: (was?.kcal ?? 0) + m.kcal,
@@ -171,6 +182,7 @@ class DayReader {
         burned: burned,
         weights: weights,
         measures: measures,
+        lastKcal: lastKcal,
         demo: false,
       );
     });
@@ -209,6 +221,18 @@ class DayReader {
     protein: row.proteinG.round(),
     fat: row.fatG.round(),
     carbs: row.carbsG.round(),
+    /* Другий рівень без округлення до цілого, на відміну від макросів вище.
+       Натрій живе в сотнях міліграмів, а сіль у десятих грама, і `round()` тут
+       перетворив би 0.4 г насичених на нуль, тобто на твердження, що їх немає.
+       Порожнє при цьому лишається порожнім: `null` доїжджає до екрана як
+       «ще не рахували». */
+    nutrients: Nutrients(
+      fiber: row.fiberG,
+      sugar: row.sugarG,
+      added: row.addedSugarG,
+      sodiumMg: row.sodiumMg,
+      sat: row.satFatG,
+    ),
     auto: row.source != 'manual',
     /* Про запис не відомо нічого: ні калорій, ні макросів, ні ваги. Отже, його
        ще не порахували, і показувати впевнений нуль було б брехнею. Картка

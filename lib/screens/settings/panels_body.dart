@@ -122,14 +122,19 @@ class ProfilePanel extends StatelessWidget {
         CalviSection(
           title: l.profileActivity,
           bare: true,
+          trail: 0,
           children: [
-            for (final a in activityLevels)
-              CalviPick(
-                label: activityTitle(context, a.v),
-                hint: activityHint(context, a.v),
-                on: s.activity == a.v,
-                onTap: () => set((v) => v.copyWith(activity: a.v)),
-              ),
+            CalviPicks(
+              children: [
+                for (final a in activityLevels)
+                  CalviPick(
+                    label: activityTitle(context, a.v),
+                    hint: activityHint(context, a.v),
+                    on: s.activity == a.v,
+                    onTap: () => set((v) => v.copyWith(activity: a.v)),
+                  ),
+              ],
+            ),
           ],
         ),
 
@@ -376,40 +381,23 @@ class _GoalPanelState extends State<GoalPanel> {
             ),
           ),
 
+          /* Той самий вигляд, що на «Як швидко» в знайомстві: число і повзунок
+             однією карткою, число по центру. Питання тут одне й те саме, і
+             людина, яка вже відповіла на нього раз, має впізнати його. */
           _Titled(
             title: l.goalPace,
             bare: true,
-            child: Column(
-              children: [
-                // The figure and what it counts, one over the other and centred.
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 26),
-                  child: Column(
-                    children: [
-                      Text(
-                        dataUnits.massNum(s.pace),
-                        style: context.t.displayLarge?.copyWith(
-                          fontSize: 40,
-                          height: 1.26,
-                          letterSpacing: 40 * -0.02,
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 6),
-                        child: Text(l.goalPaceUnit(dataUnits.massLabel), style: context.t.bodyMedium),
-                      ),
-                    ],
-                  ),
-                ),
-                CalviSlider(
-                  value: s.pace,
-                  min: 0.1,
-                  max: 1.2,
-                  step: 0.1,
-                  marks: [l.goalPaceSlow, l.goalPaceUsual, l.goalPaceFast],
-                  onChange: (p) => set((v) => v.copyWith(pace: p)),
-                ),
-              ],
+            child: CalviPaceCard(
+              value: dataUnits.massNum(s.pace),
+              unit: l.goalPaceUnit(dataUnits.massLabel),
+              slider: CalviSlider(
+                value: s.pace,
+                min: 0.1,
+                max: 1.2,
+                step: 0.1,
+                marks: [l.goalPaceSlow, l.goalPaceUsual, l.goalPaceFast],
+                onChange: (p) => set((v) => v.copyWith(pace: p)),
+              ),
             ),
           ),
         ],

@@ -21,7 +21,6 @@
   "rcHeroA": "What to cook",
   "rcHeroB": "today",
   "rcHeroLede": "Say what you have at home. Nora suggests and counts the serving; your own recipe works too.",
-  "rcAsk": "Ask Nora for a recipe",
   "rcTabAll": "All",
   "rcTabNora": "From Nora",
   "rcTabMine": "Mine",
@@ -59,14 +58,20 @@
   "rcWhole": "Whole dish: {kcal}, {g}",
   "@rcWhole": {
     "placeholders": {
-      "kcal": { "type": "String" },
-      "g": { "type": "String" }
+      "kcal": {
+        "type": "String"
+      },
+      "g": {
+        "type": "String"
+      }
     }
   },
   "rcPortion": "serving {g}",
   "@rcPortion": {
     "placeholders": {
-      "g": { "type": "String" }
+      "g": {
+        "type": "String"
+      }
     }
   },
   "rcOfDay": "that is {p}% of the daily norm",
@@ -81,19 +86,15 @@
   "rcItemsTotal": "total {g}",
   "@rcItemsTotal": {
     "placeholders": {
-      "g": { "type": "String" }
+      "g": {
+        "type": "String"
+      }
     }
   },
   "rcToolsHead": "What the kitchen needs",
   "rcNoTools": "Nothing but a knife and a bowl",
   "rcStepsHead": "How to cook",
-  "rcAskAbout": "Ask Nora about this recipe",
-  "rcAsking": "Thinking…",
-  "rcAskTitle": "What is in the kitchen?",
-  "rcPickTitle": "Pick a dish",
   "rcAskPlaceholder": "chicken, broccoli, rice",
-  "rcAskGo": "Ask",
-  "rcAskCancel": "Cancel",
   "rcJustNow": "just now",
   "rcToolOven": "Oven",
   "rcToolPan": "Pan",
@@ -109,14 +110,38 @@
       }
     }
   },
-  "rcChatPlaceholder": "Ask about this recipe",
   "rcLoadFailed": "The recipe book failed to load. Pull to retry.",
   "rcSuggestFailed": "Nora could not compose recipes. Try again.",
   "rcDeleteTitle": "Delete this recipe?",
   "rcDeleteBody": "\"{name}\" will leave the book. Diary entries logged from it will stay.",
-  "@rcDeleteBody": { "placeholders": { "name": { "type": "String" } } },
+  "@rcDeleteBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "rcDeleteCta": "Delete",
   "rcDeleteFailed": "Could not delete. Try again.",
   "rcAllergyWarn": "Contains {names}, which is on your allergy list. Be careful with this one.",
-  "@rcAllergyWarn": { "placeholders": { "names": { "type": "String" } } }
+  "@rcAllergyWarn": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "rcHelps": "Nora will help you build a recipe",
+  "rcChatHello": "Tell me what is in the kitchen and I will build a recipe.",
+  "rcChatHint": "\"chicken, broccoli, rice\": I will suggest a few dishes and count the serving",
+  "rcChatHintMince": "What can I make with mince?",
+  "rcChatHintDinner": "A 500 kcal dinner",
+  "rcChatHintEggs": "A quick breakfast with eggs",
+  "rcChatHintOnly": "Only cheese and pasta left",
+  "rcChatPicks": "Here is what you can cook from that. Pick a dish and the recipe lands in the book.",
+  "rcDishHint": "\"what can replace rice?\", \"how not to dry out the fillet?\", \"can I prep ahead?\"",
+  "rcDishHintSwap": "What can replace rice?",
+  "rcDishHintDry": "How not to dry out the fillet?",
+  "rcDishHintAhead": "Can I prep this ahead?",
+  "rcDishHintKeeps": "How long does it keep?"
 }

@@ -78,7 +78,7 @@ class CalviDb extends _$CalviDb {
   );
 
   @override
-  int get schemaVersion => 15;
+  int get schemaVersion => 16;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -220,6 +220,20 @@ class CalviDb extends _$CalviDb {
          хто вже пройшов «Старт», нема за що. */
       if (from < 15) {
         await m.addColumn(profile, profile.units);
+      }
+      /* Другий рівень нутрієнтів. Пʼять порожніх колонок, і порожніми вони й
+         лишаться для всього, що записано до сьогодні: дорахувати клітковину
+         вчорашньому борщу нема з чого, а поставити нулі означало б сказати, що
+         її там не було. Новий день заповниться сам. Плюс поправка на те, як
+         людина солить: порожньо означає «звичайно». */
+      if (from < 16) {
+        await m.addColumn(meals, meals.fiberG);
+        await m.addColumn(meals, meals.sugarG);
+        await m.addColumn(meals, meals.addedSugarG);
+        await m.addColumn(meals, meals.sodiumMg);
+        await m.addColumn(meals, meals.satFatG);
+        await m.addColumn(profile, profile.saltHand);
+        await m.addColumn(profile, profile.nutri);
       }
     },
     beforeOpen: (details) async {

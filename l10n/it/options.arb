@@ -48,5 +48,12 @@
   "reminderBodyMeds": "Secondo l'orario",
 
   "notifyChannel": "Promemoria",
-  "notifyChannelHint": "Promemoria su cibo, acqua, farmaci e pesate"
+  "notifyChannelHint": "Promemoria su cibo, acqua, farmaci e pesate",
+
+
+  "liveChannel": "Contatore del giorno",
+  "liveChannelHint": "Quanto resta per oggi, finché l’app è attiva",
+  "liveLeft": "Restano {kcal} kcal",
+  "liveOver": "{kcal} kcal in più",
+  "liveBody": "{eaten} di {goal} mangiate"
 }

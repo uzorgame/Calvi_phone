@@ -34,7 +34,12 @@ void main() {
 
     expect(find.textContaining('Скумбрія'), findsOneWidget);
 
-    await tester.scrollUntilVisible(find.textContaining('Скумбрія'), 120);
+    await tester.scrollUntilVisible(
+      find.textContaining('Скумбрія'),
+      120,
+      // Прокруток дві: книга і кімната розмови в смузі. Сторінка перша.
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.textContaining('Скумбрія'));
     await tester.pumpAndSettle();
 
@@ -62,7 +67,12 @@ void main() {
     await tester.pumpWidget(_wrap());
     await tester.pumpAndSettle();
 
-    await tester.scrollUntilVisible(find.textContaining('Скумбрія'), 120);
+    await tester.scrollUntilVisible(
+      find.textContaining('Скумбрія'),
+      120,
+      // Прокруток дві: книга і кімната розмови в смузі. Сторінка перша.
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.textContaining('Скумбрія'));
     await tester.pumpAndSettle();
 

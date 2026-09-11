@@ -5,9 +5,13 @@ part of 'recipes_screen.dart';
  * спільні зі списком. */
 
 class RecipeView extends StatelessWidget {
-  const RecipeView({super.key, required this.recipe});
+  const RecipeView({super.key, required this.recipe, required this.desk});
 
   final RecipeData recipe;
+
+  /// Книга і розмова розділу: сторінка страви працює з тими самими, а не зі
+  /// своїми копіями.
+  final RecipeDesk desk;
 
   /* Видалення питається аркушем із червоною згодою: одне натискання не має
      вміти стерти рецепт. Сервер гасить мʼяко, тож Нора його забуває, а
@@ -67,6 +71,13 @@ class RecipeView extends StatelessWidget {
     return CalviScreen(
       title: l.rcTitle,
       trailing: const CalviMenuButton(),
+      // Місце під смугу розмови, те саме, що в списку.
+      padding: EdgeInsets.only(bottom: 104 + MediaQuery.paddingOf(context).bottom),
+      /* Розмова про рецепт стоїть у смузі внизу, тій самій, що на кожній
+         сторінці книги: коли рецепт відкритий, вона сама переходить на цю
+         страву. Тут вона була карткою з власною кнопкою і власним полем, і
+         виходило два поля одне над одним, обидва до Нори. */
+      bar: _TalkHere(desk: desk, dish: r),
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 4, CalviSize.gutter, 0),
@@ -420,8 +431,9 @@ class RecipeView extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 18),
-              _Rise(delay: 370, child: _RecipeChat(recipe: r)),
+              /* «Записати в щоденник» тут прибрана свідомо: рецепт записують
+                 тоді, коли його приготували і зʼїли, а не коли читають, і
+                 дорога для цього вже є: сказати Норі в смугу внизу. */
               const SizedBox(height: 8),
             ],
           ),
@@ -475,250 +487,48 @@ class _Section extends StatelessWidget {
   }
 }
 
-/* Той самий діалог, що під розбором тижня: тиха кнопка, ті самі бульбашки,
-   те саме кільце «думаю» і поле зі стрілкою. Людина вивчила цю розмову на
-   тижні, і другий вид чату був би другим інтерфейсом.
+/* Смуга розмови на сторінці страви.
  *
- * У режимі «мої» питання йде звичайним чатом Нори з рецептом першою реплікою
- * історії: серверу не треба нового маршруту, а Нора бачить і назву, і
- * складники, і кроки. */
-class _RecipeChat extends StatefulWidget {
-  const _RecipeChat({required this.recipe});
+ * Своя обгортка, бо тут вона мусить слухати стрічку: сторінка сама по собі
+ * нерухома, а розмова під нею живе. Без слухача нове повідомлення лягало б у
+ * список і не перемальовувало нічого.
+ *
+ * Обрана з розмови страва підміняє сторінку, а не лягає поверх неї: вибирали
+ * замість цієї, і стос із двох рецептів означав би, що «назад» веде до страви,
+ * від якої людина щойно відмовилась. */
+class _TalkHere extends StatefulWidget {
+  const _TalkHere({required this.desk, required this.dish});
 
-  final RecipeData recipe;
+  final RecipeDesk desk;
+  final RecipeData dish;
 
   @override
-  State<_RecipeChat> createState() => _RecipeChatState();
+  State<_TalkHere> createState() => _TalkHereState();
 }
 
-class _RecipeChatState extends State<_RecipeChat> {
-  bool _chat = false;
-  bool _thinking = false;
-  int _replyAt = 0;
-  final _draft = TextEditingController();
-  final _msgs = <({bool me, String text})>[];
-  Timer? _timer;
+class _TalkHereState extends State<_TalkHere> {
+  @override
+  void initState() {
+    super.initState();
+    widget.desk.addListener(_redraw);
+  }
+
+  void _redraw() {
+    if (mounted) setState(() {});
+  }
 
   @override
   void dispose() {
-    _timer?.cancel();
-    _draft.dispose();
+    widget.desk.removeListener(_redraw);
     super.dispose();
   }
 
-
-  Future<void> _send() async {
-    final text = _draft.text.trim();
-    if (text.isEmpty || _thinking) return;
-    setState(() {
-      _draft.clear();
-      _msgs.add((me: true, text: text));
-      _thinking = true;
-    });
-
-    final scope = AppScope.of(context);
-    final l = L.of(context);
-
-    if (!scope.real || scope.sync == null) {
-      _timer = Timer(const Duration(milliseconds: 1100), () {
-        if (!mounted) return;
-        final canned = demoRecipeReplies[_replyAt % demoRecipeReplies.length];
-        setState(() {
-          _replyAt++;
-          _thinking = false;
-          _msgs.add((me: false, text: canned));
-        });
-      });
-      return;
-    }
-
-    final sync = scope.sync!;
-    final db = scope.db;
-    final talk = db == null ? null : ChatStore(db);
-    unawaited(talk?.save(msg(from: MsgFrom.me, text: text)) ?? Future<void>.value());
-
-    try {
-      final answer = await sync.ask(
-        text: text,
-        slot: 'snack',
-        history: [
-          /* Рецепт першою реплікою: Нора бачить складники і кроки, і питання
-             «чим замінити рис» має ґрунт без нового маршруту на сервері. */
-          {'role': 'user', 'text': recipeChatContext(widget.recipe)},
-          for (final m in _msgs.take(_msgs.length - 1).toList().reversed.take(3).toList().reversed)
-            {'role': m.me ? 'user' : 'model', 'text': m.text},
-        ],
-      );
-      if (!mounted) return;
-      final said = answer.text.isEmpty ? l.todayDone : answer.text;
-      unawaited(talk?.save(msg(from: MsgFrom.nora, text: said)) ?? Future<void>.value());
-      setState(() {
-        _thinking = false;
-        _msgs.add((me: false, text: said));
-      });
-    } on ApiFailure catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _thinking = false;
-        _msgs.add((
-          me: false,
-          text: switch (e.code) {
-            'offline' => l.todayOfflineSaved,
-            'slow' => l.todayNoraSlow,
-            'no_tokens' => l.todayOutOfTokens,
-            _ => l.todayFailedRetry,
-          },
-        ));
-      });
-    } catch (_) {
-      if (!mounted) return;
-      setState(() => _thinking = false);
-    }
-  }
-
   @override
-  Widget build(BuildContext context) {
-    final c = context.c;
-    final l = L.of(context);
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: c.card,
-        border: Border.all(color: c.cardBorder),
-        borderRadius: BorderRadius.circular(CalviSize.rLarge),
-        boxShadow: context.shadowCard,
-      ),
-      child: !_chat
-          ? GestureDetector(
-              onTap: () => setState(() {
-                _chat = true;
-                _msgs.add((me: false, text: l.rcChatGreet(widget.recipe.title)));
-              }),
-              behavior: HitTestBehavior.opaque,
-              child: Container(
-                height: 46,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: c.fillSecondary,
-                  borderRadius: BorderRadius.circular(CalviSize.rCard),
-                ),
-                child: Text(
-                  l.rcAskAbout,
-                  style: context.t.bodyMedium?.copyWith(
-                    color: c.text,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            )
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                for (final m in _msgs)
-                  Align(
-                    alignment: m.me ? Alignment.centerRight : Alignment.centerLeft,
-                    child: Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                      constraints: BoxConstraints(
-                        maxWidth: MediaQuery.sizeOf(context).width * 0.62,
-                      ),
-                      decoration: BoxDecoration(
-                        color: m.me ? c.button : c.fillSecondary,
-                        borderRadius: BorderRadius.only(
-                          topLeft: const Radius.circular(CalviSize.rCard),
-                          topRight: const Radius.circular(CalviSize.rCard),
-                          bottomLeft: Radius.circular(m.me ? CalviSize.rCard : 6),
-                          bottomRight: Radius.circular(m.me ? 6 : CalviSize.rCard),
-                        ),
-                      ),
-                      child: Text(
-                        m.text,
-                        style: context.t.bodyMedium?.copyWith(
-                          color: m.me ? c.buttonText : c.text,
-                          height: 1.45,
-                        ),
-                      ),
-                    ),
-                  ),
-                if (_thinking)
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: c.fillSecondary,
-                        borderRadius: BorderRadius.circular(CalviSize.rCard),
-                      ),
-                      child: SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.4,
-                          color: c.text,
-                          backgroundColor: c.text.withValues(alpha: 0.16),
-                        ),
-                      ),
-                    ),
-                  ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: SizedBox(
-                          height: 44,
-                          child: TextField(
-                            controller: _draft,
-                            onSubmitted: (_) => _send(),
-                            textInputAction: TextInputAction.send,
-                            style: context.t.bodyMedium?.copyWith(color: c.text),
-                            decoration: InputDecoration(
-                              isDense: true,
-                              hintText: l.rcChatPlaceholder,
-                              hintStyle: context.t.bodyMedium?.copyWith(color: c.faint),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
-                              ),
-                              filled: true,
-                              fillColor: c.card,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(CalviSize.rPill),
-                                borderSide: BorderSide(color: c.cardBorder),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(CalviSize.rPill),
-                                borderSide: BorderSide(color: c.cardBorder),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(CalviSize.rPill),
-                                borderSide: BorderSide(color: c.text),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      GestureDetector(
-                        onTap: _send,
-                        behavior: HitTestBehavior.opaque,
-                        child: Container(
-                          width: 44,
-                          height: 44,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(shape: BoxShape.circle, color: c.button),
-                          child: CalviIcon('send', size: 18, color: c.buttonText),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-    );
-  }
+  Widget build(BuildContext context) => RecipeBar(
+    desk: widget.desk,
+    dish: widget.dish,
+    onOpened: (r) => Navigator.of(context).pushReplacement(
+      slideRoute(RecipeView(recipe: r, desk: widget.desk)),
+    ),
+  );
 }

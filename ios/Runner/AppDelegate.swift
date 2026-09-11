@@ -1,3 +1,4 @@
+import ActivityKit
 import AudioToolbox
 import Flutter
 import UIKit
@@ -15,6 +16,14 @@ import UIKit
      WatchConnectivity, а та вимагає постійного делегата. Локальна змінна вмерла
      б одразу після старту, і контекст не пішов би нікуди. */
   private var watch: WatchBridge?
+
+  /* Живий запис дня на острівці.
+   *
+   * Живе стільки ж, скільки застосунок: він тримає посилання на саму
+   * активність, а без нього оновлювати було б нічого. Знімається запис у
+   * `applicationWillTerminate`: активність, яка лишилась після закритого
+   * застосунку, показує вчорашні числа і не має кому їх оновити. */
+  private let live = LiveBridge()
 
   override func application(
     _ application: UIApplication,
@@ -57,9 +66,23 @@ import UIKit
       }
 
       watch?.attach(to: controller.binaryMessenger)
+      live.attach(to: controller.binaryMessenger)
     }
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+
+  /* Застосунок закривають: живий запис іде разом із ним.
+   *
+   * Dart знімає його на `detached`, але iOS не завжди встигає цей стан дати:
+   * коли застосунок вбивають змахом, система інколи просто забирає процес. Цей
+   * виклик друга спроба з того ж приводу, і коштує вона нічого.
+   *
+   * Активність, яка пережила застосунок, показує вчорашні числа і не має кому їх
+   * оновити: це гірше за її відсутність, бо виглядає як факт. */
+  override func applicationWillTerminate(_ application: UIApplication) {
+    live.hide()
+    super.applicationWillTerminate(application)
   }
 
   /* Відповідь іде тоді, коли звук ДОГРАВ, а не коли почав.
@@ -98,3 +121,98 @@ import UIKit
     }
   }
 }
+
+/* Міст до ActivityKit.
+ *
+ * Уся розмова з Dart це три слова: показати, оновити, зняти. Числа приходять
+ * готовими, бо рахує їх щоденник, а не острівець.
+ *
+ * Кожна гілка мовчки відмовляє там, де живих активностей немає: iOS до 16.2,
+ * вимкнені активності в налаштуваннях, збірка без розширення. Живий запис це
+ * зручність поверх щоденника, і валити через нього застосунок не можна.
+ */
+final class LiveBridge {
+  private var channel: FlutterMethodChannel?
+
+  /// Сама активність, поки вона жива. Через неї йдуть і оновлення, і зняття.
+  private var current: Any?
+
+  func attach(to messenger: FlutterBinaryMessenger) {
+    let channel = FlutterMethodChannel(name: "calvi/live", binaryMessenger: messenger)
+    channel.setMethodCallHandler { [weak self] call, result in
+      switch call.method {
+      case "show":
+        self?.show(call.arguments as? [String: Any] ?? [:])
+        result(nil)
+      case "hide":
+        self?.hide()
+        result(nil)
+      default:
+        result(FlutterMethodNotImplemented)
+      }
+    }
+    self.channel = channel
+  }
+
+  func hide() {
+    guard #available(iOS 16.2, *), let activity = current as? Activity<CalviLiveAttributes> else {
+      return
+    }
+    current = nil
+    Task { await activity.end(nil, dismissalPolicy: .immediate) }
+  }
+
+  private func show(_ args: [String: Any]) {
+    guard #available(iOS 16.2, *) else { return }
+
+    let state = CalviLiveAttributes.ContentState(
+      left: args["left"] as? Int ?? 0,
+      goal: args["goal"] as? Int ?? 0,
+      eaten: args["eaten"] as? Int ?? 0,
+      last: args["last"] as? Int
+    )
+
+    /* Позначка «застаріло»: північ.
+     *
+     * Після неї числа стосуються вчора, і система має право сказати про це
+     * сама, приглушивши картку. Без позначки активність вважається свіжою
+     * назавжди, і о другій ночі острівець показував би вчорашній залишок як
+     * сьогоднішній. */
+    let midnight = Calendar.current.nextDate(
+      after: Date(),
+      matching: DateComponents(hour: 0, minute: 0),
+      matchingPolicy: .nextTime
+    )
+
+    /* Оновлення того, що вже висить, замість другої активності поруч. Система
+       дозволяє кілька активностей одного застосунку, і без цієї гілки кожен
+       запис страви заводив би ще одну.
+     *
+     * Стан перевіряється, бо активність могла вже померти без нас: людина
+     * змахнула її з замкненого екрана, або система прибрала за часом. Тоді
+     * оновлювати нічого, і треба заводити наново. */
+    if let activity = current as? Activity<CalviLiveAttributes> {
+      if activity.activityState == .active {
+        Task { await activity.update(ActivityContent(state: state, staleDate: midnight)) }
+        return
+      }
+      current = nil
+    }
+
+    /* Людина може вимкнути живі активності для застосунку в налаштуваннях
+       телефона, і це її право: мовчки нічого не робимо. */
+    guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
+
+    do {
+      current = try Activity.request(
+        attributes: CalviLiveAttributes(),
+        content: ActivityContent(state: state, staleDate: midnight),
+        pushType: nil
+      )
+    } catch {
+      // Межа системи на кількість активностей, фонова заборона і таке інше.
+      current = nil
+    }
+  }
+}
+

@@ -183,6 +183,9 @@ class LUk extends L {
   String get actionDone => 'Готово';
 
   @override
+  String get actionGotIt => 'Зрозуміло';
+
+  @override
   String get actionNext => 'Далі';
 
   @override
@@ -1193,6 +1196,27 @@ class LUk extends L {
   }
 
   @override
+  String liveBody(String eaten, String goal) {
+    return 'зʼїдено $eaten з $goal';
+  }
+
+  @override
+  String get liveChannel => 'Лічильник дня';
+
+  @override
+  String get liveChannelHint => 'Скільки лишилось на сьогодні, поки застосунок працює';
+
+  @override
+  String liveLeft(String kcal) {
+    return 'Лишилось $kcal ккал';
+  }
+
+  @override
+  String liveOver(String kcal) {
+    return 'Перебір $kcal ккал';
+  }
+
+  @override
   String get loginNoToken => 'Google не віддав токен';
 
   @override
@@ -1622,6 +1646,164 @@ class LUk extends L {
       'Телефон не дозволив сповіщення. Увімкни їх у налаштуваннях системи, і нагадування запрацюють.';
 
   @override
+  String get nutriAdded => 'Доданий цукор';
+
+  @override
+  String nutriAddedNorm(int g, int better) {
+    return 'до $g г, краще до $better';
+  }
+
+  @override
+  String get nutriAddedShort => 'Доданий';
+
+  @override
+  String get nutriAddedSource => 'ВООЗ: менше 10% калорій, краще менше 5%';
+
+  @override
+  String get nutriAddedWhat =>
+      'Цукор, сиропи і мед, які кладуть у продукт. Власний цукор фрукта і молока сюди не входить.';
+
+  @override
+  String nutriAtLeast(String text) {
+    return 'щонайменше $text';
+  }
+
+  @override
+  String get nutriFiber => 'Клітковина';
+
+  @override
+  String nutriFiberNorm(int g) {
+    return '$g г на добу';
+  }
+
+  @override
+  String get nutriFiberShort => 'Клітковина';
+
+  @override
+  String get nutriFiberSource => 'EFSA: щонайменше 25 г, або 14 г на кожну тисячу калорій';
+
+  @override
+  String get nutriFiberWhat =>
+      'Частина рослинної їжі, яку тіло не перетравлює. Тримає травлення і довше лишає ситим.';
+
+  @override
+  String get nutriFrom => 'Звідки сьогодні';
+
+  @override
+  String nutriGap(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count страви без цих чисел, тому це нижня межа.',
+      many: '$count страв без цих чисел, тому це нижня межа.',
+      few: '$count страви без цих чисел, тому це нижня межа.',
+      one: 'Одна страва без цих чисел, тому це нижня межа.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get nutriGapAll =>
+      'Про це сьогодні ще нічого не відомо: жодна страва дня не має цих чисел.';
+
+  @override
+  String get nutriNone => 'Ці страви не рахували';
+
+  @override
+  String get nutriNoneYet => 'Нутрієнти зʼявляться з першим записом';
+
+  @override
+  String get nutriNorm => 'Норма';
+
+  @override
+  String nutriNowGoal(String now, int goal) {
+    return '$now г сьогодні з $goal';
+  }
+
+  @override
+  String nutriNowSodium(String now, String salt) {
+    return '$now г сьогодні, це $salt г солі';
+  }
+
+  @override
+  String nutriNowSugar(String now, String added) {
+    return '$now г сьогодні, з них доданого $added';
+  }
+
+  @override
+  String nutriRest(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'і ще $count',
+      many: 'і ще $count',
+      few: 'і ще $count',
+      one: 'і ще $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get nutriSat => 'Насичені жири';
+
+  @override
+  String nutriSatNorm(int g) {
+    return 'до $g г на добу';
+  }
+
+  @override
+  String get nutriSatShort => 'Насичені';
+
+  @override
+  String get nutriSatSource => 'ВООЗ 2023: менше 10% калорій';
+
+  @override
+  String get nutriSatWhat =>
+      'Жири тваринних продуктів, масла і сиру, а також кокосової та пальмової олії.';
+
+  @override
+  String get nutriSodium => 'Натрій';
+
+  @override
+  String get nutriSodiumNorm => 'до 2 г на добу, це 5 г солі';
+
+  @override
+  String get nutriSodiumNote =>
+      'У домашній страві сіль кладе кухар. Ми беремо звичайну норму для роду страви, поправити можна в персоналізації.';
+
+  @override
+  String get nutriSodiumShort => 'Натрій';
+
+  @override
+  String get nutriSodiumSource => 'ВООЗ. Від калорійності не залежить';
+
+  @override
+  String get nutriSodiumWhat =>
+      'Сіль це натрій, помножений на 2.5. Більшу частину дають хліб, ковбасні, сири і їжа поза домом, а не сільничка на столі.';
+
+  @override
+  String get nutriSugar => 'Цукор';
+
+  @override
+  String get nutriSugarNorm => 'норми немає';
+
+  @override
+  String get nutriSugarNote =>
+      'Шкала під загальним цукром назвала б яблуко проблемою. Дивись на сусіднє число.';
+
+  @override
+  String get nutriSugarShort => 'Цукор';
+
+  @override
+  String get nutriSugarSource => 'ВООЗ і EFSA обмежують доданий цукор, а не загальний';
+
+  @override
+  String get nutriSugarWhat => 'Усі цукри разом: і додані, і власні цукри фруктів та молока.';
+
+  @override
+  String get nutriUnknown => 'сьогодні ще не рахували';
+
+  @override
   String get photoDish => 'Страва';
 
   @override
@@ -1876,25 +2058,7 @@ class LUk extends L {
   }
 
   @override
-  String get rcAsk => 'Попросити рецепт у Нори';
-
-  @override
-  String get rcAskAbout => 'Спитати Нору про цей рецепт';
-
-  @override
-  String get rcAskCancel => 'Скасувати';
-
-  @override
-  String get rcAskGo => 'Спитати';
-
-  @override
   String get rcAskPlaceholder => 'курка, броколі, рис';
-
-  @override
-  String get rcAskTitle => 'Що є на кухні?';
-
-  @override
-  String get rcAsking => 'Думаю…';
 
   @override
   String rcChatGreet(String name) {
@@ -1902,7 +2066,26 @@ class LUk extends L {
   }
 
   @override
-  String get rcChatPlaceholder => 'Спитай про цей рецепт';
+  String get rcChatHello => 'Скажи, що є на кухні, і я складу рецепт.';
+
+  @override
+  String get rcChatHint => '«курка, броколі, рис»: пораджу кілька страв і порахую порцію';
+
+  @override
+  String get rcChatHintDinner => 'Вечеря на 500 ккал';
+
+  @override
+  String get rcChatHintEggs => 'Швидкий сніданок із яєць';
+
+  @override
+  String get rcChatHintMince => 'Що приготувати з фаршу?';
+
+  @override
+  String get rcChatHintOnly => 'Є тільки сир і макарони';
+
+  @override
+  String get rcChatPicks =>
+      'Ось що можна з цього приготувати. Обери страву, і рецепт ляже в книгу.';
 
   @override
   String rcCount(int n) {
@@ -1932,6 +2115,21 @@ class LUk extends L {
   String get rcDeleteTitle => 'Видалити рецепт?';
 
   @override
+  String get rcDishHint => '«чим замінити рис?», «як не пересушити філе?», «чи можна наперед?»';
+
+  @override
+  String get rcDishHintAhead => 'Чи можна приготувати наперед?';
+
+  @override
+  String get rcDishHintDry => 'Як не пересушити філе?';
+
+  @override
+  String get rcDishHintKeeps => 'Скільки це зберігається?';
+
+  @override
+  String get rcDishHintSwap => 'Чим замінити рис?';
+
+  @override
   String get rcEmpty => 'Тут порожньо. Скажи Норі, що є на кухні, і перший рецепт зʼявиться.';
 
   @override
@@ -1945,6 +2143,9 @@ class LUk extends L {
 
   @override
   String get rcFromNora => 'Від Нори';
+
+  @override
+  String get rcHelps => 'Нора тобі допоможе створити рецепт';
 
   @override
   String get rcHeroA => 'Що приготувати';
@@ -1988,9 +2189,6 @@ class LUk extends L {
 
   @override
   String get rcPerServingHead => 'На порцію';
-
-  @override
-  String get rcPickTitle => 'Обери страву';
 
   @override
   String rcPortion(String g) {
@@ -2219,6 +2417,12 @@ class LUk extends L {
   }
 
   @override
+  String get setCustom => 'Персоналізація';
+
+  @override
+  String get setCustomNote => 'Що показує екран дня і як ми рахуємо сіль';
+
+  @override
   String get setDeleteAccount => 'Видалити акаунт і дані';
 
   @override
@@ -2288,6 +2492,30 @@ class LUk extends L {
   }
 
   @override
+  String get setNutriLarge => 'Картками';
+
+  @override
+  String get setNutriLargeHint => 'Пʼять стовпчиків із кільцями і підписами, як у макросів';
+
+  @override
+  String get setNutriNote => 'Клітковина, цукор, натрій і насичені під макросами';
+
+  @override
+  String get setNutriOff => 'Не показувати';
+
+  @override
+  String get setNutriOffHint => 'Тільки білок, жири і вуглеводи, як було';
+
+  @override
+  String get setNutriSmall => 'Рядком';
+
+  @override
+  String get setNutriSmallHint => 'Тихий рядок під картками: знак, число і колір на межі';
+
+  @override
+  String get setNutriTitle => 'Нутрієнти';
+
+  @override
   String get setPlan => 'Підписка';
 
   @override
@@ -2312,6 +2540,21 @@ class LUk extends L {
 
   @override
   String get setRemindersOff => 'вимкнені';
+
+  @override
+  String get setSaltLess => 'Менше, ніж зазвичай';
+
+  @override
+  String get setSaltMore => 'Більше, ніж зазвичай';
+
+  @override
+  String get setSaltNote => 'Поправка до солі, яку ми припускаємо в домашній страві';
+
+  @override
+  String get setSaltTitle => 'Як ти солиш';
+
+  @override
+  String get setSaltUsual => 'Звичайно';
 
   @override
   String get setTerms => 'Умови користування';

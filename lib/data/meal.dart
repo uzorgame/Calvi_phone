@@ -1,6 +1,8 @@
 /// One record in the day, and the card it belongs to.
 library;
 
+import 'nutrients.dart';
+
 /// Which mark a row shows: a key from our own set, as a string.
 ///
 /// Not an emoji, because emoji are drawn by the OS and the same meal would look
@@ -46,6 +48,7 @@ class Meal {
     this.carbs = 0,
     this.auto = false,
     this.pending = false,
+    this.nutrients = Nutrients.none,
   });
 
   final String id;
@@ -58,6 +61,12 @@ class Meal {
   /// Points at a [SlotDef] on the day, not at a fixed enum: cards are opened and
   /// renamed while the day runs.
   final String slotId;
+
+  /* Другий рівень нутрієнтів цієї страви, і кожне з пʼяти може бути невідомим.
+     Порожньо означає «ще не рахували», а не «немає»: усе, записане до появи
+     цієї можливості, лишиться порожнім назавжди, і малювати там нулі означало б
+     вигадати числа за минулий рік. */
+  final Nutrients nutrients;
 
   final int grams;
   final int kcal;

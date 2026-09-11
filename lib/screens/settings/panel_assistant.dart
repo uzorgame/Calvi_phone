@@ -65,7 +65,9 @@ class _AssistantPanelState extends State<AssistantPanel> {
       trailing: const CalviMenuButton(),
       onBack: widget.onBack,
       title: l.assistantTitle,
-      hint: l.assistantHint(assistantName),
+      /* Униз і карткою: сторінка про те, що Нора запамʼятала, і список має
+         починатись одразу, а не через абзац про саму Нору. */
+      note: l.assistantHint(assistantName),
       foot: CalviButton(
         label: l.actionDone,
         onTap: () => (widget.onBack ?? Navigator.of(context).pop)(),

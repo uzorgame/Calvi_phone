@@ -54,5 +54,24 @@
   },
 
   "notifyChannel": "Reminders",
-  "notifyChannelHint": "Reminders about food, water, medications and weigh-ins"
+  "notifyChannelHint": "Reminders about food, water, medications and weigh-ins",
+
+
+  "liveChannel": "Day counter",
+  "liveChannelHint": "How much is left for today, while the app is running",
+  "liveLeft": "{kcal} kcal left",
+  "liveOver": "{kcal} kcal over",
+  "liveBody": "{eaten} of {goal} eaten",
+  "@liveChannel": {
+    "description": "Окремий канал сповіщень під живий запис дня. Найнижча важливість: це рядок стану, а не нагадування, і дзвеніти він не має."
+  },
+  "@liveLeft": {
+    "placeholders": { "kcal": { "type": "String" } }
+  },
+  "@liveOver": {
+    "placeholders": { "kcal": { "type": "String" } }
+  },
+  "@liveBody": {
+    "placeholders": { "eaten": { "type": "String" }, "goal": { "type": "String" } }
+  }
 }

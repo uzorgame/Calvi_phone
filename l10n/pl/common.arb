@@ -59,5 +59,7 @@
   "menuHintNoAllergy": "brak",
   "menuHintMore": "+{n}",
   "@menuHintMore": {"placeholders": {"n": {"type": "int"}}},
-  "menuHintFree": "bezpłatny"
+  "menuHintFree": "bezpłatny",
+
+  "actionGotIt": "Rozumiem"
 }

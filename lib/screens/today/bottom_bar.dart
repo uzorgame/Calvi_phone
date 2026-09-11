@@ -28,11 +28,11 @@ import '../../l10n/app_localizations.dart';
 class BottomBar extends StatefulWidget {
   const BottomBar({
     super.key,
-    required this.slot,
+    this.slot,
     required this.open,
     required this.onOpen,
     required this.onClose,
-    required this.onCamera,
+    this.onCamera,
     required this.onHold,
     required this.onLetGo,
     required this.onSend,
@@ -44,20 +44,33 @@ class BottomBar extends StatefulWidget {
     this.onChoose,
     /* Дотик по кнопці картки «токени скінчились». Веде до тарифів. */
     this.onPlan,
+    /* Обрана страва з тих, що Нора запропонувала приготувати. */
+    this.onPick,
     this.muteMic = false,
     this.away = false,
     this.tokensLeft,
     this.pro = false,
+    this.greet,
+    this.hints,
   });
 
-  /// Card the next entry lands in.
-  final String slot;
+  /* Card the next entry lands in.
+   *
+   * Порожньо там, де розмова нічого не записує в день: у книзі рецептів
+   * «Записую в Обід» під полем було б прямою неправдою, бо звідти в щоденник не
+   * йде нічого. Пігулки тоді просто немає. */
+  final String? slot;
   final bool open;
 
   /// True only when the field itself was touched.
   final ValueChanged<bool> onOpen;
   final VoidCallback onClose;
-  final VoidCallback onCamera;
+
+  /* Куди веде камера. Порожньо означає, що знімати тут нічого: у книзі рецептів
+     фотографія не відповідає на жодне питання, бо страви ще не існує. Кнопки
+     тоді немає зовсім, а не є, але сіра: кнопка, яка нічого не робить, гірша за
+     її відсутність. */
+  final VoidCallback? onCamera;
 
   /// Палець ліг на мікрофон: запис починається цієї ж миті.
   final void Function(Offset at, double size) onHold;
@@ -71,6 +84,7 @@ class BottomBar extends StatefulWidget {
   final void Function(String id, int grams)? onWeigh;
   final void Function(String id, String option)? onChoose;
   final VoidCallback? onPlan;
+  final void Function(String id, String pick)? onPick;
 
   /// While dictation is on, the small microphone steps aside for the big one.
   final bool muteMic;
@@ -94,23 +108,49 @@ class BottomBar extends StatefulWidget {
      порожнє місце читалось би як зламаний лічильник, а не як його відсутність. */
   final bool pro;
 
+  /* Чим Нора вітається в порожній розмові і що показують приклади в полі.
+   *
+   * Своє на кожну розмову. Порожній чат у книзі рецептів, підписаний «два яйця і
+   * тост», обіцяв би запис у щоденник, а обіцянка, якої місце не виконує, гірша
+   * за мовчання. Без цього беруться слова щоденника. */
+  final ({String hello, String hint})? greet;
+  final List<String>? hints;
+
   @override
   State<BottomBar> createState() => _BottomBarState();
 }
 
-/// Opening is slower than closing and lands softer: the room arriving is worth
-/// watching, the room leaving is not.
-const _opening = Duration(milliseconds: 560);
-const _closing = Duration(milliseconds: 380);
+/* Opening is a little slower than closing and lands softer: the room arriving is
+   worth watching, the room leaving is not.
 
-/* The contents come a beat behind the height, so the room opens and then fills
-   instead of sliding what is in it through a gap that is still growing. On the
-   way out they go first and fast, so the room is empty by the time it folds. */
-const _fillIn = Duration(milliseconds: 340);
+   Крива тут `ease`, а не `easeRise`, і це видно оком. Та крива віддає вісімдесят
+   відсотків шляху за першу пʼяту часу, і на двох сотнях пікселів це читається як
+   ривок, за яким панель ще пів секунди ледь повзе. Для дрібних рухів вона
+   чудова, для великої поверхні ні: тут потрібна рівна зупинка, а не постріл із
+   хвостом. */
+const _opening = Duration(milliseconds: 420);
+const _closing = Duration(milliseconds: 320);
+
+/* The contents follow the height almost at once, not after it. Затримка була
+   довшою за пів руху, і виходило два окремі рухи: панель відкривалась порожня,
+   зависала, і аж тоді в неї проступав зміст. Один рух замість двох читається як
+   одна дія, а не як застосунок, що думає. На виході вони йдуть першими і швидко,
+   щоб кімната складалась уже порожньою. */
+const _fillIn = Duration(milliseconds: 300);
 const _fillOut = Duration(milliseconds: 160);
 
 /// How long the contents wait before following the height up.
-const _fillDelay = Duration(milliseconds: 220);
+const _fillDelay = Duration(milliseconds: 60);
+
+/* Кімната росте так само плавно, як відкривається.
+ *
+ * Її висоту веде сама розмова: нижня межа тримає порожній чат компактним, верхня
+ * не дає йому зʼїсти екран, а між ними висота береться зі вмісту. Саме по собі
+ * це миттєва зміна, і виходило, що єдиний стрибок у всій смузі робить
+ * найпомітніше: відповідь із тарілкою чисел або зі стравами на вибір додавала
+ * півтори сотні пікселів за один кадр. Панель, у якій плавне все, крім
+ * найпомітнішого, читається саме як смикання. */
+const _grow = Duration(milliseconds: 380);
 
 /// And how far they sit below their place while they wait.
 const _fillLift = 12.0;
@@ -143,6 +183,7 @@ class _BottomBarState extends State<BottomBar> {
   @override
   void dispose() {
     _later?.cancel();
+    _settle?.cancel();
     _focus.removeListener(_raise);
     _field.dispose();
     _focus.dispose();
@@ -169,12 +210,19 @@ class _BottomBarState extends State<BottomBar> {
 
     /* A new message is only useful if it is the one in view.
 
-       The count is kept here rather than compared against `old.messages`: the
-       list arrives by reference and is appended to in place, so the old widget
-       and the new one hold the same object and their lengths are always equal.
-       That comparison was always false and the room never followed a reply. */
-    if (widget.open && widget.messages.length != _seen) {
-      _seen = widget.messages.length;
+       Рахується не кількість повідомлень, а їхній стан.
+
+       Кількість тут стояла з простої причини: список приходить посиланням і
+       доповнюється на місці, тому старий віджет і новий тримають той самий
+       обʼєкт, і порівняння з `old.messages` було завжди хибним. Але самої
+       кількості мало. Відповідь Нори приходить у ту саму бульбашку, у якій
+       щойно крутилось кільце: кількість не міняється, а висота стрибає вдвічі,
+       бо під текстом розкривається тарілка з числами, кнопки ваги або страви на
+       вибір. Кімната лишалась там, де стояла, і найважливіше у відповіді
+       висіло нижче краю. Те саме правило вже працює в демці. */
+    final shape = _shape;
+    if (widget.open && shape != _seen) {
+      _seen = shape;
       _toBottom();
     }
 
@@ -207,14 +255,38 @@ class _BottomBarState extends State<BottomBar> {
       _later?.cancel();
       _later = Timer(after, go);
     }
+
+    /* І ще раз, коли все доросло.
+     *
+     * `animateTo` бере ціль у мить виклику, а в цю мить кінець списку ще не
+     * там, де він буде: кімната їде до своєї нової висоти, і сама бульбашка
+     * розкривається під текстом. Прокрутка доїжджала до вчорашнього кінця і
+     * спинялась, а відповідь зі стравами на вибір лишалась нижче краю: видно
+     * було «Ось що можна приготувати», а самих страв ні. Другий захід коштує
+     * нічого, бо коли домотано, він не робить нічого. */
+    _settle?.cancel();
+    _settle = Timer((after ?? Duration.zero) + _grow + const Duration(milliseconds: 60), go);
   }
 
-  /// How many messages the room has already scrolled for.
-  int _seen = 0;
+  /// За яким станом розмови кімната вже домотана.
+  String _seen = '';
+
+  /* Стан розмови одним рядком: номер кожного повідомлення і те, що міняє його
+     висоту. Кільце, обрана вага, обраний варіант, узята страва. */
+  String get _shape => widget.messages
+      .map(
+        (m) =>
+            '${m.id}${m.pending ? '.' : ''}'
+            '${m.weighed ?? ''}${m.chosen ?? ''}${m.taken ?? ''}',
+      )
+      .join();
 
   /* Відкладене домотування знімається разом із рядком: відкладений виклик без
      цього переживає віджет і спрацьовує вже над мертвим екраном. */
   Timer? _later;
+
+  /// Другий захід домотування, коли кімната вже доросла.
+  Timer? _settle;
 
   @override
   Widget build(BuildContext context) {
@@ -363,7 +435,7 @@ class _BottomBarState extends State<BottomBar> {
                 key: const Key('chat-room'),
                 child: AnimatedAlign(
                   duration: open ? _opening : _closing,
-                  curve: open ? CalviMotion.easeRise : CalviMotion.easeOut,
+                  curve: open ? CalviMotion.ease : CalviMotion.easeOut,
                   alignment: Alignment.bottomCenter,
                   heightFactor: open ? 1 : 0,
                   child: RepaintBoundary(
@@ -379,7 +451,7 @@ class _BottomBarState extends State<BottomBar> {
                           ? Interval(
                               _fillDelay.inMilliseconds / (_fillIn + _fillDelay).inMilliseconds,
                               1,
-                              curve: CalviMotion.easeRise,
+                              curve: CalviMotion.ease,
                             )
                           : CalviMotion.easeOut,
                       builder: (context, t, child) => Opacity(
@@ -389,20 +461,30 @@ class _BottomBarState extends State<BottomBar> {
                           child: child,
                         ),
                       ),
-                      child: _Room(
-                        controller: _room,
-                        messages: widget.messages,
-                        onWeigh: widget.onWeigh,
-                        onChoose: widget.onChoose,
-                        onPlan: widget.onPlan,
-                        tokensLeft: widget.tokensLeft,
-                        pro: widget.pro,
+                      /* Росте плавно: нова відповідь додає кімнаті висоти, і це
+                         єдиний рух у смузі, який доти був миттєвим. Тримається
+                         за низ, бо нове приходить саме туди. */
+                      child: AnimatedSize(
+                        duration: _grow,
+                        curve: CalviMotion.ease,
+                        alignment: Alignment.bottomCenter,
+                        child: _Room(
+                          controller: _room,
+                          messages: widget.messages,
+                          onWeigh: widget.onWeigh,
+                          onChoose: widget.onChoose,
+                          onPlan: widget.onPlan,
+                          onPick: widget.onPick,
+                          tokensLeft: widget.tokensLeft,
+                          pro: widget.pro,
+                          greet: widget.greet,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-              _SlotChip(slot: widget.slot),
+              if (widget.slot case final slot?) _SlotChip(slot: slot),
               _Input(
                 field: _field,
                 focus: _focus,
@@ -414,6 +496,7 @@ class _BottomBarState extends State<BottomBar> {
                 onLetGo: widget.onLetGo,
                 onSend: _send,
                 muteMic: widget.muteMic,
+                hints: widget.hints,
               ),
             ],
           ),
@@ -431,8 +514,10 @@ class _Room extends StatelessWidget {
     this.onWeigh,
     this.onChoose,
     this.onPlan,
+    this.onPick,
     this.tokensLeft,
     this.pro = false,
+    this.greet,
   });
 
   final ScrollController controller;
@@ -440,8 +525,10 @@ class _Room extends StatelessWidget {
   final void Function(String id, int grams)? onWeigh;
   final void Function(String id, String option)? onChoose;
   final VoidCallback? onPlan;
+  final void Function(String id, String pick)? onPick;
   final int? tokensLeft;
   final bool pro;
+  final ({String hello, String hint})? greet;
 
   @override
   Widget build(BuildContext context) {
@@ -498,10 +585,21 @@ class _Room extends StatelessWidget {
               shrinkWrap: true,
               children: messages.isEmpty
                   // What Nora says before anything has been said to her.
-                  ? [CalviNora(text: L.of(context).barHint, hint: L.of(context).barHintMore)]
+                  ? [
+                      CalviNora(
+                        text: greet?.hello ?? L.of(context).barHint,
+                        hint: greet?.hint ?? L.of(context).barHintMore,
+                      ),
+                    ]
                   : [
                       for (final m in messages)
-                        _Bubble(msg: m, onWeigh: onWeigh, onChoose: onChoose, onPlan: onPlan),
+                        _Bubble(
+                          msg: m,
+                          onWeigh: onWeigh,
+                          onChoose: onChoose,
+                          onPlan: onPlan,
+                          onPick: onPick,
+                        ),
                     ],
             ),
           ),
@@ -513,12 +611,13 @@ class _Room extends StatelessWidget {
 
 /// One message, arriving from a little below.
 class _Bubble extends StatelessWidget {
-  const _Bubble({required this.msg, this.onWeigh, this.onChoose, this.onPlan});
+  const _Bubble({required this.msg, this.onWeigh, this.onChoose, this.onPlan, this.onPick});
 
   final Msg msg;
   final void Function(String id, int grams)? onWeigh;
   final void Function(String id, String option)? onChoose;
   final VoidCallback? onPlan;
+  final void Function(String id, String pick)? onPick;
 
   @override
   Widget build(BuildContext context) {
@@ -674,6 +773,18 @@ class _Bubble extends StatelessWidget {
                           onPick: (o) => onChoose?.call(msg.id, o),
                         ),
                       ],
+
+                      /* Страви, які можна приготувати: рядок на кожну, і дотик
+                         по рядку кладе рецепт у книгу. Назва, час і калорії
+                         порції, тобто рівно те, за чим вибирають; склад і кроки
+                         чекають на сторінці, яка відкриється одразу. */
+                      if (msg.picks.isNotEmpty && msg.taken == null) ...[
+                        const SizedBox(height: 10),
+                        _DishPicks(
+                          picks: msg.picks,
+                          onPick: (id) => onPick?.call(msg.id, id),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -804,12 +915,16 @@ class _Input extends StatefulWidget {
     required this.onLetGo,
     required this.onSend,
     required this.muteMic,
+    this.hints,
   });
 
   final TextEditingController field;
   final FocusNode focus;
   final VoidCallback onFocused;
-  final VoidCallback onCamera;
+  final VoidCallback? onCamera;
+
+  /// Свої приклади замість щоденникових. Порожньо означає слова дня.
+  final List<String>? hints;
 
   /// Палець ліг на мікрофон: запис починається цієї ж миті.
   final void Function(Offset at, double size) onHold;
@@ -866,14 +981,17 @@ class _InputState extends State<_Input> {
 
   List<String> _lines(L l) => [
     l.noraName,
-    l.barHintEggs,
-    l.barHintYesterday,
-    l.barHintBorscht,
-    l.barHintProtein,
-    l.barHintWater,
-    l.barHintRun,
-    l.barHintWeighed,
-    l.barHintDelete,
+    ...?widget.hints,
+    if (widget.hints == null) ...[
+      l.barHintEggs,
+      l.barHintYesterday,
+      l.barHintBorscht,
+      l.barHintProtein,
+      l.barHintWater,
+      l.barHintRun,
+      l.barHintWeighed,
+      l.barHintDelete,
+    ],
   ];
 
   @override
@@ -967,8 +1085,10 @@ class _InputState extends State<_Input> {
             ),
           ),
           const SizedBox(width: 8),
-          _Round(icon: 'camera', label: L.of(context).barCamera, onTap: onCamera),
-          const SizedBox(width: 8),
+          if (onCamera case final shoot?) ...[
+            _Round(icon: 'camera', label: L.of(context).barCamera, onTap: shoot),
+            const SizedBox(width: 8),
+          ],
           /* Один круг на дві дії, а не дві кнопки поруч.
            *
            * Поки поле порожнє, сказати можна тільки голосом, і круг це мікрофон.
@@ -1260,6 +1380,84 @@ class _ChoicePicks extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+/* Страви, які Нора пропонує приготувати: біла картка в бульбашці.
+ *
+ * Тією самою мовою, що тарілка з числами. Бульбашка це мова помічника, картка
+ * всередині це те, що з неї можна взяти, і різниця поверхонь каже про це без
+ * жодного слова.
+ *
+ * Рядками, а не пігулками. Пігулки стали б у ряд і обрізали б назви, а назва
+ * тут головне: людина обирає страву, а не число. */
+class _DishPicks extends StatelessWidget {
+  const _DishPicks({required this.picks, required this.onPick});
+
+  final List<RecipePick> picks;
+  final ValueChanged<String> onPick;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+    final l = L.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: c.card,
+        border: Border.all(color: c.cardBorder),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final (i, p) in picks.indexed) ...[
+            if (i > 0) Container(height: 1, color: c.cardBorder),
+            GestureDetector(
+              onTap: () => onPick(p.id),
+              behavior: HitTestBehavior.opaque,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 11),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 34,
+                      height: 34,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(shape: BoxShape.circle, color: c.iconCircle),
+                      child: CalviIcon(p.icon, size: 18),
+                    ),
+                    const SizedBox(width: 11),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            p.title,
+                            style: context.t.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: c.text,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${l.rcMinutes(p.minutes)} · ${dataUnits.enText(p.kcal)} '
+                            '${l.rcPerServing}',
+                            style: context.t.labelSmall?.copyWith(fontSize: CalviSize.fsMicro),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

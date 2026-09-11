@@ -179,6 +179,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
          його сама: так вона правдива з будь-якого входу, а не лише з цього. */
       'plan' => PlanPanel(onBack: _close, onSignIn: () => _open('profile')),
       'theme' => ThemePanel(s: s, set: set, onBack: _close),
+      'custom' => CustomPanel(s: s, set: set, onBack: _close),
       'lang' => LangPanel(s: s, set: set, onBack: _close),
       'units' => UnitsPanel(s: s, set: set, onBack: _close),
       'privacy' => PrivacyPanel(s: s, set: set, onBack: _close),
@@ -242,7 +243,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               storageKey: const PageStorageKey('settings-list'),
               children: [
                 CalviSection(
-                  title: l.setGroupAbout,
                   children: [
                     CalviRow(
                       icon: 'user',
@@ -276,7 +276,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
            weight; splitting numbers that move each other across separate screens
            hides from the person what they just changed. */
                 CalviSection(
-                  title: l.setNorm,
                   children: [
                     CalviRow(
                       icon: 'flame',
@@ -289,7 +288,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
 
                 CalviSection(
-                  title: l.setGroupHealth,
                   children: [
                     CalviRow(
                       icon: 'allergy',
@@ -303,7 +301,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
 
                 CalviSection(
-                  title: l.setGroupAssistant,
                   children: [
                     CalviRow(
                       icon: 'user',
@@ -322,7 +319,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
 
                 CalviSection(
-                  title: l.setGroupAccount,
                   children: [
                     _PlanRow(onTap: () => _open('plan')),
                     // Under the row it belongs to, and itself the way in: it
@@ -333,6 +329,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       title: l.setTheme,
                       value: themeTitle(context, s.theme),
                       onTap: () => _open('theme'),
+                    ),
+                    /* Персоналізація одразу під темою: обидві про те, як
+                       людина хоче бачити своє, а не про самі дані. */
+                    CalviRow(
+                      icon: 'target',
+                      title: l.setCustom,
+                      value: nutriTitle(context, s.nutri),
+                      onTap: () => _open('custom'),
                     ),
                     CalviRow(
                       icon: 'note',
@@ -351,12 +355,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                        екрані означали б, що людина відкриє не те. Тут
                        перемикачі, там документ. */
                     CalviRow(icon: 'chart', title: l.setPrivacy, onTap: () => _open('privacy')),
-                    CalviRow(
-                      icon: 'user',
-                      title: l.setDeleteAccount,
-                      danger: true,
-                      onTap: () => _open('delete'),
-                    ),
                   ],
                 ),
 
@@ -364,7 +362,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                    вимагає магазин, і так чесніше: погодився в застосунку,
                    читаєш у застосунку. */
                 CalviSection(
-                  title: l.setGroupDocs,
                   children: [
                     CalviRow(
                       icon: 'note',
@@ -382,6 +379,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                        що застосунок може, а не про те, що людина їсть. */
                     CalviRow(icon: 'shield', title: l.setAccess, onTap: () => _open('access')),
                     CalviRow(icon: 'settings', title: l.setAbout, onTap: () => _open('about')),
+                  ],
+                ),
+
+                /* Видалення окремою карткою в кінці, і це єдина група з однієї
+                   дії.
+                 *
+                 * Доти воно стояло рядком поряд із темою і мовою, тобто серед
+                 * речей, які вмикають і вимикають без наслідків. Різниця між
+                 * «змінити тему» і «видалити все» має бути видна до дотику, а не
+                 * тільки в кольорі напису. */
+                CalviSection(
+                  children: [
+                    CalviRow(
+                      icon: 'user',
+                      title: l.setDeleteAccount,
+                      first: true,
+                      danger: true,
+                      onTap: () => _open('delete'),
+                    ),
                   ],
                 ),
               ],
@@ -478,12 +494,24 @@ class _FreeLine extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.c;
     final l = L.of(context);
+
+    /* Тільки українською.
+     *
+     * Пропозиція адресна: вона про тих, хто зараз служить, рятує, лікує і вчить
+     * у прифронтових зонах. Там, де її прочитають як звернення до себе, вона
+     * доречна; у чужій мові це абзац про чужу країну, і місце на екрані він
+     * забирає в усіх. Переклади рядка лишаються в `l10n`: вони знадобляться,
+     * якщо колись зʼявиться друга така пропозиція. */
+    if (Localizations.localeOf(context).languageCode != 'uk') {
+      return const SizedBox.shrink();
+    }
+
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(16, 10, 16, 13),
+        padding: const EdgeInsets.fromLTRB(18, 10, 18, 14),
         decoration: BoxDecoration(
           border: Border(top: BorderSide(color: c.cardBorder)),
         ),

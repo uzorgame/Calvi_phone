@@ -121,6 +121,7 @@ class ChatRepository {
         protein: m.protein,
         fat: m.fat,
         carbs: m.carbs,
+        nutrients: m.nutrients,
       );
     }
 
@@ -197,6 +198,7 @@ class ChatRepository {
         fat: m.fat,
         carbs: m.carbs,
         icon: m.icon,
+        nutrients: m.nutrients,
       );
     }
   }

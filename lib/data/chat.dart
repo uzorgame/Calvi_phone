@@ -57,6 +57,29 @@ class PlateItem {
   final int kcal;
 }
 
+/* Страва, яку Нора пропонує приготувати.
+ *
+ * Рівно те, за чим вибирають: назва, скільки це займе і скільки в порції. Склад,
+ * кроки й техніка чекають на сторінці рецепта, яка відкриється одразу після
+ * дотику, бо в розмові вони не допомагають вибрати, а лише займають екран. */
+class RecipePick {
+  const RecipePick({
+    required this.id,
+    required this.icon,
+    required this.title,
+    required this.minutes,
+    required this.kcal,
+  });
+
+  final String id;
+  final String icon;
+  final String title;
+  final int minutes;
+
+  /// Калорії однієї порції.
+  final int kcal;
+}
+
 class Msg {
   const Msg({
     required this.id,
@@ -71,6 +94,8 @@ class Msg {
     this.askId,
     this.options = const [],
     this.chosen,
+    this.picks = const [],
+    this.taken,
     this.offer = false,
     this.card = false,
   });
@@ -127,6 +152,16 @@ class Msg {
   /// Який варіант обрали. Кнопки після цього зникають.
   final String? chosen;
 
+  /* Страви, які Нора пропонує приготувати. Стають рядками під текстом.
+   *
+   * Живуть тільки в книзі рецептів. У щоденнику розмова про те, що вже зʼїли, і
+   * пропозиція приготувати там не має сенсу; тут навпаки, і саме тому це дві
+   * різні розмови, а не одна стрічка на весь застосунок. */
+  final List<RecipePick> picks;
+
+  /// Яку страву взяли в книгу. Рядки після цього зникають.
+  final String? taken;
+
   /* Малюється карткою, а не бульбашкою.
    *
    * Бульбашка це репліка розмови. Картка це стан застосунку, сказаний голосом
@@ -157,6 +192,8 @@ class Msg {
     askId: askId,
     options: options,
     chosen: chosen,
+    picks: picks,
+    taken: taken,
     offer: offer,
     card: card,
   );
@@ -173,11 +210,32 @@ class Msg {
     askId: askId,
     options: options,
     chosen: option,
+    picks: picks,
+    taken: taken,
     offer: offer,
     card: card,
   );
 
-  Msg answered({required String text, MealPlate? plate}) => Msg(
+  /// Страву взяли в книгу: рядки вибору поступаються місцем.
+  Msg took(String dish) => Msg(
+    id: id,
+    from: from,
+    kind: kind,
+    text: text,
+    code: code,
+    plate: plate,
+    weights: weights,
+    weighed: weighed,
+    askId: askId,
+    options: options,
+    chosen: chosen,
+    picks: picks,
+    taken: dish,
+    offer: offer,
+    card: card,
+  );
+
+  Msg answered({required String text, MealPlate? plate, List<RecipePick>? picks}) => Msg(
     id: id,
     from: from,
     kind: kind,
@@ -189,6 +247,8 @@ class Msg {
     askId: askId,
     options: options,
     chosen: chosen,
+    picks: picks ?? this.picks,
+    taken: taken,
     offer: offer,
     card: card,
   );
@@ -206,6 +266,7 @@ Msg msg({
   List<int> weights = const [],
   String? askId,
   List<String> options = const [],
+  List<RecipePick> picks = const [],
   bool card = false,
 }) => Msg(
   id: 'm${++_seq}',
@@ -218,6 +279,7 @@ Msg msg({
   weights: weights,
   askId: askId,
   options: options,
+  picks: picks,
   card: card,
 );
 

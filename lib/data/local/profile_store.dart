@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
 import '../measure.dart';
+import '../nutrients.dart';
 import '../settings.dart';
 /* Drift зве рядок таблиці алергій так само, як його зве застосунок, і два
    різні `Allergy` в одному файлі не уживаються. Тут потрібен той, що з
@@ -73,6 +74,8 @@ class ProfileStore {
       theme: _themeOf(row.theme),
       lang: _langOf(row.lang),
       units: _unitsOf(row.units),
+      nutri: nutriLevelOf(row.nutri),
+      saltHand: saltHandOf(row.saltHand),
       /* Памʼять приходить із профілю, а не живе тільки в памʼяті екрана.
        *
        * Без цього рядка сторінка «Памʼять» лишалась порожньою назавжди: Нора
@@ -119,6 +122,8 @@ class ProfileStore {
             theme: Value(s.theme.name),
             lang: Value(s.lang.name),
             units: Value(jsonEncode(s.units.toJson())),
+            nutri: Value(nutriLevelKey(s.nutri)),
+            saltHand: Value(saltHandKey(s.saltHand)),
             addressAs: Value(s.addressAs),
             memory: Value(
               jsonEncode([

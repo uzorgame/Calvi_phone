@@ -239,8 +239,13 @@ class CalviSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /* Body-sized and sentence case, the way the demo writes them: «Про
-             тебе», not a shouted caps label. */
+          /* Sentence case, the way the demo writes them: «Про тебе», not a
+             shouted caps label.
+           *
+           * Кегль той самий, що в рядків під ним, а різницю тримає вага. Доти
+           * заголовок був на два пункти більший, і на сторінці збиралось чотири
+           * розміри там, де в списку налаштувань їх два. Саме з цього складалось
+           * відчуття, що кожна вкладка написана своїм голосом. */
           if (title != null)
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
@@ -248,8 +253,17 @@ class CalviSection extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: TextBaseline.alphabetic,
                 children: [
-                  Expanded(child: Text(title!, style: context.t.titleMedium)),
-                  if (aside != null) Text(aside!, style: context.t.bodyMedium),
+                  Expanded(
+                    child: Text(
+                      title!,
+                      style: context.t.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: context.c.text,
+                      ),
+                    ),
+                  ),
+                  if (aside != null)
+                    Text(aside!, style: context.t.labelSmall?.copyWith(fontWeight: FontWeight.w400)),
                 ],
               ),
             ),
@@ -258,11 +272,13 @@ class CalviSection extends StatelessWidget {
           if (bare)
             Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: children)
           else if (children.isNotEmpty)
+            /* Картка без обведення: поверхню відділяє колір і тінь, а лінія
+               навколо неї казала те саме втретє. Межа лишилась тільки там, де
+               вона справді щось розділяє: між сусідніми рядками всередині. */
             Container(
               decoration: BoxDecoration(
                 color: context.c.card,
-                border: Border.all(color: context.c.cardBorder),
-                borderRadius: BorderRadius.circular(CalviSize.rLarge),
+                borderRadius: BorderRadius.circular(CalviSize.rGroup),
                 boxShadow: context.shadowCard,
               ),
               clipBehavior: Clip.antiAlias,
@@ -322,16 +338,43 @@ class CalviRow extends StatelessWidget {
     final c = context.c;
     final ink = danger ? c.protein : c.text;
 
+    /* Небезпечна дія стоїть інакше за решту, і це не прикраса.
+     *
+     * Ні знака, ні стрілки, напис по центру. Стрілка обіцяла б наступний екран
+     * серед рівних, а це не рівний рядок: різниця між «змінити тему» і
+     * «видалити все» має бути видна до дотику, а не лише в кольорі напису. */
+    if (danger) {
+      return GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+          alignment: Alignment.center,
+          child: Text(
+            title,
+            style: context.t.bodyMedium?.copyWith(fontWeight: FontWeight.w500, color: ink),
+          ),
+        ),
+      );
+    }
+
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-        decoration: BoxDecoration(
-          // Hairlines between rows are the card border, same as the demo.
-          border: first ? null : Border(top: BorderSide(color: c.cardBorder)),
-        ),
-        child: LayoutBuilder(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          /* Лінія між сусідніми рядками, з відступом під самий текст.
+             Проведена від краю картки, вона розрізає і стовпчик знаків; з
+             відступом список читається як список, а не як таблиця. */
+          if (!first)
+            Padding(
+              padding: const EdgeInsets.only(left: 60, right: 18),
+              child: Container(height: 1, color: c.cardBorder),
+            ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+            child: LayoutBuilder(
           builder: (context, box) {
             /* The value takes what the title does not need, and the title gives
                way when there is not enough for both. Splitting the line equally
@@ -339,11 +382,11 @@ class CalviRow extends StatelessWidget {
                the value no ceiling pushed the title out of the row entirely on
                the one setting with a long answer. Measuring the title is what
                the browser does for `flex: 1 1 auto` beside `flex: 0 0 auto`. */
-            final room = box.maxWidth - 34 - 12 - 12 - 16;
-            final titleStyle = context.t.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-              color: ink,
-            );
+            final room = box.maxWidth - 26 - 16 - 12 - 16;
+            /* Звичайна вага, а не напівжирна: більший кегль тонким написом
+               читається спокійніше за щільний напівжирний, і рядок від цього
+               не меншає. */
+            final titleStyle = context.t.bodyMedium?.copyWith(color: ink);
             final valueStyle = context.t.labelSmall?.copyWith(fontWeight: FontWeight.w400);
             final measure = TextPainter(
               text: TextSpan(text: title, style: titleStyle),
@@ -357,14 +400,17 @@ class CalviRow extends StatelessWidget {
 
             return Row(
               children: [
-                Container(
-                  width: 34,
-                  height: 34,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(shape: BoxShape.circle, color: c.iconCircle),
-                  child: CalviIcon(icon, size: 19, color: ink),
+                /* Знак без кола і без чорнила: сірий гліф поруч із назвою. Коло
+                   тримає знак, коли поруч велике число, а в списку рядків воно
+                   саме стає сіткою комірок. */
+                SizedBox(
+                  width: 26,
+                  height: 26,
+                  child: Center(
+                    child: CalviIcon(icon, size: 19, color: danger ? ink : c.textSecondary),
+                  ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 16),
                 Expanded(
                   child: hint == null
                       ? Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: titleStyle)
@@ -398,8 +444,10 @@ class CalviRow extends StatelessWidget {
                 trailing ?? CalviIcon('chevron', size: 16, color: c.faint),
               ],
             );
-          },
-        ),
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -525,6 +573,13 @@ class CalviChoice extends StatelessWidget {
 ///
 /// Chosen is white and outlined rather than filled: these are choices among
 /// equals, and filling one black would make it read as the screen's action.
+/* Один варіант вибору, рядком у спільній картці.
+ *
+ * Доти кожен варіант був окремою карткою з обведенням, а обраний ще й обводився
+ * чорним у два пікселі. Стос карток читається як кілька різних речей поруч, а
+ * це одне питання з кількома відповідями: рядки однієї картки саме це й кажуть.
+ * Обране позначає лише кружечок, і цього досить: вибраний рядок не має важити
+ * на екрані більше за саме питання. */
 class CalviPick extends StatelessWidget {
   const CalviPick({
     super.key,
@@ -544,46 +599,34 @@ class CalviPick extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.c;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: AnimatedContainer(
-          duration: CalviMotion.normal,
-          curve: CalviMotion.ease,
-          /* Chosen is white and outlined rather than filled: the row is a choice
-             among equals, and filling it black would make it read as the
-             screen's action. The padding gives back what the border takes. */
-          padding: EdgeInsets.symmetric(horizontal: on ? 15 : 16, vertical: on ? 13 : 14),
-          decoration: BoxDecoration(
-            color: on ? c.bg : c.hover,
-            border: Border.all(color: on ? c.button : c.cardBorder, width: on ? 2 : 1),
-            borderRadius: BorderRadius.circular(CalviSize.rLarge),
-          ),
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
           child: Row(
             children: [
               if (icon != null) ...[
-                Container(
-                  width: 40,
-                  height: 40,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(shape: BoxShape.circle, color: c.iconCircle),
-                  child: CalviIcon(icon!, size: 19),
+                SizedBox(
+                  width: 26,
+                  height: 26,
+                  child: Center(child: CalviIcon(icon!, size: 19, color: c.textSecondary)),
                 ),
-                const SizedBox(width: 13),
+                const SizedBox(width: 16),
               ],
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      label,
-                      style: context.t.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: CalviSize.fsBody * -0.02,
-                      ),
-                    ),
+                    /* Той самий напис, що назва рядка в списку налаштувань.
+                     *
+                     * Тут стояв більший кегль напівжирним, і кожна сторінка
+                     * вибору через це виглядала важчою за сторінку, з якої на
+                     * неї прийшли: «Мова», «Тема», «Активність» читались як
+                     * заголовки, а не як рівні між собою варіанти. Налаштування
+                     * це одна річ, а не десять сторінок різними голосами, тому
+                     * розмірів у всьому розділі рівно два: назва і підпис. */
+                    Text(label, style: context.t.bodyMedium?.copyWith(color: c.text)),
                     /* Порожній рядок це не підказка. Без цієї перевірки картка
                        без підказки малювала порожній текст із відступом, і
                        назва стояла не по центру, а трохи вище. */
@@ -597,11 +640,47 @@ class CalviPick extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 13),
+              const SizedBox(width: 16),
               _PickDot(on: on),
             ],
           ),
-        ),
+      ),
+    );
+  }
+}
+
+/* Група варіантів однією карткою.
+ *
+ * Лінії між рядками малює саме вона: рядок не знає, чи він перший, це знає
+ * тільки список. Та сама картка, що в рядків налаштувань, і те саме питання
+ * всередині: одне, з кількома відповідями. */
+class CalviPicks extends StatelessWidget {
+  const CalviPicks({super.key, required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+    return Container(
+      decoration: BoxDecoration(
+        color: c.card,
+        borderRadius: BorderRadius.circular(CalviSize.rGroup),
+        boxShadow: context.shadowCard,
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < children.length; i++) ...[
+            if (i > 0)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 18),
+                child: Container(height: 1, color: c.cardBorder),
+              ),
+            children[i],
+          ],
+        ],
       ),
     );
   }
@@ -619,8 +698,8 @@ class _PickDot extends StatelessWidget {
     return AnimatedContainer(
       duration: CalviMotion.normal,
       curve: CalviMotion.ease,
-      width: 24,
-      height: 24,
+      width: 22,
+      height: 22,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
@@ -916,4 +995,51 @@ class _CalviPressState extends State<CalviPress> {
       child: widget.builder(context, _down),
     ),
   );
+}
+
+/* Картка темпу: число і повзунок разом, бо одне рухає інше.
+ *
+ * Доти вони стояли двома окремими речами на голому ґрунті: число зліва вгорі,
+ * смуга під ним, і між ними нічого, що сказало б про звʼязок. Картка це і
+ * каже, а число в ній стоїть по центру, бо воно тут єдине, заради чого
+ * відкрили екран.
+ *
+ * Одна на два місця: «Як швидко» в знайомстві і «Темп» у налаштуваннях. Питання
+ * там і там одне, і людина, яка вже відповіла на нього раз, має впізнати його.
+ */
+class CalviPaceCard extends StatelessWidget {
+  const CalviPaceCard({super.key, required this.value, required this.unit, required this.slider});
+
+  /// Саме число, уже в одиницях людини.
+  final String value;
+
+  /// Що це за число: «кг на тиждень».
+  final String unit;
+
+  final Widget slider;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 26, 20, 20),
+      decoration: BoxDecoration(
+        color: c.card,
+        borderRadius: BorderRadius.circular(CalviSize.rGroup),
+        boxShadow: context.shadowCard,
+      ),
+      child: Column(
+        children: [
+          /* Число по центру і підпис під ним, а не в один рядок збоку. У рядку
+             «0.5 кг на тиждень» око читає речення; тут потрібне не речення, а
+             саме число, яке зараз під пальцем на повзунку. */
+          Text(value, style: context.t.displayLarge?.copyWith(height: 1)),
+          const SizedBox(height: 6),
+          Text(unit, style: context.t.labelSmall?.copyWith(fontWeight: FontWeight.w400)),
+          const SizedBox(height: 24),
+          slider,
+        ],
+      ),
+    );
+  }
 }

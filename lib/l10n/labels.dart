@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../data/meal.dart';
+import '../data/nutrients.dart';
 import '../data/settings.dart';
 import 'app_localizations.dart';
 
@@ -118,6 +119,33 @@ String themeHint(BuildContext context, AppTheme t) {
     AppTheme.dawn => l.themeDawnHint,
     AppTheme.dark => l.themeDarkHint,
     AppTheme.system => l.themeSystemHint,
+  };
+}
+
+String nutriTitle(BuildContext context, NutriLevel v) {
+  final l = L.of(context);
+  return switch (v) {
+    NutriLevel.off => l.setNutriOff,
+    NutriLevel.small => l.setNutriSmall,
+    NutriLevel.large => l.setNutriLarge,
+  };
+}
+
+String nutriHint(BuildContext context, NutriLevel v) {
+  final l = L.of(context);
+  return switch (v) {
+    NutriLevel.off => l.setNutriOffHint,
+    NutriLevel.small => l.setNutriSmallHint,
+    NutriLevel.large => l.setNutriLargeHint,
+  };
+}
+
+String saltHandTitle(BuildContext context, SaltHand v) {
+  final l = L.of(context);
+  return switch (v) {
+    SaltHand.less => l.setSaltLess,
+    SaltHand.usual => l.setSaltUsual,
+    SaltHand.more => l.setSaltMore,
   };
 }
 

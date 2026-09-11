@@ -48,5 +48,12 @@
   "reminderBodyMeds": "За розкладом",
 
   "notifyChannel": "Нагадування",
-  "notifyChannelHint": "Нагадування про їжу, воду, препарати і зважування"
+  "notifyChannelHint": "Нагадування про їжу, воду, препарати і зважування",
+
+
+  "liveChannel": "Лічильник дня",
+  "liveChannelHint": "Скільки лишилось на сьогодні, поки застосунок працює",
+  "liveLeft": "Лишилось {kcal} ккал",
+  "liveOver": "Перебір {kcal} ккал",
+  "liveBody": "зʼїдено {eaten} з {goal}"
 }

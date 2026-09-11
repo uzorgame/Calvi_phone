@@ -21,7 +21,6 @@
   "rcHeroA": "Was kochen wir",
   "rcHeroB": "heute",
   "rcHeroLede": "Sag, was du zu Hause hast. Nora schlägt vor und rechnet die Portion; dein eigenes Rezept geht auch.",
-  "rcAsk": "Nora nach einem Rezept fragen",
   "rcTabAll": "Alle",
   "rcTabNora": "Von Nora",
   "rcTabMine": "Meine",
@@ -59,14 +58,20 @@
   "rcWhole": "Ganzes Gericht: {kcal}, {g}",
   "@rcWhole": {
     "placeholders": {
-      "kcal": { "type": "String" },
-      "g": { "type": "String" }
+      "kcal": {
+        "type": "String"
+      },
+      "g": {
+        "type": "String"
+      }
     }
   },
   "rcPortion": "Portion {g}",
   "@rcPortion": {
     "placeholders": {
-      "g": { "type": "String" }
+      "g": {
+        "type": "String"
+      }
     }
   },
   "rcOfDay": "das sind {p}% des Tagesrichtwerts",
@@ -81,19 +86,15 @@
   "rcItemsTotal": "insgesamt {g}",
   "@rcItemsTotal": {
     "placeholders": {
-      "g": { "type": "String" }
+      "g": {
+        "type": "String"
+      }
     }
   },
   "rcToolsHead": "Was die Küche braucht",
   "rcNoTools": "Nichts außer Messer und Schüssel",
   "rcStepsHead": "So wird es gekocht",
-  "rcAskAbout": "Nora zu diesem Rezept fragen",
-  "rcAsking": "Denke nach…",
-  "rcAskTitle": "Was ist in der Küche?",
-  "rcPickTitle": "Wähl ein Gericht",
   "rcAskPlaceholder": "Hähnchen, Brokkoli, Reis",
-  "rcAskGo": "Fragen",
-  "rcAskCancel": "Abbrechen",
   "rcJustNow": "gerade eben",
   "rcToolOven": "Backofen",
   "rcToolPan": "Pfanne",
@@ -109,14 +110,38 @@
       }
     }
   },
-  "rcChatPlaceholder": "Frag zu diesem Rezept",
   "rcLoadFailed": "Das Rezeptbuch wurde nicht geladen. Zieh nach unten für einen neuen Versuch.",
   "rcSuggestFailed": "Nora konnte keine Rezepte zusammenstellen. Versuch es noch einmal.",
   "rcDeleteTitle": "Dieses Rezept löschen?",
   "rcDeleteBody": "«{name}» verlässt das Buch. Einträge im Tagebuch, die daraus entstanden sind, bleiben.",
-  "@rcDeleteBody": { "placeholders": { "name": { "type": "String" } } },
+  "@rcDeleteBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "rcDeleteCta": "Löschen",
   "rcDeleteFailed": "Löschen ging nicht. Versuch es noch einmal.",
   "rcAllergyWarn": "Enthält {names}, das steht auf deiner Allergieliste. Sei damit vorsichtig.",
-  "@rcAllergyWarn": { "placeholders": { "names": { "type": "String" } } }
+  "@rcAllergyWarn": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "rcHelps": "Nora hilft dir, ein Rezept zu bauen",
+  "rcChatHello": "Sag, was in der Küche ist, und ich baue ein Rezept.",
+  "rcChatHint": "«Hähnchen, Brokkoli, Reis»: ich schlage ein paar Gerichte vor und rechne die Portion",
+  "rcChatHintMince": "Was mache ich aus Hackfleisch?",
+  "rcChatHintDinner": "Abendessen mit 500 kcal",
+  "rcChatHintEggs": "Schnelles Frühstück mit Eiern",
+  "rcChatHintOnly": "Nur noch Käse und Nudeln",
+  "rcChatPicks": "Das lässt sich daraus kochen. Wähl ein Gericht, und das Rezept landet im Buch.",
+  "rcDishHint": "«womit ersetze ich Reis?», «wie wird das Filet nicht trocken?», «kann ich vorbereiten?»",
+  "rcDishHintSwap": "Womit ersetze ich Reis?",
+  "rcDishHintDry": "Wie wird das Filet nicht trocken?",
+  "rcDishHintAhead": "Kann ich das vorbereiten?",
+  "rcDishHintKeeps": "Wie lange hält sich das?"
 }

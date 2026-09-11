@@ -77,5 +77,7 @@
   "menuHintNoAllergy": "aucune",
   "menuHintMore": "+{n}",
   "@menuHintMore": {"placeholders": {"n": {"type": "int"}}},
-  "menuHintFree": "gratuit"
+  "menuHintFree": "gratuit",
+
+  "actionGotIt": "Compris"
 }

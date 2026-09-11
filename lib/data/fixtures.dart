@@ -7,6 +7,7 @@ library;
 import 'day.dart';
 import 'settings.dart';
 import 'meal.dart';
+import 'nutrients.dart';
 import 'workout.dart';
 
 /// The norm the strip judges a fixture day against.
@@ -298,6 +299,7 @@ final allDays = <int, DayModel>{
         protein: 18,
         fat: 6,
         carbs: 28,
+        nutrients: Nutrients(fiber: 1.4, sugar: 21, added: 4.2, sodiumMg: 176, sat: 3.7),
       ),
       Meal(
         id: 'e2',
@@ -310,6 +312,7 @@ final allDays = <int, DayModel>{
         protein: 30,
         fat: 18,
         carbs: 22,
+        nutrients: Nutrients(fiber: 4.8, sugar: 6.6, added: 0, sodiumMg: 512, sat: 2.7),
       ),
       Meal(
         id: 'e3',
@@ -322,6 +325,7 @@ final allDays = <int, DayModel>{
         protein: 48,
         fat: 34,
         carbs: 18,
+        nutrients: Nutrients(fiber: 4.5, sugar: 5.4, added: 0, sodiumMg: 1008, sat: 12.9),
       ),
       Meal(
         id: 'e4',
@@ -334,6 +338,7 @@ final allDays = <int, DayModel>{
         protein: 40,
         fat: 26,
         carbs: 0,
+        nutrients: Nutrients(fiber: 0, sugar: 0, added: 0, sodiumMg: 560, sat: 5.7),
       ),
       Meal(
         id: 'e5',
@@ -346,6 +351,7 @@ final allDays = <int, DayModel>{
         protein: 17,
         fat: 4,
         carbs: 11,
+        nutrients: Nutrients(fiber: 0, sugar: 9.9, added: 2, sodiumMg: 320, sat: 2.5),
       ),
       Meal(
         id: 'e6',
@@ -358,6 +364,7 @@ final allDays = <int, DayModel>{
         protein: 6,
         fat: 16,
         carbs: 24,
+        nutrients: Nutrients(fiber: 1.4, sugar: 1.2, added: 0.5, sodiumMg: 672, sat: 5.6),
       ),
     ],
     waterMl: 2200,
@@ -377,6 +384,7 @@ final allDays = <int, DayModel>{
         protein: 14,
         fat: 16,
         carbs: 2,
+        nutrients: Nutrients(fiber: 0, sugar: 0, added: 0, sodiumMg: 448, sat: 4.8),
       ),
       Meal(
         id: 'f2',
@@ -401,6 +409,7 @@ final allDays = <int, DayModel>{
         protein: 14,
         fat: 8,
         carbs: 20,
+        nutrients: Nutrients(fiber: 3, sugar: 4, added: 0, sodiumMg: 840, sat: 2.8),
       ),
       Meal(
         id: 'f4',
@@ -413,6 +422,7 @@ final allDays = <int, DayModel>{
         protein: 5,
         fat: 1,
         carbs: 26,
+        nutrients: Nutrients(fiber: 1.8, sugar: 1.6, added: 0.8, sodiumMg: 288, sat: 0.2),
       ),
     ],
     workouts: [

@@ -340,5 +340,21 @@
   "eraseFailed": "Non sono riuscita a cancellare: {why}",
   "@eraseFailed": {"placeholders":{"why":{"type":"String"}}},
   "eraseNoNet": "nessuna rete. Accendi internet e riprova",
-  "eraseSlow": "il server ci mette troppo. Riprova tra un minuto"
+  "eraseSlow": "il server ci mette troppo. Riprova tra un minuto",
+
+  "setCustom": "Personalizzazione",
+  "setCustomNote": "Cosa mostra la schermata del giorno e come contiamo il sale",
+  "setNutriTitle": "Nutrienti",
+  "setNutriNote": "Fibre, zucchero, sodio e grassi saturi sotto i macro",
+  "setNutriOff": "Non mostrare",
+  "setNutriOffHint": "Solo proteine, grassi e carboidrati, come prima",
+  "setNutriSmall": "In riga",
+  "setNutriSmallHint": "Una riga discreta sotto le carte: segno, numero, colore al limite",
+  "setNutriLarge": "In carte",
+  "setNutriLargeHint": "Cinque colonne con anelli ed etichette, come i macro",
+  "setSaltTitle": "Come sali",
+  "setSaltNote": "Una correzione al sale che ipotizziamo in un piatto fatto in casa",
+  "setSaltLess": "Meno del solito",
+  "setSaltUsual": "Come al solito",
+  "setSaltMore": "Più del solito"
 }

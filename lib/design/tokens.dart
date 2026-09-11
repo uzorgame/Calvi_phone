@@ -80,6 +80,13 @@ class CalviSize {
   static const double gapSection = 28;
   static const double rCard = 16;
   static const double rLarge = 24;
+
+  /* Заокруглення картки з рядків.
+   *
+   * Двадцять, а не двадцять чотири: картка тепер без обведення, і на голому
+   * заокругленні великий радіус читається як подушка, а не як поверхня. Те саме
+   * число стоїть у демці на всіх групах рядків. */
+  static const double rGroup = 20;
   static const double rPill = 999;
   static const double buttonH = 56;
   static const double iconCircleSize = 44;

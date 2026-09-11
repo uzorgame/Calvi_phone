@@ -24,7 +24,9 @@ class CalviScreen extends StatefulWidget {
     this.onBack,
     this.trailing,
     this.hint,
+    this.note,
     this.foot,
+    this.bar,
     this.padding = const EdgeInsets.only(bottom: 16),
     this.storageKey,
   });
@@ -52,11 +54,28 @@ class CalviScreen extends StatefulWidget {
   /// One sentence under the title saying what this screen is for.
   final String? hint;
 
+  /* Те саме пояснення, але в самому низу і карткою.
+   *
+   * Угорі воно стоїть перед тим, що пояснює, і читається як вступ до сторінки.
+   * Це доречно там, де від пояснення залежить вибір: «що таке темп» треба знати
+   * до того, як його рухати. На сторінці, де людина щось перебирає очима, той
+   * самий абзац угорі відсуває саму справу вниз, а внизу карткою він стає тим,
+   * чим і є: приміткою, яку читають раз. */
+  final String? note;
+
   /// The action. It follows the content when the screen has room for it and
   /// holds the bottom when it does not, which is the demo's sticky footer: an
   /// action nailed to the bottom of a short screen floats away from the thing it
   /// acts on, and one that only scrolls is out of reach on a long one.
   final Widget? foot;
+
+  /* Смуга розмови з Норою поверх сторінки, та сама, що на дні.
+   *
+   * Шаром над списком, а не в ньому: вона накриває сторінку, а не їде разом із
+   * нею, і її власна завіса має діставати країв екрана. Тому вона стоїть поза
+   * безпечною зоною: інакше смужка статусу лишалась би світлою над затемненою
+   * сторінкою, і це читалось би як збій малювання, а не як піднята розмова. */
+  final Widget? bar;
 
   final EdgeInsets padding;
 
@@ -89,13 +108,7 @@ class _CalviScreenState extends State<CalviScreen> {
             child: widget.foot,
           );
 
-    return Scaffold(
-      /* Прозорий навмисно: під сторінкою лежить ґрунт, а суцільне тло
-         Scaffold накрило б його рівним кольором і від «Вугілля» лишився б
-         один тон. Непрозорість сторінки під час переходу дає CalviGround,
-         а не це поле, тож нічого не просвічує. */
-      backgroundColor: const Color(0x00000000),
-      body: SafeArea(
+    final page = SafeArea(
         bottom: false,
         child: Stack(
           children: [
@@ -136,6 +149,31 @@ class _CalviScreenState extends State<CalviScreen> {
                     ),
                   ),
                 ...widget.children,
+                if (widget.note != null)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      CalviSize.gutter,
+                      0,
+                      CalviSize.gutter,
+                      CalviSize.gapSection,
+                    ),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+                      decoration: BoxDecoration(
+                        color: context.c.card,
+                        borderRadius: BorderRadius.circular(CalviSize.rGroup),
+                        boxShadow: context.shadowCard,
+                      ),
+                      child: Text(
+                        widget.note!,
+                        style: context.t.bodyMedium?.copyWith(
+                          height: 1.5,
+                          color: context.c.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ),
                 /* The action's space stays in the flow so a long page can
                    scroll its last row clear of the button; the action itself
                    is drawn once, below. */
@@ -163,7 +201,17 @@ class _CalviScreenState extends State<CalviScreen> {
             if (foot != null) Positioned(left: 0, right: 0, bottom: 0, child: foot),
           ],
         ),
-      ),
+      );
+
+    return Scaffold(
+      /* Прозорий навмисно: під сторінкою лежить ґрунт, а суцільне тло
+         Scaffold накрило б його рівним кольором і від «Вугілля» лишився б
+         один тон. Непрозорість сторінки під час переходу дає CalviGround,
+         а не це поле, тож нічого не просвічує. */
+      backgroundColor: const Color(0x00000000),
+      body: widget.bar == null
+          ? page
+          : Stack(children: [page, Positioned.fill(child: widget.bar!)]),
     );
   }
 }

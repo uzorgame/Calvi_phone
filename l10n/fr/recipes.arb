@@ -21,7 +21,6 @@
   "rcHeroA": "Quoi cuisiner",
   "rcHeroB": "aujourd'hui",
   "rcHeroLede": "Dis ce que tu as à la maison. Nora propose et calcule la portion ; ta propre recette marche aussi.",
-  "rcAsk": "Demander une recette à Nora",
   "rcTabAll": "Toutes",
   "rcTabNora": "De Nora",
   "rcTabMine": "Les miennes",
@@ -59,14 +58,20 @@
   "rcWhole": "Plat entier : {kcal}, {g}",
   "@rcWhole": {
     "placeholders": {
-      "kcal": { "type": "String" },
-      "g": { "type": "String" }
+      "kcal": {
+        "type": "String"
+      },
+      "g": {
+        "type": "String"
+      }
     }
   },
   "rcPortion": "portion {g}",
   "@rcPortion": {
     "placeholders": {
-      "g": { "type": "String" }
+      "g": {
+        "type": "String"
+      }
     }
   },
   "rcOfDay": "soit {p}% du repère journalier",
@@ -81,19 +86,15 @@
   "rcItemsTotal": "au total {g}",
   "@rcItemsTotal": {
     "placeholders": {
-      "g": { "type": "String" }
+      "g": {
+        "type": "String"
+      }
     }
   },
   "rcToolsHead": "Ce qu'il faut en cuisine",
   "rcNoTools": "Rien de plus qu'un couteau et un saladier",
   "rcStepsHead": "Comment la faire",
-  "rcAskAbout": "Interroger Nora sur cette recette",
-  "rcAsking": "Je réfléchis…",
-  "rcAskTitle": "Qu'est-ce qu'il y a dans la cuisine ?",
-  "rcPickTitle": "Choisis un plat",
   "rcAskPlaceholder": "poulet, brocoli, riz",
-  "rcAskGo": "Demander",
-  "rcAskCancel": "Annuler",
   "rcJustNow": "à l'instant",
   "rcToolOven": "Four",
   "rcToolPan": "Poêle",
@@ -109,14 +110,38 @@
       }
     }
   },
-  "rcChatPlaceholder": "Pose une question sur cette recette",
   "rcLoadFailed": "Le carnet de recettes n'a pas chargé. Tire pour réessayer.",
   "rcSuggestFailed": "Nora n'a pas pu composer de recettes. Réessaie.",
   "rcDeleteTitle": "Supprimer cette recette ?",
   "rcDeleteBody": "«{name}» quitte le carnet. Les entrées du journal faites à partir d'elle restent.",
-  "@rcDeleteBody": { "placeholders": { "name": { "type": "String" } } },
+  "@rcDeleteBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "rcDeleteCta": "Supprimer",
   "rcDeleteFailed": "La suppression n'a pas marché. Réessaie.",
   "rcAllergyWarn": "Contient {names}, qui est sur ta liste d'allergies. Fais attention avec celle-là.",
-  "@rcAllergyWarn": { "placeholders": { "names": { "type": "String" } } }
+  "@rcAllergyWarn": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "rcHelps": "Nora t’aide à créer une recette",
+  "rcChatHello": "Dis-moi ce qu’il y a dans la cuisine et je monte une recette.",
+  "rcChatHint": "«poulet, brocoli, riz» : je propose quelques plats et je calcule la portion",
+  "rcChatHintMince": "Quoi faire avec de la viande hachée ?",
+  "rcChatHintDinner": "Un dîner à 500 kcal",
+  "rcChatHintEggs": "Petit-déjeuner rapide aux œufs",
+  "rcChatHintOnly": "Il ne reste que fromage et pâtes",
+  "rcChatPicks": "Voilà ce qu’on peut cuisiner avec ça. Choisis un plat et la recette rejoint le livre.",
+  "rcDishHint": "«par quoi remplacer le riz ?», «comment ne pas sécher le filet ?», «je peux préparer à l’avance ?»",
+  "rcDishHintSwap": "Par quoi remplacer le riz ?",
+  "rcDishHintDry": "Comment ne pas sécher le filet ?",
+  "rcDishHintAhead": "Je peux préparer à l’avance ?",
+  "rcDishHintKeeps": "Ça se garde combien de temps ?"
 }

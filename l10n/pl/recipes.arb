@@ -7,7 +7,6 @@
   "rcHeroA": "Co ugotować",
   "rcHeroB": "dzisiaj",
   "rcHeroLede": "Powiedz, co masz w domu. Nora podpowie i policzy porcję; własny przepis też można podyktować.",
-  "rcAsk": "Poproś Norę o przepis",
   "rcTabAll": "Wszystkie",
   "rcTabNora": "Od Nory",
   "rcTabMine": "Moje",
@@ -24,8 +23,12 @@
   "rcWhole": "Całe danie: {kcal}, {g}",
   "@rcWhole": {
     "placeholders": {
-      "kcal": { "type": "String" },
-      "g": { "type": "String" }
+      "kcal": {
+        "type": "String"
+      },
+      "g": {
+        "type": "String"
+      }
     }
   },
   "rcPortion": "porcja {g}",
@@ -35,13 +38,7 @@
   "rcToolsHead": "Potrzebne w kuchni",
   "rcNoTools": "Nic poza nożem i miską",
   "rcStepsHead": "Jak przygotować",
-  "rcAskAbout": "Zapytaj Norę o ten przepis",
-  "rcAsking": "Myślę…",
-  "rcAskTitle": "Co masz w kuchni?",
-  "rcPickTitle": "Wybierz danie",
   "rcAskPlaceholder": "kurczak, brokuły, ryż",
-  "rcAskGo": "Zapytaj",
-  "rcAskCancel": "Anuluj",
   "rcJustNow": "przed chwilą",
   "rcToolOven": "Piekarnik",
   "rcToolPan": "Patelnia",
@@ -50,12 +47,24 @@
   "rcToolGrill": "Grill",
   "rcToolMixer": "Mikser",
   "rcChatGreet": "Pytaj o „{name}”: czym zastąpić produkt, jak nie zepsuć, co zrobić wcześniej. Podpowiem na bieżąco.",
-  "rcChatPlaceholder": "Zapytaj o ten przepis",
   "rcLoadFailed": "Książka przepisów się nie wczytała. Pociągnij, żeby spróbować jeszcze raz.",
   "rcSuggestFailed": "Nora nie zdołała ułożyć przepisów. Spróbuj jeszcze raz.",
   "rcDeleteTitle": "Usunąć przepis?",
   "rcDeleteBody": "„{name}” zniknie z książki. Wpisy w dzienniku zrobione na jego podstawie zostaną.",
   "rcDeleteCta": "Usuń",
   "rcDeleteFailed": "Nie udało się usunąć. Spróbuj jeszcze raz.",
-  "rcAllergyWarn": "W składzie jest {names}, a to twój alergen. Ostrożnie z tym przepisem."
+  "rcAllergyWarn": "W składzie jest {names}, a to twój alergen. Ostrożnie z tym przepisem.",
+  "rcHelps": "Nora pomoże ci stworzyć przepis",
+  "rcChatHello": "Powiedz, co masz w kuchni, a ułożę przepis.",
+  "rcChatHint": "„kurczak, brokuły, ryż”: podpowiem kilka dań i policzę porcję",
+  "rcChatHintMince": "Co zrobić z mielonego?",
+  "rcChatHintDinner": "Kolacja na 500 kcal",
+  "rcChatHintEggs": "Szybkie śniadanie z jajek",
+  "rcChatHintOnly": "Został tylko ser i makaron",
+  "rcChatPicks": "Oto co można z tego ugotować. Wybierz danie, a przepis trafi do księgi.",
+  "rcDishHint": "„czym zastąpić ryż?”, „jak nie przesuszyć filetu?”, „czy można wcześniej?”",
+  "rcDishHintSwap": "Czym zastąpić ryż?",
+  "rcDishHintDry": "Jak nie przesuszyć filetu?",
+  "rcDishHintAhead": "Czy można przygotować wcześniej?",
+  "rcDishHintKeeps": "Jak długo się trzyma?"
 }

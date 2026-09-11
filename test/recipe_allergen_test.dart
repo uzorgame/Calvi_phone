@@ -42,7 +42,19 @@ void main() {
     await tester.pumpWidget(_wrap(const SizedBox()));
     await tester.pumpAndSettle();
 
-    await tester.scrollUntilVisible(find.textContaining('Вівсянка'), 120);
+    /* Крутиться сама сторінка, а не перше, що трапилось.
+     *
+     * Прокруток на екрані тепер дві: книга і кімната розмови в смузі внизу,
+     * яка живе в дереві навіть складеною. Без адреси `scrollUntilVisible`
+     * шукає єдину і падає на «Too many elements». Сторінка стоїть у стосі
+     * першою, смуга шаром над нею. */
+    await tester.scrollUntilVisible(
+      find.textContaining('Вівсянка'),
+      120,
+      scrollable: find.byType(Scrollable).first,
+    );
+    // Список ще їде: дотик посеред руху промахується повз картку.
+    await tester.pumpAndSettle();
     await tester.tap(find.textContaining('Вівсянка'));
     await tester.pumpAndSettle();
 

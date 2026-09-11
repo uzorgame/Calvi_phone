@@ -183,6 +183,9 @@ class LEn extends L {
   String get actionDone => 'Done';
 
   @override
+  String get actionGotIt => 'Got it';
+
+  @override
   String get actionNext => 'Next';
 
   @override
@@ -1184,6 +1187,27 @@ class LEn extends L {
   }
 
   @override
+  String liveBody(String eaten, String goal) {
+    return '$eaten of $goal eaten';
+  }
+
+  @override
+  String get liveChannel => 'Day counter';
+
+  @override
+  String get liveChannelHint => 'How much is left for today, while the app is running';
+
+  @override
+  String liveLeft(String kcal) {
+    return '$kcal kcal left';
+  }
+
+  @override
+  String liveOver(String kcal) {
+    return '$kcal kcal over';
+  }
+
+  @override
   String get loginNoToken => 'Google did not return a token';
 
   @override
@@ -1613,6 +1637,160 @@ class LEn extends L {
       'The phone refused notifications. Switch them on in the system settings and the reminders will work.';
 
   @override
+  String get nutriAdded => 'Added sugar';
+
+  @override
+  String nutriAddedNorm(int g, int better) {
+    return 'up to $g g, better up to $better';
+  }
+
+  @override
+  String get nutriAddedShort => 'Added';
+
+  @override
+  String get nutriAddedSource => 'WHO: under 10% of calories, better under 5%';
+
+  @override
+  String get nutriAddedWhat =>
+      'Sugar, syrups and honey put into a product. The sugar of fruit and milk is not counted here.';
+
+  @override
+  String nutriAtLeast(String text) {
+    return 'at least $text';
+  }
+
+  @override
+  String get nutriFiber => 'Fibre';
+
+  @override
+  String nutriFiberNorm(int g) {
+    return '$g g a day';
+  }
+
+  @override
+  String get nutriFiberShort => 'Fibre';
+
+  @override
+  String get nutriFiberSource => 'EFSA: at least 25 g, or 14 g per thousand calories';
+
+  @override
+  String get nutriFiberWhat =>
+      'The part of plant food the body does not digest. Keeps digestion going and keeps you full longer.';
+
+  @override
+  String get nutriFrom => 'Where from today';
+
+  @override
+  String nutriGap(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count dishes without these numbers, so this is a minimum.',
+      one: 'One dish without these numbers, so this is a minimum.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get nutriGapAll =>
+      'Nothing is known about this today: no dish of the day carries these numbers.';
+
+  @override
+  String get nutriNone => 'These meals were not counted';
+
+  @override
+  String get nutriNoneYet => 'Nutrients appear with the first entry';
+
+  @override
+  String get nutriNorm => 'Norm';
+
+  @override
+  String nutriNowGoal(String now, int goal) {
+    return '$now g today of $goal';
+  }
+
+  @override
+  String nutriNowSodium(String now, String salt) {
+    return '$now g today, that is $salt g of salt';
+  }
+
+  @override
+  String nutriNowSugar(String now, String added) {
+    return '$now g today, added of it $added';
+  }
+
+  @override
+  String nutriRest(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'and $count more',
+      one: 'and $count more',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get nutriSat => 'Saturated fat';
+
+  @override
+  String nutriSatNorm(int g) {
+    return 'up to $g g a day';
+  }
+
+  @override
+  String get nutriSatShort => 'Saturated';
+
+  @override
+  String get nutriSatSource => 'WHO 2023: under 10% of calories';
+
+  @override
+  String get nutriSatWhat =>
+      'Fats of animal products, butter and cheese, and of coconut and palm oil.';
+
+  @override
+  String get nutriSodium => 'Sodium';
+
+  @override
+  String get nutriSodiumNorm => 'up to 2 g a day, that is 5 g of salt';
+
+  @override
+  String get nutriSodiumNote =>
+      'In a home dish the cook decides the salt. We take the usual amount for that kind of dish, and you can correct it in personalisation.';
+
+  @override
+  String get nutriSodiumShort => 'Sodium';
+
+  @override
+  String get nutriSodiumSource => 'WHO. Does not depend on calories';
+
+  @override
+  String get nutriSodiumWhat =>
+      'Salt is sodium times 2.5. Most of it comes from bread, cured meat, cheese and food away from home, not from the salt shaker.';
+
+  @override
+  String get nutriSugar => 'Sugar';
+
+  @override
+  String get nutriSugarNorm => 'no norm';
+
+  @override
+  String get nutriSugarNote =>
+      'A scale under total sugar would call an apple a problem. Look at the number next to it.';
+
+  @override
+  String get nutriSugarShort => 'Sugar';
+
+  @override
+  String get nutriSugarSource => 'WHO and EFSA limit added sugar, not the total';
+
+  @override
+  String get nutriSugarWhat => 'All sugars together: added ones and the sugars of fruit and milk.';
+
+  @override
+  String get nutriUnknown => 'not counted today yet';
+
+  @override
   String get photoDish => 'Dish';
 
   @override
@@ -1867,25 +2045,7 @@ class LEn extends L {
   }
 
   @override
-  String get rcAsk => 'Ask Nora for a recipe';
-
-  @override
-  String get rcAskAbout => 'Ask Nora about this recipe';
-
-  @override
-  String get rcAskCancel => 'Cancel';
-
-  @override
-  String get rcAskGo => 'Ask';
-
-  @override
   String get rcAskPlaceholder => 'chicken, broccoli, rice';
-
-  @override
-  String get rcAskTitle => 'What is in the kitchen?';
-
-  @override
-  String get rcAsking => 'Thinking…';
 
   @override
   String rcChatGreet(String name) {
@@ -1893,7 +2053,27 @@ class LEn extends L {
   }
 
   @override
-  String get rcChatPlaceholder => 'Ask about this recipe';
+  String get rcChatHello => 'Tell me what is in the kitchen and I will build a recipe.';
+
+  @override
+  String get rcChatHint =>
+      '\"chicken, broccoli, rice\": I will suggest a few dishes and count the serving';
+
+  @override
+  String get rcChatHintDinner => 'A 500 kcal dinner';
+
+  @override
+  String get rcChatHintEggs => 'A quick breakfast with eggs';
+
+  @override
+  String get rcChatHintMince => 'What can I make with mince?';
+
+  @override
+  String get rcChatHintOnly => 'Only cheese and pasta left';
+
+  @override
+  String get rcChatPicks =>
+      'Here is what you can cook from that. Pick a dish and the recipe lands in the book.';
 
   @override
   String rcCount(int n) {
@@ -1923,6 +2103,22 @@ class LEn extends L {
   String get rcDeleteTitle => 'Delete this recipe?';
 
   @override
+  String get rcDishHint =>
+      '\"what can replace rice?\", \"how not to dry out the fillet?\", \"can I prep ahead?\"';
+
+  @override
+  String get rcDishHintAhead => 'Can I prep this ahead?';
+
+  @override
+  String get rcDishHintDry => 'How not to dry out the fillet?';
+
+  @override
+  String get rcDishHintKeeps => 'How long does it keep?';
+
+  @override
+  String get rcDishHintSwap => 'What can replace rice?';
+
+  @override
   String get rcEmpty =>
       'Nothing here yet. Tell Nora what is in the kitchen and the first recipe appears.';
 
@@ -1937,6 +2133,9 @@ class LEn extends L {
 
   @override
   String get rcFromNora => 'From Nora';
+
+  @override
+  String get rcHelps => 'Nora will help you build a recipe';
 
   @override
   String get rcHeroA => 'What to cook';
@@ -1980,9 +2179,6 @@ class LEn extends L {
 
   @override
   String get rcPerServingHead => 'Per serving';
-
-  @override
-  String get rcPickTitle => 'Pick a dish';
 
   @override
   String rcPortion(String g) {
@@ -2204,6 +2400,12 @@ class LEn extends L {
   }
 
   @override
+  String get setCustom => 'Personalisation';
+
+  @override
+  String get setCustomNote => 'What the day screen shows and how we count salt';
+
+  @override
   String get setDeleteAccount => 'Delete account and data';
 
   @override
@@ -2274,6 +2476,30 @@ class LEn extends L {
   }
 
   @override
+  String get setNutriLarge => 'Cards';
+
+  @override
+  String get setNutriLargeHint => 'Five columns with rings and labels, like the macros';
+
+  @override
+  String get setNutriNote => 'Fibre, sugar, sodium and saturated fat under the macros';
+
+  @override
+  String get setNutriOff => 'Do not show';
+
+  @override
+  String get setNutriOffHint => 'Only protein, fat and carbs, as before';
+
+  @override
+  String get setNutriSmall => 'A row';
+
+  @override
+  String get setNutriSmallHint => 'A quiet line under the cards: mark, number, colour at the limit';
+
+  @override
+  String get setNutriTitle => 'Nutrients';
+
+  @override
   String get setPlan => 'Subscription';
 
   @override
@@ -2298,6 +2524,21 @@ class LEn extends L {
 
   @override
   String get setRemindersOff => 'off';
+
+  @override
+  String get setSaltLess => 'Less than usual';
+
+  @override
+  String get setSaltMore => 'More than usual';
+
+  @override
+  String get setSaltNote => 'A correction to the salt we assume in home cooking';
+
+  @override
+  String get setSaltTitle => 'How you salt';
+
+  @override
+  String get setSaltUsual => 'The usual way';
 
   @override
   String get setTerms => 'Terms of use';

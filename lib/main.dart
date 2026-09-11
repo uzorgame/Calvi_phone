@@ -1,17 +1,21 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'data/billing/billing.dart';
 import 'data/evening.dart';
+import 'data/live_day.dart';
 import 'data/local/database.dart';
+import 'data/remote/api.dart';
 import 'data/remote/sync_service.dart';
 import 'data/meds.dart';
 import 'data/watch.dart';
 import 'data/settings.dart';
 import 'data/units.dart';
 import 'data/app_scope.dart';
+import 'data/day.dart' show todayDate;
 import 'data/day_stats.dart';
 import 'data/local/day_reader.dart';
 import 'data/local/meds_store.dart';
@@ -54,6 +58,14 @@ Future<void> main() async {
      від нього. Без ключів це тиха порожня операція, і застосунок стартує так
      само: щоденник не має залежати від того, чи працює оплата. */
   await Billing.start();
+  /* Версія збірки називається серверу заголовком, як платформа поруч.
+     Потрібна панелі рівно для одного: бачити, хто сидить на старій збірці,
+     коли розбирають скаргу. Збій тут нічого не має валити: без версії
+     застосунок працює так само. */
+  try {
+    final info = await PackageInfo.fromPlatform();
+    CalviApi.version = '${info.version}+${info.buildNumber}';
+  } catch (_) {}
   runApp(const CalviApp());
 }
 
@@ -76,7 +88,7 @@ class CalviApp extends StatefulWidget {
   State<CalviApp> createState() => _CalviAppState();
 }
 
-class _CalviAppState extends State<CalviApp> {
+class _CalviAppState extends State<CalviApp> with WidgetsBindingObserver {
   /* Settings and medications live above every screen, not inside the screens
      that edit them: the goal and the weight set in settings are read by the home
      card, and state that dies on the way out would leave that card showing
@@ -143,11 +155,51 @@ class _CalviAppState extends State<CalviApp> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _statsFeed?.cancel();
     _saveLater?.cancel();
     _sync?.stop();
     _db?.close();
+    unawaited(_live.off());
     super.dispose();
+  }
+
+  /* Живий запис живе рівно поки живий застосунок.
+   *
+   * `detached` це остання мить перед тим, як система забере процес: далі
+   * оновлювати числа не буде кому, а запис, який показує вчорашнє, гірший за
+   * відсутність запису, бо виглядає як факт. Згорнутий застосунок (`paused`)
+   * навпаки лишає запис на місці: саме заради цього він і потрібен.
+   *
+   * Повернення з фону оновлює його одразу: поки телефон лежав у кишені, день
+   * міг змінитись і на годиннику, і в іншому пристрої. */
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.detached) {
+      unawaited(_live.off());
+      return;
+    }
+    if (state == AppLifecycleState.resumed) _pushLive();
+  }
+
+  /* Що саме показує живий запис: ті самі числа, що картка дня.
+   *
+   * Демонстраційні дні сюди не йдуть. Вітрина показує чужий заповнений день, і
+   * повісити його в шторку означало б сказати людині неправду про її власний. */
+  void _pushLive() {
+    if (_stats.demo || _onboarding != false) {
+      unawaited(_live.off());
+      return;
+    }
+
+    final goal = dailyKcal(_s);
+    final eaten = _stats.netOn(todayDate);
+    unawaited(
+      _live.put(
+        LiveFacts(left: goal - eaten, goal: goal, eaten: eaten, last: _stats.lastKcal),
+      ),
+    );
   }
 
   /// Switching to «мої» is what opens the database, and the first switch is the
@@ -251,6 +303,50 @@ class _CalviAppState extends State<CalviApp> {
     _replan();
     // Перший запуск: профілю на диску ще немає.
     if (saved == null && widget.storage) unawaited(_askFirstPermissions());
+    // Профіль є, отже людина заходить одразу на головний екран.
+    if (saved != null && widget.storage) unawaited(_askBell());
+  }
+
+  /// Чи вже питали дозвіл цього запуску. Питання одне на запуск, звідки б воно
+  /// не прийшло: із «Старту» чи з головного екрана.
+  bool _bellAsked = false;
+
+  /* Дозвіл на сповіщення питається при вході на головний екран.
+   *
+   * Доти його питали тільки на першому запуску і ще раз тоді, коли людина
+   * вмикала нагадування. Виходило, що той, хто нагадувань не вмикав, не бачив і
+   * живого запису дня: на Android 13 і новіших він теж сповіщення, і без дозволу
+   * система просто мовчки його викидає. Людина при цьому не бачила ні запису, ні
+   * питання, ні причини.
+   *
+   * **Один раз на запуск, і тільки коли дозволу немає.** Тому, хто вже дозволив,
+   * не показується нічого: `granted` відповідає без жодного вікна. Тому, хто
+   * відмовився, теж: система після відмови повертає «ні», не питаючи вдруге, і
+   * єдиний шлях назад лежить через її власні налаштування.
+   *
+   * Пауза перед питанням, щоб екран встиг зʼявитись: системне вікно поверх
+   * порожнечі читається як збій, а не як питання застосунку.
+   */
+  Future<void> _askBell() async {
+    if (_bellAsked) return;
+    _bellAsked = true;
+
+    await Future<void>.delayed(const Duration(milliseconds: 700));
+    if (!mounted) return;
+
+    _bellOk = await _bell.granted();
+    if (_bellOk || !mounted) return;
+
+    _bellOk = await _bell.ask();
+    if (!_bellOk || !mounted) return;
+
+    /* Дозвіл щойно дали, і живий запис треба завести наново.
+     *
+     * Числа дня могли піти в систему ще до питання: вона їх мовчки викинула, а
+     * `LiveDay` лишився памʼятати, що запис ніби стоїть. Ті самі числа далі вже
+     * не пішли б, і острівець зʼявився б аж із наступною стравою. */
+    _live.forget();
+    _pushLive();
   }
 
   /* Дозволи на камеру і сповіщення питаються на першому запуску, одразу, ще на
@@ -272,7 +368,9 @@ class _CalviAppState extends State<CalviApp> {
       // Платформа без такого дозволу: нічого питати.
     }
     if (!mounted) return;
-    _bellOk = await _bell.ask();
+    // Сповіщення питає [_askBell]: правило одне на весь застосунок, і другий
+    // виклик того самого вікна тут лише подвоїв би його першому запуску.
+    await _askBell();
   }
 
   /// Кінець «Старту»: те, що зібрали, стає профілем і одразу лягає на диск.
@@ -303,6 +401,9 @@ class _CalviAppState extends State<CalviApp> {
        запису в щоденник: людина проходила «Старт», закривала застосунок, і на
        сервері про неї не було нічого. */
     unawaited(_profiles?.save(next).then((_) => _sync?.now()));
+    /* Головний екран щойно відкрився вперше. Питання тут майже завжди вже
+       поставлене на «Старті», і тоді цей виклик не робить нічого. */
+    if (widget.storage) unawaited(_askBell());
   }
 
   /* Вхід у наявний акаунт: профіль приходить із сервера, а не звідси.
@@ -351,7 +452,10 @@ class _CalviAppState extends State<CalviApp> {
     _stats = DayStats.empty;
     _statsFeed = DayReader(db).watchStats().listen(
       (next) {
-        if (mounted) setState(() => _stats = next);
+        if (!mounted) return;
+        setState(() => _stats = next);
+        // Живий запис іде за днем: записали страву, число в шторці змінилось.
+        _pushLive();
       },
       /* База не відкрилась.
        *
@@ -396,6 +500,11 @@ class _CalviAppState extends State<CalviApp> {
      * три сходяться сюди, і правило, поставлене тут, працює для всіх, а
      * поставлене в одній з них мовчало б у двох інших. */
     if (_s.weightKg != weighed) _goalMet();
+
+    /* Норма могла змінитись просто зараз: вага, ціль, темп і спосіб життя всі
+       рахують її наново. Живий запис показує саме її, і без цього рядка він
+       лишався б із учорашнім числом до першої записаної страви. */
+    _pushLive();
 
     /* Нагадування переставляються одразу, а дозвіл питається на першому з них.
      *
@@ -661,6 +770,14 @@ class _CalviAppState extends State<CalviApp> {
     if (!_bellOk) _bellOk = await _bell.ask();
 
     if (_bellOk) {
+      /* Аж тут точний будильник, і тільки тут.
+       *
+       * На Android це повноекранна сторінка системних налаштувань, а не
+       * віконце: людину виносить із застосунку геть. Вона щойно ввімкнула
+       * нагадування і розуміє, за чим її туди повели. На вході в день те саме
+       * вікно було б дикістю, тому дозвіл на сповіщення просить `_askBell`, а
+       * будильник лишається тут. */
+      unawaited(_bell.askExactAlarms());
       _replan();
       return;
     }
@@ -771,9 +888,16 @@ class _CalviAppState extends State<CalviApp> {
     _ => calviLightTheme,
   };
 
+  /* Живий запис дня: острівець на iPhone, стійке сповіщення на Android.
+   *
+   * Тут, а не в екрані: він має жити рівно стільки, скільки живий сам
+   * застосунок, а екрани народжуються і вмирають на кожному переході. */
+  final _live = LiveDay();
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     // Real from the first frame, so nothing has to be switched on to be used.
     if (_real && widget.storage) {
       unawaited(_open());
