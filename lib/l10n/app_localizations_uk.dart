@@ -1177,6 +1177,24 @@ class LUk extends L {
   }
 
   @override
+  String get islandLast => 'останній прийом їжі';
+
+  @override
+  String get islandLeft => 'ккал лишилось';
+
+  @override
+  String get islandNothing => 'сьогодні ще нічого не записано';
+
+  @override
+  String get islandOver => 'ккал перебір';
+
+  @override
+  String get islandToday => 'лишилось на сьогодні';
+
+  @override
+  String get islandTodayOver => 'перебір за сьогодні';
+
+  @override
   String kcalUnit(String kcal) {
     return '$kcal';
   }

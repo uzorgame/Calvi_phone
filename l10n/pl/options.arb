@@ -55,5 +55,12 @@
   "liveChannelHint": "Ile zostało na dziś, dopóki aplikacja działa",
   "liveLeft": "Zostało {kcal} kcal",
   "liveOver": "{kcal} kcal ponad",
-  "liveBody": "zjedzone {eaten} z {goal}"
+  "liveBody": "zjedzone {eaten} z {goal}",
+
+  "islandLeft": "kcal zostało",
+  "islandOver": "kcal ponad",
+  "islandToday": "zostało na dziś",
+  "islandTodayOver": "ponad na dziś",
+  "islandLast": "ostatni posiłek",
+  "islandNothing": "dziś nic nie zapisano"
 }

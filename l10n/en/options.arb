@@ -62,6 +62,16 @@
   "liveLeft": "{kcal} kcal left",
   "liveOver": "{kcal} kcal over",
   "liveBody": "{eaten} of {goal} eaten",
+
+  "islandLeft": "kcal left",
+  "islandOver": "kcal over",
+  "islandToday": "left for today",
+  "islandTodayOver": "over for today",
+  "islandLast": "last meal",
+  "islandNothing": "nothing logged today",
+  "@islandLeft": {
+    "description": "Підписи живої активності на динамічному острівці iPhone. Малює їх Swift, а слова приходять звідси: у розширення не дістає ні контекст, ні локаль, і зашитий там текст лишався б українським у всіх вісьмох мовах. Коротко: поруч стоїть велике число, і рядок має вміститись у півострівця."
+  },
   "@liveChannel": {
     "description": "Окремий канал сповіщень під живий запис дня. Найнижча важливість: це рядок стану, а не нагадування, і дзвеніти він не має."
   },

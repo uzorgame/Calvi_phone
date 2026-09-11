@@ -1177,6 +1177,24 @@ class LDe extends L {
   }
 
   @override
+  String get islandLast => 'letzte Mahlzeit';
+
+  @override
+  String get islandLeft => 'kcal übrig';
+
+  @override
+  String get islandNothing => 'heute noch nichts eingetragen';
+
+  @override
+  String get islandOver => 'kcal darüber';
+
+  @override
+  String get islandToday => 'bleibt für heute';
+
+  @override
+  String get islandTodayOver => 'zu viel für heute';
+
+  @override
   String kcalUnit(String kcal) {
     return '$kcal';
   }

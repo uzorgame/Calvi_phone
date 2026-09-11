@@ -200,8 +200,15 @@ class AndroidLive implements LiveSink {
 /* --- iOS ---
  *
  * Жива активність заводиться не з Dart: ActivityKit це Swift, і малює її окреме
- * розширення застосунку. Звідси йдуть тільки числа, а коли розширення в збірці
- * немає, канал мовчки відмовляє і застосунок працює далі.
+ * розширення застосунку. Коли розширення в збірці немає, канал мовчки відмовляє
+ * і застосунок працює далі.
+ *
+ * Звідси йдуть готові слова, а не самі числа, і це не дрібниця формату.
+ * Розширення живе окремим процесом: у нього немає ні `BuildContext`, ні локалі
+ * застосунку, тому будь-який рядок, написаний там, лишається одномовним. Саме
+ * так і було: острівець казав «ккал лишилось» українською в кожному телефоні,
+ * хай якою мовою людина поставила застосунок. Тепер там не лишилось жодного
+ * свого слова, рівно як в Android.
  */
 class IosLive implements LiveSink {
   const IosLive();
@@ -212,11 +219,16 @@ class IosLive implements LiveSink {
   Future<void> show(LiveFacts facts) async {
     try {
       await _channel.invokeMethod<void>('show', {
-        'left': facts.left,
-        'goal': facts.goal,
-        'eaten': facts.eaten,
-        // Порожнє поле означає «сьогодні ще нічого», і острівець скаже саме це.
-        'last': facts.last,
+        /* Кільце і смуга беруть частку, і вона підрізана тут: перебір це інше
+           слово поруч із додатним числом, а не смуга, що вилізла за край. */
+        'progress': facts.progress.clamp(0.0, 1.0),
+        'shown': _num(facts.left.abs()),
+        'caption': facts.over ? dataL.islandOver : dataL.islandLeft,
+        'lock': facts.over ? dataL.islandTodayOver : dataL.islandToday,
+        // Порожнє значення означає «сьогодні ще нічого», і підпис скаже саме це.
+        'lastLabel': facts.last == null ? dataL.islandNothing : dataL.islandLast,
+        'lastValue': facts.last == null ? '' : '${_num(facts.last!)} ${dataL.unitKcal}',
+        'unit': dataL.unitKcal,
       });
     } on PlatformException {
       /* Телефон без острівця, вимкнені живі активності в налаштуваннях, збірка

@@ -55,5 +55,12 @@
   "liveChannelHint": "Quanto falta para hoje, enquanto o app está aberto",
   "liveLeft": "Faltam {kcal} kcal",
   "liveOver": "{kcal} kcal a mais",
-  "liveBody": "{eaten} de {goal} comidas"
+  "liveBody": "{eaten} de {goal} comidas",
+
+  "islandLeft": "kcal restantes",
+  "islandOver": "kcal a mais",
+  "islandToday": "resta para hoje",
+  "islandTodayOver": "a mais para hoje",
+  "islandLast": "última refeição",
+  "islandNothing": "nada registrado hoje"
 }

@@ -1176,6 +1176,24 @@ class LFr extends L {
   }
 
   @override
+  String get islandLast => 'dernier repas';
+
+  @override
+  String get islandLeft => 'kcal restantes';
+
+  @override
+  String get islandNothing => 'rien d’enregistré aujourd’hui';
+
+  @override
+  String get islandOver => 'kcal de trop';
+
+  @override
+  String get islandToday => 'reste pour aujourd’hui';
+
+  @override
+  String get islandTodayOver => 'de trop pour aujourd’hui';
+
+  @override
   String kcalUnit(String kcal) {
     return '$kcal';
   }

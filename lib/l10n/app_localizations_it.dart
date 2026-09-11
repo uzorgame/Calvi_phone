@@ -1172,6 +1172,24 @@ class LIt extends L {
   }
 
   @override
+  String get islandLast => 'ultimo pasto';
+
+  @override
+  String get islandLeft => 'kcal rimaste';
+
+  @override
+  String get islandNothing => 'oggi ancora niente';
+
+  @override
+  String get islandOver => 'kcal in più';
+
+  @override
+  String get islandToday => 'resta per oggi';
+
+  @override
+  String get islandTodayOver => 'in più per oggi';
+
+  @override
   String kcalUnit(String kcal) {
     return '$kcal';
   }

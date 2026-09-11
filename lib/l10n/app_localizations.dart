@@ -2148,6 +2148,42 @@ abstract class L {
   /// **'now, from {kg} at the start of the goal'**
   String heroWeightFrom(String kg);
 
+  /// No description provided for @islandLast.
+  ///
+  /// In en, this message translates to:
+  /// **'last meal'**
+  String get islandLast;
+
+  /// Підписи живої активності на динамічному острівці iPhone. Малює їх Swift, а слова приходять звідси: у розширення не дістає ні контекст, ні локаль, і зашитий там текст лишався б українським у всіх вісьмох мовах. Коротко: поруч стоїть велике число, і рядок має вміститись у півострівця.
+  ///
+  /// In en, this message translates to:
+  /// **'kcal left'**
+  String get islandLeft;
+
+  /// No description provided for @islandNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'nothing logged today'**
+  String get islandNothing;
+
+  /// No description provided for @islandOver.
+  ///
+  /// In en, this message translates to:
+  /// **'kcal over'**
+  String get islandOver;
+
+  /// No description provided for @islandToday.
+  ///
+  /// In en, this message translates to:
+  /// **'left for today'**
+  String get islandToday;
+
+  /// No description provided for @islandTodayOver.
+  ///
+  /// In en, this message translates to:
+  /// **'over for today'**
+  String get islandTodayOver;
+
   /// Calories with the unit, as it stands on badges and cards.
   ///
   /// In en, this message translates to:

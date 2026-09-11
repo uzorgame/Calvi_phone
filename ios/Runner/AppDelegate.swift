@@ -165,11 +165,17 @@ final class LiveBridge {
   private func show(_ args: [String: Any]) {
     guard #available(iOS 16.2, *) else { return }
 
+    /* Слова приходять готовими, як і числа: перекладів на цьому боці немає
+       взагалі, і складати тут нема чого. Порожній рядок означає рівно те, що
+       він означає на екрані, тому запасні значення теж порожні. */
     let state = CalviLiveAttributes.ContentState(
-      left: args["left"] as? Int ?? 0,
-      goal: args["goal"] as? Int ?? 0,
-      eaten: args["eaten"] as? Int ?? 0,
-      last: args["last"] as? Int
+      progress: args["progress"] as? Double ?? 0,
+      shown: args["shown"] as? String ?? "",
+      caption: args["caption"] as? String ?? "",
+      lock: args["lock"] as? String ?? "",
+      unit: args["unit"] as? String ?? "",
+      lastLabel: args["lastLabel"] as? String ?? "",
+      lastValue: args["lastValue"] as? String ?? ""
     )
 
     /* Позначка «застаріло»: північ.

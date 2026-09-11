@@ -1168,6 +1168,24 @@ class LEn extends L {
   }
 
   @override
+  String get islandLast => 'last meal';
+
+  @override
+  String get islandLeft => 'kcal left';
+
+  @override
+  String get islandNothing => 'nothing logged today';
+
+  @override
+  String get islandOver => 'kcal over';
+
+  @override
+  String get islandToday => 'left for today';
+
+  @override
+  String get islandTodayOver => 'over for today';
+
+  @override
   String kcalUnit(String kcal) {
     return '$kcal';
   }

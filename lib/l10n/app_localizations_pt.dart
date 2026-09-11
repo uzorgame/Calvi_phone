@@ -1170,6 +1170,24 @@ class LPt extends L {
   }
 
   @override
+  String get islandLast => 'última refeição';
+
+  @override
+  String get islandLeft => 'kcal restantes';
+
+  @override
+  String get islandNothing => 'nada registrado hoje';
+
+  @override
+  String get islandOver => 'kcal a mais';
+
+  @override
+  String get islandToday => 'resta para hoje';
+
+  @override
+  String get islandTodayOver => 'a mais para hoje';
+
+  @override
   String kcalUnit(String kcal) {
     return '$kcal';
   }

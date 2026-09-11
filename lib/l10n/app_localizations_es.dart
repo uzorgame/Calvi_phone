@@ -1169,6 +1169,24 @@ class LEs extends L {
   }
 
   @override
+  String get islandLast => 'última comida';
+
+  @override
+  String get islandLeft => 'kcal restantes';
+
+  @override
+  String get islandNothing => 'hoy aún no hay nada';
+
+  @override
+  String get islandOver => 'kcal de más';
+
+  @override
+  String get islandToday => 'queda para hoy';
+
+  @override
+  String get islandTodayOver => 'de más para hoy';
+
+  @override
   String kcalUnit(String kcal) {
     return '$kcal';
   }

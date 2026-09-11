@@ -14,6 +14,11 @@ import WidgetKit
  *
  * Малюється це на SwiftUI і тільки тут: із Flutter в острівець не потрапити
  * ніяк, бо система малює його власним процесом, поза застосунком.
+ *
+ * Жодного свого слова в цьому файлі немає, і це навмисно. Розширення не бачить
+ * ні локалі застосунку, ні перекладів, тому все, що людина тут читає, приходить
+ * готовим рядком із Dart. Інакше виходило те, що й виходило: острівець говорив
+ * українською в польському застосунку.
  */
 
 /// Кільце дня. Те саме, що на картці дня в застосунку, тільки без анімації
@@ -53,10 +58,10 @@ struct CalviLiveWidget: Widget {
         }
         DynamicIslandExpandedRegion(.trailing) {
           VStack(alignment: .trailing, spacing: 2) {
-            Text("\(context.state.shown)")
+            Text(context.state.shown)
               .font(.system(size: 30, weight: .bold))
               .monospacedDigit()
-            Text(context.state.over ? "ккал перебір" : "ккал лишилось")
+            Text(context.state.caption)
               .font(.system(size: 12))
               .foregroundStyle(.white.opacity(0.6))
           }
@@ -70,14 +75,12 @@ struct CalviLiveWidget: Widget {
                немає, тільки калорії. Острівець висить на екрані весь день, і
                його бачить не тільки той, кому він призначений. */
             HStack {
-              Text(context.state.last == nil
-                ? "сьогодні ще нічого не записано"
-                : "останній прийом їжі")
+              Text(context.state.lastLabel)
                 .font(.system(size: 12))
                 .foregroundStyle(.white.opacity(0.6))
               Spacer()
-              if let last = context.state.last {
-                Text("\(last) ккал")
+              if !context.state.lastValue.isEmpty {
+                Text(context.state.lastValue)
                   .font(.system(size: 12, weight: .semibold))
                   .monospacedDigit()
               }
@@ -88,7 +91,7 @@ struct CalviLiveWidget: Widget {
       } compactLeading: {
         DayRing(progress: context.state.progress, size: 20, width: 4)
       } compactTrailing: {
-        Text("\(context.state.shown)")
+        Text(context.state.shown)
           .font(.system(size: 15, weight: .semibold))
           .monospacedDigit()
       } minimal: {
@@ -112,9 +115,11 @@ struct LockScreenView: View {
         DayRing(progress: state.progress, size: 34, width: 6)
 
         VStack(alignment: .leading, spacing: 2) {
+          /* Назва застосунку тут не перекладається: це імʼя, і людина шукає
+             очима саме його, хай якою мовою поставила застосунок. */
           Text("Calvi")
             .font(.system(size: 14, weight: .semibold))
-          Text(state.over ? "перебір за сьогодні" : "лишилось на сьогодні")
+          Text(state.lock)
             .font(.system(size: 12))
             .foregroundStyle(.white.opacity(0.6))
         }
@@ -122,10 +127,10 @@ struct LockScreenView: View {
         Spacer(minLength: 8)
 
         HStack(alignment: .firstTextBaseline, spacing: 4) {
-          Text("\(state.shown)")
+          Text(state.shown)
             .font(.system(size: 24, weight: .bold))
             .monospacedDigit()
-          Text("ккал")
+          Text(state.unit)
             .font(.system(size: 12))
             .foregroundStyle(.white.opacity(0.6))
         }

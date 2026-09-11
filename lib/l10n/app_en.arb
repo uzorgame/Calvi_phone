@@ -290,6 +290,9 @@
       }
     }
   },
+  "@islandLeft": {
+    "description": "Підписи живої активності на динамічному острівці iPhone. Малює їх Swift, а слова приходять звідси: у розширення не дістає ні контекст, ні локаль, і зашитий там текст лишався б українським у всіх вісьмох мовах. Коротко: поруч стоїть велике число, і рядок має вміститись у півострівця."
+  },
   "@kcalUnit": {
     "description": "Calories with the unit, as it stands on badges and cards.",
     "placeholders": {
@@ -1306,6 +1309,12 @@
   "heroOver": "over by ",
   "heroWeekOpen": "The week in full",
   "heroWeightFrom": "now, from {kg} at the start of the goal",
+  "islandLast": "last meal",
+  "islandLeft": "kcal left",
+  "islandNothing": "nothing logged today",
+  "islandOver": "kcal over",
+  "islandToday": "left for today",
+  "islandTodayOver": "over for today",
   "kcalUnit": "{kcal}",
   "langSection": "Interface language",
   "langSystem": "Device language",

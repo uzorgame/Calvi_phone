@@ -55,5 +55,12 @@
   "liveChannelHint": "Скільки лишилось на сьогодні, поки застосунок працює",
   "liveLeft": "Лишилось {kcal} ккал",
   "liveOver": "Перебір {kcal} ккал",
-  "liveBody": "зʼїдено {eaten} з {goal}"
+  "liveBody": "зʼїдено {eaten} з {goal}",
+
+  "islandLeft": "ккал лишилось",
+  "islandOver": "ккал перебір",
+  "islandToday": "лишилось на сьогодні",
+  "islandTodayOver": "перебір за сьогодні",
+  "islandLast": "останній прийом їжі",
+  "islandNothing": "сьогодні ще нічого не записано"
 }
