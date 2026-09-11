@@ -105,6 +105,17 @@ workflows:
             --certificate-key=@env:CERTIFICATE_PRIVATE_KEY \
             --create
 
+          # Острівець: четвертий ідентифікатор і четвертий профіль.
+          #
+          # Кожна підписана ціль просить свій, і пропущений рядок валить збірку
+          # аж на архіві, словами про профіль, а не про цей крок. Саме так і
+          # сталось, коли жива активність приїхала четвертою ціллю, а рядків
+          # тут лишилось три: «CalviLive requires a provisioning profile».
+          app-store-connect fetch-signing-files "${BUNDLE_ID}.live" \
+            --type IOS_APP_STORE \
+            --certificate-key=@env:CERTIFICATE_PRIVATE_KEY \
+            --create
+
           keychain add-certificates
           # Проставляє профіль у проєкт Xcode, щоб не робити цього руками.
           xcode-project use-profiles
