@@ -64,6 +64,16 @@ else
   end
   group.new_reference(File.join(ROOT, 'ios', NAME, 'Info.plist'))
 
+  # Каталог кольорів розширення.
+  #
+  # Без нього розширення не має власного кольору взагалі, і там, де система
+  # фарбує щось сама (обведення острівця, тло віджета, будь-яка типова відтінка
+  # всередині нашого вмісту), вона бере свій відтінок замість нашого. Це та сама
+  # діра, що була в андроїдному сповіщенні, де через відсутній колір система
+  # брала його з оформлення телефона.
+  assets = File.join(ROOT, 'ios', NAME, 'Assets.xcassets')
+  live.add_resources([group.new_reference(assets)])
+
   stamp(live, version, build)
   live.build_configurations.each do |config|
     s = config.build_settings
@@ -78,8 +88,10 @@ else
     s['DEVELOPMENT_TEAM'] = team if team
     s['CODE_SIGN_STYLE'] = 'Manual'
     s['LD_RUNPATH_SEARCH_PATHS'] = '$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks'
-    # Розширення не має жодного ресурсу власного виробництва, і каталогу іконок
-    # йому теж не треба: живу активність малює система з наших поглядів.
+    # Імена кольорів із каталогу вище. Без цих двох рядків каталог лежить у
+    # пакеті, а система про нього не знає і далі фарбує своїм.
+    s['ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME'] = 'AccentColor'
+    s['ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME'] = 'WidgetBackground'
     s['GENERATE_INFOPLIST_FILE'] = 'NO'
   end
 
