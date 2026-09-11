@@ -37,6 +37,14 @@ struct DayRing: View {
         .stroke(Color.white, style: StrokeStyle(lineWidth: width, lineCap: .round))
         .rotationEffect(.degrees(-90))
     }
+    /* Відступ у півтовщини, і без нього кільце виглядало надкушеним.
+     *
+     * Обведення лягає по самій лінії кола, тобто половина товщини виходить за
+     * межу рамки. У розгорнутому вигляді довкола є місце, і це нікому не
+     * заважає, а в стислому рамка рівно така, як кільце: система зрізає все, що
+     * виступило, і на телефоні збоку видно рівний зріз. Тепер малюнок цілком
+     * усередині рамки, а рамка лишається того самого розміру. */
+    .padding(width / 2)
     .frame(width: size, height: size)
   }
 }
@@ -61,9 +69,18 @@ struct CalviLiveWidget: Widget {
             Text(context.state.shown)
               .font(.system(size: 30, weight: .bold))
               .monospacedDigit()
+              .lineLimit(1)
+              .minimumScaleFactor(0.6)
+            /* Підпис приходить перекладом, а мови різної довжини: «kcal left»
+               коротке, «kcal restantes» удвічі довше. Рядок, який не влазить,
+               SwiftUI не обрізає, а вирівнює по центру, і тоді він вилазить за
+               острівець з обох боків. Тому тут один рядок, який радше змаліє,
+               ніж вилізе. */
             Text(context.state.caption)
               .font(.system(size: 12))
               .foregroundStyle(.white.opacity(0.6))
+              .lineLimit(1)
+              .minimumScaleFactor(0.7)
           }
           .padding(.trailing, 4)
         }
@@ -73,20 +90,33 @@ struct CalviLiveWidget: Widget {
 
             /* Рядок про останній запис, слово в слово як у демці: назви страви
                немає, тільки калорії. Острівець висить на екрані весь день, і
-               його бачить не тільки той, кому він призначений. */
-            HStack {
+               його бачить не тільки той, кому він призначений.
+             *
+             * Підпис має право змаліти, число не має: воно тут головне, і
+             * дробити його переносом або підрізати наполовину гірше, ніж
+             * зменшити слова поруч. Доти обидва стояли на повний розмір, разом
+             * не вміщались, і рядок вилазив за край острівця з обох боків: у
+             * підпису зрізало першу літеру, у числа останню. */
+            HStack(spacing: 8) {
               Text(context.state.lastLabel)
                 .font(.system(size: 12))
                 .foregroundStyle(.white.opacity(0.6))
-              Spacer()
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+              Spacer(minLength: 4)
               if !context.state.lastValue.isEmpty {
                 Text(context.state.lastValue)
                   .font(.system(size: 12, weight: .semibold))
                   .monospacedDigit()
+                  .lineLimit(1)
+                  .fixedSize()
               }
             }
           }
           .padding(.top, 2)
+          /* Заокруглення острівця зрізає кути, і текст, доведений до самого
+             краю, читається обрізаним навіть тоді, коли він у межі влазить. */
+          .padding(.horizontal, 6)
         }
       } compactLeading: {
         DayRing(progress: context.state.progress, size: 20, width: 4)
@@ -94,6 +124,8 @@ struct CalviLiveWidget: Widget {
         Text(context.state.shown)
           .font(.system(size: 15, weight: .semibold))
           .monospacedDigit()
+          .lineLimit(1)
+          .minimumScaleFactor(0.8)
       } minimal: {
         DayRing(progress: context.state.progress, size: 18, width: 4)
       }
@@ -122,6 +154,8 @@ struct LockScreenView: View {
           Text(state.lock)
             .font(.system(size: 12))
             .foregroundStyle(.white.opacity(0.6))
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
         }
 
         Spacer(minLength: 8)
@@ -130,9 +164,13 @@ struct LockScreenView: View {
           Text(state.shown)
             .font(.system(size: 24, weight: .bold))
             .monospacedDigit()
+            .lineLimit(1)
+            .fixedSize()
           Text(state.unit)
             .font(.system(size: 12))
             .foregroundStyle(.white.opacity(0.6))
+            .lineLimit(1)
+            .fixedSize()
         }
       }
 
