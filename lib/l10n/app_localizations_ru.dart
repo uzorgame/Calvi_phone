@@ -692,9 +692,6 @@ class LRu extends L {
   String get camLabelNoShot => 'Кадр не вышел. Попробуй снять этикетку ещё раз.';
 
   @override
-  String get camLabelReading => 'Переписываю числа с пачки…';
-
-  @override
   String camLogInto(String slotInto) {
     return 'Записать $slotInto';
   }
@@ -2919,6 +2916,11 @@ class LRu extends L {
   }
 
   @override
+  String todayLabelTalk(String code) {
+    return 'Это этикетка продукта со штрихкодом $code, в базах его нет. Перепиши таблицу пищевой ценности с упаковки.';
+  }
+
+  @override
   String get todayLogFailed => 'Не вышло записать. Попробуй ещё раз.';
 
   @override
@@ -2966,6 +2968,9 @@ class LRu extends L {
 
   @override
   String get todayOutOfTokens => 'Токены кончились.';
+
+  @override
+  String get todayPhotoLabel => 'Фото этикетки';
 
   @override
   String get todayPhotoMeal => 'Фото';

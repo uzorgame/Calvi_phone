@@ -48,6 +48,13 @@
       }
     }
   },
+  "@todayLabelTalk": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "aboutContact": "Kontakt",
   "aboutDeveloper": "Deweloper",
   "aboutText": "Dziennik żywieniowy, który rozumie zwykłe zdania. Liczby liczy asystentka Nora, decyzje zostają przy tobie.",
@@ -247,7 +254,6 @@
   "camKcalPer": " {u} na {grams}",
   "camLabelAim": "wyceluj w tabelę wartości odżywczych",
   "camLabelNoShot": "Zdjęcie się nie udało. Spróbuj sfotografować etykietę jeszcze raz.",
-  "camLabelReading": "Przepisuję liczby z opakowania…",
   "camLogInto": "Zapisz {slotInto}",
   "camNoPermission": "Brak zgody na aparat. Można jej udzielić w ustawieniach telefonu.",
   "camNoScanner": "Ten telefon nie umie czytać kodów aparatem.",
@@ -894,6 +900,7 @@
   "todayFailedRetry": "Nie udało się. Spróbuj jeszcze raz za minutę.",
   "todayGoalMet": "Gratulacje! 🎉 Waga, o którą chodziło, jest twoja, cel zamknięty. I zrobiłeś to ty, nie aplikacja. Przestawiam teraz normę na utrzymanie, żeby wynik z tobą został.",
   "todayHowManyGrams": "Ile gramów było: {dish}?",
+  "todayLabelTalk": "To etykieta produktu o kodzie kreskowym {code}, żadna baza go nie zna. Przepisz tabelę wartości odżywczych z opakowania.",
   "todayLogFailed": "Nie udało się zapisać. Spróbuj jeszcze raz.",
   "todayLogged": "Zapisałam.",
   "todayLoggedAskWeight": "Zapisałam {slotInto}. Podaj wagę, jeśli chcesz dokładniej.",
@@ -907,6 +914,7 @@
   "todayOutOfBody": "Na razie milczę, ale wpisywać ręcznie możesz zawsze, i to za darmo. Subskrypcja włącza mnie z powrotem i kosztuje tyle, co trzy kawy miesięcznie.",
   "todayOutOfPlan": "Subskrypcja",
   "todayOutOfTokens": "Tokeny się skończyły.",
+  "todayPhotoLabel": "Zdjęcie etykiety",
   "todayPhotoMeal": "Zdjęcie",
   "todayQuestionClosed": "To pytanie jest już zamknięte. Podaj wagę słowami, jeśli trzeba.",
   "tourCamera": "Aparat",

@@ -691,9 +691,6 @@ class LUk extends L {
   String get camLabelNoShot => 'Кадр не вийшов. Спробуй зняти етикетку ще раз.';
 
   @override
-  String get camLabelReading => 'Переписую числа з пачки…';
-
-  @override
   String camLogInto(String slotInto) {
     return 'Записати $slotInto';
   }
@@ -1903,13 +1900,13 @@ class LUk extends L {
   String get planPerkMemorySub => 'нове вона запамʼятовує в розмові, а розмова коштує токен';
 
   @override
-  String get planPerkPhoto => 'Фото страв без ліку';
+  String get planPerkPhoto => 'Фото страв без лімітів';
 
   @override
   String get planPerkPhotoSub => 'зараз знімок коштує два токени';
 
   @override
-  String get planPerkRecipes => 'Рецепти від Нори без ліку';
+  String get planPerkRecipes => 'Рецепти від Нори без лімітів';
 
   @override
   String get planPerkRecipesSub => 'зараз підбір страв коштує один токен';
@@ -2915,6 +2912,11 @@ class LUk extends L {
   }
 
   @override
+  String todayLabelTalk(String code) {
+    return 'Це етикетка продукту зі штрихкодом $code, у базах його немає. Перепиши таблицю поживності з пачки.';
+  }
+
+  @override
   String get todayLogFailed => 'Не вийшло записати. Спробуй ще раз.';
 
   @override
@@ -2962,6 +2964,9 @@ class LUk extends L {
 
   @override
   String get todayOutOfTokens => 'Токени скінчились.';
+
+  @override
+  String get todayPhotoLabel => 'Фото етикетки';
 
   @override
   String get todayPhotoMeal => 'Фото';

@@ -226,11 +226,16 @@ class CalviApi {
     String place = 'today',
     bool card = false,
     bool voice = false,
+    /* Штрихкод зі сканера, коли знімок це етикетка до нього. Код зчитав сам
+       телефон, і він точніший за будь-що прочитане моделлю з кадру: таблиця з
+       пачки ляже в спільну базу саме під ним. */
+    String? barcode,
   }) async {
     final body = await _post('/v1/chat', {
       'text': text,
       'slot': slot,
       'day': day,
+      if (barcode != null) 'barcode': barcode,
       /* Звідки пишуть. Нора одна, але на сторінці тижня сервер докладає їй
          бриф тижня і власний розбір: там вона бачить більше. */
       if (place != 'today') 'place': place,
@@ -545,27 +550,6 @@ class CalviApi {
   }
 
   /// Етикетка з тієї самої пачки, що й штрихкод.
-  ///
-  /// Основний шлях для всього, чого немає у відкритих базах, а немає там
-  /// більшості. Модель не рахує, а переписує надруковані цифри, і прочитане
-  /// лягає в спільну базу за цим кодом: наступному воно дістанеться задарма.
-  ///
-  /// Токена не коштує.
-  Future<LabelRead> readLabel({required String barcode, required Shot shot}) async {
-    final body = await _post('/v1/foods/label', {
-      'barcode': barcode,
-      'image': {'mime': shot.mime, 'data': base64Encode(shot.bytes)},
-      'lang': dataLang,
-    }, wait: _thinking);
-
-    final food = body['food'] as Map<String, dynamic>?;
-    if (food == null) {
-      return LabelRead(trouble: body['trouble'] as String? ?? dataL.photoNotRecognized);
-    }
-
-    return LabelRead(food: _hit(body, food));
-  }
-
   /// Рядок довідника разом із тим, що сервер сказав про його повноту.
   FoodHit _hit(Map<String, dynamic> body, Map<String, dynamic> food) => FoodHit.fromJson(
     food,
@@ -1570,22 +1554,6 @@ class FoodHit {
       tier: tier.scaled(k),
     );
   }
-}
-
-/// Чим скінчилось читання етикетки.
-class LabelRead {
-  const LabelRead({this.food, this.trouble, this.failure});
-
-  /// Прочитане, якщо воно витримало перевірку арифметикою.
-  final FoodHit? food;
-
-  /// Чому не вийшло, словами від сервера: таблиці не видно, цифри не сходяться.
-  /// Це про сам знімок, і людина може виправити це, перезнявши.
-  final String? trouble;
-
-  /// Не вийшло з іншої причини: мережа, сесія, сервер. Слова для цього добирає
-  /// екран, бо тільки він знає мову застосунку.
-  final ApiFailure? failure;
 }
 
 /// Ключ знімка форми підписки в місцевій базі. Знімок, а не таблиця: це

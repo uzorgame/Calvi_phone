@@ -678,6 +678,13 @@
       }
     }
   },
+  "@todayLabelTalk": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "@todayLoggedAskWeight": {
     "placeholders": {
       "slotInto": {
@@ -1008,7 +1015,6 @@
   "camKcalPer": " {u} por {grams}",
   "camLabelAim": "aponte para a tabela nutricional",
   "camLabelNoShot": "A foto não saiu. Tente fotografar o rótulo de novo.",
-  "camLabelReading": "Copiando os números do pacote…",
   "camLogInto": "Anotar {slotInto}",
   "camNoPermission": "Sem permissão para a câmera. Você pode liberar nas configurações do telefone.",
   "camNoScanner": "Este telefone não consegue ler códigos com a câmera.",
@@ -1655,6 +1661,7 @@
   "todayFailedRetry": "Não deu certo. Tente daqui a um minuto.",
   "todayGoalMet": "Parabéns! 🎉 O peso que você queria é seu e a meta está fechada. E foi você que conseguiu, não o app. Agora passo a sua norma para manutenção, para o resultado ficar.",
   "todayHowManyGrams": "Quantos gramas eram de {dish}?",
+  "todayLabelTalk": "É o rótulo de um produto com o código de barras {code}, nenhuma base o conhece. Copia a tabela nutricional da embalagem.",
   "todayLogFailed": "Não consegui anotar. Tente de novo.",
   "todayLogged": "Anotado.",
   "todayLoggedAskWeight": "Anotado {slotInto}. Me diga o peso se quiser exato.",
@@ -1668,6 +1675,7 @@
   "todayOutOfBody": "Por enquanto fico quieta, mas anotar na mão dá sempre, e é de graça. A assinatura me liga de volta e custa como três cafés por mês.",
   "todayOutOfPlan": "Assinatura",
   "todayOutOfTokens": "Os tokens acabaram.",
+  "todayPhotoLabel": "Foto do rótulo",
   "todayPhotoMeal": "Foto",
   "todayQuestionClosed": "Essa pergunta já está fechada. Diga o peso em palavras, se precisar.",
   "tourCamera": "Câmara",

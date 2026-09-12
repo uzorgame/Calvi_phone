@@ -70,10 +70,14 @@ class SyncService with WidgetsBindingObserver {
     /// День, який відкритий на екрані, а не сьогодні: запис за вівторок має
     /// лягти у вівторок і на телефоні, і на сервері.
     DateTime? at,
+    /// Штрихкод зі сканера, коли знімок це етикетка до нього: прочитане з пачки
+    /// ляже в спільну базу під цим кодом.
+    String? barcode,
   }) => ChatRepository(db, _api).send(
     text: text,
     slot: slot,
     image: image,
+    barcode: barcode,
     history: history,
     place: place,
     card: card,

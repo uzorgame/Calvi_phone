@@ -10,6 +10,9 @@
   "todayBarcode": "Code-barres",
   "todayCodeTalk": "J'ai scanné le code-barres {code} et aucune base ne le connaît. Ne note rien : demande-moi ce qu'est ce produit ou dis-moi comment le compter.",
   "@todayCodeTalk": { "placeholders": { "code": { "type": "String" } } },
+  "todayPhotoLabel": "Photo de l'étiquette",
+  "todayLabelTalk": "C'est l'étiquette d'un produit au code-barres {code}, aucune base ne le connaît. Recopie le tableau nutritionnel de l'emballage.",
+  "@todayLabelTalk": { "placeholders": { "code": { "type": "String" } } },
 
   "todayLoggedInto": "Noté {slotInto} : {dish}.",
   "@todayLoggedInto": {

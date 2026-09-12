@@ -685,9 +685,6 @@ class LEs extends L {
   String get camLabelNoShot => 'La foto no salió. Prueba a fotografiar la etiqueta otra vez.';
 
   @override
-  String get camLabelReading => 'Copiando las cifras del paquete…';
-
-  @override
   String camLogInto(String slotInto) {
     return 'Registrarlo $slotInto';
   }
@@ -2898,6 +2895,11 @@ class LEs extends L {
   }
 
   @override
+  String todayLabelTalk(String code) {
+    return 'Es la etiqueta de un producto con código de barras $code, ninguna base lo conoce. Copia la tabla nutricional del envase.';
+  }
+
+  @override
   String get todayLogFailed => 'No se pudo registrar. Inténtalo otra vez.';
 
   @override
@@ -2946,6 +2948,9 @@ class LEs extends L {
 
   @override
   String get todayOutOfTokens => 'Se acabaron los tokens.';
+
+  @override
+  String get todayPhotoLabel => 'Foto de la etiqueta';
 
   @override
   String get todayPhotoMeal => 'Foto';

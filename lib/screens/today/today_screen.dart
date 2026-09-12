@@ -598,14 +598,17 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
 
   /// Те саме, що [_say], але з кадром: знімок їде до моделі разом із
   /// повідомленням, і відповідь приходить у ту саму розмову.
-  void _shotToNora(Msg mine, String reply, Shot? shot) {
+  /* `ask` це те, що поїде Норі, коли воно довше за підпис під знімком у чаті:
+     бульбашка каже «Фото етикетки», а модель має почути ще й код і що з ним
+     робити. `barcode` їде окремим полем: прочитане з пачки ляже в базу під ним. */
+  void _shotToNora(Msg mine, String reply, Shot? shot, {String? ask, String? barcode}) {
     final waiting = _wait(mine);
 
     final scope = AppScope.of(context);
     final sync = scope.sync;
 
     if (scope.real && sync != null && shot != null) {
-      unawaited(_askNora(sync, mine.text, image: shot, waiting: waiting));
+      unawaited(_askNora(sync, ask ?? mine.text, image: shot, barcode: barcode, waiting: waiting));
       return;
     }
 
@@ -785,6 +788,8 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
     SyncService sync,
     String text, {
     Shot? image,
+    /// Штрихкод, зчитаний сканером, коли знімок це етикетка до нього.
+    String? barcode,
     required Msg waiting,
     String? slotId,
     String? draft,
@@ -798,6 +803,7 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
         text: text,
         slot: slotId ?? _nextSlotId(_dayNow(AppScope.of(context))),
         image: image,
+        barcode: barcode,
         /* Запис у картку їде без історії чату і з ознакою картки.
          *
          * Історія тут не контекст, а пастка: «мідії 300 грам», вписані в
@@ -1495,6 +1501,17 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
                 _logScanned(slot, code, food);
               case CodeTalk(:final code):
                 _codeToNora(code);
+              /* Етикетка того, чого не знає жодна база: та сама дорога, що в
+                 кадру страви, тільки Нора не оцінює, а переписує, і код їде
+                 разом зі знімком, щоб прочитане лягло в базу під ним. */
+              case LabelShot(:final code, :final shot):
+                _shotToNora(
+                  msg(from: MsgFrom.me, kind: MsgKind.photo, text: l.todayPhotoLabel),
+                  noraLabel,
+                  shot,
+                  ask: l.todayLabelTalk(code),
+                  barcode: code,
+                );
             }
           },
         ),

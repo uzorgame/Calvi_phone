@@ -686,9 +686,6 @@ class LIt extends L {
   String get camLabelNoShot => 'La foto non è riuscita. Prova a fotografare di nuovo l\'etichetta.';
 
   @override
-  String get camLabelReading => 'Copio i valori dalla confezione…';
-
-  @override
   String camLogInto(String slotInto) {
     return 'Registralo $slotInto';
   }
@@ -2902,6 +2899,11 @@ class LIt extends L {
   }
 
   @override
+  String todayLabelTalk(String code) {
+    return 'È l\'etichetta di un prodotto con codice a barre $code, nessuna base lo conosce. Trascrivi la tabella nutrizionale dalla confezione.';
+  }
+
+  @override
   String get todayLogFailed => 'Non sono riuscita a registrarlo. Riprova.';
 
   @override
@@ -2950,6 +2952,9 @@ class LIt extends L {
 
   @override
   String get todayOutOfTokens => 'I token sono finiti.';
+
+  @override
+  String get todayPhotoLabel => 'Foto dell\'etichetta';
 
   @override
   String get todayPhotoMeal => 'Foto';

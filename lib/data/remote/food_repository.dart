@@ -103,18 +103,6 @@ class FoodRepository {
       });
     }
   }
-
-  /// Етикетка з тієї самої пачки. Не коштує токена і лягає в спільну базу.
-  ///
-  /// Причина невдачі доїжджає цілою, як і в скані: «не видно таблиці» і «немає
-  /// мережі» це різні речі, і виправляють їх по-різному.
-  Future<LabelRead> readLabel({required String barcode, required Shot shot}) async {
-    try {
-      return await api.readLabel(barcode: barcode, shot: shot);
-    } on ApiFailure catch (e) {
-      return LabelRead(failure: e);
-    }
-  }
 }
 
 /// Чим скінчився скан штрихкоду.

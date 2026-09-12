@@ -1,5 +1,12 @@
 {
   "@@locale": "cs",
+  "@todayLabelTalk": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "aboutContact": "Kontakt",
   "aboutDeveloper": "Vývojář",
   "aboutText": "Deník jídla, který rozumí obyčejným větám. Nora dělá počty, rozhodnutí zůstávají tvoje.",
@@ -199,7 +206,6 @@
   "camKcalPer": " {u} na {grams}",
   "camLabelAim": "miř na tabulku výživových hodnot",
   "camLabelNoShot": "Snímek se nepovedl. Zkus etiketu vyfotit znovu.",
-  "camLabelReading": "Opisuji čísla z obalu…",
   "camLogInto": "Zapsat {slotInto}",
   "camNoPermission": "Chybí povolení k fotoaparátu. Můžeš ho dát v nastavení telefonu.",
   "camNoScanner": "Tenhle telefon neumí číst kódy fotoaparátem.",
@@ -846,6 +852,7 @@
   "todayFailedRetry": "Nevyšlo to. Zkus to za minutu znovu.",
   "todayGoalMet": "Gratuluji! 🎉 Vytoužená váha je tvoje a cíl je uzavřený. A je to tvoje zásluha, ne aplikace. Teď přepínám tvou normu na udržování, aby ti výsledek zůstal.",
   "todayHowManyGrams": "Kolik gramů bylo {dish}?",
+  "todayLabelTalk": "Je to etiketa výrobku s čárovým kódem {code}, žádná databáze ho nezná. Opiš tabulku nutričních hodnot z obalu.",
   "todayLogFailed": "Nepodařilo se to zapsat. Zkus to znovu.",
   "todayLogged": "Zapsáno.",
   "todayLoggedAskWeight": "Zapsáno {slotInto}. Řekni váhu, pokud to chceš přesně.",
@@ -859,6 +866,7 @@
   "todayOutOfBody": "Teď chvíli mlčím, ale zapisovat ručně můžeš pořád a je to zdarma. Předplatné mě zapne zpátky a stojí asi tři kávy měsíčně.",
   "todayOutOfPlan": "Předplatné",
   "todayOutOfTokens": "Tokeny došly.",
+  "todayPhotoLabel": "Fotka etikety",
   "todayPhotoMeal": "Foto",
   "todayQuestionClosed": "Ta otázka je už uzavřená. Když je potřeba, řekni váhu slovy.",
   "tourCamera": "Fotoaparát",

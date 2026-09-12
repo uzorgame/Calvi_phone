@@ -692,9 +692,6 @@ class LPl extends L {
   String get camLabelNoShot => 'Zdjęcie się nie udało. Spróbuj sfotografować etykietę jeszcze raz.';
 
   @override
-  String get camLabelReading => 'Przepisuję liczby z opakowania…';
-
-  @override
   String camLogInto(String slotInto) {
     return 'Zapisz $slotInto';
   }
@@ -2922,6 +2919,11 @@ class LPl extends L {
   }
 
   @override
+  String todayLabelTalk(String code) {
+    return 'To etykieta produktu o kodzie kreskowym $code, żadna baza go nie zna. Przepisz tabelę wartości odżywczych z opakowania.';
+  }
+
+  @override
   String get todayLogFailed => 'Nie udało się zapisać. Spróbuj jeszcze raz.';
 
   @override
@@ -2970,6 +2972,9 @@ class LPl extends L {
 
   @override
   String get todayOutOfTokens => 'Tokeny się skończyły.';
+
+  @override
+  String get todayPhotoLabel => 'Zdjęcie etykiety';
 
   @override
   String get todayPhotoMeal => 'Zdjęcie';

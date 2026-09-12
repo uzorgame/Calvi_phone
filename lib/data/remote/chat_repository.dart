@@ -53,6 +53,8 @@ class ChatRepository {
     String place = 'today',
     bool card = false,
     bool voice = false,
+    /// Штрихкод зі сканера, коли знімок це етикетка до нього.
+    String? barcode,
   }) async {
     final when = at ?? DateTime.now();
 
@@ -64,6 +66,7 @@ class ChatRepository {
       // cannot charge twice for one sentence.
       idempotencyKey: _uuid.v4(),
       image: image,
+      barcode: barcode,
       history: history,
       place: place,
       card: card,

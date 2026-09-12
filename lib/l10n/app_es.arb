@@ -678,6 +678,13 @@
       }
     }
   },
+  "@todayLabelTalk": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "@todayLoggedAskWeight": {
     "placeholders": {
       "slotInto": {
@@ -1008,7 +1015,6 @@
   "camKcalPer": " {u} por {grams}",
   "camLabelAim": "apunta a la tabla nutricional",
   "camLabelNoShot": "La foto no salió. Prueba a fotografiar la etiqueta otra vez.",
-  "camLabelReading": "Copiando las cifras del paquete…",
   "camLogInto": "Registrarlo {slotInto}",
   "camNoPermission": "Sin permiso de cámara. Puedes darlo en los ajustes del teléfono.",
   "camNoScanner": "Este teléfono no puede leer códigos con la cámara.",
@@ -1655,6 +1661,7 @@
   "todayFailedRetry": "No salió. Prueba dentro de un minuto.",
   "todayGoalMet": "¡Enhorabuena! 🎉 El peso que querías ya es tuyo y el objetivo está cerrado. Y lo has hecho tú, no la app. Ahora paso tu norma a mantenimiento, para que el resultado se quede.",
   "todayHowManyGrams": "¿Cuántos gramos eran de {dish}?",
+  "todayLabelTalk": "Es la etiqueta de un producto con código de barras {code}, ninguna base lo conoce. Copia la tabla nutricional del envase.",
   "todayLogFailed": "No se pudo registrar. Inténtalo otra vez.",
   "todayLogged": "Registrado.",
   "todayLoggedAskWeight": "Registrado {slotInto}. Dime el peso si lo quieres exacto.",
@@ -1668,6 +1675,7 @@
   "todayOutOfBody": "De momento callo, pero apuntar a mano se puede siempre, y es gratis. La suscripción me vuelve a encender y cuesta como tres cafés al mes.",
   "todayOutOfPlan": "Suscripción",
   "todayOutOfTokens": "Se acabaron los tokens.",
+  "todayPhotoLabel": "Foto de la etiqueta",
   "todayPhotoMeal": "Foto",
   "todayQuestionClosed": "Esa pregunta ya está cerrada. Di el peso con palabras si hace falta.",
   "tourCamera": "Cámara",

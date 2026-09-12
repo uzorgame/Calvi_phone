@@ -53,6 +53,17 @@ class CodeTalk extends CamShot {
   final String code;
 }
 
+/// Знімок етикетки того, чого не знає жодна база. Їде в чат до Нори разом зі
+/// штрихкодом, як і кадр страви: вона переписує таблицю поживності й відповідає
+/// там, а прочитане лягає в спільну базу під цим кодом, і наступному, хто
+/// візьме цю саму пачку, дістанеться задарма і без зйомки.
+class LabelShot extends CamShot {
+  const LabelShot({required this.code, required this.shot});
+
+  final String code;
+  final Shot shot;
+}
+
 class _ModeInfo {
   const _ModeInfo({required this.id, required this.icon, required this.title});
 
@@ -388,14 +399,19 @@ class _CameraScreenState extends State<CameraScreen> {
     _handLens(fromScanner: true);
   }
 
-  /// Знімає етикетку і віддає її моделі переписати.
+  /// Знімає етикетку і віддає її в чат.
   ///
-  /// Не оцінка, а переписування: цифри надрукував виробник, і робота моделі
-  /// перенести їх, а не порахувати. Прочитане лягає в спільну базу за цим
-  /// штрихкодом, тому наступному воно дістанеться задарма і без зйомки.
+  /// У чат, а не сюди. Доти сканер сам ходив на сервер, переписував числа і
+  /// показував їх карткою тут, і людина стояла з піднятим телефоном ті десять
+  /// секунд, поки модель думає. Тепер кадр їде повідомленням до Нори, як і кадр
+  /// страви: видошукач закривається за ним, чат відкривається з уже надісланим
+  /// фото, і відповідь приходить туди, а чат уміє чекати сам.
+  ///
+  /// Це переписування, а не оцінка: цифри надрукував виробник, і робота моделі
+  /// перенести їх, а не порахувати. Штрихкод їде разом зі знімком, і прочитане
+  /// лягає в спільну базу під ним.
   Future<void> _readLabel() async {
     final code = _code;
-    final sync = AppScope.of(context).sync;
     if (code == null || _reading) return;
 
     HapticFeedback.mediumImpact();
@@ -405,7 +421,7 @@ class _CameraScreenState extends State<CameraScreen> {
     final shot = _shot;
     if (!mounted) return;
 
-    if (shot == null || sync == null) {
+    if (shot == null) {
       setState(() {
         _reading = false;
         _aiming = false;
@@ -418,46 +434,7 @@ class _CameraScreenState extends State<CameraScreen> {
       return;
     }
 
-    final read = await sync.foods.readLabel(barcode: code, shot: shot);
-    if (!mounted) return;
-
-    /* Знімок далі не потрібен нікому: числа з нього вже зняті, а тримати кадр
-       упаковки в памʼяті означало б віддати його потім у чат замість страви. */
-    _shot = null;
-
-    setState(() {
-      _reading = false;
-      _aiming = false;
-      // Лінза вертається сканеру, і теж по черзі, а не миттю.
-      _lensFree = false;
-      _done = true;
-
-      final food = read.food;
-      if (food != null) {
-        _food = food;
-        _scan = food.complete ? Scanned.found : Scanned.partial;
-        _trouble = null;
-        return;
-      }
-
-      /* Не вийшло. Причина стоїть на картці, і вона різна: таблиці не видно це
-         одне, а немає мережі зовсім інше, і перезнімати в другому випадку
-         немає сенсу. */
-      final l = L.of(context);
-      _scan = Scanned.unknown;
-      _trouble =
-          read.trouble ??
-          switch (read.failure?.code) {
-            'offline' => l.camOffline,
-            'slow' => l.camSlow,
-            _ => switch (read.failure?.status) {
-              401 || 403 => l.camSignedOut,
-              _ => l.camServerDown,
-            },
-          };
-    });
-
-    _handLens(fromScanner: false);
+    widget.onSend(LabelShot(code: code, shot: shot));
   }
 
   /// Перемикає режим і передає камеру від одного читача до іншого.
@@ -824,11 +801,7 @@ class _CameraScreenState extends State<CameraScreen> {
                * і третю спробу. */
               if (_aiming || _busy || _reading)
                 Text(
-                  _reading
-                      ? l.camLabelReading
-                      : _aiming
-                      ? l.camLabelAim
-                      : l.camReading,
+                  _aiming && !_reading ? l.camLabelAim : l.camReading,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: _ink.withValues(alpha: 0.78),

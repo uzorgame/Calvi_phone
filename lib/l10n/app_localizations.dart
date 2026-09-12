@@ -1308,12 +1308,6 @@ abstract class L {
   /// **'The shot did not come out. Try photographing the label again.'**
   String get camLabelNoShot;
 
-  /// No description provided for @camLabelReading.
-  ///
-  /// In en, this message translates to:
-  /// **'Copying the figures off the packet…'**
-  String get camLabelReading;
-
   /// The whole phrase comes from the shared slot phrases, because Ukrainian declines the card name after the preposition.
   ///
   /// In en, this message translates to:
@@ -5190,6 +5184,12 @@ abstract class L {
   /// **'How many grams was the {dish}?'**
   String todayHowManyGrams(String dish);
 
+  /// No description provided for @todayLabelTalk.
+  ///
+  /// In en, this message translates to:
+  /// **'This is the label of a product with barcode {code}, no base knows it. Copy the nutrition table from the pack.'**
+  String todayLabelTalk(String code);
+
   /// No description provided for @todayLogFailed.
   ///
   /// In en, this message translates to:
@@ -5267,6 +5267,12 @@ abstract class L {
   /// In en, this message translates to:
   /// **'The tokens are gone.'**
   String get todayOutOfTokens;
+
+  /// No description provided for @todayPhotoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Label photo'**
+  String get todayPhotoLabel;
 
   /// No description provided for @todayPhotoMeal.
   ///

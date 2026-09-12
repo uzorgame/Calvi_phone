@@ -688,9 +688,6 @@ class LDe extends L {
   String get camLabelNoShot => 'Das Foto ist nichts geworden. Versuch das Etikett noch einmal.';
 
   @override
-  String get camLabelReading => 'Übernehme die Werte von der Packung…';
-
-  @override
   String camLogInto(String slotInto) {
     return 'Eintragen $slotInto';
   }
@@ -2912,6 +2909,11 @@ class LDe extends L {
   }
 
   @override
+  String todayLabelTalk(String code) {
+    return 'Das ist das Etikett eines Produkts mit dem Barcode $code, keine Datenbank kennt es. Übertrage die Nährwerttabelle von der Packung.';
+  }
+
+  @override
   String get todayLogFailed => 'Eintragen ging nicht. Versuch es noch einmal.';
 
   @override
@@ -2961,6 +2963,9 @@ class LDe extends L {
 
   @override
   String get todayOutOfTokens => 'Die Tokens sind aufgebraucht.';
+
+  @override
+  String get todayPhotoLabel => 'Etikettenfoto';
 
   @override
   String get todayPhotoMeal => 'Foto';

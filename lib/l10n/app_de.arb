@@ -678,6 +678,13 @@
       }
     }
   },
+  "@todayLabelTalk": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "@todayLoggedAskWeight": {
     "placeholders": {
       "slotInto": {
@@ -1008,7 +1015,6 @@
   "camKcalPer": " {u} pro {grams}",
   "camLabelAim": "halte auf die Nährwerttabelle",
   "camLabelNoShot": "Das Foto ist nichts geworden. Versuch das Etikett noch einmal.",
-  "camLabelReading": "Übernehme die Werte von der Packung…",
   "camLogInto": "Eintragen {slotInto}",
   "camNoPermission": "Keine Kameraberechtigung. Du kannst sie in den Einstellungen des Telefons geben.",
   "camNoScanner": "Dieses Telefon kann mit der Kamera keine Codes lesen.",
@@ -1655,6 +1661,7 @@
   "todayFailedRetry": "Hat nicht geklappt. Versuch es in einer Minute.",
   "todayGoalMet": "Glückwunsch! 🎉 Dein Wunschgewicht ist da, das Ziel ist geschafft. Und geschafft hast du es, nicht die App. Jetzt stelle ich deine Norm aufs Halten um, damit das Ergebnis bleibt.",
   "todayHowManyGrams": "Wie viel Gramm waren es bei {dish}?",
+  "todayLabelTalk": "Das ist das Etikett eines Produkts mit dem Barcode {code}, keine Datenbank kennt es. Übertrage die Nährwerttabelle von der Packung.",
   "todayLogFailed": "Eintragen ging nicht. Versuch es noch einmal.",
   "todayLogged": "Eingetragen.",
   "todayLoggedAskWeight": "Eingetragen {slotInto}. Sag mir das Gewicht, wenn du es genau willst.",
@@ -1668,6 +1675,7 @@
   "todayOutOfBody": "Ich bin erst mal still, aber von Hand eintragen geht immer, und das kostet nichts. Ein Abo schaltet mich wieder ein und kostet so viel wie drei Kaffee im Monat.",
   "todayOutOfPlan": "Abo",
   "todayOutOfTokens": "Die Tokens sind aufgebraucht.",
+  "todayPhotoLabel": "Etikettenfoto",
   "todayPhotoMeal": "Foto",
   "todayQuestionClosed": "Diese Frage ist schon geschlossen. Sag das Gewicht mit Worten, falls nötig.",
   "tourCamera": "Kamera",

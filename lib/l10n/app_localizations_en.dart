@@ -683,9 +683,6 @@ class LEn extends L {
   String get camLabelNoShot => 'The shot did not come out. Try photographing the label again.';
 
   @override
-  String get camLabelReading => 'Copying the figures off the packet…';
-
-  @override
   String camLogInto(String slotInto) {
     return 'Log it $slotInto';
   }
@@ -2895,6 +2892,11 @@ class LEn extends L {
   }
 
   @override
+  String todayLabelTalk(String code) {
+    return 'This is the label of a product with barcode $code, no base knows it. Copy the nutrition table from the pack.';
+  }
+
+  @override
   String get todayLogFailed => 'Could not log it. Try again.';
 
   @override
@@ -2943,6 +2945,9 @@ class LEn extends L {
 
   @override
   String get todayOutOfTokens => 'The tokens are gone.';
+
+  @override
+  String get todayPhotoLabel => 'Label photo';
 
   @override
   String get todayPhotoMeal => 'Photo';

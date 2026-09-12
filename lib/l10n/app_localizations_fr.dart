@@ -690,9 +690,6 @@ class LFr extends L {
   String get camLabelNoShot => 'La photo n\'a pas marché. Réessaie l\'étiquette.';
 
   @override
-  String get camLabelReading => 'Je recopie les chiffres du paquet…';
-
-  @override
   String camLogInto(String slotInto) {
     return 'L\'enregistrer $slotInto';
   }
@@ -2914,6 +2911,11 @@ class LFr extends L {
   }
 
   @override
+  String todayLabelTalk(String code) {
+    return 'C\'est l\'étiquette d\'un produit au code-barres $code, aucune base ne le connaît. Recopie le tableau nutritionnel de l\'emballage.';
+  }
+
+  @override
   String get todayLogFailed => 'Je n\'ai pas pu le noter. Réessaie.';
 
   @override
@@ -2962,6 +2964,9 @@ class LFr extends L {
 
   @override
   String get todayOutOfTokens => 'Les jetons sont épuisés.';
+
+  @override
+  String get todayPhotoLabel => 'Photo de l\'étiquette';
 
   @override
   String get todayPhotoMeal => 'Photo';

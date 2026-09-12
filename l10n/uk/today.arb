@@ -7,6 +7,9 @@
   "todayBarcode": "Штрихкод",
   "todayCodeTalk": "Відсканував штрихкод {code}, у базах його немає. Нічого не записуй: розпитай мене про цей продукт або підкажи, як його порахувати.",
   "@todayCodeTalk": { "placeholders": { "code": { "type": "String" } } },
+  "todayPhotoLabel": "Фото етикетки",
+  "todayLabelTalk": "Це етикетка продукту зі штрихкодом {code}, у базах його немає. Перепиши таблицю поживності з пачки.",
+  "@todayLabelTalk": { "placeholders": { "code": { "type": "String" } } },
 
   "todayLoggedInto": "Записала {slotInto}: {dish}.",
   "todayLoggedIntoWithNumbers": "Записала {slotInto}: {dish}, {kcal} за {grams}.",

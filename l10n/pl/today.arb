@@ -6,6 +6,9 @@
   "todayPhotoMeal": "Zdjęcie",
   "todayBarcode": "Kod kreskowy",
   "todayCodeTalk": "Zeskanowałem kod {code}, nie ma go w bazach. Nic nie zapisuj: dopytaj mnie o ten produkt albo podpowiedz, jak go policzyć.",
+  "todayPhotoLabel": "Zdjęcie etykiety",
+  "todayLabelTalk": "To etykieta produktu o kodzie kreskowym {code}, żadna baza go nie zna. Przepisz tabelę wartości odżywczych z opakowania.",
+  "@todayLabelTalk": { "placeholders": { "code": { "type": "String" } } },
 
   "todayLoggedInto": "Zapisałam {slotInto}: {dish}.",
   "todayLoggedIntoWithNumbers": "Zapisałam {slotInto}: {dish}, {kcal} za {grams}.",

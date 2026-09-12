@@ -684,9 +684,6 @@ class LPt extends L {
   String get camLabelNoShot => 'A foto não saiu. Tente fotografar o rótulo de novo.';
 
   @override
-  String get camLabelReading => 'Copiando os números do pacote…';
-
-  @override
   String camLogInto(String slotInto) {
     return 'Anotar $slotInto';
   }
@@ -2900,6 +2897,11 @@ class LPt extends L {
   }
 
   @override
+  String todayLabelTalk(String code) {
+    return 'É o rótulo de um produto com o código de barras $code, nenhuma base o conhece. Copia a tabela nutricional da embalagem.';
+  }
+
+  @override
   String get todayLogFailed => 'Não consegui anotar. Tente de novo.';
 
   @override
@@ -2948,6 +2950,9 @@ class LPt extends L {
 
   @override
   String get todayOutOfTokens => 'Os tokens acabaram.';
+
+  @override
+  String get todayPhotoLabel => 'Foto do rótulo';
 
   @override
   String get todayPhotoMeal => 'Foto';

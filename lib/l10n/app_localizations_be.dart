@@ -691,9 +691,6 @@ class LBe extends L {
   String get camLabelNoShot => 'Кадр не выйшаў. Паспрабуй зняць этыкетку яшчэ раз.';
 
   @override
-  String get camLabelReading => 'Перапісваю лічбы з пачкі…';
-
-  @override
   String camLogInto(String slotInto) {
     return 'Запісаць $slotInto';
   }
@@ -2917,6 +2914,11 @@ class LBe extends L {
   }
 
   @override
+  String todayLabelTalk(String code) {
+    return 'Гэта этыкетка прадукту са штрыхкодам $code, у базах яго няма. Перапішы табліцу пажыўнасці з упакоўкі.';
+  }
+
+  @override
   String get todayLogFailed => 'Не выйшла запісаць. Паспрабуй яшчэ раз.';
 
   @override
@@ -2965,6 +2967,9 @@ class LBe extends L {
 
   @override
   String get todayOutOfTokens => 'Токены скончыліся.';
+
+  @override
+  String get todayPhotoLabel => 'Фота этыкеткі';
 
   @override
   String get todayPhotoMeal => 'Фота';

@@ -11,6 +11,9 @@
   "todayBarcode": "Barcode",
   "todayCodeTalk": "I scanned barcode {code} and no base knows it. Do not log anything: ask me about this product or tell me how to count it.",
   "@todayCodeTalk": { "placeholders": { "code": { "type": "String" } } },
+  "todayPhotoLabel": "Label photo",
+  "todayLabelTalk": "This is the label of a product with barcode {code}, no base knows it. Copy the nutrition table from the pack.",
+  "@todayLabelTalk": { "placeholders": { "code": { "type": "String" } } },
 
   "todayLoggedInto": "Logged {slotInto}: {dish}.",
   "@todayLoggedInto": {

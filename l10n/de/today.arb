@@ -10,6 +10,9 @@
   "todayBarcode": "Barcode",
   "todayCodeTalk": "Ich habe den Barcode {code} gescannt, und keine Datenbank kennt ihn. Trag nichts ein: frag mich zu diesem Produkt oder sag mir, wie ich es rechnen soll.",
   "@todayCodeTalk": { "placeholders": { "code": { "type": "String" } } },
+  "todayPhotoLabel": "Etikettenfoto",
+  "todayLabelTalk": "Das ist das Etikett eines Produkts mit dem Barcode {code}, keine Datenbank kennt es. Übertrage die Nährwerttabelle von der Packung.",
+  "@todayLabelTalk": { "placeholders": { "code": { "type": "String" } } },
 
   "todayLoggedInto": "Eingetragen {slotInto}: {dish}.",
   "@todayLoggedInto": {

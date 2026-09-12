@@ -835,6 +835,13 @@
       }
     }
   },
+  "@todayLabelTalk": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "@todayLoggedAskWeight": {
     "placeholders": {
       "slotInto": {
@@ -1168,7 +1175,6 @@
   "camKcalPer": " {u} per {grams}",
   "camLabelAim": "aim at the nutrition table",
   "camLabelNoShot": "The shot did not come out. Try photographing the label again.",
-  "camLabelReading": "Copying the figures off the packet…",
   "camLogInto": "Log it {slotInto}",
   "camNoPermission": "No camera permission. You can grant it in the phone's settings.",
   "camNoScanner": "This phone cannot read codes with the camera.",
@@ -1815,6 +1821,7 @@
   "todayFailedRetry": "Did not work. Try again in a minute.",
   "todayGoalMet": "Congratulations! 🎉 The weight you wanted is yours, and the goal is closed. And you did that, not the app. Now I am moving your norm to holding, so the result stays with you.",
   "todayHowManyGrams": "How many grams was the {dish}?",
+  "todayLabelTalk": "This is the label of a product with barcode {code}, no base knows it. Copy the nutrition table from the pack.",
   "todayLogFailed": "Could not log it. Try again.",
   "todayLogged": "Logged.",
   "todayLoggedAskWeight": "Logged {slotInto}. Tell me the weight if you want it exact.",
@@ -1828,6 +1835,7 @@
   "todayOutOfBody": "I am quiet for now, but writing entries by hand is always there, and it is free. A subscription switches me back on, and costs about three coffees a month.",
   "todayOutOfPlan": "Subscription",
   "todayOutOfTokens": "The tokens are gone.",
+  "todayPhotoLabel": "Label photo",
   "todayPhotoMeal": "Photo",
   "todayQuestionClosed": "That question is already closed. Say the weight in words if you need to.",
   "tourCamera": "Camera",

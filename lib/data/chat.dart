@@ -293,6 +293,12 @@ String get noraBarcode => demoDish(
   'Записала в обід: Йогурт грецький 5%, 231 ккал за 130 г.\nСклад: молоко знежирене, закваска, білок молочний.',
   'Logged into lunch: Greek yoghurt 5%, 231 kcal per 130 g.\nIngredients: skimmed milk, cultures, milk protein.',
 );
+/* Етикетка до незнайомого коду: не оцінка, а переписане з пачки, тому без
+   «приблизно» і без запису. Скільки зʼїдено, знає лише людина. */
+String get noraLabel => demoDish(
+  'Переписала з пачки: Гранола з горіхами й медом, 462 ккал на 100 г, білок 11 г, жири 20 г, вуглеводи 57 г. Штрихкод запамʼятала, наступного разу сканер знайде її сам. Скажи, скільки зʼїв, і я запишу.',
+  'Copied from the pack: Granola with nuts and honey, 462 kcal per 100 g, protein 11 g, fat 20 g, carbs 57 g. I have remembered the barcode, next time the scanner will find it itself. Tell me how much you ate and I will log it.',
+);
 String get noraCodeTalk => demoDish(
   'Цього коду немає в базах, тож нічого не записую. Розкажи, що це за продукт, або сфотографуй етикетку зі складом, і я порахую.',
   'No base knows this code, so nothing is logged. Tell me what the product is, or photograph the label with its composition, and I will count it.',

@@ -683,9 +683,6 @@ class LCs extends L {
   String get camLabelNoShot => 'Snímek se nepovedl. Zkus etiketu vyfotit znovu.';
 
   @override
-  String get camLabelReading => 'Opisuji čísla z obalu…';
-
-  @override
   String camLogInto(String slotInto) {
     return 'Zapsat $slotInto';
   }
@@ -2888,6 +2885,11 @@ class LCs extends L {
   }
 
   @override
+  String todayLabelTalk(String code) {
+    return 'Je to etiketa výrobku s čárovým kódem $code, žádná databáze ho nezná. Opiš tabulku nutričních hodnot z obalu.';
+  }
+
+  @override
   String get todayLogFailed => 'Nepodařilo se to zapsat. Zkus to znovu.';
 
   @override
@@ -2935,6 +2937,9 @@ class LCs extends L {
 
   @override
   String get todayOutOfTokens => 'Tokeny došly.';
+
+  @override
+  String get todayPhotoLabel => 'Fotka etikety';
 
   @override
   String get todayPhotoMeal => 'Foto';

@@ -10,6 +10,9 @@
   "todayBarcode": "Codice a barre",
   "todayCodeTalk": "Ho scansionato il codice a barre {code} e non lo conosce nessun archivio. Non registrare niente: chiedimi di questo prodotto o dimmi come contarlo.",
   "@todayCodeTalk": { "placeholders": { "code": { "type": "String" } } },
+  "todayPhotoLabel": "Foto dell'etichetta",
+  "todayLabelTalk": "È l'etichetta di un prodotto con codice a barre {code}, nessuna base lo conosce. Trascrivi la tabella nutrizionale dalla confezione.",
+  "@todayLabelTalk": { "placeholders": { "code": { "type": "String" } } },
 
   "todayLoggedInto": "Registrato {slotInto}: {dish}.",
   "@todayLoggedInto": {
