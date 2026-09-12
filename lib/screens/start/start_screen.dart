@@ -522,15 +522,48 @@ class _StartScreenState extends State<StartScreen> {
       cta: l.actionNext,
       onNext: () => _go(4),
       children: [
-        for (final g in groups)
-          _Block(
-            title: g.title,
-            child: CalviSegments(
-              labels: g.labels,
-              index: g.values.indexOf(_units.byKey(g.key)).clamp(0, g.values.length - 1),
-              onPick: (i) => setState(() => _units = _units.withKey(g.key, g.values[i])),
+        /* Той самий рядок вибору, що на екрані «Куди рухаємось»: та сама
+           картка, той самий кружечок, та сама типографіка. Різниця одна і вона
+           в осі: варіанти стоять поруч, а не стосом, бо відповіді тут короткі.
+
+           Смужка позначок, що була тут, показувала «кг», «lb» і «st», тобто
+           позначки, а не відповіді: хто не знає, що таке «st», у смужці цього й
+           не дізнається. Тепер назва словом, а під нею приклад, і приклад
+           порахований тим самим кодом, що рахує всі числа застосунку.
+
+           Заголовків груп немає: «Кілограми, фунти, стоуни» самі кажуть, що це
+           про вагу тіла. Для читача екрана назва лишилась у `Semantics`. */
+        for (var gi = 0; gi < groups.length; gi++) ...[
+          if (gi > 0) const SizedBox(height: 12),
+          Semantics(
+            container: true,
+            label: groups[gi].title,
+            child: CalviPicks(
+              row: true,
+              children: [
+                for (var i = 0; i < groups[gi].values.length; i++)
+                  CalviPick(
+                    tight: true,
+                    label: groups[gi].names[i],
+                    /* Числа в анкеті звичайні, а не свої: одиниці питаються
+                       раніше за вагу і зріст, тобто своїх у людини ще немає. */
+                    hint: unitSample(
+                      groups[gi].key,
+                      _units.withKey(groups[gi].key, groups[gi].values[i]),
+                      weightKg: 78.6,
+                      heightCm: 183,
+                      waterMl: 1800,
+                      kcal: 2240,
+                    ),
+                    on: _units.byKey(groups[gi].key) == groups[gi].values[i],
+                    onTap: () => setState(
+                      () => _units = _units.withKey(groups[gi].key, groups[gi].values[i]),
+                    ),
+                  ),
+              ],
             ),
           ),
+        ],
       ],
     );
   }

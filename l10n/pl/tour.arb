@@ -17,6 +17,18 @@
   "tourGuideHow": "zapytaj, gdzie co jest i jak to zrobić",
 
   "unitsTitle": "Jakie jednostki",
+  "unitKgName": "Kilogramy",
+  "unitLbName": "Funty",
+  "unitStName": "Stone",
+  "unitCmName": "Centymetry",
+  "unitInName": "Cale",
+  "unitMlName": "Mililitry",
+  "unitFlozName": "Uncje płynu",
+  "unitGName": "Gramy",
+  "unitOzName": "Uncje",
+  "unitKcalName": "Kalorie",
+  "unitKjName": "Kilodżule",
+
   "unitsMass": "Masa ciała",
   "unitsLength": "Wzrost i obwody",
   "unitsVolume": "Woda",

@@ -32,13 +32,71 @@ const _kjPerKcal = 4.184;
 ///
 /// Values are what the database stores, labels are what the person reads.
 /// Metric labels come from the translation: «кг» in Ukrainian is not `kg`.
-List<({String key, String title, List<String> labels, List<String> values})> unitGroups(L l) => [
-  (key: 'mass', title: l.unitsMass, labels: [l.unitKg, 'lb', 'st'], values: ['kg', 'lb', 'st']),
-  (key: 'length', title: l.unitsLength, labels: [l.unitCm, 'in'], values: ['cm', 'in']),
-  (key: 'volume', title: l.unitsVolume, labels: [l.unitMl, 'fl oz'], values: ['ml', 'floz']),
-  (key: 'portion', title: l.unitsPortion, labels: [l.unitG, 'oz'], values: ['g', 'oz']),
-  (key: 'energy', title: l.unitsEnergy, labels: [l.unitKcal, l.unitKj], values: ['kcal', 'kj']),
+/* Позначка і повна назва, і потрібні обидві.
+ *
+ * Позначка стоїть поруч із кожним числом на екрані. Назва потрібна там, де
+ * вибір показаний рядками: «st» саме по собі це не питання і не відповідь, а
+ * «Стоуни» з прикладом під ними це і те, і те. */
+List<({String key, String title, List<String> labels, List<String> names, List<String> values})>
+unitGroups(L l) => [
+  (
+    key: 'mass',
+    title: l.unitsMass,
+    labels: [l.unitKg, 'lb', 'st'],
+    names: [l.unitKgName, l.unitLbName, l.unitStName],
+    values: ['kg', 'lb', 'st'],
+  ),
+  (
+    key: 'length',
+    title: l.unitsLength,
+    labels: [l.unitCm, 'in'],
+    names: [l.unitCmName, l.unitInName],
+    values: ['cm', 'in'],
+  ),
+  (
+    key: 'volume',
+    title: l.unitsVolume,
+    labels: [l.unitMl, 'fl oz'],
+    names: [l.unitMlName, l.unitFlozName],
+    values: ['ml', 'floz'],
+  ),
+  (
+    key: 'portion',
+    title: l.unitsPortion,
+    labels: [l.unitG, 'oz'],
+    names: [l.unitGName, l.unitOzName],
+    values: ['g', 'oz'],
+  ),
+  (
+    key: 'energy',
+    title: l.unitsEnergy,
+    labels: [l.unitKcal, l.unitKj],
+    names: [l.unitKcalName, l.unitKjName],
+    values: ['kcal', 'kj'],
+  ),
 ];
+
+/* Як виглядатиме число в цих одиницях.
+ *
+ * Рахується тим самим кодом, що й усі числа застосунку: приклад, вписаний
+ * рукою, розійшовся б із дійсністю на першій же правці округлення, і побачити
+ * це було б нікому.
+ *
+ * Числа передаються ззовні, бо вони різні в двох місцях. В анкеті своїх ще
+ * немає, там ідуть звичайні; у налаштуваннях приходять власні, і приклад із
+ * чужою вагою виглядав би там як чужий. */
+String unitSample(String key, Units units, {
+  required double weightKg,
+  required int heightCm,
+  required int waterMl,
+  required int kcal,
+}) => switch (key) {
+  'mass' => units.massText(weightKg),
+  'length' => units.heightText(heightCm),
+  'volume' => units.volText(waterMl),
+  'portion' => units.porText(300),
+  _ => units.enText(kcal),
+};
 
 extension UnitsShow on Units {
   bool get metric =>

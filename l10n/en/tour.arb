@@ -17,6 +17,18 @@
   "tourGuideHow": "ask where things are and how to do them",
 
   "unitsTitle": "Which units",
+  "unitKgName": "Kilograms",
+  "unitLbName": "Pounds",
+  "unitStName": "Stones",
+  "unitCmName": "Centimetres",
+  "unitInName": "Inches",
+  "unitMlName": "Millilitres",
+  "unitFlozName": "Fluid ounces",
+  "unitGName": "Grams",
+  "unitOzName": "Ounces",
+  "unitKcalName": "Calories",
+  "unitKjName": "Kilojoules",
+
   "unitsMass": "Body weight",
   "unitsLength": "Height and measurements",
   "unitsVolume": "Water",

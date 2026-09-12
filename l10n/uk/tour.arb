@@ -17,6 +17,18 @@
   "tourGuideHow": "спитай, де що лежить і як це зробити",
 
   "unitsTitle": "Які одиниці виміру",
+  "unitKgName": "Кілограми",
+  "unitLbName": "Фунти",
+  "unitStName": "Стоуни",
+  "unitCmName": "Сантиметри",
+  "unitInName": "Дюйми",
+  "unitMlName": "Мілілітри",
+  "unitFlozName": "Рідкі унції",
+  "unitGName": "Грами",
+  "unitOzName": "Унції",
+  "unitKcalName": "Калорії",
+  "unitKjName": "Кілоджоулі",
+
   "unitsMass": "Вага тіла",
   "unitsLength": "Зріст і обхвати",
   "unitsVolume": "Вода",

@@ -232,19 +232,47 @@ class UnitsPanel extends StatelessWidget {
       title: l.setUnits,
       foot: CalviButton(label: l.actionDone, onTap: () => (onBack ?? Navigator.of(context).pop)()),
       children: [
-        for (final g in unitGroups(l))
-          CalviSection(
-            title: g.title,
-            bare: true,
-            children: [
-              CalviSegments(
-                labels: g.labels,
-                index: g.values.indexOf(s.units.byKey(g.key)).clamp(0, g.values.length - 1),
-                onPick: (i) =>
-                    set((v) => v.copyWith(units: v.units.withKey(g.key, g.values[i]))),
-              ),
-            ],
+        /* Той самий екран, що в анкеті, до пікселя: та сама картка, той самий
+           рядок, той самий проміжок між групами і жодних заголовків. Одиниці
+           питають двічі за життя застосунку, і два різні вигляди одного питання
+           були б двома інтерфейсами.
+
+           Різниця лише в числах прикладу: тут профіль уже є, тому під
+           «Мілілітрами» стоїть власна норма води, а не зразкова. Приклад із
+           чужою вагою на цьому екрані виглядав би як чужий. */
+        for (var gi = 0; gi < unitGroups(l).length; gi++) ...[
+          if (gi > 0) const SizedBox(height: 12),
+          Builder(
+            builder: (context) {
+              final g = unitGroups(l)[gi];
+              return Semantics(
+                container: true,
+                label: g.title,
+                child: CalviPicks(
+                  row: true,
+                  children: [
+                    for (var i = 0; i < g.values.length; i++)
+                      CalviPick(
+                        tight: true,
+                        label: g.names[i],
+                        hint: unitSample(
+                          g.key,
+                          s.units.withKey(g.key, g.values[i]),
+                          weightKg: s.weightKg,
+                          heightCm: s.heightCm,
+                          waterMl: s.waterMl,
+                          kcal: dailyKcal(s),
+                        ),
+                        on: s.units.byKey(g.key) == g.values[i],
+                        onTap: () =>
+                            set((v) => v.copyWith(units: v.units.withKey(g.key, g.values[i]))),
+                      ),
+                  ],
+                ),
+              );
+            },
           ),
+        ],
       ],
     );
   }

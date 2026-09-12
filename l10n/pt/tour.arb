@@ -17,6 +17,18 @@
   "tourGuideHow": "pergunta onde está o quê e como se faz",
 
   "unitsTitle": "Que unidades",
+  "unitKgName": "Quilogramas",
+  "unitLbName": "Libras",
+  "unitStName": "Stones",
+  "unitCmName": "Centímetros",
+  "unitInName": "Polegadas",
+  "unitMlName": "Mililitros",
+  "unitFlozName": "Onças líquidas",
+  "unitGName": "Gramas",
+  "unitOzName": "Onças",
+  "unitKcalName": "Calorias",
+  "unitKjName": "Quilojoules",
+
   "unitsMass": "Peso do corpo",
   "unitsLength": "Altura e medidas",
   "unitsVolume": "Água",

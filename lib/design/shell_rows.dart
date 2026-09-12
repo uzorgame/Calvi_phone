@@ -588,6 +588,7 @@ class CalviPick extends StatelessWidget {
     this.icon,
     required this.on,
     required this.onTap,
+    this.tight = false,
   });
 
   final String label;
@@ -596,6 +597,23 @@ class CalviPick extends StatelessWidget {
   final bool on;
   final VoidCallback onTap;
 
+  /* Рядок стоїть колонкою в ряду, а не сам по собі.
+   *
+   * Ширини втричі менше, і звичайні вісімнадцять пікселів з кожного боку не
+   * лишали б місця самому слову: «Кілограми» переносились на два рядки. Тут
+   * вужчі відступи і менший кружечок, решта та сама. */
+  final bool tight;
+
+  /* У ряду текст стискається до ширини колонки, у стосі лишається як є.
+   *
+   * «Як є» тут буквально: у стосі рядок так само переноситься на другий рядок,
+   * як переносився завжди. Перша спроба ставила `maxLines: 1` усім, і золотий
+   * знімок темної «Теми» одразу це спіймав: довгі назви там переносяться, і без
+   * переносу сторінка перемалювалась інакше. */
+  Widget _tight(Widget text) => tight
+      ? FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: text)
+      : text;
+
   @override
   Widget build(BuildContext context) {
     final c = context.c;
@@ -603,7 +621,9 @@ class CalviPick extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+          padding: tight
+              ? const EdgeInsets.symmetric(horizontal: 12, vertical: 13)
+              : const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
           child: Row(
             children: [
               if (icon != null) ...[
@@ -626,22 +646,41 @@ class CalviPick extends StatelessWidget {
                      * заголовки, а не як рівні між собою варіанти. Налаштування
                      * це одна річ, а не десять сторінок різними голосами, тому
                      * розмірів у всьому розділі рівно два: назва і підпис. */
-                    Text(label, style: context.t.bodyMedium?.copyWith(color: c.text)),
+                    /* У колонці слово стискається, а не переноситься.
+                     *
+                     * На вузькому телефоні «Кілограми» не вміщались у третину
+                     * ряду і ламались на «Кілогр / ами». Перенос тут гірший за
+                     * усе інше: сусідні колонки лишаються в один рядок, і
+                     * картка виглядає зламаною. Стискається лише те, що не
+                     * вміщається, тому на звичайному телефоні не міняється
+                     * нічого. */
+                    _tight(
+                      Text(
+                        label,
+                        maxLines: tight ? 1 : null,
+                        softWrap: !tight,
+                        style: context.t.bodyMedium?.copyWith(color: c.text),
+                      ),
+                    ),
                     /* Порожній рядок це не підказка. Без цієї перевірки картка
                        без підказки малювала порожній текст із відступом, і
                        назва стояла не по центру, а трохи вище. */
                     if (hint != null && hint!.isNotEmpty) ...[
                       const SizedBox(height: 2),
-                      Text(
-                        hint!,
-                        style: context.t.labelSmall?.copyWith(fontWeight: FontWeight.w400),
+                      _tight(
+                        Text(
+                          hint!,
+                          maxLines: tight ? 1 : null,
+                          softWrap: !tight,
+                          style: context.t.labelSmall?.copyWith(fontWeight: FontWeight.w400),
+                        ),
                       ),
                     ],
                   ],
                 ),
               ),
-              const SizedBox(width: 16),
-              _PickDot(on: on),
+              SizedBox(width: tight ? 8 : 16),
+              _PickDot(on: on, small: tight),
             ],
           ),
       ),
@@ -655,9 +694,16 @@ class CalviPick extends StatelessWidget {
  * тільки список. Та сама картка, що в рядків налаштувань, і те саме питання
  * всередині: одне, з кількома відповідями. */
 class CalviPicks extends StatelessWidget {
-  const CalviPicks({super.key, required this.children});
+  const CalviPicks({super.key, required this.children, this.row = false});
 
   final List<Widget> children;
+
+  /* Варіанти поруч, а не стосом.
+   *
+   * Так можна лише там, де відповіді короткі: на екрані цілі пояснення в рядок
+   * не влізло б ніколи, а «Кілограми» і «78.6 кг» влазять утрьох. Картка,
+   * рядок і кружечок при цьому ті самі, різниця рівно в осі. */
+  final bool row;
 
   @override
   Widget build(BuildContext context) {
@@ -669,28 +715,49 @@ class CalviPicks extends StatelessWidget {
         boxShadow: context.shadowCard,
       ),
       clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (var i = 0; i < children.length; i++) ...[
-            if (i > 0)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 18),
-                child: Container(height: 1, color: c.cardBorder),
+      child: row
+          ? IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (var i = 0; i < children.length; i++) ...[
+                    // Риска та сама, тільки повернута разом із рядом.
+                    if (i > 0)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: Container(width: 1, color: c.cardBorder),
+                      ),
+                    Expanded(child: children[i]),
+                  ],
+                ],
               ),
-            children[i],
-          ],
-        ],
-      ),
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (var i = 0; i < children.length; i++) ...[
+                  if (i > 0)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 18),
+                      child: Container(height: 1, color: c.cardBorder),
+                    ),
+                  children[i],
+                ],
+              ],
+            ),
     );
   }
 }
 
 /// The radio of a [_Card]: a ring that fills, with a dot that grows inside it.
 class _PickDot extends StatelessWidget {
-  const _PickDot({required this.on});
+  const _PickDot({required this.on, this.small = false});
 
   final bool on;
+
+  /// Менший на два пікселі: у колонці на третину ширини звичайний забирає
+  /// місце в самої назви.
+  final bool small;
 
   @override
   Widget build(BuildContext context) {
@@ -698,8 +765,8 @@ class _PickDot extends StatelessWidget {
     return AnimatedContainer(
       duration: CalviMotion.normal,
       curve: CalviMotion.ease,
-      width: 22,
-      height: 22,
+      width: small ? 20 : 22,
+      height: small ? 20 : 22,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
