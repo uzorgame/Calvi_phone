@@ -439,32 +439,46 @@ class _ProSheet extends StatelessWidget {
     final c = context.c;
     final l = L.of(context);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            for (final f in _facts(context, goal)) ...[
-              _Mark(icon: f.icon, tint: f.tint, over: false, full: false, plain: false, big: true),
-              const SizedBox(width: 8),
+    /* Поля ставить вміст, а не сам аркуш: у різних аркушів різний вміст, і
+       однакове поле для картки і для списку було б не те саме поле. Те саме
+       правило, що в сусідній шторці про одне число. */
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(CalviSize.gutter, 2, CalviSize.gutter, 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        /* За змістом, а не на всю висоту аркуша. Без цього шторка виростала до
+           своєї стелі в три чверті екрана, і між останнім рядком і кнопкою
+           лишалась долоня порожнечі. */
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          /* Пʼять знаків рівним рядом, від краю до краю поля. Доти вони стояли
+             стосом ліворуч із фіксованим проміжком і збивались до лівого краю,
+             ніби ряд не дорахували. */
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              for (final f in _facts(context, goal))
+                _Mark(icon: f.icon, tint: f.tint, over: false, full: false, plain: false, big: true),
             ],
-          ],
-        ),
-        const SizedBox(height: 16),
-        Text(
-          l.nutriProWhat,
-          style: context.t.bodyMedium?.copyWith(height: 1.45, color: c.text),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          l.nutriProKept,
-          style: context.t.labelSmall?.copyWith(
-            fontSize: CalviSize.fsMicro,
-            height: 1.45,
-            color: c.textSecondary,
           ),
-        ),
-      ],
+          const SizedBox(height: 18),
+          Text(l.nutriProWhat, style: context.t.bodySmall?.copyWith(height: 1.5)),
+
+          /* Друге речення тихіше і з рискою ліворуч: воно не продовження
+             першого, а відповідь на питання, яке виникає після нього. */
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.only(left: 14),
+            decoration: BoxDecoration(
+              border: Border(left: BorderSide(color: c.hairline, width: 2)),
+            ),
+            child: Text(
+              l.nutriProKept,
+              style: context.t.labelSmall?.copyWith(fontSize: CalviSize.fsMicro, height: 1.5),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
