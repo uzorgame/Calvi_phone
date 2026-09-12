@@ -151,6 +151,11 @@ class _CalviAppState extends State<CalviApp> with WidgetsBindingObserver {
   /* Підсумки днів для стрічки тижня і аналітики. У демо це фікстури, у режимі
      «мої» це те, що справді записано, і воно оновлюється саме, бо йде потоком. */
   DayStats _stats = DayStats.demo();
+
+  /* Платний доступ, як його бачить телефон. Джерело те саме, що в лічильника
+     токенів: місцеве дзеркало, куди число кладе кожна відповідь сервера. */
+  bool _pro = false;
+  StreamSubscription<TokenStateData?>? _proFeed;
   StreamSubscription<DayStats>? _statsFeed;
 
   @override
@@ -447,7 +452,14 @@ class _CalviAppState extends State<CalviApp> with WidgetsBindingObserver {
 
   void _follow(CalviDb? db) {
     _statsFeed?.cancel();
+    _proFeed?.cancel();
     if (db == null) return;
+
+    _proFeed = db.syncDao.watchTokens().listen((t) {
+      final now = t?.unlimited == true;
+      if (!mounted || now == _pro) return;
+      setState(() => _pro = now);
+    });
 
     _stats = DayStats.empty;
     _statsFeed = DayReader(db).watchStats().listen(
@@ -919,6 +931,7 @@ class _CalviAppState extends State<CalviApp> with WidgetsBindingObserver {
       sync: _sync,
       real: _real,
       stats: _stats,
+      pro: _pro,
       setReal: _setReal,
       // Тільки коли є кому стирати: у демо без бази кнопка чесно мовчить.
       eraseAll: _sync == null ? null : _eraseAll,

@@ -196,7 +196,10 @@ String langTitle(BuildContext context, Lang lang) => switch (lang) {
   Lang.pt => 'Português do Brasil',
   Lang.pl => 'Polski',
   Lang.cs => 'Čeština',
-  Lang.ru => 'Русский',
+  /* З малої літери навмисно. Решта мов названі так, як їх пише сама мова, а
+     ця лишається малою: це рішення власника, а не помилка регістру, і
+     «виправляти» його не треба. */
+  Lang.ru => 'русский',
   Lang.be => 'Беларуская',
 };
 

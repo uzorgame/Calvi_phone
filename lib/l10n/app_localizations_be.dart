@@ -1746,6 +1746,20 @@ class LBe extends L {
   }
 
   @override
+  String get nutriProHidden => 'даступна з Pro';
+
+  @override
+  String get nutriProKept =>
+      'Лічацца яны ўжо зараз, на кожным запісе, і без падпіскі таксама. Нічога не губляецца: як толькі зʼявіцца Pro, гэты дзень і ўвесь месяц ззаду адкрыюцца з лічбамі.';
+
+  @override
+  String get nutriProTitle => 'Нутрыенты ў Pro';
+
+  @override
+  String get nutriProWhat =>
+      'Клятчатка, цукар, дададзены цукар, натрый і насычаныя тлушчы ўваходзяць у Pro. Знакі застаюцца на месцы, а самі лічбы адкрывае падпіска.';
+
+  @override
   String nutriRest(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -3010,19 +3024,52 @@ class LBe extends L {
   String get unitCm => 'см';
 
   @override
+  String get unitCmName => 'Сантыметры';
+
+  @override
+  String get unitFlozName => 'Вадкія унцыі';
+
+  @override
   String get unitG => 'г';
+
+  @override
+  String get unitGName => 'Грамы';
+
+  @override
+  String get unitInName => 'Цалі';
 
   @override
   String get unitKcal => 'ккал';
 
   @override
+  String get unitKcalName => 'Калорыі';
+
+  @override
   String get unitKg => 'кг';
+
+  @override
+  String get unitKgName => 'Кілаграмы';
 
   @override
   String get unitKj => 'кДж';
 
   @override
+  String get unitKjName => 'Кіладжоўлі';
+
+  @override
+  String get unitLbName => 'Фунты';
+
+  @override
   String get unitMl => 'мл';
+
+  @override
+  String get unitMlName => 'Мілілітры';
+
+  @override
+  String get unitOzName => 'Унцыі';
+
+  @override
+  String get unitStName => 'Стоўны';
 
   @override
   String get unitsEnergy => 'Энергія';

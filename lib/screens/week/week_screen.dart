@@ -11,7 +11,9 @@ import '../../data/week.dart';
 import '../../data/units.dart';
 import '../../design/fold.dart';
 import '../../design/icons.dart';
+import '../../data/nutrients.dart';
 import '../../design/macro_row.dart';
+import '../../design/nutri_row.dart';
 import '../../design/section.dart';
 import '../../design/shell.dart';
 import '../../design/theme.dart';
@@ -209,7 +211,7 @@ class _WeekScreenState extends State<WeekScreen> {
           child: Builder(
             builder: (context) {
               final g = goalOf(AppScope.of(context).s);
-              return MacroRow(
+              final row = MacroRow(
                 cells: [
                   (
                     label: l.macroProteinCaps,
@@ -231,6 +233,21 @@ class _WeekScreenState extends State<WeekScreen> {
                     value: w.avgCarbs,
                     goal: g.carbs,
                     colour: context.c.carbs,
+                  ),
+                ],
+              );
+
+              /* Другий рівень у тій самій картці, під тією самою рискою.
+                 Питання тут одне, «як тиждень годував», і дві картки на одну
+                 відповідь читались би як два різні питання. */
+              return Column(
+                children: [
+                  row,
+                  const NutriTierLine(),
+                  NutriAvgRow(
+                    avg: w.avgNutrients,
+                    goal: nutrientGoals(g.kcal),
+                    pro: AppScope.of(context).pro,
                   ),
                 ],
               );

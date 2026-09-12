@@ -1,16 +1,21 @@
-/// Другий рівень нутрієнтів під картками макросів.
+/// Другий рівень нутрієнтів: смуга дня і середнє за період.
+///
+/// Жив у теці екрана дня, поки був тільки там. Тепер той самий ряд стоїть на
+/// тижні й в аналітиці, і місце йому серед решти спільних частин інтерфейсу.
 library;
+
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-import '../../data/meal.dart';
-import '../../data/nutrients.dart';
-import '../../design/icons.dart';
-import '../../design/ring.dart';
-import '../../design/shell.dart';
-import '../../design/theme.dart';
-import '../../design/tokens.dart';
-import '../../l10n/app_localizations.dart';
+import '../data/meal.dart';
+import '../data/nutrients.dart';
+import 'icons.dart';
+import 'ring.dart';
+import 'shell.dart';
+import 'theme.dart';
+import 'tokens.dart';
+import '../l10n/app_localizations.dart';
 
 /* Один нутрієнт, як його бачить екран: знак, підпис, тон і всі слова шторки.
  *
@@ -152,6 +157,7 @@ class NutriRow extends StatelessWidget {
     required this.goal,
     required this.meals,
     this.large = false,
+    this.pro = true,
   });
 
   final NutrientDay day;
@@ -161,6 +167,11 @@ class NutriRow extends StatelessWidget {
   final List<Meal> meals;
 
   final bool large;
+
+  /* Чи відкритий другий рівень. Без Pro ряд лишається на місці, а чисел у
+     ньому немає жодного: див. [_Locked]. Калорії й макроси підпискою не
+     закриті ніколи, це основа щоденника. */
+  final bool pro;
 
   @override
   Widget build(BuildContext context) {
@@ -173,6 +184,27 @@ class NutriRow extends StatelessWidget {
       borderRadius: BorderRadius.circular(CalviSize.rCard),
       boxShadow: context.shadowCard,
     );
+
+    /* Без Pro ряд той самий, тільки спить.
+     *
+     * Три рішення, і всі три навмисні.
+     *
+     * **Ряд лишається.** Прибрати його означало б, що людина просто не знає
+     * про другий рівень: порожнє місце нічого не пропонує. Знаки стоять там,
+     * де стояли б завжди, і видно, що тут щось є.
+     *
+     * **Цифр немає жодної.** Не схованої, не розмитої, не підміненої нулями:
+     * їх немає в дереві віджетів узагалі. Розмите число це все одно число, і
+     * ховати його оформленням означало б віддати те, що ми закрили.
+     *
+     * **Слова тільки на дотик.** Напис «відкрий Pro» на головному екрані щодня
+     * це вже не пропозиція, а докір. Розмитий ряд питає сам, і відповідь
+     * приходить тоді, коли по ньому натиснули.
+     *
+     * Порожній і непорахований день сюди не заходять: без Pro ряд виглядає
+     * однаково щодня, а «ці страви не рахували» це розмова про повноту даних,
+     * яких людині все одно не видно. */
+    if (!pro) return _Locked(goal: goal, large: large, box: box);
 
     /* Про день не відомо нічого з пʼяти: усі записи старші за саму можливість.
        Пʼять знаків питання в ряд це не чесність, а поламаний екран. */
@@ -273,6 +305,345 @@ class NutriRow extends StatelessWidget {
     );
   }
 }
+
+/* Замкнений другий рівень: самі знаки, легко розмиті, і більше нічого.
+ *
+ * Розмиття слабке навмисно. Сильне перетворює знак на пляму, і ряд читається
+ * як помилка малювання; слабке лишає його впізнаваним і просто каже, що він
+ * спить. Підписи у великому вигляді лишаються різкими: назва нутрієнта це не
+ * дані, а те саме, що знак, тільки словом.
+ */
+class _Locked extends StatelessWidget {
+  const _Locked({required this.goal, required this.large, required this.box});
+
+  final NutrientGoal goal;
+  final bool large;
+  final BoxDecoration box;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+
+    return Container(
+      decoration: box,
+      padding: large
+          ? const EdgeInsets.fromLTRB(6, 14, 6, 12)
+          : const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      child: Row(
+        children: [
+          for (final f in _facts(context, goal))
+            Expanded(
+              child: Semantics(
+                button: true,
+                label: '${f.title}: ${l.nutriProHidden}',
+                excludeSemantics: true,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => _open(context),
+                  child: Padding(
+                    padding: large
+                        ? const EdgeInsets.symmetric(horizontal: 2, vertical: 4)
+                        : const EdgeInsets.symmetric(horizontal: 2, vertical: 8),
+                    child: large
+                        ? Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              /* Кільце те саме, що у відкритому ряду, але
+                                 порожнє і без доріжки: наповнена дуга це частка
+                                 від норми, тобто те саме число, тільки
+                                 намальоване. Лишається воно заради висоти: без
+                                 нього замкнений ряд був би на десять пікселів
+                                 нижчий за відкритий, і сторінка стрибала б у
+                                 мить покупки. */
+                              CalviRing(
+                                progress: 0,
+                                size: 36,
+                                stroke: 2.5,
+                                color: f.tint,
+                                track: const Color(0x00000000),
+                                child: _blur(
+                                  _Mark(
+                                    icon: f.icon,
+                                    tint: f.tint,
+                                    over: false,
+                                    full: false,
+                                    plain: false,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 7),
+                              const _ValueGap(),
+                              const SizedBox(height: 5),
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  f.short,
+                                  maxLines: 1,
+                                  softWrap: false,
+                                  style: context.t.labelSmall?.copyWith(
+                                    fontSize: 8,
+                                    letterSpacing: 0.08,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _blur(
+                                _Mark(
+                                  icon: f.icon,
+                                  tint: f.tint,
+                                  over: false,
+                                  full: false,
+                                  plain: true,
+                                ),
+                              ),
+                              const _ValueGap(small: true),
+                            ],
+                          ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /* Саме розмиття, і нічого крім нього.
+   *
+   * Прозорості тут немає навмисно, хоч у демці вона була: `Opacity` дешевий на
+   * вигляд і дорогий насправді, бо кожен такий віджет це окреме полотно, яке
+   * малюється і потім змішується з рештою. Пʼять знаків це пʼять полотен на
+   * кожному кадрі головного екрана, і `frame_cost_test` спіймав це одразу,
+   * піднявши рахунок шарів із двох до семи. Розмиття і так тлумить знак
+   * достатньо. */
+  Widget _blur(Widget child) => _blurred(child);
+
+  void _open(BuildContext context) {
+    final l = L.of(context);
+    calviSheet<void>(
+      context,
+      title: l.nutriProTitle,
+      info: true,
+      doneLabel: l.actionGotIt,
+      builder: (sheet) => _ProSheet(goal: goal),
+    );
+  }
+}
+
+/* Шторка замка. Пʼять знаків у шапці замість одного числа: вона не про якесь
+   одне з них, а про весь другий рівень.
+ *
+ * Друге речення тут головне, і саме заради нього шторка написана. Людина має
+ * знати, що без підписки нічого не втрачено: числа рахуються на кожному записі
+ * вже зараз, і минуле відкриється цілим, а не з дня покупки. */
+class _ProSheet extends StatelessWidget {
+  const _ProSheet({required this.goal});
+
+  final NutrientGoal goal;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+    final l = L.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            for (final f in _facts(context, goal)) ...[
+              _Mark(icon: f.icon, tint: f.tint, over: false, full: false, plain: false, big: true),
+              const SizedBox(width: 8),
+            ],
+          ],
+        ),
+        const SizedBox(height: 16),
+        Text(
+          l.nutriProWhat,
+          style: context.t.bodyMedium?.copyWith(height: 1.45, color: c.text),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          l.nutriProKept,
+          style: context.t.labelSmall?.copyWith(
+            fontSize: CalviSize.fsMicro,
+            height: 1.45,
+            color: c.textSecondary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/* Місце, де стояло б число, без самого числа.
+ *
+ * Порожній рядок тим самим кеглем: він не малює нічого і не має ширини, зате
+ * має висоту рядка. Завдяки цьому замкнена смуга рівно така сама заввишки, як
+ * відкрита, і сторінка не стрибає в мить, коли людина купує Pro.
+ *
+ * Саме порожній рядок, а не коробка з числом у пікселях: кегль, шрифт і
+ * висота рядка живуть у темі, і коробка розійшлась би з ними на першій же
+ * правці типографіки. */
+class _ValueGap extends StatelessWidget {
+  const _ValueGap({this.small = false});
+
+  final bool small;
+
+  @override
+  Widget build(BuildContext context) => FittedBox(
+    fit: BoxFit.scaleDown,
+    child: Text.rich(
+    TextSpan(
+      text: '',
+      /* Той самий склад рядка, що і в числа: велика цифра, волосок і дрібна
+         одиниця. Порожні вони обидва, а метрику рядка задають ту саму, і саме
+         тому висота сходиться пікселем у піксель. Один лише порожній `Text`
+         кеглем числа давав на піксель менше: дрібний шрифт одиниці і
+         вирівняний посередині проміжок міняють висоту рядка. */
+      children: [
+        const WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
+          child: SizedBox(width: 2),
+        ),
+        TextSpan(
+          text: '',
+          style: context.t.labelSmall?.copyWith(fontSize: 9, fontWeight: FontWeight.w500),
+        ),
+      ],
+    ),
+    maxLines: 1,
+    softWrap: false,
+      style: context.t.headlineMedium?.copyWith(
+        fontSize: small ? 13 : 15,
+        fontWeight: FontWeight.w700,
+      ),
+    ),
+  );
+}
+
+/* Риска між двома рівнями однієї картки.
+ *
+ * Тонка і на всю ширину: вона розділяє два поверхи одного факту, а не два
+ * розділи. Відступи над і під нею різні на пару пікселів навмисно, бо підписи
+ * макросів угорі вже дають своє повітря.
+ */
+class NutriTierLine extends StatelessWidget {
+  const NutriTierLine({super.key});
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(top: 14, bottom: 13),
+    child: Container(height: 1, color: context.c.hairline),
+  );
+}
+
+/* Пʼять нутрієнтів під трьома макросами, середні за період.
+ *
+ * **Та сама мова, що на дні.** Знак у кольорі нутрієнта, число поруч, одиниця
+ * дрібним. Око вивчило цей ряд на головному екрані, і другий спосіб показати
+ * ті самі пʼять величин був би другим інтерфейсом.
+ *
+ * **Кілець тут немає, на відміну від макросів над ними.** Кільце показує
+ * частку від норми, а норма в цих пʼяти денна: на середньому за тиждень вона
+ * читалась би як вирок тижню за один солоний вечір. Числа досить, а порівняти
+ * з нормою людина йде на день, де вона й порахована.
+ *
+ * **Шторки на дотик теж немає.** На дні дотик пояснює, що це за число і звідки
+ * воно взялось сьогодні. Тут пояснювати нема чого: це середнє, і «звідки» в
+ * нього цілий період. Єдиний дотик, який тут працює, це замок без Pro.
+ */
+class NutriAvgRow extends StatefulWidget {
+  const NutriAvgRow({super.key, required this.avg, required this.goal, required this.pro});
+
+  /// Середнє за добу по кожному. Порожньо означає «таких днів не було».
+  final Nutrients avg;
+
+  /// Денна норма: з неї беруться кольори і назви, а не самі числа.
+  final NutrientGoal goal;
+
+  final bool pro;
+
+  @override
+  State<NutriAvgRow> createState() => _NutriAvgRowState();
+}
+
+class _NutriAvgRowState extends State<NutriAvgRow> {
+  @override
+  Widget build(BuildContext context) {
+    final l = L.of(context);
+    final facts = _facts(context, widget.goal);
+
+    return Row(
+      children: [
+        for (final f in facts)
+          Expanded(
+            child: Semantics(
+              button: !widget.pro,
+              label: widget.pro
+                  ? '${f.title}: ${_avgOf(widget.avg, f.key) ?? '?'}${l.unitG}'
+                  : '${f.title}: ${l.nutriProHidden}',
+              excludeSemantics: true,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: widget.pro ? null : () => _openLock(context),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (widget.pro)
+                        _Mark(icon: f.icon, tint: f.tint, over: false, full: false, plain: true)
+                      else
+                        _blurred(
+                          _Mark(icon: f.icon, tint: f.tint, over: false, full: false, plain: true),
+                        ),
+                      if (widget.pro) ...[
+                        const SizedBox(width: 5),
+                        Flexible(
+                          child: _Value(now: _avgOf(widget.avg, f.key), tone: null, small: true),
+                        ),
+                      ] else
+                        const _ValueGap(small: true),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  void _openLock(BuildContext context) {
+    final l = L.of(context);
+    calviSheet<void>(
+      context,
+      title: l.nutriProTitle,
+      info: true,
+      doneLabel: l.actionGotIt,
+      builder: (sheet) => _ProSheet(goal: widget.goal),
+    );
+  }
+}
+
+/// Середнє так, як його показують у ряду. Натрій у грамах, як і на дні.
+String? _avgOf(Nutrients avg, NutrientKey k) {
+  final v = avg[k];
+  if (v == null) return null;
+  return k == NutrientKey.sodium ? (v / 1000).toStringAsFixed(1) : '${v.round()}';
+}
+
+/* Те саме слабке розмиття, що й у замкненій смузі дня, і з тієї ж причини:
+   прозорості немає, бо кожен `Opacity` це окреме полотно на кожному кадрі. */
+Widget _blurred(Widget child) => ImageFiltered(
+  imageFilter: ui.ImageFilter.blur(sigmaX: 1.2, sigmaY: 1.2, tileMode: TileMode.decal),
+  child: child,
+);
 
 class _Cell extends StatelessWidget {
   const _Cell({
@@ -404,6 +775,7 @@ class _Mark extends StatelessWidget {
     required this.over,
     required this.full,
     required this.plain,
+    this.big = false,
   });
 
   final String icon;
@@ -414,6 +786,9 @@ class _Mark extends StatelessWidget {
   /// Малий ряд: сам знак, без підкладки. Пʼять кіл у рядку під картками
   /// читались як другий ряд кнопок.
   final bool plain;
+
+  /// Шапка шторки: те саме коло, тільки більше. Там воно єдина картинка.
+  final bool big;
 
   @override
   Widget build(BuildContext context) {
@@ -433,10 +808,10 @@ class _Mark extends StatelessWidget {
         : tint.withValues(alpha: 0.13);
 
     return Container(
-      width: 26,
-      height: 26,
+      width: big ? 38 : 26,
+      height: big ? 38 : 26,
       decoration: BoxDecoration(color: wash, shape: BoxShape.circle),
-      child: Center(child: CalviIcon(icon, size: 14, color: ink)),
+      child: Center(child: CalviIcon(icon, size: big ? 18 : 14, color: ink)),
     );
   }
 }

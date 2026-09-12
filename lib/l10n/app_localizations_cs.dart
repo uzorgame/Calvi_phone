@@ -1732,6 +1732,20 @@ class LCs extends L {
   }
 
   @override
+  String get nutriProHidden => 'dostupné s Pro';
+
+  @override
+  String get nutriProKept =>
+      'Počítají se už teď, u každého záznamu, s předplatným i bez něj. Nic se neztrácí: jakmile bude Pro, tento den i celý měsíc zpátky se otevřou s čísly.';
+
+  @override
+  String get nutriProTitle => 'Živiny v Pro';
+
+  @override
+  String get nutriProWhat =>
+      'Vláknina, cukr, přidaný cukr, sodík a nasycené tuky patří do Pro. Značky zůstávají na místě, samotná čísla otevírá předplatné.';
+
+  @override
   String nutriRest(int count) {
     String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'a ještě $count');
     return '$_temp0';
@@ -2980,19 +2994,52 @@ class LCs extends L {
   String get unitCm => 'cm';
 
   @override
+  String get unitCmName => 'Centimetry';
+
+  @override
+  String get unitFlozName => 'Tekuté unce';
+
+  @override
   String get unitG => 'g';
+
+  @override
+  String get unitGName => 'Gramy';
+
+  @override
+  String get unitInName => 'Palce';
 
   @override
   String get unitKcal => 'kcal';
 
   @override
+  String get unitKcalName => 'Kalorie';
+
+  @override
   String get unitKg => 'kg';
+
+  @override
+  String get unitKgName => 'Kilogramy';
 
   @override
   String get unitKj => 'kJ';
 
   @override
+  String get unitKjName => 'Kilojouly';
+
+  @override
+  String get unitLbName => 'Libry';
+
+  @override
   String get unitMl => 'ml';
+
+  @override
+  String get unitMlName => 'Mililitry';
+
+  @override
+  String get unitOzName => 'Unce';
+
+  @override
+  String get unitStName => 'Stony';
 
   @override
   String get unitsEnergy => 'Energie';

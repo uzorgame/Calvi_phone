@@ -24,6 +24,7 @@ class AppScope extends InheritedWidget {
     this.real = false,
     this.setReal = _keepDemo,
     this.stats = DayStats.empty,
+    this.pro = false,
     this.eraseAll,
     this.deleteAccount,
     this.signOut,
@@ -50,6 +51,17 @@ class AppScope extends InheritedWidget {
   /// Carries local changes to the server and Nora's answers back. Null in a
   /// widget test and while the app has no database yet.
   final SyncService? sync;
+
+  /* Чи в людини платний доступ просто зараз.
+   *
+   * Один прапорець на застосунок, а не по одному на екран. Другий рівень
+   * нутрієнтів закритий у трьох місцях одразу, і три відповіді на питання «чи є
+   * Pro» рано чи пізно розійшлись би.
+   *
+   * `false`, поки сховище ще не відповіло, і це навмисно. Помилитись тут можна
+   * в два боки, і ціна різна: зайва мить розмиття у платного це дрібниця, а
+   * числа, показані безкоштовному, це віддане задарма. */
+  final bool pro;
 
   /* «Видалити дані» з налаштувань, цілком: сервер, місцева база і памʼять
      екранів. Живе тут, а не в самих налаштуваннях, бо половина роботи належить

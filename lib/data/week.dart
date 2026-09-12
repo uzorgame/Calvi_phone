@@ -7,6 +7,7 @@ library;
 
 import 'day.dart';
 import 'day_stats.dart';
+import 'nutrients.dart';
 import 'settings.dart';
 
 /// Один день у ряду тижня.
@@ -62,6 +63,7 @@ class WeekSummary {
     required this.avgFat,
     required this.avgCarbs,
     required this.avgWaterMl,
+    required this.avgNutrients,
     required this.daysLogged,
     required this.daysOnGoal,
     required this.daysFinished,
@@ -77,6 +79,15 @@ class WeekSummary {
   final double avgFat;
   final double avgCarbs;
   final int avgWaterMl;
+
+  /* Пʼять нутрієнтів, теж середні за добу.
+   *
+   * Ділиться не на сім днів і не на записані, а на ті, у яких це число взагалі
+   * є. Страва, записана до появи підрахунку, його не має і вже не матиме, і
+   * ділити на такий день означало б занижувати середнє за нашу власну
+   * неповноту. Порожньо там, де таких днів немає жодного: нуль сказав би, що
+   * клітковини за тиждень не було. */
+  final Nutrients avgNutrients;
 
   /// Скільки днів тижня мають хоч якийсь запис.
   final int daysLogged;
@@ -167,6 +178,9 @@ WeekSummary weekSummary(
   var carbs = 0;
   var water = 0;
   var logged = 0;
+
+  /// Дні, які пішли в середнє. Потрібні нутрієнтам: вони рахуються окремо.
+  final counted = <int>[];
   var finished = 0;
   var onGoal = 0;
 
@@ -202,6 +216,7 @@ WeekSummary weekSummary(
     fat += totals.fat;
     carbs += totals.carbs;
     water += stats.waterOn(date);
+    counted.add(date);
     logged++;
     finished++;
     if (hit(date, totals)) onGoal++;
@@ -217,6 +232,9 @@ WeekSummary weekSummary(
     fat = totals.fat;
     carbs = totals.carbs;
     water = stats.waterOn(todayDate);
+    counted
+      ..clear()
+      ..add(todayDate);
     logged = 1;
   }
 
@@ -240,6 +258,9 @@ WeekSummary weekSummary(
     avgFat: fat / div,
     avgCarbs: carbs / div,
     avgWaterMl: (water / div).round(),
+    /* Ті самі дні, що й у решти середніх: сьогодні не входить, бо день, що
+       триває, це його початок. Функція спільна з аналітикою. */
+    avgNutrients: nutrientsAvg(stats, counted),
     daysLogged: logged,
     daysOnGoal: onGoal,
     daysFinished: finished,
@@ -313,4 +334,38 @@ String reviewWeekKey([DateTime? now]) {
   return '${monday.year.toString().padLeft(4, '0')}-'
       '${monday.month.toString().padLeft(2, '0')}-'
       '${monday.day.toString().padLeft(2, '0')}';
+}
+
+/// Середнє по тих днях, де це число взагалі є. Порожньо, коли таких немає.
+double? _mean(Map<NutrientKey, double> sum, Map<NutrientKey, int> days, NutrientKey k) =>
+    days[k] == 0 ? null : sum[k]! / days[k]!;
+
+/* Середні нутрієнти за довільний набір днів.
+ *
+ * Те саме правило, що всередині зведення тижня, і тому воно тут одне на обидва
+ * місця: ділиться не на всі дні вікна, а на ті, у яких це число взагалі є.
+ * Страва, записана до появи підрахунку, його не має і вже не матиме, і ділити
+ * на такий день означало б занижувати середнє за нашу власну неповноту.
+ */
+Nutrients nutrientsAvg(DayStats stats, Iterable<int> dates) {
+  final sum = {for (final k in NutrientKey.values) k: 0.0};
+  final days = {for (final k in NutrientKey.values) k: 0};
+
+  for (final date in dates) {
+    final n = stats.nutrientsOn(date);
+    for (final k in NutrientKey.values) {
+      final v = n[k];
+      if (v == null) continue;
+      sum[k] = sum[k]! + v;
+      days[k] = days[k]! + 1;
+    }
+  }
+
+  return Nutrients(
+    fiber: _mean(sum, days, NutrientKey.fiber),
+    sugar: _mean(sum, days, NutrientKey.sugar),
+    added: _mean(sum, days, NutrientKey.added),
+    sodiumMg: _mean(sum, days, NutrientKey.sodium),
+    sat: _mean(sum, days, NutrientKey.sat),
+  );
 }

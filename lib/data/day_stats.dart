@@ -2,6 +2,7 @@ import 'day.dart';
 import 'fixtures.dart';
 import 'goal_at.dart';
 import 'measure.dart';
+import 'nutrients.dart';
 import 'settings.dart';
 
 /// Про що екрани питають дні, яких вони не показують.
@@ -15,6 +16,7 @@ import 'settings.dart';
 class DayStats {
   const DayStats({
     required this.totals,
+    this.nutrients = const {},
     required this.water,
     required this.weights,
     this.burned = const {},
@@ -31,6 +33,12 @@ class DayStats {
   /// Демонстраційний тиждень із фікстур, для режиму «демо».
   factory DayStats.demo() => DayStats(
     totals: {for (final d in weekDates) d: totalsFor(d)},
+    /* Другий рівень теж із фікстур: без нього демонстраційний тиждень показував
+       би пʼять знаків питання там, де в живому застосунку стоять числа. */
+    nutrients: {
+      for (final d in weekDates)
+        d: nutrientsOver([for (final m in dayFor(d).meals) m.nutrients]).sum,
+    },
     water: {for (final d in weekDates) d: dayFor(d).waterMl},
     burned: {for (final d in weekDates) d: dayFor(d).burned},
     weights: {
@@ -43,6 +51,16 @@ class DayStats {
   );
 
   final Map<int, DayTotals> totals;
+
+  /* Другий рівень за днями: сума пʼяти чисел на кожен день окремо.
+   *
+   * Окремо від [totals], а не полем у них, і причина не в охайності. Макроси в
+   * дні є завжди: страва без білка це нуль білка. Нутрієнти бувають невідомі, і
+   * невідоме тут не нуль: усе, записане до появи підрахунку, цих чисел не має і
+   * вже не матиме. Порожнє поле в [Nutrients] означає саме це, і зведення
+   * тижня ділить середнє тільки на ті дні, де число є. */
+  final Map<int, Nutrients> nutrients;
+
   final Map<int, int> water;
 
   /// Спалене на тренуваннях за днями. Без нього минулі дні судились би так,
@@ -93,6 +111,9 @@ class DayStats {
   static const _zero = DayTotals(kcal: 0, protein: 0, fat: 0, carbs: 0);
 
   DayTotals totalsOn(int date) => totals[date] ?? _zero;
+
+  /// Пʼять чисел цього дня. Усі порожні там, де дня немає або він не рахований.
+  Nutrients nutrientsOn(int date) => nutrients[date] ?? Nutrients.none;
   int waterOn(int date) => water[date] ?? 0;
   int burnedOn(int date) => burned[date] ?? 0;
   double? weightOn(int date) => weights[date];

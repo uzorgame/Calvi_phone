@@ -1746,6 +1746,20 @@ class LUk extends L {
   }
 
   @override
+  String get nutriProHidden => 'доступно з Pro';
+
+  @override
+  String get nutriProKept =>
+      'Рахуються вони вже зараз, на кожному записі, і без підписки теж. Нічого не губиться: щойно зʼявиться Pro, цей день і весь місяць позаду відкриються з числами.';
+
+  @override
+  String get nutriProTitle => 'Нутрієнти в Pro';
+
+  @override
+  String get nutriProWhat =>
+      'Клітковина, цукор, доданий цукор, натрій і насичені жири входять у Pro. Знаки лишаються на місці, а самі числа відкриває підписка.';
+
+  @override
   String nutriRest(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -3007,19 +3021,52 @@ class LUk extends L {
   String get unitCm => 'см';
 
   @override
+  String get unitCmName => 'Сантиметри';
+
+  @override
+  String get unitFlozName => 'Рідкі унції';
+
+  @override
   String get unitG => 'г';
+
+  @override
+  String get unitGName => 'Грами';
+
+  @override
+  String get unitInName => 'Дюйми';
 
   @override
   String get unitKcal => 'ккал';
 
   @override
+  String get unitKcalName => 'Калорії';
+
+  @override
   String get unitKg => 'кг';
+
+  @override
+  String get unitKgName => 'Кілограми';
 
   @override
   String get unitKj => 'кДж';
 
   @override
+  String get unitKjName => 'Кілоджоулі';
+
+  @override
+  String get unitLbName => 'Фунти';
+
+  @override
   String get unitMl => 'мл';
+
+  @override
+  String get unitMlName => 'Мілілітри';
+
+  @override
+  String get unitOzName => 'Унції';
+
+  @override
+  String get unitStName => 'Стоуни';
 
   @override
   String get unitsEnergy => 'Енергія';

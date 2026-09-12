@@ -42,7 +42,7 @@ import 'hero_card.dart';
 import 'macro_cards.dart';
 import 'manual_form.dart';
 import 'meal_card.dart';
-import 'nutri_row.dart';
+import '../../design/nutri_row.dart';
 import 'measure_card.dart';
 import 'slot_card.dart';
 import 'water_card.dart';
@@ -1713,6 +1713,8 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
                                 goal: nutrientGoals(goal.kcal),
                                 meals: day.meals,
                                 large: scope.s.nutri == NutriLevel.large,
+                                // Один прапорець на застосунок, див. [AppScope.pro].
+                                pro: scope.pro,
                               ),
                               const SizedBox(height: CalviSize.gapCard),
                             ] else

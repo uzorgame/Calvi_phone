@@ -7,7 +7,10 @@ import '../../data/settings.dart';
 import '../../data/app_scope.dart';
 import '../../data/units.dart';
 import '../../design/icons.dart';
+import '../../data/nutrients.dart';
+import '../../data/week.dart';
 import '../../design/macro_row.dart';
+import '../../design/nutri_row.dart';
 import '../../design/section.dart';
 import '../../design/shell.dart';
 import '../../design/theme.dart';
@@ -464,7 +467,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                  самих трьох величин. Кільце заразом показує те, чого чотири
                  рядки не показували жодним чином, а саме наскільки середнє
                  добирає до норми. */
-              return MacroRow(
+              final row = MacroRow(
                 cells: [
                   (
                     label: l.macroProteinCaps,
@@ -486,6 +489,23 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     value: sum.carbs / over,
                     goal: goal.carbs,
                     colour: c.carbs,
+                  ),
+                ],
+              );
+
+              /* Другий рівень у тій самій картці, під тією самою рискою, що й
+                 на сторінці тижня: питання тут одне, «як воно годувало», і дві
+                 картки на одну відповідь читались би як два різні питання.
+                 Середні беруться по тому самому вікну, тому перемикач періоду
+                 керує обома поверхами разом. */
+              return Column(
+                children: [
+                  row,
+                  const NutriTierLine(),
+                  NutriAvgRow(
+                    avg: nutrientsAvg(stats, dates),
+                    goal: nutrientGoals(goal.kcal),
+                    pro: AppScope.of(context).pro,
                   ),
                 ],
               );

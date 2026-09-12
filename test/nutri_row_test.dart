@@ -8,7 +8,7 @@ import 'package:calvi/screens/settings/panels_account.dart';
 import 'package:calvi/design/icons.dart';
 import 'package:calvi/design/theme.dart';
 import 'package:calvi/l10n/app_localizations.dart';
-import 'package:calvi/screens/today/nutri_row.dart';
+import 'package:calvi/design/nutri_row.dart';
 
 /// Смуга другого рівня: три стани і жодного вигаданого нуля.
 ///
@@ -24,6 +24,7 @@ void main() {
     WidgetTester tester,
     List<Meal> meals, {
     bool large = false,
+    bool pro = true,
     String lang = 'uk',
     Size size = const Size(390, 844),
   }) async {
@@ -44,6 +45,7 @@ void main() {
               goal: nutrientGoals(2000),
               meals: meals,
               large: large,
+              pro: pro,
             ),
           ),
         ),
@@ -51,6 +53,126 @@ void main() {
     );
     await tester.pumpAndSettle();
   }
+
+  /* Ряд середніх на тижні й в аналітиці: те саме правило, що на дні.
+   *
+   * Без Pro цифр немає в дереві віджетів, з Pro вони на місці. Перевіряється
+   * саме це, а не оформлення: розмиття знімається однією властивістю, а
+   * відсутність числа ні. */
+  Future<void> showAvg(WidgetTester tester, {required bool pro}) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: L.localizationsDelegates,
+        supportedLocales: L.supportedLocales,
+        locale: const Locale('uk'),
+        theme: calviLightTheme,
+        home: Scaffold(
+          body: Center(
+            child: NutriAvgRow(
+              avg: const Nutrients(fiber: 12, sugar: 44, added: 7, sodiumMg: 3248, sat: 33),
+              goal: nutrientGoals(2000),
+              pro: pro,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('середні нутрієнти показують числа в Pro', (tester) async {
+    await showAvg(tester, pro: true);
+
+    expect(find.textContaining('12'), findsWidgets, reason: 'клітковина зникла');
+    expect(find.textContaining('3.2'), findsWidgets, reason: 'натрій має бути в грамах');
+  });
+
+  testWidgets('середні нутрієнти без Pro не показують жодної цифри', (tester) async {
+    await showAvg(tester, pro: false);
+
+    for (final text in tester.widgetList<Text>(find.byType(Text))) {
+      final said = text.data ?? '';
+      expect(RegExp(r'[0-9]').hasMatch(said), isFalse, reason: 'цифра «$said» у замкненому ряду');
+    }
+
+    await tester.tap(find.byType(CalviIcon).first);
+    await tester.pumpAndSettle();
+    expect(find.text('Нутрієнти в Pro'), findsOneWidget);
+  });
+
+  /* Замкнена смуга рівно такої самої висоти, як відкрита.
+   *
+   * Без цього сторінка стрибала б у мить покупки, а в замкненому малому ряду
+   * взагалі поїхала верстка: `Center` усередині клітинки розтягував її на всю
+   * доступну висоту, і смуга виходила на шістсот пікселів замість тридцяти
+   * девʼяти. Число тут одне на обидва стани, тому воно й перевіряється разом. */
+  for (final large in [false, true]) {
+    testWidgets('замкнена смуга ${large ? 'велика' : 'мала'} така сама заввишки', (tester) async {
+      final meals = [dish('Борщ', const Nutrients(fiber: 4, sugar: 5, added: 0, sodiumMg: 1300, sat: 9))];
+
+      await show(tester, meals, large: large);
+      final open = tester.getSize(find.byType(NutriRow)).height;
+
+      await show(tester, meals, large: large, pro: false);
+      final shut = tester.getSize(find.byType(NutriRow)).height;
+
+      /* Піксель допуску, і він чесний. Місце під число тримає порожній рядок
+         того самого кегля, а порожній рядок на піксель нижчий за рядок із
+         цифрами: висоту задають самі гліфи. Домалювати їх невидимими не можна,
+         бо тоді число повернулось би в дерево, а саме його тут і немає.
+         Сторожа це не послаблює: він ловив шістсот пікселів замість тридцяти
+         девʼяти, а не одиницю. */
+      expect(
+        (shut - open).abs(),
+        lessThanOrEqualTo(1),
+        reason: 'замкнена смуга $shut проти відкритої $open',
+      );
+    });
+  }
+
+  /* Замок без Pro, і перевіряється тут одне: чисел немає.
+   *
+   * Не схованих, не розмитих, не підмінених нулями. Розмите число це все одно
+   * число в дереві віджетів, і якби ми ховали його оформленням, ця перевірка
+   * впала б: вона шукає цифри, а не те, як вони виглядають. */
+  testWidgets('без Pro у смузі немає жодної цифри', (tester) async {
+    await show(
+      tester,
+      [dish('Борщ', const Nutrients(fiber: 4, sugar: 5, added: 0, sodiumMg: 1300, sat: 9))],
+      pro: false,
+    );
+
+    for (final text in tester.widgetList<Text>(find.byType(Text))) {
+      final said = text.data ?? '';
+      expect(
+        RegExp(r'[0-9]').hasMatch(said),
+        isFalse,
+        reason: 'цифра «$said» у замкненій смузі',
+      );
+    }
+  });
+
+  /* І слова теж тільки на дотик: на головному екрані про підписку не сказано
+     нічого, поки по смузі не натиснули. */
+  testWidgets('без Pro про підписку мовчать, поки не натиснути', (tester) async {
+    await show(
+      tester,
+      [dish('Борщ', const Nutrients(fiber: 4, sugar: 5, added: 0, sodiumMg: 1300, sat: 9))],
+      pro: false,
+    );
+
+    expect(find.textContaining('Pro'), findsNothing, reason: 'напис висить на екрані щодня');
+
+    await tester.tap(find.byType(CalviIcon).first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Нутрієнти в Pro'), findsOneWidget);
+    expect(
+      find.textContaining('без підписки теж'),
+      findsOneWidget,
+      reason: 'головне речення: числа рахуються і без Pro',
+    );
+  });
 
   testWidgets('день без жодного з пʼяти каже про це словами, а не нулями', (tester) async {
     await show(tester, [dish('Борщ', Nutrients.none), dish('Хліб', Nutrients.none)]);

@@ -3102,6 +3102,30 @@ abstract class L {
   /// **'{now} g today, added of it {added}'**
   String nutriNowSugar(String now, String added);
 
+  /// No description provided for @nutriProHidden.
+  ///
+  /// In en, this message translates to:
+  /// **'available with Pro'**
+  String get nutriProHidden;
+
+  /// No description provided for @nutriProKept.
+  ///
+  /// In en, this message translates to:
+  /// **'They are already being counted, on every entry, subscription or not. Nothing is lost: the moment Pro arrives, this day and the whole month behind it open up with their numbers.'**
+  String get nutriProKept;
+
+  /// No description provided for @nutriProTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrients in Pro'**
+  String get nutriProTitle;
+
+  /// No description provided for @nutriProWhat.
+  ///
+  /// In en, this message translates to:
+  /// **'Fibre, sugar, added sugar, sodium and saturated fat are part of Pro. The marks stay where they are; the numbers themselves come with the subscription.'**
+  String get nutriProWhat;
+
   /// No description provided for @nutriRest.
   ///
   /// In en, this message translates to:
@@ -5358,11 +5382,35 @@ abstract class L {
   /// **'cm'**
   String get unitCm;
 
+  /// No description provided for @unitCmName.
+  ///
+  /// In en, this message translates to:
+  /// **'Centimetres'**
+  String get unitCmName;
+
+  /// No description provided for @unitFlozName.
+  ///
+  /// In en, this message translates to:
+  /// **'Fluid ounces'**
+  String get unitFlozName;
+
   /// No description provided for @unitG.
   ///
   /// In en, this message translates to:
   /// **'g'**
   String get unitG;
+
+  /// No description provided for @unitGName.
+  ///
+  /// In en, this message translates to:
+  /// **'Grams'**
+  String get unitGName;
+
+  /// No description provided for @unitInName.
+  ///
+  /// In en, this message translates to:
+  /// **'Inches'**
+  String get unitInName;
 
   /// Bare units, for places that set the figure and the unit in different type.
   ///
@@ -5370,11 +5418,23 @@ abstract class L {
   /// **'kcal'**
   String get unitKcal;
 
+  /// No description provided for @unitKcalName.
+  ///
+  /// In en, this message translates to:
+  /// **'Calories'**
+  String get unitKcalName;
+
   /// No description provided for @unitKg.
   ///
   /// In en, this message translates to:
   /// **'kg'**
   String get unitKg;
+
+  /// No description provided for @unitKgName.
+  ///
+  /// In en, this message translates to:
+  /// **'Kilograms'**
+  String get unitKgName;
 
   /// No description provided for @unitKj.
   ///
@@ -5382,11 +5442,41 @@ abstract class L {
   /// **'kJ'**
   String get unitKj;
 
+  /// No description provided for @unitKjName.
+  ///
+  /// In en, this message translates to:
+  /// **'Kilojoules'**
+  String get unitKjName;
+
+  /// No description provided for @unitLbName.
+  ///
+  /// In en, this message translates to:
+  /// **'Pounds'**
+  String get unitLbName;
+
   /// No description provided for @unitMl.
   ///
   /// In en, this message translates to:
   /// **'ml'**
   String get unitMl;
+
+  /// No description provided for @unitMlName.
+  ///
+  /// In en, this message translates to:
+  /// **'Millilitres'**
+  String get unitMlName;
+
+  /// No description provided for @unitOzName.
+  ///
+  /// In en, this message translates to:
+  /// **'Ounces'**
+  String get unitOzName;
+
+  /// No description provided for @unitStName.
+  ///
+  /// In en, this message translates to:
+  /// **'Stones'**
+  String get unitStName;
 
   /// No description provided for @unitsEnergy.
   ///

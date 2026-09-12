@@ -197,6 +197,11 @@
   "@waterOf": {"placeholders":{"ml":{ "type": "String" }}},
   "wcNoTime": "ohne Dauer",
 
+  "nutriProTitle": "Nährstoffe in Pro",
+  "nutriProHidden": "mit Pro verfügbar",
+  "nutriProWhat": "Ballaststoffe, Zucker, zugesetzter Zucker, Natrium und gesättigte Fette gehören zu Pro. Die Zeichen bleiben, wo sie sind; die Zahlen öffnet das Abo.",
+  "nutriProKept": "Gezählt werden sie schon jetzt, bei jedem Eintrag, mit Abo oder ohne. Nichts geht verloren: sobald Pro da ist, öffnen sich dieser Tag und der ganze Monat davor mit ihren Zahlen.",
+
   "nutriNone": "Diese Mahlzeiten wurden nicht gezählt",
   "nutriNorm": "Richtwert",
   "nutriFrom": "Woher heute",

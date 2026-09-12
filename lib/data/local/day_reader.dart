@@ -139,12 +139,27 @@ class DayReader {
       DateTime? lastAt;
       int? lastKcal;
 
+      /* Другий рівень збирається по днях тим самим правилом, що й на картці
+         дня: невідоме лишається невідомим, а не стає нулем. Тому спершу список
+         на день, а сума береться одним місцем нижче. */
+      final byDayNutrients = <int, List<Nutrients>>{};
+
       for (final m in rows.meals) {
         final key = _dayOffset(m.day);
         if (key == 0 && (lastAt == null || m.at.isAfter(lastAt))) {
           lastAt = m.at;
           lastKcal = m.kcal;
         }
+        (byDayNutrients[key] ??= []).add(
+          Nutrients(
+            fiber: m.fiberG,
+            sugar: m.sugarG,
+            added: m.addedSugarG,
+            sodiumMg: m.sodiumMg,
+            sat: m.satFatG,
+          ),
+        );
+
         final was = totals[key];
         totals[key] = DayTotals(
           kcal: (was?.kcal ?? 0) + m.kcal,
@@ -196,6 +211,9 @@ class DayReader {
 
       return DayStats(
         totals: totals,
+        nutrients: {
+          for (final e in byDayNutrients.entries) e.key: nutrientsOver(e.value).sum,
+        },
         water: water,
         burned: burned,
         weights: weights,

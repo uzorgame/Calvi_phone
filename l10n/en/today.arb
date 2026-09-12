@@ -198,6 +198,11 @@
   "@waterOf": {"placeholders":{"ml":{ "type": "String" }}},
   "wcNoTime": "no duration",
 
+  "nutriProTitle": "Nutrients in Pro",
+  "nutriProHidden": "available with Pro",
+  "nutriProWhat": "Fibre, sugar, added sugar, sodium and saturated fat are part of Pro. The marks stay where they are; the numbers themselves come with the subscription.",
+  "nutriProKept": "They are already being counted, on every entry, subscription or not. Nothing is lost: the moment Pro arrives, this day and the whole month behind it open up with their numbers.",
+
   "nutriNone": "These meals were not counted",
   "nutriNorm": "Norm",
   "nutriFrom": "Where from today",

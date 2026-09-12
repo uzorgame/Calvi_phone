@@ -197,6 +197,11 @@
   "@waterOf": {"placeholders":{"ml":{ "type": "String" }}},
   "wcNoTime": "senza durata",
 
+  "nutriProTitle": "Nutrienti in Pro",
+  "nutriProHidden": "disponibile con Pro",
+  "nutriProWhat": "Fibre, zuccheri, zuccheri aggiunti, sodio e grassi saturi fanno parte di Pro. I simboli restano al loro posto; i numeri li apre l’abbonamento.",
+  "nutriProKept": "Vengono già contati, a ogni voce, con o senza abbonamento. Non si perde nulla: appena arriva Pro, questa giornata e tutto il mese alle spalle si aprono con i loro numeri.",
+
   "nutriNone": "Questi piatti non sono stati contati",
   "nutriNorm": "Riferimento",
   "nutriFrom": "Da dove viene oggi",

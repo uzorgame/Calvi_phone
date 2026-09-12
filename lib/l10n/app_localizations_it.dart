@@ -1739,6 +1739,20 @@ class LIt extends L {
   }
 
   @override
+  String get nutriProHidden => 'disponibile con Pro';
+
+  @override
+  String get nutriProKept =>
+      'Vengono già contati, a ogni voce, con o senza abbonamento. Non si perde nulla: appena arriva Pro, questa giornata e tutto il mese alle spalle si aprono con i loro numeri.';
+
+  @override
+  String get nutriProTitle => 'Nutrienti in Pro';
+
+  @override
+  String get nutriProWhat =>
+      'Fibre, zuccheri, zuccheri aggiunti, sodio e grassi saturi fanno parte di Pro. I simboli restano al loro posto; i numeri li apre l’abbonamento.';
+
+  @override
   String nutriRest(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -2995,19 +3009,52 @@ class LIt extends L {
   String get unitCm => 'cm';
 
   @override
+  String get unitCmName => 'Centimetri';
+
+  @override
+  String get unitFlozName => 'Once liquide';
+
+  @override
   String get unitG => 'g';
+
+  @override
+  String get unitGName => 'Grammi';
+
+  @override
+  String get unitInName => 'Pollici';
 
   @override
   String get unitKcal => 'kcal';
 
   @override
+  String get unitKcalName => 'Calorie';
+
+  @override
   String get unitKg => 'kg';
+
+  @override
+  String get unitKgName => 'Chilogrammi';
 
   @override
   String get unitKj => 'kJ';
 
   @override
+  String get unitKjName => 'Kilojoule';
+
+  @override
+  String get unitLbName => 'Libbre';
+
+  @override
   String get unitMl => 'ml';
+
+  @override
+  String get unitMlName => 'Millilitri';
+
+  @override
+  String get unitOzName => 'Once';
+
+  @override
+  String get unitStName => 'Stone';
 
   @override
   String get unitsEnergy => 'Energia';

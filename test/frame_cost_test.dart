@@ -89,6 +89,17 @@ void main() {
         lessThanOrEqualTo(3),
         reason: 'збережених шарів на кадр стало більше: ${at.layers}',
       );
+
+      /* Розмиття віджетом рахується окремо, бо обхід вище його не бачить:
+         `ImageFiltered` не `RenderOpacity` і не тінь, а полотно він створює
+         таке саме. Пʼять це замкнена смуга нутрієнтів без Pro, по знаку на
+         кожен. Шосте означає, що розмиття завелось десь іще. */
+      final filters = tester.widgetList<ImageFiltered>(find.byType(ImageFiltered)).length;
+      expect(
+        filters,
+        lessThanOrEqualTo(5),
+        reason: 'розмитих шарів на кадр стало більше: $filters',
+      );
     });
   }
 
