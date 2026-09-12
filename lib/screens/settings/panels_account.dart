@@ -240,39 +240,52 @@ class UnitsPanel extends StatelessWidget {
            Різниця лише в числах прикладу: тут профіль уже є, тому під
            «Мілілітрами» стоїть власна норма води, а не зразкова. Приклад із
            чужою вагою на цьому екрані виглядав би як чужий. */
-        for (var gi = 0; gi < unitGroups(l).length; gi++) ...[
-          if (gi > 0) const SizedBox(height: 12),
-          Builder(
-            builder: (context) {
-              final g = unitGroups(l)[gi];
-              return Semantics(
-                container: true,
-                label: g.title,
-                child: CalviPicks(
-                  row: true,
-                  children: [
-                    for (var i = 0; i < g.values.length; i++)
-                      CalviPick(
-                        tight: true,
-                        label: g.names[i],
-                        hint: unitSample(
-                          g.key,
-                          s.units.withKey(g.key, g.values[i]),
-                          weightKg: s.weightKg,
-                          heightCm: s.heightCm,
-                          waterMl: s.waterMl,
-                          kcal: dailyKcal(s),
-                        ),
-                        on: s.units.byKey(g.key) == g.values[i],
-                        onTap: () =>
-                            set((v) => v.copyWith(units: v.units.withKey(g.key, g.values[i]))),
-                      ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
+        /* Обгортка тут `CalviSection`, і без неї картки лягали від краю до
+           краю екрана. Бічний відступ сторінки живе саме в ній, а не в самому
+           екрані: усі інші сторінки налаштувань стоять у ній же, і «Одиниці»
+           без неї виглядали ширшими за «Мову» поруч.
+
+           Одна секція на всі пʼять груп, а не пʼять окремих: свої проміжки між
+           картками вони тримають самі, а секція додала б між ними ще й власний,
+           і вийшло б рідше, ніж в анкеті. */
+        CalviSection(
+          bare: true,
+          children: [
+            for (var gi = 0; gi < unitGroups(l).length; gi++) ...[
+              if (gi > 0) const SizedBox(height: 12),
+              Builder(
+                builder: (context) {
+                  final g = unitGroups(l)[gi];
+                  return Semantics(
+                    container: true,
+                    label: g.title,
+                    child: CalviPicks(
+                      row: true,
+                      children: [
+                        for (var i = 0; i < g.values.length; i++)
+                          CalviPick(
+                            tight: true,
+                            label: g.names[i],
+                            hint: unitSample(
+                              g.key,
+                              s.units.withKey(g.key, g.values[i]),
+                              weightKg: s.weightKg,
+                              heightCm: s.heightCm,
+                              waterMl: s.waterMl,
+                              kcal: dailyKcal(s),
+                            ),
+                            on: s.units.byKey(g.key) == g.values[i],
+                            onTap: () =>
+                                set((v) => v.copyWith(units: v.units.withKey(g.key, g.values[i]))),
+                          ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ],
+          ],
+        ),
       ],
     );
   }
