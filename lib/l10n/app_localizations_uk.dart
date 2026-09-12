@@ -1728,9 +1728,6 @@ class LUk extends L {
   String get nutriNone => 'Ці страви не рахували';
 
   @override
-  String get nutriNoneYet => 'Нутрієнти зʼявляться з першим записом';
-
-  @override
   String get nutriNorm => 'Норма';
 
   @override

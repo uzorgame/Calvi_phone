@@ -226,6 +226,7 @@ class Dictation implements LevelSource {
     'fr': 'fr-FR',
     'pt': 'pt-BR',
     'pl': 'pl-PL',
+    'cs': 'cs-CZ',
   };
 
   /// Мова розпізнавання за мовою застосунку.

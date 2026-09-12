@@ -169,6 +169,7 @@ Lang langNow(BuildContext context) => switch (Localizations.localeOf(context).la
   'fr' => Lang.fr,
   'pt' => Lang.pt,
   'pl' => Lang.pl,
+  'cs' => Lang.cs,
   _ => Lang.en,
 };
 
@@ -192,6 +193,7 @@ String langTitle(BuildContext context, Lang lang) => switch (lang) {
      назва стоїть локалізацією сторінки в App Store. */
   Lang.pt => 'Português do Brasil',
   Lang.pl => 'Polski',
+  Lang.cs => 'Čeština',
 };
 
 /// Про що нагадування. Назву самій людині вирішувати, це лише рід.

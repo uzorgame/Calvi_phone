@@ -148,7 +148,17 @@ class WeekSummary {
 /// понеділок мовчала б цілий день.
 ///
 /// Калорії тут нетто: зʼїдене мінус спалене, як на картці дня і в кружечках.
-WeekSummary weekSummary(DayStats stats, SettingsState s) {
+WeekSummary weekSummary(
+  DayStats stats,
+  SettingsState s, [
+  /* Який тиждень зводити: той, у якому лежить цей день. Нуль це сьогодні, і
+     тоді виходить поточний тиждень, як було завжди.
+
+     Тиждень тут календарний, від понеділка до неділі, а не «сім днів назад від
+     вибраного». Причина проста: рівно такий тиждень показує стрічка дат угорі,
+     і дві різні сімки на одному екрані читались би як помилка. */
+  int pick = todayDate,
+]) {
   final norm = dailyKcal(s);
 
   var kcal = 0;
@@ -165,7 +175,9 @@ WeekSummary weekSummary(DayStats stats, SettingsState s) {
   bool hit(int date, DayTotals totals) =>
       dayHit(kcal: totals.kcal, burned: stats.burnedOn(date), norm: norm, direction: s.direction);
 
-  for (final date in weekDates) {
+  final monday = mondayOf(pick);
+
+  for (final date in List.generate(7, (i) => monday + i)) {
     final totals = stats.totalsOn(date);
     final has = stats.has(date);
 
@@ -196,7 +208,9 @@ WeekSummary weekSummary(DayStats stats, SettingsState s) {
   }
 
   // Тиждень щойно почався: сьогодні це все, що є, і мовчати гірше.
-  if (logged == 0 && stats.has(todayDate)) {
+  /* Виняток працює тільки для тижня, у якому лежить сьогодні: у минулому тижні
+     завершились усі сім днів, і рятувати там нема чого. */
+  if (monday <= todayDate && monday + 6 >= todayDate && logged == 0 && stats.has(todayDate)) {
     final totals = stats.totalsOn(todayDate);
     kcal = stats.netOn(todayDate);
     protein = totals.protein;
@@ -213,7 +227,10 @@ WeekSummary weekSummary(DayStats stats, SettingsState s) {
      той самий запис, різниця виходить рівно нуль, і сторінка каже «0.0 кг»,
      ніби вага трималась. Насправді вона не трималась, а просто не міряна: одне
      зважування не описує тижня, і чесна відповідь тут «не зважувались». */
-  final weighed = weekDates.where((d) => stats.weightOn(d) != null).toList()..sort();
+  final weighed = List.generate(7, (i) => monday + i)
+      .where((d) => stats.weightOn(d) != null)
+      .toList()
+    ..sort();
 
   final div = logged == 0 ? 1 : logged;
 
@@ -242,11 +259,23 @@ WeekSummary weekSummary(DayStats stats, SettingsState s) {
 /// Понеділок береться з календаря застосунку через [mondayOf], тим самим, яким
 /// малюється стрічка дат: два різні уявлення про те, де починається тиждень,
 /// суперечили б одне одному на одному екрані.
-double weekRun([DateTime? now]) {
+double weekRun([int pick = todayDate, DateTime? now]) {
   final clock = now ?? DateTime.now();
-  final sinceMonday = -mondayOf(todayDate);
+
+  /* Відлік від понеділка того тижня, у якому лежить вибраний день, а не від
+     сьогоднішнього. Інакше картка минулого тижня показувала б, скільки минуло
+     цього: числа з одного тижня, а кільце з іншого.
+
+     Частка дня додається лише сьогоднішньому. Минулий день прожитий цілком,
+     майбутній не прожитий зовсім, і тільки сьогодні триває просто зараз. */
+  final sinceMonday = pick - mondayOf(pick);
   final dayShare = (clock.hour * 60 + clock.minute) / 1440;
-  final run = (sinceMonday + dayShare) / 7;
+  final share = pick == todayDate
+      ? dayShare
+      : pick < todayDate
+      ? 1.0
+      : 0.0;
+  final run = (sinceMonday + share) / 7;
   return run < 0 ? 0 : (run > 1 ? 1 : run);
 }
 

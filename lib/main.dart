@@ -948,6 +948,7 @@ class _CalviAppState extends State<CalviApp> with WidgetsBindingObserver {
           Locale('fr'),
           Locale('pt'),
           Locale('pl'),
+          Locale('cs'),
         ],
 
         /* `null` означає «спитай пристрій». Людина, яка обрала мову руками,
@@ -963,6 +964,7 @@ class _CalviAppState extends State<CalviApp> with WidgetsBindingObserver {
           Lang.fr => const Locale('fr'),
           Lang.pt => const Locale('pt'),
           Lang.pl => const Locale('pl'),
+          Lang.cs => const Locale('cs'),
         },
         /* Шар даних дізнається про мову звідси.
          *
@@ -987,7 +989,26 @@ class _CalviAppState extends State<CalviApp> with WidgetsBindingObserver {
         },
         home: Builder(
           builder: (context) {
-            dataLang = Localizations.localeOf(context).languageCode;
+            /* Мова змінилась, і живий запис має заговорити нею ж.
+             *
+             * Слова в острівець і в сповіщення їдуть готовими з Dart, а числа
+             * при цьому лишаються ті самі. `LiveDay` навмисно не смикає систему
+             * однаковими числами, тому сама зміна мови не доходила нікуди:
+             * запис лишався попередньою мовою до першої записаної страви.
+             * Забути показане означає «надішли наново».
+             *
+             * Тут, а не в налаштуваннях, бо мову міняють двома дорогами: сам
+             * застосунок і мова телефона, коли вибрано «як у пристрої». Сюди
+             * сходяться обидві. */
+            final speaks = Localizations.localeOf(context).languageCode;
+            if (speaks != dataLang) {
+              dataLang = speaks;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (!mounted) return;
+                _live.forget();
+                _pushLive();
+              });
+            }
             /* Units next to the language: both are «how the numbers read»,
                and both must be in place before the first screen draws. This
                builder runs on every rebuild, so a change in settings reaches

@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
+import 'app_localizations_cs.dart';
 import 'app_localizations_de.dart';
 import 'app_localizations_en.dart';
 import 'app_localizations_es.dart';
@@ -98,6 +99,7 @@ abstract class L {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
+    Locale('cs'),
     Locale('de'),
     Locale('en'),
     Locale('es'),
@@ -3072,12 +3074,6 @@ abstract class L {
   /// **'These meals were not counted'**
   String get nutriNone;
 
-  /// No description provided for @nutriNoneYet.
-  ///
-  /// In en, this message translates to:
-  /// **'Nutrients appear with the first entry'**
-  String get nutriNoneYet;
-
   /// No description provided for @nutriNorm.
   ///
   /// In en, this message translates to:
@@ -5957,7 +5953,7 @@ class _LDelegate extends LocalizationsDelegate<L> {
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['de', 'en', 'es', 'fr', 'it', 'pl', 'pt', 'uk'].contains(locale.languageCode);
+      <String>['cs', 'de', 'en', 'es', 'fr', 'it', 'pl', 'pt', 'uk'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_LDelegate old) => false;
@@ -5966,6 +5962,8 @@ class _LDelegate extends LocalizationsDelegate<L> {
 L lookupL(Locale locale) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
+    case 'cs':
+      return LCs();
     case 'de':
       return LDe();
     case 'en':

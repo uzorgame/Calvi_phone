@@ -199,7 +199,6 @@
   "wcNoTime": "no duration",
 
   "nutriNone": "These meals were not counted",
-  "nutriNoneYet": "Nutrients appear with the first entry",
   "nutriNorm": "Norm",
   "nutriFrom": "Where from today",
   "nutriRest": "{count, plural, one{and {count} more} other{and {count} more}}",

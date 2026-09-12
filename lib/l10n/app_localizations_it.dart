@@ -1721,9 +1721,6 @@ class LIt extends L {
   String get nutriNone => 'Questi piatti non sono stati contati';
 
   @override
-  String get nutriNoneYet => 'I nutrienti compaiono con la prima voce';
-
-  @override
   String get nutriNorm => 'Riferimento';
 
   @override

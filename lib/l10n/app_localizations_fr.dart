@@ -1727,9 +1727,6 @@ class LFr extends L {
   String get nutriNone => 'Ces plats nʼont pas été comptés';
 
   @override
-  String get nutriNoneYet => 'Les nutriments apparaissent avec la première entrée';
-
-  @override
   String get nutriNorm => 'Repère';
 
   @override

@@ -220,6 +220,7 @@ class SyncRepository {
       for (final row in await db.syncDao.pendingMeals(limit: perTable)) mealToChange(row),
       for (final row in await db.syncDao.pendingWater(limit: perTable)) waterToChange(row),
       for (final row in await db.syncDao.pendingWeights(limit: perTable)) weightToChange(row),
+      for (final row in await db.syncDao.pendingGoals(limit: perTable)) goalToChange(row),
       for (final row in await db.syncDao.pendingMeasures(limit: perTable)) measureToChange(row),
       for (final row in await db.syncDao.pendingWorkouts(limit: perTable)) workoutToChange(row),
       for (final row in await db.syncDao.pendingMeds(limit: perTable)) medToChange(row),
@@ -263,6 +264,8 @@ class SyncRepository {
             await db.into(db.waterLogs).insertOnConflictUpdate(waterFromChange(change));
           case 'weights':
             await db.into(db.weights).insertOnConflictUpdate(weightFromChange(change));
+          case 'goals':
+            await db.into(db.goals).insertOnConflictUpdate(goalFromChange(change));
           case 'measurements':
             await db.into(db.measurements).insertOnConflictUpdate(measureFromChange(change));
           case 'workouts':

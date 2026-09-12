@@ -153,7 +153,6 @@
   "wcNoTime": "без тривалості",
 
   "nutriNone": "Ці страви не рахували",
-  "nutriNoneYet": "Нутрієнти зʼявляться з першим записом",
   "nutriNorm": "Норма",
   "nutriFrom": "Звідки сьогодні",
   "nutriRest": "{count, plural, one{і ще {count}} few{і ще {count}} many{і ще {count}} other{і ще {count}}}",

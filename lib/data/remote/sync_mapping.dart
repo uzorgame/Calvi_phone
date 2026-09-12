@@ -71,6 +71,20 @@ Map<String, dynamic> weightToChange(Weight r) => envelope(
   data: {'day': r.day, 'at': r.at.toUtc().toIso8601String(), 'kg': r.kg},
 );
 
+Map<String, dynamic> goalToChange(Goal r) => envelope(
+  table: 'goals',
+  id: r.id,
+  updatedAt: r.updatedAt,
+  deletedAt: r.deletedAt,
+  data: {
+    'started_on': r.startedOn,
+    'goal_start_kg': r.goalStartKg,
+    'target_kg': r.targetKg,
+    'direction': r.direction,
+    'pace': r.pace,
+  },
+);
+
 /// A change from the server, ready to be written locally.
 ///
 /// It arrives already accepted: the server settled the conflict, so the row is
@@ -134,6 +148,22 @@ WeightsCompanion weightFromChange(Map<String, dynamic> c) {
     day: Value(_day(d['day'])),
     at: Value(_time(d['at'])!),
     kg: Value(_dec(d['kg'])!),
+  );
+}
+
+GoalsCompanion goalFromChange(Map<String, dynamic> c) {
+  final d = c['data'] as Map<String, dynamic>;
+  return GoalsCompanion(
+    id: Value(c['id'] as String),
+    updatedAt: Value(_time(c['updated_at'])!),
+    deletedAt: Value(_time(c['deleted_at'])),
+    seq: Value(_int(c['seq'])!),
+    dirty: const Value(false),
+    startedOn: Value(_day(d['started_on'])),
+    goalStartKg: Value(_dec(d['goal_start_kg'])),
+    targetKg: Value(_dec(d['target_kg'])),
+    direction: Value(d['direction'] as String? ?? 'lose'),
+    pace: Value(_dec(d['pace']) ?? 0.5),
   );
 }
 

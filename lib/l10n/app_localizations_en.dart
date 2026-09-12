@@ -1717,9 +1717,6 @@ class LEn extends L {
   String get nutriNone => 'These meals were not counted';
 
   @override
-  String get nutriNoneYet => 'Nutrients appear with the first entry';
-
-  @override
   String get nutriNorm => 'Norm';
 
   @override

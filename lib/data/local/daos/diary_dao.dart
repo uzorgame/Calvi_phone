@@ -7,6 +7,7 @@ import '../tables/meals.dart';
 import '../tables/measurements.dart';
 import '../tables/medication_takes.dart';
 import '../tables/water_logs.dart';
+import '../tables/goals.dart';
 import '../tables/weights.dart';
 import '../tables/workouts.dart';
 
@@ -20,7 +21,9 @@ const _uuid = Uuid();
 /// stamps `updatedAt`, marks the row dirty, and leaves the id alone. A screen
 /// that sets those by hand is a screen that will one day forget to, and a row
 /// that forgets to be dirty is a record that silently never reaches the server.
-@DriftAccessor(tables: [Meals, WaterLogs, Weights, Measurements, Workouts, MedicationTakes])
+@DriftAccessor(
+  tables: [Meals, WaterLogs, Weights, Goals, Measurements, Workouts, MedicationTakes],
+)
 class DiaryDao extends DatabaseAccessor<CalviDb> with _$DiaryDaoMixin {
   DiaryDao(super.db);
 
@@ -579,6 +582,74 @@ class DiaryDao extends DatabaseAccessor<CalviDb> with _$DiaryDaoMixin {
 
   /// One weight a day: a second reading replaces the first rather than adding a
   /// second point to the graph, because the product asks for a morning weight.
+  /* Ціль, записана в історію, а не тільки в профіль.
+   *
+   * Профіль тримає ціль поточну, і за нею рахується норма. Історія відповідає
+   * на інше питання: яка ціль була такого-то числа. Без неї зміна цілі
+   * переписувала б минулі картки дня заднім числом, ніби людина завжди йшла
+   * туди, куди зібралась сьогодні.
+   *
+   * Один рядок на день: людина може крутити повзунок скільки завгодно, і кожен
+   * рух не має ставати окремим рішенням в історії. Лишається те, на якому вона
+   * зупинилась.
+   *
+   * Однакова ціль другого рядка теж не робить: зберегти налаштування можна
+   * через будь-яку дрібницю, і історія не має заростати копіями. */
+  Future<void> keepGoal({
+    required double goalStartKg,
+    required double targetKg,
+    required String direction,
+    required double pace,
+    DateTime? at,
+  }) async {
+    final when = at ?? DateTime.now();
+    final key = dayKey(when);
+
+    final same = await (select(goals)..where((g) => g.deletedAt.isNull())
+          ..orderBy([(g) => OrderingTerm(expression: g.startedOn, mode: OrderingMode.desc)])
+          ..limit(1))
+        .getSingleOrNull();
+
+    if (same != null &&
+        same.startedOn != key &&
+        same.goalStartKg == goalStartKg &&
+        same.targetKg == targetKg &&
+        same.direction == direction &&
+        same.pace == pace) {
+      return;
+    }
+
+    final today = await (select(
+      goals,
+    )..where((g) => g.startedOn.equals(key) & g.deletedAt.isNull())).getSingleOrNull();
+
+    if (today == null) {
+      await into(goals).insert(
+        GoalsCompanion.insert(
+          id: _uuid.v4(),
+          updatedAt: when,
+          startedOn: key,
+          goalStartKg: Value(goalStartKg),
+          targetKg: Value(targetKg),
+          direction: direction,
+          pace: pace,
+        ),
+      );
+      return;
+    }
+
+    await (update(goals)..where((g) => g.id.equals(today.id))).write(
+      GoalsCompanion(
+        goalStartKg: Value(goalStartKg),
+        targetKg: Value(targetKg),
+        direction: Value(direction),
+        pace: Value(pace),
+        updatedAt: Value(when),
+        dirty: const Value(true),
+      ),
+    );
+  }
+
   Future<void> setWeight({required double kg, DateTime? at}) async {
     final when = at ?? DateTime.now();
     final key = dayKey(when);
@@ -659,6 +730,7 @@ class DiaryDao extends DatabaseAccessor<CalviDb> with _$DiaryDaoMixin {
       List<MealRow> meals,
       List<WaterLog> water,
       List<Weight> weights,
+      List<Goal> goals,
       List<Measurement> measures,
       List<WorkoutRow> workouts,
     })
@@ -683,6 +755,14 @@ class DiaryDao extends DatabaseAccessor<CalviDb> with _$DiaryDaoMixin {
         await (select(measurements)
               ..where((t) => t.at.isBiggerOrEqualValue(from) & t.deletedAt.isNull())
               ..orderBy([(t) => OrderingTerm(expression: t.at)]))
+            .get(),
+    /* Цілі без межі за часом, на відміну від решти: їх одиниці, а найперша з
+       них може бути старша за будь-яке вікно і все одно потрібна, бо саме вона
+       діяла в усі дні до наступної. */
+    goals:
+        await (select(goals)
+              ..where((t) => t.deletedAt.isNull())
+              ..orderBy([(t) => OrderingTerm(expression: t.startedOn)]))
             .get(),
   );
 

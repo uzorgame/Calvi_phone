@@ -198,7 +198,6 @@
   "wcNoTime": "sans durée",
 
   "nutriNone": "Ces plats nʼont pas été comptés",
-  "nutriNoneYet": "Les nutriments apparaissent avec la première entrée",
   "nutriNorm": "Repère",
   "nutriFrom": "Dʼoù cela vient aujourdʼhui",
   "nutriRest": "{count, plural, one{et {count} de plus} other{et {count} de plus}}",

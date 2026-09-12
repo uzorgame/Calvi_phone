@@ -1727,9 +1727,6 @@ class LDe extends L {
   String get nutriNone => 'Diese Mahlzeiten wurden nicht gezählt';
 
   @override
-  String get nutriNoneYet => 'Nährstoffe erscheinen mit dem ersten Eintrag';
-
-  @override
   String get nutriNorm => 'Richtwert';
 
   @override

@@ -305,6 +305,7 @@ const _weekdaysDe = ['SO', 'MO', 'DI', 'MI', 'DO', 'FR', 'SA'];
 const _weekdaysFr = ['DIM', 'LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM'];
 const _weekdaysPt = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
 const _weekdaysPl = ['ND', 'PN', 'WT', 'ŚR', 'CZ', 'PT', 'SO'];
+const _weekdaysCs = ['NE', 'PO', 'ÚT', 'ST', 'ČT', 'PÁ', 'SO'];
 
 /* Родовий відмінок: «15 серпня», а не «15 серпень». Місяць тут ніколи не
    стоїть сам, він завжди після числа. */
@@ -435,6 +436,23 @@ const _monthsPl = [
   'grudnia',
 ];
 
+/* Чеська, як польська і українська, ставить місяць у родовому: «15. srpna», а
+   не «15. srpen». Число перед ним іде з крапкою, як у німецькій. */
+const _monthsCs = [
+  'ledna',
+  'února',
+  'března',
+  'dubna',
+  'května',
+  'června',
+  'července',
+  'srpna',
+  'září',
+  'října',
+  'listopadu',
+  'prosince',
+];
+
 List<String> get _months => switch (dataLang) {
   'uk' => _monthsUk,
   'es' => _monthsEs,
@@ -443,6 +461,7 @@ List<String> get _months => switch (dataLang) {
   'fr' => _monthsFr,
   'pt' => _monthsPt,
   'pl' => _monthsPl,
+  'cs' => _monthsCs,
   _ => _monthsEn,
 };
 List<String> get _weekdays => switch (dataLang) {
@@ -453,6 +472,7 @@ List<String> get _weekdays => switch (dataLang) {
   'fr' => _weekdaysFr,
   'pt' => _weekdaysPt,
   'pl' => _weekdaysPl,
+  'cs' => _weekdaysCs,
   _ => _weekdaysEn,
 };
 
@@ -467,7 +487,7 @@ String dayMonth(int day, int month) {
   final name = _months[month - 1];
   return switch (dataLang) {
     'es' || 'pt' => '$day de $name',
-    'de' => '$day. $name',
+    'de' || 'cs' => '$day. $name',
     _ => '$day $name',
   };
 }
@@ -496,6 +516,7 @@ List<String> weekdaysFromMonday([String? lang]) {
     'fr' => _weekdaysFr,
     'pt' => _weekdaysPt,
     'pl' => _weekdaysPl,
+    'cs' => _weekdaysCs,
     _ => _weekdaysEn,
   };
   return [...week.skip(1), week.first];
@@ -566,11 +587,29 @@ const _shortFr = [
   'déc',
 ];
 
+/* Чеські скорочення теж списком: «červen» і «červenec» трьома літерами дали б
+   однакове «čer», як «juin» і «juillet» у французькій. */
+const _shortCs = [
+  'led',
+  'úno',
+  'bře',
+  'dub',
+  'kvě',
+  'čvn',
+  'čvc',
+  'srp',
+  'zář',
+  'říj',
+  'lis',
+  'pro',
+];
+
 String monthShort(int month) => switch (dataLang) {
   'uk' => _shortUk[month - 1],
   'es' => _shortEs[month - 1],
   'it' => _shortIt[month - 1],
   'fr' => _shortFr[month - 1],
+  'cs' => _shortCs[month - 1],
   'de' => _monthsDe[month - 1].substring(0, 3),
   'pt' => _monthsPt[month - 1].substring(0, 3),
   /* Польські три літери самі виходять різними: «sty», «sie», «wrz», «paź».

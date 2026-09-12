@@ -109,20 +109,27 @@ team = phone.build_configurations.first.build_settings['DEVELOPMENT_TEAM']
 # `InfoPlist.strings` на кожну мову лежать у репозиторії, а тут вони
 # підключаються до телефонної цілі однією варіантною групою і вписуються в
 # knownRegions, як зробив би сам Xcode.
-LANGS = %w[en uk es it de fr pt pl].freeze
+LANGS = %w[en uk es it de fr pt pl cs].freeze
+#
+# Група може вже стояти, і тоді дописуються лише нові мови. Раніше тут стояла
+# перевірка «група є, отже все підключено», і дев'ята мова мовчки не доїхала б
+# до жодного проєкту, де скрипт уже відпрацював: App Store показував би вісім.
 runner_group = project.main_group.find_subpath('Runner', false) or abort 'Немає групи Runner'
-if runner_group.children.any? { |c| c.respond_to?(:name) && c.name == 'InfoPlist.strings' }
-  puts 'Локалізації: вже підключені'
-else
+strings = runner_group.children.find { |c| c.respond_to?(:name) && c.name == 'InfoPlist.strings' }
+
+if strings.nil?
   strings = runner_group.new_variant_group('InfoPlist.strings')
-  LANGS.each do |lang|
-    ref = strings.new_reference("#{lang}.lproj/InfoPlist.strings")
-    ref.name = lang
-  end
   phone.add_resources([strings])
-  project.root_object.known_regions = (project.root_object.known_regions | LANGS)
-  puts "Локалізації: підключено #{LANGS.join(', ')}"
 end
+
+added = LANGS.reject { |lang| strings.children.any? { |c| c.name == lang } }
+added.each do |lang|
+  ref = strings.new_reference("#{lang}.lproj/InfoPlist.strings")
+  ref.name = lang
+end
+project.root_object.known_regions = (project.root_object.known_regions | LANGS)
+
+puts added.empty? ? 'Локалізації: вже підключені' : "Локалізації: підключено #{added.join(', ')}"
 
 watch = project.targets.find { |t| t.name == NAME }
 if watch

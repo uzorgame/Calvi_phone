@@ -13,6 +13,7 @@ import '../tables/sync_meta.dart';
 import '../tables/server_snapshots.dart';
 import '../tables/tokens.dart';
 import '../tables/water_logs.dart';
+import '../tables/goals.dart';
 import '../tables/weights.dart';
 import '../tables/workouts.dart';
 
@@ -28,6 +29,7 @@ part 'sync_dao.g.dart';
     Meals,
     WaterLogs,
     Weights,
+    Goals,
     Measurements,
     Workouts,
     Medications,
@@ -135,6 +137,13 @@ class SyncDao extends DatabaseAccessor<CalviDb> with _$SyncDaoMixin {
             ..limit(limit))
           .get();
 
+  Future<List<Goal>> pendingGoals({int limit = 200}) =>
+      (select(goals)
+            ..where((g) => g.dirty.equals(true))
+            ..orderBy([(g) => OrderingTerm(expression: g.updatedAt)])
+            ..limit(limit))
+          .get();
+
   Future<List<Measurement>> pendingMeasures({int limit = 200}) =>
       (select(measurements)
             ..where((m) => m.dirty.equals(true))
@@ -217,6 +226,7 @@ class SyncDao extends DatabaseAccessor<CalviDb> with _$SyncDaoMixin {
       await heal<Meals, MealRow>(meals, (t) => t.id, (r) => r.id);
       await heal<WaterLogs, WaterLog>(waterLogs, (t) => t.id, (r) => r.id);
       await heal<Weights, Weight>(weights, (t) => t.id, (r) => r.id);
+      await heal<Goals, Goal>(goals, (t) => t.id, (r) => r.id);
       await heal<Measurements, Measurement>(measurements, (t) => t.id, (r) => r.id);
       await heal<Workouts, WorkoutRow>(workouts, (t) => t.id, (r) => r.id);
       /* Препарат тягне за собою прийоми: вони тримаються за його ідентифікатор,
@@ -266,6 +276,7 @@ class SyncDao extends DatabaseAccessor<CalviDb> with _$SyncDaoMixin {
     'meals': meals,
     'water_logs': waterLogs,
     'weights': weights,
+    'goals': goals,
     'measurements': measurements,
     'workouts': workouts,
     'medications': medications,
@@ -381,6 +392,10 @@ class SyncDao extends DatabaseAccessor<CalviDb> with _$SyncDaoMixin {
       await delete(meals).go();
       await delete(waterLogs).go();
       await delete(weights).go();
+      /* Історія цілей теж: на спільному телефоні вона так само чужа, як
+         щоденник. У «видалити дані» вона навпаки лишається, разом із профілем
+         і поточною ціллю, бо чистий аркуш стосується записів про дні. */
+      await delete(goals).go();
       await delete(measurements).go();
       await delete(workouts).go();
       await delete(medicationTakes).go();

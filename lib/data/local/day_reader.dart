@@ -2,6 +2,8 @@ import 'dart:async';
 
 import '../day.dart';
 import '../day_stats.dart';
+import '../settings.dart';
+import '../goal_at.dart';
 import '../measure.dart';
 import '../nutrients.dart';
 import '../meal.dart';
@@ -176,12 +178,29 @@ class DayReader {
       final measures = [for (final e in byDay.entries) Measure(date: e.key, values: e.value)]
         ..sort((a, b) => a.date.compareTo(b.date));
 
+      /* Історія цілей як є, тільки день перерахований у зсув від сьогодні: далі
+         в застосунку всі дати саме такі. */
+      final goals = [
+        for (final g in rows.goals)
+          GoalAt(
+            from: _dayOffset(g.startedOn),
+            startKg: g.goalStartKg ?? 0,
+            targetKg: g.targetKg ?? 0,
+            direction: Direction.values.firstWhere(
+              (d) => d.name == g.direction,
+              orElse: () => Direction.lose,
+            ),
+            pace: g.pace,
+          ),
+      ];
+
       return DayStats(
         totals: totals,
         water: water,
         burned: burned,
         weights: weights,
         measures: measures,
+        goals: goals,
         lastKcal: lastKcal,
         demo: false,
       );

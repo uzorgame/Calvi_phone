@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:calvi/data/day.dart';
 import 'package:calvi/data/app_scope.dart';
 import 'package:calvi/data/fixtures.dart';
 import 'package:calvi/data/settings.dart';
@@ -52,6 +53,7 @@ void main() {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: HeroCard(
+                  date: todayDate,
                   day: dayFor(0),
                   burned: 0,
                   goal: goalOf(initialSettings()),

@@ -1303,7 +1303,6 @@
   "nutriGap": "{count, plural, one{Ein Gericht ohne diese Zahlen, das ist also eine Untergrenze.} other{{count} Gerichte ohne diese Zahlen, das ist also eine Untergrenze.}}",
   "nutriGapAll": "Dazu ist heute noch nichts bekannt: kein Gericht des Tages hat diese Zahlen.",
   "nutriNone": "Diese Mahlzeiten wurden nicht gezählt",
-  "nutriNoneYet": "Nährstoffe erscheinen mit dem ersten Eintrag",
   "nutriNorm": "Richtwert",
   "nutriNowGoal": "{now} g heute von {goal}",
   "nutriNowSodium": "{now} g heute, das sind {salt} g Salz",

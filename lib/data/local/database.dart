@@ -9,6 +9,7 @@ import 'tables/meals.dart';
 import 'tables/measurements.dart';
 import 'tables/medication_takes.dart';
 import 'tables/medications.dart';
+import 'tables/goals.dart';
 import 'tables/profile.dart';
 import 'tables/sync_meta.dart';
 import 'tables/tokens.dart';
@@ -34,6 +35,7 @@ part 'database.g.dart';
     Meals,
     WaterLogs,
     Weights,
+    Goals,
     Measurements,
     Workouts,
     Medications,
@@ -78,7 +80,7 @@ class CalviDb extends _$CalviDb {
   );
 
   @override
-  int get schemaVersion => 16;
+  int get schemaVersion => 17;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -234,6 +236,21 @@ class CalviDb extends _$CalviDb {
         await m.addColumn(meals, meals.satFatG);
         await m.addColumn(profile, profile.saltHand);
         await m.addColumn(profile, profile.nutri);
+      }
+
+      /* 17: історія цілей.
+       *
+       * Ціль жила одним рядком у профілі, і цього вистачало, доки картка дня
+       * показувала тільки сьогодні. Тепер вона показує будь-який день, і кожен
+       * має знати свою ціль: без історії зміна цілі переписувала б минулий
+       * місяць заднім числом.
+       *
+       * Таблиця створюється порожньою, а перший рядок кладе сам застосунок,
+       * коли побачить, що історії ще немає: він знає і поточну ціль, і день, з
+       * якого її рахувати. Тут його класти нема з чого, бо міграція не бачить
+       * ні профілю людини, ні її годинника. */
+      if (from < 17) {
+        await m.createTable(goals);
       }
     },
     beforeOpen: (details) async {

@@ -32,7 +32,7 @@ enum AppTheme { light, aquarelle, dawn, dark, system }
 /// Застосунок бере мову телефона, якщо вона в нас є, і англійську, якщо немає.
 /// Саме тому англійська стоїть першою в `supportedLocales`: Flutter бере першу
 /// підтримувану як запасну.
-enum Lang { system, uk, en, es, it, de, fr, pt, pl }
+enum Lang { system, uk, en, es, it, de, fr, pt, pl, cs }
 
 enum Direction { lose, keep, gain }
 
@@ -581,6 +581,9 @@ const themeOptions = <ThemeOption>[
  * говорить зараз, а дотик по рядку робить вибір остаточним. */
 const langOptions = <Lang>[
   Lang.en,
+  /* «Čeština» під літерою C, там, де її шукають: у чеських списках «Č» стоїть
+     одразу за «C», а не наприкінці абетки. */
+  Lang.cs,
   Lang.de,
   Lang.es,
   Lang.fr,
@@ -669,15 +672,21 @@ int? usualHour(String slotId) {
   return (icon: down ? 'trend-down' : 'trend-up', good: down == (s.direction == Direction.lose));
 }
 
-double goalProgress(SettingsState s) {
+/// Пройдений шлях до цілі, від нуля до одиниці.
+///
+/// Вага приходить окремо, а не береться з налаштувань: картка дня показує будь-
+/// який день, і на минулому дні шлях міряється тією вагою, яка була тоді.
+/// Порожня вага означає сьогоднішню, і тоді це те саме, що було завжди.
+double goalProgress(SettingsState s, [double? weight]) {
+  final was = weight ?? s.weightKg;
   final total = s.targetKg - s.goalStartKg;
-  final moved = s.weightKg - s.goalStartKg;
+  final moved = was - s.goalStartKg;
 
   /* Ціль «тримати вагу» це нульова відстань, і ділити на неї нема чого. Там
      пройдене міряється інакше: кільце повне, поки вага тримається біля цілі, і
      порожніє, коли відходить далі ніж на три кілограми. */
   if (total.abs() < 0.05) {
-    final off = (s.weightKg - s.targetKg).abs();
+    final off = (was - s.targetKg).abs();
     return (1 - off / 3).clamp(0.0, 1.0);
   }
 

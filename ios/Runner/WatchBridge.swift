@@ -197,6 +197,7 @@ enum Hearing {
   private static let locales: [String: String] = [
     "uk": "uk-UA", "en": "en-US", "es": "es-ES", "it": "it-IT",
     "de": "de-DE", "fr": "fr-FR", "pt": "pt-BR", "pl": "pl-PL",
+    "cs": "cs-CZ",
   ]
 
   /// Що телефон відповідає годиннику словами. Мовою застосунку, як і сам
@@ -260,6 +261,13 @@ enum Hearing {
         .noNetwork: "Brak połączenia z siecią",
         .noLanguage: "Rozpoznawanie niedostępne w tym języku",
         .locked: "Odblokuj telefon i powtórz",
+      ],
+      "cs": [
+        .notHeard: "Neslyšela jsem. Řekni to znovu",
+        .needSpeech: "V telefonu: Calvi, Nastavení, Přístupy, zapni rozpoznávání řeči",
+        .noNetwork: "Není připojení k síti",
+        .noLanguage: "Rozpoznávání není v tomto jazyce dostupné",
+        .locked: "Odemkni telefon a řekni to znovu",
       ],
     ]
     return (table[lang] ?? table["en"]!)[what]!

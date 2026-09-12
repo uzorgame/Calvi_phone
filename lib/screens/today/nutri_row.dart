@@ -177,14 +177,82 @@ class NutriRow extends StatelessWidget {
     /* Про день не відомо нічого з пʼяти: усі записи старші за саму можливість.
        Пʼять знаків питання в ряд це не чесність, а поламаний екран. */
     if (!day.sum.knownAny) {
+      /* Записи в дні є, а порахованих серед них немає. Тут потрібні саме слова:
+         мовчання читалось би як «застосунок не порахував», і пояснити це нічим,
+         крім речення. */
+      if (day.counted > 0) {
+        return Container(
+          width: double.infinity,
+          decoration: box,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+          child: Text(
+            l.nutriNone,
+            textAlign: TextAlign.center,
+            style: context.t.labelSmall?.copyWith(fontSize: CalviSize.fsMicro, height: 1.35),
+          ),
+        );
+      }
+
+      /* Порожній день: самі знаки, тихо, без чисел і без підписів.
+       *
+       * Тут стояв рядок «Нутрієнти зʼявляться з першим записом». Він повідомляв
+       * те, що людина й так бачить: у дні немає жодного запису, отже й чисел
+       * узятись нізвідки. Ряд знаків на тому самому місці каже це без слів і
+       * заразом показує, що саме тут зʼявиться. */
       return Container(
-        width: double.infinity,
         decoration: box,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-        child: Text(
-          day.counted == 0 ? l.nutriNoneYet : l.nutriNone,
-          textAlign: TextAlign.center,
-          style: context.t.labelSmall?.copyWith(fontSize: CalviSize.fsMicro, height: 1.35),
+        padding: large
+            ? const EdgeInsets.fromLTRB(6, 14, 6, 12)
+            : const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        child: Row(
+          children: [
+            for (final f in _facts(context, goal))
+              Expanded(
+                child: Padding(
+                  padding: large
+                      ? const EdgeInsets.symmetric(horizontal: 2, vertical: 4)
+                      : const EdgeInsets.symmetric(horizontal: 2, vertical: 8),
+                  child: Opacity(
+                    opacity: 0.45,
+                    child: large
+                        ? Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _Mark(
+                                icon: f.icon,
+                                tint: f.tint,
+                                over: false,
+                                full: false,
+                                plain: false,
+                              ),
+                              const SizedBox(height: 7),
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  f.short,
+                                  maxLines: 1,
+                                  softWrap: false,
+                                  style: context.t.labelSmall?.copyWith(
+                                    fontSize: 8,
+                                    letterSpacing: 0.08,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        : Center(
+                            child: _Mark(
+                              icon: f.icon,
+                              tint: f.tint,
+                              over: false,
+                              full: false,
+                              plain: true,
+                            ),
+                          ),
+                  ),
+                ),
+              ),
+          ],
         ),
       );
     }

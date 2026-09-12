@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:speech_to_text_platform_interface/speech_to_text_platform_interface.dart';
 
+import 'package:calvi/data/settings.dart' show langOptions;
 import 'package:calvi/screens/voice/dictation.dart';
 
 /// Диктування слухає, доки не скажуть перестати.
@@ -395,6 +396,20 @@ void main() {
     test('мова застосунку стає тегом BCP-47, а не кодом із підкресленням', () {
       expect(Dictation.localeFor('pl'), 'pl-PL');
       expect(Dictation.localeFor('uk'), 'uk-UA');
+      expect(Dictation.localeFor('cs'), 'cs-CZ');
+    });
+
+    /* Кожна мова застосунку має свій тег, і жодна не падає в англійську тихо.
+       Забутий рядок у таблиці означав би, що чеський телефон диктує англійським
+       словником: людина каже «dvě vejce», а в полі зʼявляється «two eggs». */
+    test('жодна мова застосунку не лишається без свого розпізнавача', () {
+      for (final lang in langOptions) {
+        expect(
+          Dictation.localeFor(lang.name),
+          startsWith('${lang.name}-'),
+          reason: '«${lang.name}» диктує чужою мовою',
+        );
+      }
     });
   });
 }

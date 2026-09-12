@@ -5,6 +5,7 @@ import 'package:calvi/data/meal.dart';
 import 'package:calvi/data/nutrients.dart';
 import 'package:calvi/data/settings.dart';
 import 'package:calvi/screens/settings/panels_account.dart';
+import 'package:calvi/design/icons.dart';
 import 'package:calvi/design/theme.dart';
 import 'package:calvi/l10n/app_localizations.dart';
 import 'package:calvi/screens/today/nutri_row.dart';
@@ -58,9 +59,20 @@ void main() {
     expect(find.textContaining('0'), findsNothing, reason: 'нуль тут означав би «цього не було»');
   });
 
-  testWidgets('порожній день чекає на перший запис', (tester) async {
+  /* Порожній день мовчить.
+   *
+   * Тут очікувався рядок «Нутрієнти зʼявляться з першим записом». Він
+   * повідомляв те, що людина й так бачить: у дні немає жодного запису. Тепер на
+   * тому самому місці стоять самі знаки, без чисел і без слів: вони кажуть, що
+   * саме тут зʼявиться, і не забирають рядок екрана на пояснення очевидного. */
+  testWidgets('порожній день показує самі знаки, без слів і без чисел', (tester) async {
     await show(tester, []);
-    expect(find.text('Нутрієнти зʼявляться з першим записом'), findsOneWidget);
+
+    expect(find.text('Нутрієнти зʼявляться з першим записом'), findsNothing);
+    expect(find.text('Ці страви не рахували'), findsNothing);
+    expect(find.byType(CalviIcon), findsNWidgets(5), reason: 'пʼять знаків, по одному на нутрієнт');
+    expect(find.textContaining('?'), findsNothing, reason: 'знак питання це не порожнеча');
+    expect(find.textContaining('0'), findsNothing, reason: 'нуль тут означав би «цього не було»');
   });
 
   /* Неповний день не позначається в самому ряду.

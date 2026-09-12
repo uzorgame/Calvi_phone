@@ -1720,9 +1720,6 @@ class LPt extends L {
   String get nutriNone => 'Estas refeições não foram contadas';
 
   @override
-  String get nutriNoneYet => 'Os nutrientes aparecem com o primeiro registo';
-
-  @override
   String get nutriNorm => 'Referência';
 
   @override

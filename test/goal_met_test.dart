@@ -133,6 +133,7 @@ void main() {
       theme: calviLightTheme,
       home: Scaffold(
         body: HeroCard(
+          date: todayDate,
           day: dayFor(0),
           burned: 0,
           goal: const DayGoal(kcal: 2670, protein: 136, fat: 83, carbs: 264, waterMl: 2000),

@@ -148,6 +148,16 @@ class ProfileStore {
         );
 
     await db.diaryDao.setWeight(kg: s.weightKg, at: now);
+
+    /* Ціль іде ще й в історію, а не тільки в профіль: картка дня показує будь-
+       який день, і кожен має знати ту ціль, яка діяла тоді. */
+    await db.diaryDao.keepGoal(
+      goalStartKg: s.goalStartKg,
+      targetKg: s.targetKg,
+      direction: s.direction.name,
+      pace: s.pace,
+      at: now,
+    );
     await _saveAllergies(s.allergies, now);
   }
 
@@ -283,5 +293,6 @@ Lang _langOf(String v) => switch (v) {
   'fr' => Lang.fr,
   'pt' => Lang.pt,
   'pl' => Lang.pl,
+  'cs' => Lang.cs,
   _ => Lang.system,
 };

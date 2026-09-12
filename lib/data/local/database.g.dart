@@ -2335,6 +2335,635 @@ class WeightsCompanion extends UpdateCompanion<Weight> {
   }
 }
 
+class $GoalsTable extends Goals with TableInfo<$GoalsTable, Goal> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $GoalsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _dirtyMeta = const VerificationMeta('dirty');
+  @override
+  late final GeneratedColumn<bool> dirty = GeneratedColumn<bool>(
+    'dirty',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("dirty" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _seqMeta = const VerificationMeta('seq');
+  @override
+  late final GeneratedColumn<int> seq = GeneratedColumn<int>(
+    'seq',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _startedOnMeta = const VerificationMeta(
+    'startedOn',
+  );
+  @override
+  late final GeneratedColumn<String> startedOn = GeneratedColumn<String>(
+    'started_on',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 10,
+      maxTextLength: 10,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _goalStartKgMeta = const VerificationMeta(
+    'goalStartKg',
+  );
+  @override
+  late final GeneratedColumn<double> goalStartKg = GeneratedColumn<double>(
+    'goal_start_kg',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _targetKgMeta = const VerificationMeta(
+    'targetKg',
+  );
+  @override
+  late final GeneratedColumn<double> targetKg = GeneratedColumn<double>(
+    'target_kg',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _directionMeta = const VerificationMeta(
+    'direction',
+  );
+  @override
+  late final GeneratedColumn<String> direction = GeneratedColumn<String>(
+    'direction',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 10),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _paceMeta = const VerificationMeta('pace');
+  @override
+  late final GeneratedColumn<double> pace = GeneratedColumn<double>(
+    'pace',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    updatedAt,
+    deletedAt,
+    dirty,
+    seq,
+    startedOn,
+    goalStartKg,
+    targetKg,
+    direction,
+    pace,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'goals';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Goal> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('dirty')) {
+      context.handle(
+        _dirtyMeta,
+        dirty.isAcceptableOrUnknown(data['dirty']!, _dirtyMeta),
+      );
+    }
+    if (data.containsKey('seq')) {
+      context.handle(
+        _seqMeta,
+        seq.isAcceptableOrUnknown(data['seq']!, _seqMeta),
+      );
+    }
+    if (data.containsKey('started_on')) {
+      context.handle(
+        _startedOnMeta,
+        startedOn.isAcceptableOrUnknown(data['started_on']!, _startedOnMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_startedOnMeta);
+    }
+    if (data.containsKey('goal_start_kg')) {
+      context.handle(
+        _goalStartKgMeta,
+        goalStartKg.isAcceptableOrUnknown(
+          data['goal_start_kg']!,
+          _goalStartKgMeta,
+        ),
+      );
+    }
+    if (data.containsKey('target_kg')) {
+      context.handle(
+        _targetKgMeta,
+        targetKg.isAcceptableOrUnknown(data['target_kg']!, _targetKgMeta),
+      );
+    }
+    if (data.containsKey('direction')) {
+      context.handle(
+        _directionMeta,
+        direction.isAcceptableOrUnknown(data['direction']!, _directionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_directionMeta);
+    }
+    if (data.containsKey('pace')) {
+      context.handle(
+        _paceMeta,
+        pace.isAcceptableOrUnknown(data['pace']!, _paceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_paceMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Goal map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Goal(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      dirty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}dirty'],
+      )!,
+      seq: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}seq'],
+      ),
+      startedOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}started_on'],
+      )!,
+      goalStartKg: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}goal_start_kg'],
+      ),
+      targetKg: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}target_kg'],
+      ),
+      direction: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}direction'],
+      )!,
+      pace: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}pace'],
+      )!,
+    );
+  }
+
+  @override
+  $GoalsTable createAlias(String alias) {
+    return $GoalsTable(attachedDatabase, alias);
+  }
+}
+
+class Goal extends DataClass implements Insertable<Goal> {
+  final String id;
+
+  /// When this device last changed the row. Not a sync cursor: the server's
+  /// [seq] is the cursor, because a phone clock is not evidence.
+  final DateTime updatedAt;
+
+  /// Set instead of deleting the row.
+  final DateTime? deletedAt;
+
+  /// True while the server has not acknowledged this version.
+  final bool dirty;
+
+  /// The number the server gave this version, null while it has never been sent.
+  final int? seq;
+
+  /// Місцевий день людини, з якого діє ця ціль.
+  final String startedOn;
+
+  /// Вага, від якої міряється шлях. Порожня буває в цілі «тримати вагу».
+  final double? goalStartKg;
+  final double? targetKg;
+  final String direction;
+
+  /// Кілограмів на тиждень, завжди додатне: знак задає напрямок.
+  final double pace;
+  const Goal({
+    required this.id,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.dirty,
+    this.seq,
+    required this.startedOn,
+    this.goalStartKg,
+    this.targetKg,
+    required this.direction,
+    required this.pace,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['dirty'] = Variable<bool>(dirty);
+    if (!nullToAbsent || seq != null) {
+      map['seq'] = Variable<int>(seq);
+    }
+    map['started_on'] = Variable<String>(startedOn);
+    if (!nullToAbsent || goalStartKg != null) {
+      map['goal_start_kg'] = Variable<double>(goalStartKg);
+    }
+    if (!nullToAbsent || targetKg != null) {
+      map['target_kg'] = Variable<double>(targetKg);
+    }
+    map['direction'] = Variable<String>(direction);
+    map['pace'] = Variable<double>(pace);
+    return map;
+  }
+
+  GoalsCompanion toCompanion(bool nullToAbsent) {
+    return GoalsCompanion(
+      id: Value(id),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      dirty: Value(dirty),
+      seq: seq == null && nullToAbsent ? const Value.absent() : Value(seq),
+      startedOn: Value(startedOn),
+      goalStartKg: goalStartKg == null && nullToAbsent
+          ? const Value.absent()
+          : Value(goalStartKg),
+      targetKg: targetKg == null && nullToAbsent
+          ? const Value.absent()
+          : Value(targetKg),
+      direction: Value(direction),
+      pace: Value(pace),
+    );
+  }
+
+  factory Goal.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Goal(
+      id: serializer.fromJson<String>(json['id']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      dirty: serializer.fromJson<bool>(json['dirty']),
+      seq: serializer.fromJson<int?>(json['seq']),
+      startedOn: serializer.fromJson<String>(json['startedOn']),
+      goalStartKg: serializer.fromJson<double?>(json['goalStartKg']),
+      targetKg: serializer.fromJson<double?>(json['targetKg']),
+      direction: serializer.fromJson<String>(json['direction']),
+      pace: serializer.fromJson<double>(json['pace']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'dirty': serializer.toJson<bool>(dirty),
+      'seq': serializer.toJson<int?>(seq),
+      'startedOn': serializer.toJson<String>(startedOn),
+      'goalStartKg': serializer.toJson<double?>(goalStartKg),
+      'targetKg': serializer.toJson<double?>(targetKg),
+      'direction': serializer.toJson<String>(direction),
+      'pace': serializer.toJson<double>(pace),
+    };
+  }
+
+  Goal copyWith({
+    String? id,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    bool? dirty,
+    Value<int?> seq = const Value.absent(),
+    String? startedOn,
+    Value<double?> goalStartKg = const Value.absent(),
+    Value<double?> targetKg = const Value.absent(),
+    String? direction,
+    double? pace,
+  }) => Goal(
+    id: id ?? this.id,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    dirty: dirty ?? this.dirty,
+    seq: seq.present ? seq.value : this.seq,
+    startedOn: startedOn ?? this.startedOn,
+    goalStartKg: goalStartKg.present ? goalStartKg.value : this.goalStartKg,
+    targetKg: targetKg.present ? targetKg.value : this.targetKg,
+    direction: direction ?? this.direction,
+    pace: pace ?? this.pace,
+  );
+  Goal copyWithCompanion(GoalsCompanion data) {
+    return Goal(
+      id: data.id.present ? data.id.value : this.id,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      dirty: data.dirty.present ? data.dirty.value : this.dirty,
+      seq: data.seq.present ? data.seq.value : this.seq,
+      startedOn: data.startedOn.present ? data.startedOn.value : this.startedOn,
+      goalStartKg: data.goalStartKg.present
+          ? data.goalStartKg.value
+          : this.goalStartKg,
+      targetKg: data.targetKg.present ? data.targetKg.value : this.targetKg,
+      direction: data.direction.present ? data.direction.value : this.direction,
+      pace: data.pace.present ? data.pace.value : this.pace,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Goal(')
+          ..write('id: $id, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('dirty: $dirty, ')
+          ..write('seq: $seq, ')
+          ..write('startedOn: $startedOn, ')
+          ..write('goalStartKg: $goalStartKg, ')
+          ..write('targetKg: $targetKg, ')
+          ..write('direction: $direction, ')
+          ..write('pace: $pace')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    updatedAt,
+    deletedAt,
+    dirty,
+    seq,
+    startedOn,
+    goalStartKg,
+    targetKg,
+    direction,
+    pace,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Goal &&
+          other.id == this.id &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.dirty == this.dirty &&
+          other.seq == this.seq &&
+          other.startedOn == this.startedOn &&
+          other.goalStartKg == this.goalStartKg &&
+          other.targetKg == this.targetKg &&
+          other.direction == this.direction &&
+          other.pace == this.pace);
+}
+
+class GoalsCompanion extends UpdateCompanion<Goal> {
+  final Value<String> id;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<bool> dirty;
+  final Value<int?> seq;
+  final Value<String> startedOn;
+  final Value<double?> goalStartKg;
+  final Value<double?> targetKg;
+  final Value<String> direction;
+  final Value<double> pace;
+  final Value<int> rowid;
+  const GoalsCompanion({
+    this.id = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.dirty = const Value.absent(),
+    this.seq = const Value.absent(),
+    this.startedOn = const Value.absent(),
+    this.goalStartKg = const Value.absent(),
+    this.targetKg = const Value.absent(),
+    this.direction = const Value.absent(),
+    this.pace = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  GoalsCompanion.insert({
+    required String id,
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.dirty = const Value.absent(),
+    this.seq = const Value.absent(),
+    required String startedOn,
+    this.goalStartKg = const Value.absent(),
+    this.targetKg = const Value.absent(),
+    required String direction,
+    required double pace,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       updatedAt = Value(updatedAt),
+       startedOn = Value(startedOn),
+       direction = Value(direction),
+       pace = Value(pace);
+  static Insertable<Goal> custom({
+    Expression<String>? id,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<bool>? dirty,
+    Expression<int>? seq,
+    Expression<String>? startedOn,
+    Expression<double>? goalStartKg,
+    Expression<double>? targetKg,
+    Expression<String>? direction,
+    Expression<double>? pace,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (dirty != null) 'dirty': dirty,
+      if (seq != null) 'seq': seq,
+      if (startedOn != null) 'started_on': startedOn,
+      if (goalStartKg != null) 'goal_start_kg': goalStartKg,
+      if (targetKg != null) 'target_kg': targetKg,
+      if (direction != null) 'direction': direction,
+      if (pace != null) 'pace': pace,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  GoalsCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<bool>? dirty,
+    Value<int?>? seq,
+    Value<String>? startedOn,
+    Value<double?>? goalStartKg,
+    Value<double?>? targetKg,
+    Value<String>? direction,
+    Value<double>? pace,
+    Value<int>? rowid,
+  }) {
+    return GoalsCompanion(
+      id: id ?? this.id,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      dirty: dirty ?? this.dirty,
+      seq: seq ?? this.seq,
+      startedOn: startedOn ?? this.startedOn,
+      goalStartKg: goalStartKg ?? this.goalStartKg,
+      targetKg: targetKg ?? this.targetKg,
+      direction: direction ?? this.direction,
+      pace: pace ?? this.pace,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (dirty.present) {
+      map['dirty'] = Variable<bool>(dirty.value);
+    }
+    if (seq.present) {
+      map['seq'] = Variable<int>(seq.value);
+    }
+    if (startedOn.present) {
+      map['started_on'] = Variable<String>(startedOn.value);
+    }
+    if (goalStartKg.present) {
+      map['goal_start_kg'] = Variable<double>(goalStartKg.value);
+    }
+    if (targetKg.present) {
+      map['target_kg'] = Variable<double>(targetKg.value);
+    }
+    if (direction.present) {
+      map['direction'] = Variable<String>(direction.value);
+    }
+    if (pace.present) {
+      map['pace'] = Variable<double>(pace.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GoalsCompanion(')
+          ..write('id: $id, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('dirty: $dirty, ')
+          ..write('seq: $seq, ')
+          ..write('startedOn: $startedOn, ')
+          ..write('goalStartKg: $goalStartKg, ')
+          ..write('targetKg: $targetKg, ')
+          ..write('direction: $direction, ')
+          ..write('pace: $pace, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $MeasurementsTable extends Measurements
     with TableInfo<$MeasurementsTable, Measurement> {
   @override
@@ -8528,6 +9157,7 @@ abstract class _$CalviDb extends GeneratedDatabase {
   late final $MealsTable meals = $MealsTable(this);
   late final $WaterLogsTable waterLogs = $WaterLogsTable(this);
   late final $WeightsTable weights = $WeightsTable(this);
+  late final $GoalsTable goals = $GoalsTable(this);
   late final $MeasurementsTable measurements = $MeasurementsTable(this);
   late final $WorkoutsTable workouts = $WorkoutsTable(this);
   late final $MedicationsTable medications = $MedicationsTable(this);
@@ -8552,6 +9182,7 @@ abstract class _$CalviDb extends GeneratedDatabase {
     meals,
     waterLogs,
     weights,
+    goals,
     measurements,
     workouts,
     medications,
@@ -9641,6 +10272,294 @@ typedef $$WeightsTableProcessedTableManager =
       $$WeightsTableUpdateCompanionBuilder,
       (Weight, BaseReferences<_$CalviDb, $WeightsTable, Weight>),
       Weight,
+      PrefetchHooks Function()
+    >;
+typedef $$GoalsTableCreateCompanionBuilder =
+    GoalsCompanion Function({
+      required String id,
+      required DateTime updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<bool> dirty,
+      Value<int?> seq,
+      required String startedOn,
+      Value<double?> goalStartKg,
+      Value<double?> targetKg,
+      required String direction,
+      required double pace,
+      Value<int> rowid,
+    });
+typedef $$GoalsTableUpdateCompanionBuilder =
+    GoalsCompanion Function({
+      Value<String> id,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<bool> dirty,
+      Value<int?> seq,
+      Value<String> startedOn,
+      Value<double?> goalStartKg,
+      Value<double?> targetKg,
+      Value<String> direction,
+      Value<double> pace,
+      Value<int> rowid,
+    });
+
+class $$GoalsTableFilterComposer extends Composer<_$CalviDb, $GoalsTable> {
+  $$GoalsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get dirty => $composableBuilder(
+    column: $table.dirty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get seq => $composableBuilder(
+    column: $table.seq,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get startedOn => $composableBuilder(
+    column: $table.startedOn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get goalStartKg => $composableBuilder(
+    column: $table.goalStartKg,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get targetKg => $composableBuilder(
+    column: $table.targetKg,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get direction => $composableBuilder(
+    column: $table.direction,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get pace => $composableBuilder(
+    column: $table.pace,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$GoalsTableOrderingComposer extends Composer<_$CalviDb, $GoalsTable> {
+  $$GoalsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get dirty => $composableBuilder(
+    column: $table.dirty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get seq => $composableBuilder(
+    column: $table.seq,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get startedOn => $composableBuilder(
+    column: $table.startedOn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get goalStartKg => $composableBuilder(
+    column: $table.goalStartKg,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get targetKg => $composableBuilder(
+    column: $table.targetKg,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get direction => $composableBuilder(
+    column: $table.direction,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get pace => $composableBuilder(
+    column: $table.pace,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$GoalsTableAnnotationComposer extends Composer<_$CalviDb, $GoalsTable> {
+  $$GoalsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get dirty =>
+      $composableBuilder(column: $table.dirty, builder: (column) => column);
+
+  GeneratedColumn<int> get seq =>
+      $composableBuilder(column: $table.seq, builder: (column) => column);
+
+  GeneratedColumn<String> get startedOn =>
+      $composableBuilder(column: $table.startedOn, builder: (column) => column);
+
+  GeneratedColumn<double> get goalStartKg => $composableBuilder(
+    column: $table.goalStartKg,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get targetKg =>
+      $composableBuilder(column: $table.targetKg, builder: (column) => column);
+
+  GeneratedColumn<String> get direction =>
+      $composableBuilder(column: $table.direction, builder: (column) => column);
+
+  GeneratedColumn<double> get pace =>
+      $composableBuilder(column: $table.pace, builder: (column) => column);
+}
+
+class $$GoalsTableTableManager
+    extends
+        RootTableManager<
+          _$CalviDb,
+          $GoalsTable,
+          Goal,
+          $$GoalsTableFilterComposer,
+          $$GoalsTableOrderingComposer,
+          $$GoalsTableAnnotationComposer,
+          $$GoalsTableCreateCompanionBuilder,
+          $$GoalsTableUpdateCompanionBuilder,
+          (Goal, BaseReferences<_$CalviDb, $GoalsTable, Goal>),
+          Goal,
+          PrefetchHooks Function()
+        > {
+  $$GoalsTableTableManager(_$CalviDb db, $GoalsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$GoalsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$GoalsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$GoalsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<bool> dirty = const Value.absent(),
+                Value<int?> seq = const Value.absent(),
+                Value<String> startedOn = const Value.absent(),
+                Value<double?> goalStartKg = const Value.absent(),
+                Value<double?> targetKg = const Value.absent(),
+                Value<String> direction = const Value.absent(),
+                Value<double> pace = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => GoalsCompanion(
+                id: id,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                dirty: dirty,
+                seq: seq,
+                startedOn: startedOn,
+                goalStartKg: goalStartKg,
+                targetKg: targetKg,
+                direction: direction,
+                pace: pace,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required DateTime updatedAt,
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<bool> dirty = const Value.absent(),
+                Value<int?> seq = const Value.absent(),
+                required String startedOn,
+                Value<double?> goalStartKg = const Value.absent(),
+                Value<double?> targetKg = const Value.absent(),
+                required String direction,
+                required double pace,
+                Value<int> rowid = const Value.absent(),
+              }) => GoalsCompanion.insert(
+                id: id,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                dirty: dirty,
+                seq: seq,
+                startedOn: startedOn,
+                goalStartKg: goalStartKg,
+                targetKg: targetKg,
+                direction: direction,
+                pace: pace,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$GoalsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$CalviDb,
+      $GoalsTable,
+      Goal,
+      $$GoalsTableFilterComposer,
+      $$GoalsTableOrderingComposer,
+      $$GoalsTableAnnotationComposer,
+      $$GoalsTableCreateCompanionBuilder,
+      $$GoalsTableUpdateCompanionBuilder,
+      (Goal, BaseReferences<_$CalviDb, $GoalsTable, Goal>),
+      Goal,
       PrefetchHooks Function()
     >;
 typedef $$MeasurementsTableCreateCompanionBuilder =
@@ -12635,6 +13554,8 @@ class $CalviDbManager {
       $$WaterLogsTableTableManager(_db, _db.waterLogs);
   $$WeightsTableTableManager get weights =>
       $$WeightsTableTableManager(_db, _db.weights);
+  $$GoalsTableTableManager get goals =>
+      $$GoalsTableTableManager(_db, _db.goals);
   $$MeasurementsTableTableManager get measurements =>
       $$MeasurementsTableTableManager(_db, _db.measurements);
   $$WorkoutsTableTableManager get workouts =>

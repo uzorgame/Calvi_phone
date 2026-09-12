@@ -1717,9 +1717,6 @@ class LEs extends L {
   String get nutriNone => 'Estas comidas no se contaron';
 
   @override
-  String get nutriNoneYet => 'Los nutrientes aparecen con el primer registro';
-
-  @override
   String get nutriNorm => 'Referencia';
 
   @override

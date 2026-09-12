@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:calvi/data/day.dart';
 import 'package:calvi/data/fixtures.dart';
 import 'package:calvi/data/app_scope.dart';
 import 'package:calvi/data/settings.dart';
@@ -17,6 +18,9 @@ Widget _wrap(Widget child) => AppScope(
   set: (_) {},
   meds: const [],
   setMeds: (_) {},
+  /* Зважування потрібні саме тут: бік ваги показує вагу вибраного дня, і без
+     історії він показував би одне число на всі дні. */
+  stats: DayStats.demo(),
   child: MaterialApp(
     localizationsDelegates: L.localizationsDelegates,
     supportedLocales: L.supportedLocales,
@@ -31,6 +35,7 @@ void main() {
     await tester.pumpWidget(
       _wrap(
         HeroCard(
+          date: todayDate,
           day: dayFor(0),
           burned: dayFor(0).burned,
           goal: goalOf(initialSettings()),
@@ -74,6 +79,7 @@ void main() {
     await tester.pumpWidget(
       _wrap(
         HeroCard(
+          date: todayDate,
           day: dayFor(0),
           burned: dayFor(0).burned,
           goal: goalOf(initialSettings()),
@@ -99,6 +105,61 @@ void main() {
         .map((o) => o.opacity);
     expect(faded, contains(closeTo(0, 0.01)), reason: 'бік калорій не згас');
   });
+
+  /* Картка показує вибраний день, а не сьогодні.
+   *
+   * Доти обидві задні сторони читали сьогоднішнє: вага бралась із профілю, а
+   * тиждень зводився сталим вікном «останні сім днів». Людина гортала стрічку
+   * дат, калорії слухняно мінялись, а вага і тиждень стояли на місці й казали
+   * про сьогодні під чужою датою. */
+  testWidgets('бік ваги показує вагу вибраного дня', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        HeroCard(
+          date: -3,
+          day: dayFor(-3),
+          burned: dayFor(-3).burned,
+          goal: goalOf(initialSettings()),
+          week: _week,
+          onWeek: () {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.drag(find.byType(HeroCard), const Offset(0, -60));
+    await tester.pumpAndSettle();
+
+    /* 78.7 це зважування за три дні до сьогодні, 78.6 сьогоднішнє. Саме ця пара
+       і ловить помилку: обидва числа є в історії, і взяти треба давніше. */
+    expect(find.textContaining('78.7', findRichText: true), findsWidgets);
+    expect(find.textContaining('78.6', findRichText: true), findsNothing);
+  });
+
+  testWidgets('день без зважування бере число з попереднього', (tester) async {
+    /* Зважились у понеділок, у вівторок на ваги не ставали: вівторок показує
+       понеділкове число, а не сьогоднішнє і не порожнє. У демо-історії такий
+       день це мінус девʼятий, найближче зважування до нього мінус десятий. */
+    await tester.pumpWidget(
+      _wrap(
+        HeroCard(
+          date: -9,
+          day: dayFor(-9),
+          burned: dayFor(-9).burned,
+          goal: goalOf(initialSettings()),
+          week: _week,
+          onWeek: () {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.drag(find.byType(HeroCard), const Offset(0, -60));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('79.0', findRichText: true), findsWidgets);
+  });
+
 }
 
 /// Показовий тиждень для картки: сторона тижня читає готове зведення.

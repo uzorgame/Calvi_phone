@@ -1303,7 +1303,6 @@
   "nutriGap": "{count, plural, one{Um prato sem estes números, por isso é um mínimo.} other{{count} pratos sem estes números, por isso é um mínimo.}}",
   "nutriGapAll": "Sobre isto ainda não se sabe nada hoje: nenhum prato do dia tem estes números.",
   "nutriNone": "Estas refeições não foram contadas",
-  "nutriNoneYet": "Os nutrientes aparecem com o primeiro registo",
   "nutriNorm": "Referência",
   "nutriNowGoal": "{now} g hoje de {goal}",
   "nutriNowSodium": "{now} g hoje, são {salt} g de sal",

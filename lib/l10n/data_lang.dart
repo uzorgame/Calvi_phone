@@ -1,6 +1,7 @@
 import '../data/day.dart' show dataLang;
 import 'app_localizations.dart';
 import 'app_localizations_en.dart';
+import 'app_localizations_cs.dart';
 import 'app_localizations_de.dart';
 import 'app_localizations_es.dart';
 import 'app_localizations_fr.dart';
@@ -36,5 +37,6 @@ L get dataL => switch (dataLang) {
   'fr' => LFr(),
   'pt' => LPt(),
   'pl' => LPl(),
+  'cs' => LCs(),
   _ => LEn(),
 };

@@ -1730,9 +1730,6 @@ class LPl extends L {
   String get nutriNone => 'Tych posiłków nie liczono';
 
   @override
-  String get nutriNoneYet => 'Składniki pojawią się z pierwszym wpisem';
-
-  @override
   String get nutriNorm => 'Norma';
 
   @override

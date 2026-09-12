@@ -231,11 +231,50 @@ void main() {
       'fr': '2 septembre',
       'pt': '2 de setembro',
       'pl': '2 września',
+      /* Чеська ставить крапку після числа, як німецька, а місяць у родовому,
+         як польська: «2. září». Обидва правила разом більше ніде не стоять. */
+      'cs': '2. září',
     };
     for (final lang in langs) {
       dataLang = lang;
       expect(dayMonth(2, 9), want[lang], reason: '$lang: дата зібрана не за правилами мови');
     }
     dataLang = 'uk';
+  });
+
+  /* Мова, забута в нативному боці, не видно нізвідки.
+   *
+   * Дарт має перевірку ключів, а Swift і `Info.plist` не мають нічого: там мова
+   * це рядок у словнику, і забутий рядок тихо падає в англійську. Так годинник
+   * говорив би англійською на чеському телефоні, а App Store показував би на
+   * одну мову менше, ніж застосунок уміє. Тому перелік мов звіряється з кожним
+   * місцем, де він продубльований.
+   *
+   * Перевіряється текст файлів, а не зібраний застосунок: Swift на цій машині
+   * не збирається, а розходження видно вже в рядках. */
+  test('кожна мова застосунку є в нативних переліках', () {
+    String text(String path) {
+      final file = File(path);
+      expect(file.existsSync(), isTrue, reason: 'немає $path');
+      return file.readAsStringSync();
+    }
+
+    final words = text('ios/CalviWatch/Words.swift');
+    final bridge = text('ios/Runner/WatchBridge.swift');
+    final plist = text('ios/Runner/Info.plist');
+    final xcode = text('ios/watch_target.rb');
+
+    for (final lang in langs) {
+      expect(words, contains('"$lang": Words('), reason: '$lang: годинник не має своїх слів');
+      expect(bridge, contains('"$lang": "$lang-'), reason: '$lang: годинник не має свого розпізнавача');
+      expect(bridge, contains('"$lang": ['), reason: '$lang: телефон не відповість годиннику цією мовою');
+      expect(plist, contains('<string>$lang</string>'), reason: '$lang: пакет про мову не оголошує');
+      expect(xcode, contains(' $lang'), reason: '$lang: теки .lproj не підключено до цілі');
+      expect(
+        File('ios/Runner/$lang.lproj/InfoPlist.strings').existsSync(),
+        isTrue,
+        reason: '$lang: немає теки .lproj, і App Store мови не побачить',
+      );
+    }
   });
 }

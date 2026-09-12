@@ -1,5 +1,6 @@
 import 'day.dart';
 import 'fixtures.dart';
+import 'goal_at.dart';
 import 'measure.dart';
 import 'settings.dart';
 
@@ -18,6 +19,7 @@ class DayStats {
     required this.weights,
     this.burned = const {},
     this.measures = const [],
+    this.goals = const [],
     this.lastKcal,
     required this.demo,
   });
@@ -36,6 +38,7 @@ class DayStats {
         if (m['weightKg'] != null) m.date: m['weightKg']!,
     },
     measures: demoMeasures,
+    goals: demoGoals,
     demo: true,
   );
 
@@ -52,6 +55,28 @@ class DayStats {
   /// Заміри сантиметром, від найдавнішого. Тут вони живуть разом із вагою, бо
   /// стрічка вимірювань показує їх в одному ряду і питає про них одночасно.
   final List<Measure> measures;
+
+  /// Історія цілей, від найдавнішої. Картка дня показує будь-який день, і дуга
+  /// на ній міряє шлях до тієї цілі, яка діяла тоді, а не до сьогоднішньої.
+  final List<GoalAt> goals;
+
+  /* Ціль, яка діяла на цей день.
+   *
+   * Найпізніша з тих, що почались не пізніше за нього. Якщо день старший за
+   * найпершу ціль, береться вона ж: до її появи шляху не було, а порожня картка
+   * гірша за найдавнішу відому.
+   *
+   * Порожньо буває, поки історії немає взагалі: у застосунку, який щойно
+   * оновився, вона зʼявиться з першим збереженням налаштувань або приїде
+   * синхронізацією. Тоді картка бере поточну ціль, як і раніше. */
+  GoalAt? goalOn(int date) {
+    GoalAt? found;
+    for (final g in goals) {
+      if (g.from > date) continue;
+      if (found == null || g.from >= found.from) found = g;
+    }
+    return found ?? (goals.isEmpty ? null : goals.first);
+  }
 
   /// Звідки взялись ці числа. Екранам це потрібно рівно для одного: не малювати
   /// «немає даних» там, де їх ще просто не встигли прочитати.

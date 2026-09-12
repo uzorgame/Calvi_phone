@@ -1562,7 +1562,7 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
     /* Тиждень зводиться раз і віддається обом читачам: третій стороні картки і
        сторінці, яку вона відкриває. Два підрахунки одного тижня розійшлись би
        на першому ж дні, і повірити не можна було б жодному. */
-    final week = weekSummary(scope.stats, scope.s);
+    final week = weekSummary(scope.stats, scope.s, _date);
 
     return Scaffold(
       /* Прозорий навмисно: під сторінкою лежить ґрунт, а суцільне тло
@@ -1668,6 +1668,7 @@ class _TodayScreenState extends State<TodayScreen> with WidgetsBindingObserver {
                             RepaintBoundary(
                               child: HeroCard(
                                 key: ValueKey(_date),
+                                date: _date,
                                 day: day,
                                 /* Норму щойно переставили на утримання, і картка
                                    показує це рухом, а не новим числом, яке

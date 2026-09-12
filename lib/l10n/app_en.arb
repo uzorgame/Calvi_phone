@@ -1463,7 +1463,6 @@
   "nutriGap": "{count, plural, one{One dish without these numbers, so this is a minimum.} other{{count} dishes without these numbers, so this is a minimum.}}",
   "nutriGapAll": "Nothing is known about this today: no dish of the day carries these numbers.",
   "nutriNone": "These meals were not counted",
-  "nutriNoneYet": "Nutrients appear with the first entry",
   "nutriNorm": "Norm",
   "nutriNowGoal": "{now} g today of {goal}",
   "nutriNowSodium": "{now} g today, that is {salt} g of salt",

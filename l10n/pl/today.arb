@@ -150,7 +150,6 @@
   "wcNoTime": "bez czasu trwania",
 
   "nutriNone": "Tych posiłków nie liczono",
-  "nutriNoneYet": "Składniki pojawią się z pierwszym wpisem",
   "nutriNorm": "Norma",
   "nutriFrom": "Skąd dzisiaj",
   "nutriRest": "{count, plural, one{i jeszcze {count}} few{i jeszcze {count}} many{i jeszcze {count}} other{i jeszcze {count}}}",

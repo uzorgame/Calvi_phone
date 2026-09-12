@@ -46,7 +46,7 @@ void main() {
    * Другий `pumpWidget` у тому самому тесті піднімає новий застосунок поверх
    * живого старого, і старий при знесенні шукає предків у вже неживому дереві.
    * Це шум самого тесту, а не застосунку, але він ховає справжні збої. */
-  for (final code in ['en', 'uk', 'es', 'it', 'de', 'fr', 'pt', 'pl']) {
+  for (final code in ['en', 'uk', 'es', 'it', 'de', 'fr', 'pt', 'pl', 'cs']) {
     testWidgets('телефон $code відкриває застосунок мовою $code', (tester) async {
       await boot(tester, [Locale(code)]);
       expect(shown(tester).languageCode, code);
@@ -70,7 +70,7 @@ void main() {
     });
   }
 
-  for (final code in ['ja', 'zh', 'ar', 'tr', 'cs', 'sk', 'ro', 'hu']) {
+  for (final code in ['ja', 'zh', 'ar', 'tr', 'sk', 'ro', 'hu']) {
     testWidgets('телефон $code, мови якого в застосунку немає, отримує англійську', (
       tester,
     ) async {

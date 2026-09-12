@@ -76,11 +76,41 @@ class Measure {
   double? operator [](String key) => values[key];
 }
 
+/// Значення, яке було правдою на цей день.
+///
+/// Береться останній запис **на цей день або раніше**. Зважились 26-го, 27-го на
+/// ваги не ставали, отже 27-го правдиве число від 26-го: вага не зникає від
+/// того, що її не міряли.
+///
+/// Пізніші записи не беруться навмисно. Картка минулого дня, яка показує
+/// сьогоднішню вагу, це не історія, а сьогодні з чужою датою.
+double? measuredOn(List<Measure> list, String key, int date) {
+  double? found;
+  var at = -100000;
+  for (final m in list) {
+    final v = m[key];
+    if (v == null || m.date > date || m.date < at) continue;
+    at = m.date;
+    found = v;
+  }
+  return found;
+}
+
 /// What this person actually measures. Most people measure one thing, and eight
 /// fields open at once assumes everybody takes a full set.
 const defaultTracked = ['weightKg', 'waist'];
 
-/// Demo history, one session a month, moving the way the weight story does.
+/* Demo history: a tape session a month, and the scale far more often than that.
+ *
+ * Зважування щодня останнього тижня, і це не декорація. Картка дня показує вагу
+ * того дня, і з чотирма записами за три місяці всі сім днів тижня показували б
+ * одне число: перевірити, що вона справді слухає день, було б ніяк. Люди й
+ * зважуються частіше, ніж міряються сантиметром.
+ *
+ * Сьогодні зважування немає навмисно: людина відкриває застосунок удень і на
+ * ваги ще не ставала. Картка дня показує вчорашнє число, 78.6, те саме, що в
+ * профілі, а поле в картці замірів лишається порожнім і тримає його підказкою.
+ * Ті самі числа стоять у демці на 5300. */
 const demoMeasures = <Measure>[
   Measure(
     date: -84,
@@ -121,10 +151,16 @@ const demoMeasures = <Measure>[
       'biceps': 34.5,
     },
   ),
+  Measure(date: -21, values: {'weightKg': 79.3}),
+  Measure(date: -14, values: {'weightKg': 79.1}),
+  Measure(date: -10, values: {'weightKg': 79.0}),
+  Measure(date: -8, values: {'weightKg': 79.0}),
+  Measure(date: -7, values: {'weightKg': 78.9}),
+  Measure(date: -6, values: {'weightKg': 78.9}),
   Measure(
     date: -5,
     values: {
-      'weightKg': 78.6,
+      'weightKg': 78.8,
       'chest': 102.5,
       'waist': 85,
       'hips': 99,
@@ -134,6 +170,10 @@ const demoMeasures = <Measure>[
       'biceps': 34.5,
     },
   ),
+  Measure(date: -4, values: {'weightKg': 78.8}),
+  Measure(date: -3, values: {'weightKg': 78.7}),
+  Measure(date: -2, values: {'weightKg': 78.9}),
+  Measure(date: -1, values: {'weightKg': 78.6}),
 ];
 
 /// Newest recorded value of one field, if any.

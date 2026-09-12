@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../data/day.dart';
+import '../../data/measure.dart';
 import '../../data/app_scope.dart';
 import '../../data/settings.dart';
 import '../../data/week.dart';
@@ -31,6 +32,7 @@ import '../../l10n/app_localizations.dart';
 class HeroCard extends StatefulWidget {
   const HeroCard({
     super.key,
+    required this.date,
     required this.day,
     required this.burned,
     required this.goal,
@@ -38,6 +40,10 @@ class HeroCard extends StatefulWidget {
     required this.onWeek,
     this.recount = false,
   });
+
+  /// Який день показано. Вага береться на цей день, і тиждень зводиться той, у
+  /// якому він лежить.
+  final int date;
 
   final DayModel day;
 
@@ -297,8 +303,8 @@ class _HeroCardState extends State<HeroCard>
         goal: widget.goal,
         recount: widget.recount,
       ),
-      const _Weight(),
-      _Week(summary: widget.week, onOpen: widget.onWeek),
+      _Weight(date: widget.date),
+      _Week(date: widget.date, summary: widget.week, onOpen: widget.onWeek),
     ];
 
     /* The faces share one box, and a system font scale the phone sets can
@@ -739,7 +745,10 @@ class _KcalState extends State<_Kcal> {
 /// Дотик відкриває сторінку тижня. Про це каже пілюля під шкалою: сторона з
 /// дверима, яка про них мовчить, це двері, яких ніхто не знайде.
 class _Week extends StatelessWidget {
-  const _Week({required this.summary, required this.onOpen});
+  const _Week({required this.date, required this.summary, required this.onOpen});
+
+  /// Вибраний день: його тиждень зведено, і його ж день стоїть у кільці.
+  final int date;
 
   final WeekSummary summary;
   final VoidCallback onOpen;
@@ -796,11 +805,11 @@ class _Week extends StatelessWidget {
         ],
       ),
       ring: CalviRing(
-        progress: weekRun(),
+        progress: weekRun(date),
         child: Text(
           // Той самий підпис дня, що під стовпчиками тижня і в стрічці дат:
           // одна назва понеділка на застосунок, а не дві.
-          dayInfo(todayDate).label,
+          dayInfo(date).label,
           style: context.t.headlineMedium?.copyWith(
             fontSize: 19,
             fontWeight: FontWeight.w700,
@@ -871,21 +880,41 @@ class _Meter extends StatelessWidget {
 }
 
 class _Weight extends StatelessWidget {
-  const _Weight();
+  const _Weight({required this.date});
+
+  final int date;
 
   @override
   Widget build(BuildContext context) {
     /* The person's own figures, not the fixtures. A weight set in settings and a
        card still showing the one the fixtures were written with are two answers
        to the same question. */
-    final s = AppScope.of(context).s;
+    final scope = AppScope.of(context);
+    final s = scope.s;
+
+    /* Вага того дня, а не найновіша: останнє зважування на цей день або раніше.
+       Зважились 26-го, 27-го на ваги не ставали, отже 27-го стоїть число від
+       26-го. Порожньо буває тільки до найпершого зважування, і тоді лишається
+       вага з профілю. */
+    final weight = measuredOn(scope.stats.measures, 'weightKg', date) ?? s.weightKg;
+
+    /* Ціль того дня, а не сьогоднішня.
+     *
+     * Людина міняє ціль сьогодні, а картка показує минулий тиждень: тоді шлях
+     * вів в інше місце, і дуга має міряти саме його. Поки історії немає
+     * (застосунок щойно оновився, і перша ціль ще не записана), лишається
+     * поточна, як було завжди. */
+    final aim = scope.stats.goalOn(date);
+    final goal = aim == null
+        ? s
+        : s.copyWith(goalStartKg: aim.startKg, targetKg: aim.targetKg, direction: aim.direction);
 
     /* Measured from where the goal started, not from the oldest reading: the
        ring shows progress on this goal, and a weight from before it was set has
        nothing to do with it. */
     // Працює в обидва боки: схуднення і набір це та сама відстань, пройдена в
     // різні сторони.
-    final done = goalProgress(s);
+    final done = goalProgress(goal, weight);
 
     return _Shell(
       dot: 1,
@@ -895,7 +924,7 @@ class _Weight extends StatelessWidget {
         children: [
           Text.rich(
             TextSpan(
-              text: dataUnits.massNum(s.weightKg),
+              text: dataUnits.massNum(weight),
               children: [
                 TextSpan(
                   text: L.of(context).heroKg(dataUnits.massLabel),
@@ -907,7 +936,7 @@ class _Weight extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            L.of(context).heroWeightFrom(dataUnits.massText(s.goalStartKg)),
+            L.of(context).heroWeightFrom(dataUnits.massText(goal.goalStartKg)),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: context.t.bodyMedium?.copyWith(height: 1.25),
@@ -920,7 +949,9 @@ class _Weight extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              dataUnits.massNum(s.targetKg, decimals: 0),
+              /* Ціль того самого дня, що й дуга. Інакше картка минулого тижня
+                 міряла б шлях до однієї цілі, а в кільці показувала іншу. */
+              dataUnits.massNum(goal.targetKg, decimals: 0),
               style: context.t.headlineMedium?.copyWith(
                 fontSize: 24,
                 fontWeight: FontWeight.w700,

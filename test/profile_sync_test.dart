@@ -216,9 +216,13 @@ void main() {
       CalviApi(base: Uri.parse('https://api.calvi.test'), client: client),
     ).run();
 
-    expect(result.pushed, 2, reason: 'страва і вага');
+    /* Три рядки, а не два: збереження профілю пише ще й ціль в історію. Вона
+       їде тією ж чергою, що страва і вага, бо картка дня показує будь-який день
+       і має знати, яка ціль діяла тоді. */
+    expect(result.pushed, 3, reason: 'страва, вага і ціль');
     expect(await db.syncDao.pendingMeals(), isEmpty);
     expect(await db.syncDao.pendingWeights(), isEmpty);
+    expect(await db.syncDao.pendingGoals(), isEmpty);
     expect(id, isNotEmpty);
     expect(
       (await db.select(db.profile).getSingle()).dirty,
