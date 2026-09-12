@@ -202,7 +202,6 @@
   "nutriProWhat": "La fibra, el azúcar, el azúcar añadido, el sodio y las grasas saturadas forman parte de Pro. Los iconos siguen en su sitio; las cifras las abre la suscripción.",
   "nutriProKept": "Ya se están contando, en cada registro, con suscripción o sin ella. No se pierde nada: en cuanto llegue Pro, este día y todo el mes anterior se abrirán con sus cifras.",
 
-  "nutriNone": "Estas comidas no se contaron",
   "nutriNorm": "Referencia",
   "nutriFrom": "De dónde viene hoy",
   "nutriRest": "{count, plural, one{y {count} más} other{y {count} más}}",

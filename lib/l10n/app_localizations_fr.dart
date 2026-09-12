@@ -1724,9 +1724,6 @@ class LFr extends L {
       'Rien nʼest connu là-dessus aujourdʼhui : aucun plat du jour nʼa ces chiffres.';
 
   @override
-  String get nutriNone => 'Ces plats nʼont pas été comptés';
-
-  @override
   String get nutriNorm => 'Repère';
 
   @override

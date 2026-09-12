@@ -1717,9 +1717,6 @@ class LPt extends L {
       'Sobre isto ainda não se sabe nada hoje: nenhum prato do dia tem estes números.';
 
   @override
-  String get nutriNone => 'Estas refeições não foram contadas';
-
-  @override
   String get nutriNorm => 'Referência';
 
   @override

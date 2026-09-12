@@ -1718,9 +1718,6 @@ class LIt extends L {
       'Di questo oggi non si sa nulla: nessun piatto del giorno ha questi numeri.';
 
   @override
-  String get nutriNone => 'Questi piatti non sono stati contati';
-
-  @override
   String get nutriNorm => 'Riferimento';
 
   @override

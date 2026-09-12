@@ -1714,9 +1714,6 @@ class LEn extends L {
       'Nothing is known about this today: no dish of the day carries these numbers.';
 
   @override
-  String get nutriNone => 'These meals were not counted';
-
-  @override
   String get nutriNorm => 'Norm';
 
   @override

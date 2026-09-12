@@ -154,7 +154,6 @@
   "nutriProWhat": "Błonnik, cukier, cukier dodany, sód i tłuszcze nasycone należą do Pro. Znaki zostają na miejscu, a same liczby otwiera subskrypcja.",
   "nutriProKept": "Liczone są już teraz, przy każdym wpisie, z subskrypcją i bez niej. Nic nie ginie: gdy tylko pojawi się Pro, ten dzień i cały miesiąc wstecz otworzą się z liczbami.",
 
-  "nutriNone": "Tych posiłków nie liczono",
   "nutriNorm": "Norma",
   "nutriFrom": "Skąd dzisiaj",
   "nutriRest": "{count, plural, one{i jeszcze {count}} few{i jeszcze {count}} many{i jeszcze {count}} other{i jeszcze {count}}}",

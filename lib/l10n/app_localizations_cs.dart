@@ -1711,9 +1711,6 @@ class LCs extends L {
   String get nutriGapAll => 'O tomhle se dnes neví nic: žádné jídlo dne tato čísla nenese.';
 
   @override
-  String get nutriNone => 'Tato jídla se nepočítala';
-
-  @override
   String get nutriNorm => 'Norma';
 
   @override

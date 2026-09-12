@@ -1725,9 +1725,6 @@ class LBe extends L {
       'Пра гэта сёння яшчэ нічога не вядома: ніводная страва дня не нясе гэтых лічбаў.';
 
   @override
-  String get nutriNone => 'Гэтыя стравы не лічылі';
-
-  @override
   String get nutriNorm => 'Норма';
 
   @override

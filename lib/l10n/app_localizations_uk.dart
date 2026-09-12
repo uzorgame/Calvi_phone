@@ -1725,9 +1725,6 @@ class LUk extends L {
       'Про це сьогодні ще нічого не відомо: жодна страва дня не має цих чисел.';
 
   @override
-  String get nutriNone => 'Ці страви не рахували';
-
-  @override
   String get nutriNorm => 'Норма';
 
   @override

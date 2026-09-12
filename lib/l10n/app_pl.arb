@@ -541,7 +541,6 @@
   "nutriFrom": "Skąd dzisiaj",
   "nutriGap": "{count, plural, one{Jedno danie bez tych liczb, więc to dolna granica.} few{{count} dania bez tych liczb, więc to dolna granica.} many{{count} dań bez tych liczb, więc to dolna granica.} other{{count} dania bez tych liczb, więc to dolna granica.}}",
   "nutriGapAll": "O tym dzisiaj nic jeszcze nie wiadomo: żadne danie dnia nie ma tych liczb.",
-  "nutriNone": "Tych posiłków nie liczono",
   "nutriNorm": "Norma",
   "nutriNowGoal": "{now} g dzisiaj z {goal}",
   "nutriNowSodium": "{now} g dzisiaj, to {salt} g soli",

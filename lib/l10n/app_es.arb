@@ -1302,7 +1302,6 @@
   "nutriFrom": "De dónde viene hoy",
   "nutriGap": "{count, plural, one{Un plato sin estos números, así que es un mínimo.} other{{count} platos sin estos números, así que es un mínimo.}}",
   "nutriGapAll": "Hoy no se sabe nada de esto: ningún plato del día tiene estos números.",
-  "nutriNone": "Estas comidas no se contaron",
   "nutriNorm": "Referencia",
   "nutriNowGoal": "{now} g hoy de {goal}",
   "nutriNowSodium": "{now} g hoy, son {salt} g de sal",

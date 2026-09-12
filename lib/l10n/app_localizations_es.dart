@@ -1714,9 +1714,6 @@ class LEs extends L {
       'Hoy no se sabe nada de esto: ningún plato del día tiene estos números.';
 
   @override
-  String get nutriNone => 'Estas comidas no se contaron';
-
-  @override
   String get nutriNorm => 'Referencia';
 
   @override

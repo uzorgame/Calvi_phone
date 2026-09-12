@@ -3072,12 +3072,6 @@ abstract class L {
   /// **'Nothing is known about this today: no dish of the day carries these numbers.'**
   String get nutriGapAll;
 
-  /// No description provided for @nutriNone.
-  ///
-  /// In en, this message translates to:
-  /// **'These meals were not counted'**
-  String get nutriNone;
-
   /// No description provided for @nutriNorm.
   ///
   /// In en, this message translates to:

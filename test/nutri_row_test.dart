@@ -174,10 +174,18 @@ void main() {
     );
   });
 
-  testWidgets('день без жодного з пʼяти каже про це словами, а не нулями', (tester) async {
+  /* День із записами, у яких цих чисел немає, виглядає як порожній: самі знаки.
+   *
+   * Тут очікувався рядок «Ці страви не рахували». Він розповідав про нашу
+   * власну неповноту, стояв на головному екрані замість чисел і не пропонував
+   * людині нічого: зробити з ним вона не може нічого. Ряд знаків каже те саме
+   * без слів. */
+  testWidgets('день без жодного з пʼяти показує самі знаки, без слів і без нулів', (tester) async {
     await show(tester, [dish('Борщ', Nutrients.none), dish('Хліб', Nutrients.none)]);
 
-    expect(find.text('Ці страви не рахували'), findsOneWidget);
+    expect(find.text('Ці страви не рахували'), findsNothing);
+    expect(find.byType(CalviIcon), findsNWidgets(5), reason: 'пʼять знаків, по одному на нутрієнт');
+    expect(find.textContaining('?'), findsNothing, reason: 'знак питання це не порожнеча');
     expect(find.textContaining('0'), findsNothing, reason: 'нуль тут означав би «цього не було»');
   });
 

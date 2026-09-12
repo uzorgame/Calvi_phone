@@ -202,7 +202,6 @@
   "nutriProWhat": "Fibra, açúcar, açúcar adicionado, sódio e gorduras saturadas fazem parte do Pro. Os símbolos continuam onde estão; os números chegam com a assinatura.",
   "nutriProKept": "Já estão a ser contados, em cada registo, com assinatura ou sem ela. Nada se perde: assim que o Pro chegar, este dia e todo o mês atrás abrem-se com os seus números.",
 
-  "nutriNone": "Estas refeições não foram contadas",
   "nutriNorm": "Referência",
   "nutriFrom": "De onde vem hoje",
   "nutriRest": "{count, plural, one{e mais {count}} other{e mais {count}}}",

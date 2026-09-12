@@ -1727,9 +1727,6 @@ class LRu extends L {
       'Об этом сегодня ещё ничего не известно: ни одно блюдо дня не несёт этих чисел.';
 
   @override
-  String get nutriNone => 'Эти блюда не считали';
-
-  @override
   String get nutriNorm => 'Норма';
 
   @override

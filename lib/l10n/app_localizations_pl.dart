@@ -1727,9 +1727,6 @@ class LPl extends L {
       'O tym dzisiaj nic jeszcze nie wiadomo: żadne danie dnia nie ma tych liczb.';
 
   @override
-  String get nutriNone => 'Tych posiłków nie liczono';
-
-  @override
   String get nutriNorm => 'Norma';
 
   @override

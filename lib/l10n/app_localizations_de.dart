@@ -1724,9 +1724,6 @@ class LDe extends L {
       'Dazu ist heute noch nichts bekannt: kein Gericht des Tages hat diese Zahlen.';
 
   @override
-  String get nutriNone => 'Diese Mahlzeiten wurden nicht gezählt';
-
-  @override
   String get nutriNorm => 'Richtwert';
 
   @override

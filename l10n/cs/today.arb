@@ -142,7 +142,6 @@
   "nutriProWhat": "Vláknina, cukr, přidaný cukr, sodík a nasycené tuky patří do Pro. Značky zůstávají na místě, samotná čísla otevírá předplatné.",
   "nutriProKept": "Počítají se už teď, u každého záznamu, s předplatným i bez něj. Nic se neztrácí: jakmile bude Pro, tento den i celý měsíc zpátky se otevřou s čísly.",
 
-  "nutriNone": "Tato jídla se nepočítala",
   "nutriNorm": "Norma",
   "nutriFrom": "Odkud to dnes je",
   "nutriRest": "{count, plural, other{a ještě {count}}}",

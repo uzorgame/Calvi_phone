@@ -202,7 +202,6 @@
   "nutriProWhat": "Fibres, sucres, sucres ajoutés, sodium et graisses saturées font partie de Pro. Les repères restent en place ; les chiffres, eux, s’ouvrent avec l’abonnement.",
   "nutriProKept": "Ils sont déjà comptés, à chaque entrée, avec abonnement ou sans. Rien ne se perd : dès que Pro arrive, cette journée et tout le mois derrière s’ouvrent avec leurs chiffres.",
 
-  "nutriNone": "Ces plats nʼont pas été comptés",
   "nutriNorm": "Repère",
   "nutriFrom": "Dʼoù cela vient aujourdʼhui",
   "nutriRest": "{count, plural, one{et {count} de plus} other{et {count} de plus}}",
