@@ -591,12 +591,17 @@ class _NutriAvgRowState extends State<NutriAvgRow> {
                         _blurred(
                           _Mark(icon: f.icon, tint: f.tint, over: false, full: false, plain: true),
                         ),
-                      if (widget.pro) ...[
+                      /* Числа немає, отже нема чого й показувати: лишається
+                         сам знак. Знак питання з грамами поруч виглядав як
+                         зламане число, хоч означав «ми цього не рахували», і
+                         стояти він буде часто: усе, записане до появи цього
+                         підрахунку, таких чисел не має і вже не матиме. */
+                      if (widget.pro && _avgOf(widget.avg, f.key) != null) ...[
                         const SizedBox(width: 5),
                         Flexible(
                           child: _Value(now: _avgOf(widget.avg, f.key), tone: null, small: true),
                         ),
-                      ] else
+                      ] else if (!widget.pro)
                         const _ValueGap(small: true),
                     ],
                   ),

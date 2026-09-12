@@ -87,6 +87,32 @@ void main() {
     expect(find.textContaining('3.2'), findsWidgets, reason: 'натрій має бути в грамах');
   });
 
+  /* Середнє, якого немає, показує самий знак.
+   *
+   * Тут стояло «? г», і воно означало «ми цього не рахували». Читалось воно як
+   * зламане число, а стоятиме часто: усе, записане до появи підрахунку, цих
+   * чисел не має і вже не матиме. */
+  testWidgets('середнє без даних показує знак, а не знак питання', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: L.localizationsDelegates,
+        supportedLocales: L.supportedLocales,
+        locale: const Locale('uk'),
+        theme: calviLightTheme,
+        home: Scaffold(
+          body: Center(
+            child: NutriAvgRow(avg: Nutrients.none, goal: nutrientGoals(2000), pro: true),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CalviIcon), findsNWidgets(5), reason: 'пʼять знаків, по одному на нутрієнт');
+    expect(find.textContaining('?'), findsNothing, reason: 'знак питання це не порожнеча');
+    expect(find.textContaining('0'), findsNothing, reason: 'нуль тут означав би «цього не було»');
+  });
+
   testWidgets('середні нутрієнти без Pro не показують жодної цифри', (tester) async {
     await showAvg(tester, pro: false);
 
