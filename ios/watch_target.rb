@@ -109,7 +109,7 @@ team = phone.build_configurations.first.build_settings['DEVELOPMENT_TEAM']
 # `InfoPlist.strings` на кожну мову лежать у репозиторії, а тут вони
 # підключаються до телефонної цілі однією варіантною групою і вписуються в
 # knownRegions, як зробив би сам Xcode.
-LANGS = %w[en uk es it de fr pt pl cs].freeze
+LANGS = %w[en uk es it de fr pt pl cs ru be].freeze
 #
 # Група може вже стояти, і тоді дописуються лише нові мови. Раніше тут стояла
 # перевірка «група є, отже все підключено», і дев'ята мова мовчки не доїхала б

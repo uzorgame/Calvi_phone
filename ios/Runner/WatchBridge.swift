@@ -197,7 +197,12 @@ enum Hearing {
   private static let locales: [String: String] = [
     "uk": "uk-UA", "en": "en-US", "es": "es-ES", "it": "it-IT",
     "de": "de-DE", "fr": "fr-FR", "pt": "pt-BR", "pl": "pl-PL",
-    "cs": "cs-CZ",
+    "cs": "cs-CZ", "ru": "ru-RU",
+    /* Білоруську розпізнавач Apple не знає. Рядок тут потрібен усе одно:
+       без нього мова падала б в англійську і телефон чув би зовсім не те,
+       а так він чесно скаже, що цією мовою не вміє, і годинник у
+       замкненому телефоні піде на сервер, де вона є. */
+    "be": "be-BY",
   ]
 
   /// Що телефон відповідає годиннику словами. Мовою застосунку, як і сам
@@ -268,6 +273,20 @@ enum Hearing {
         .noNetwork: "Není připojení k síti",
         .noLanguage: "Rozpoznávání není v tomto jazyce dostupné",
         .locked: "Odemkni telefon a řekni to znovu",
+      ],
+      "ru": [
+        .notHeard: "Не услышала. Скажи ещё раз",
+        .needSpeech: "На телефоне: Calvi, Настройки, Доступ, включи распознавание речи",
+        .noNetwork: "Нет подключения к сети",
+        .noLanguage: "Распознавание на этом языке недоступно",
+        .locked: "Разблокируй телефон и скажи ещё раз",
+      ],
+      "be": [
+        .notHeard: "Не пачула. Скажы яшчэ раз",
+        .needSpeech: "У тэлефоне: Calvi, Налады, Доступ, уключы распазнаванне маўлення",
+        .noNetwork: "Няма падлучэння да сеткі",
+        .noLanguage: "Распазнаванне на гэтай мове недаступнае",
+        .locked: "Разблакуй тэлефон і скажы яшчэ раз",
       ],
     ]
     return (table[lang] ?? table["en"]!)[what]!

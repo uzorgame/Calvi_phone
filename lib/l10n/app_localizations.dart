@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
+import 'app_localizations_be.dart';
 import 'app_localizations_cs.dart';
 import 'app_localizations_de.dart';
 import 'app_localizations_en.dart';
@@ -13,6 +14,7 @@ import 'app_localizations_fr.dart';
 import 'app_localizations_it.dart';
 import 'app_localizations_pl.dart';
 import 'app_localizations_pt.dart';
+import 'app_localizations_ru.dart';
 import 'app_localizations_uk.dart';
 
 // ignore_for_file: type=lint
@@ -99,6 +101,7 @@ abstract class L {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
+    Locale('be'),
     Locale('cs'),
     Locale('de'),
     Locale('en'),
@@ -107,6 +110,7 @@ abstract class L {
     Locale('it'),
     Locale('pl'),
     Locale('pt'),
+    Locale('ru'),
     Locale('uk'),
   ];
 
@@ -5952,8 +5956,19 @@ class _LDelegate extends LocalizationsDelegate<L> {
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['cs', 'de', 'en', 'es', 'fr', 'it', 'pl', 'pt', 'uk'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>[
+    'be',
+    'cs',
+    'de',
+    'en',
+    'es',
+    'fr',
+    'it',
+    'pl',
+    'pt',
+    'ru',
+    'uk',
+  ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_LDelegate old) => false;
@@ -5962,6 +5977,8 @@ class _LDelegate extends LocalizationsDelegate<L> {
 L lookupL(Locale locale) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
+    case 'be':
+      return LBe();
     case 'cs':
       return LCs();
     case 'de':
@@ -5978,6 +5995,8 @@ L lookupL(Locale locale) {
       return LPl();
     case 'pt':
       return LPt();
+    case 'ru':
+      return LRu();
     case 'uk':
       return LUk();
   }

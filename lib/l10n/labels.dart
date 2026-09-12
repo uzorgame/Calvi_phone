@@ -170,6 +170,8 @@ Lang langNow(BuildContext context) => switch (Localizations.localeOf(context).la
   'pt' => Lang.pt,
   'pl' => Lang.pl,
   'cs' => Lang.cs,
+  'ru' => Lang.ru,
+  'be' => Lang.be,
   _ => Lang.en,
 };
 
@@ -194,6 +196,8 @@ String langTitle(BuildContext context, Lang lang) => switch (lang) {
   Lang.pt => 'Português do Brasil',
   Lang.pl => 'Polski',
   Lang.cs => 'Čeština',
+  Lang.ru => 'Русский',
+  Lang.be => 'Беларуская',
 };
 
 /// Про що нагадування. Назву самій людині вирішувати, це лише рід.

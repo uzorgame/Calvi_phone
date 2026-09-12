@@ -32,7 +32,7 @@ enum AppTheme { light, aquarelle, dawn, dark, system }
 /// Застосунок бере мову телефона, якщо вона в нас є, і англійську, якщо немає.
 /// Саме тому англійська стоїть першою в `supportedLocales`: Flutter бере першу
 /// підтримувану як запасну.
-enum Lang { system, uk, en, es, it, de, fr, pt, pl, cs }
+enum Lang { system, uk, en, es, it, de, fr, pt, pl, cs, ru, be }
 
 enum Direction { lose, keep, gain }
 
@@ -590,6 +590,10 @@ const langOptions = <Lang>[
   Lang.it,
   Lang.pl,
   Lang.pt,
+  /* Кирилиця в кінці, і між собою теж за абеткою: «Беларуская»,
+     «Русский», «Українська». */
+  Lang.be,
+  Lang.ru,
   Lang.uk,
 ];
 

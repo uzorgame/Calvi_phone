@@ -949,6 +949,8 @@ class _CalviAppState extends State<CalviApp> with WidgetsBindingObserver {
           Locale('pt'),
           Locale('pl'),
           Locale('cs'),
+          Locale('ru'),
+          Locale('be'),
         ],
 
         /* `null` означає «спитай пристрій». Людина, яка обрала мову руками,
@@ -965,6 +967,8 @@ class _CalviAppState extends State<CalviApp> with WidgetsBindingObserver {
           Lang.pt => const Locale('pt'),
           Lang.pl => const Locale('pl'),
           Lang.cs => const Locale('cs'),
+          Lang.ru => const Locale('ru'),
+          Lang.be => const Locale('be'),
         },
         /* Шар даних дізнається про мову звідси.
          *

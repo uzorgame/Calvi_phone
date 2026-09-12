@@ -294,5 +294,7 @@ Lang _langOf(String v) => switch (v) {
   'pt' => Lang.pt,
   'pl' => Lang.pl,
   'cs' => Lang.cs,
+  'ru' => Lang.ru,
+  'be' => Lang.be,
   _ => Lang.system,
 };

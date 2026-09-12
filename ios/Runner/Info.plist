@@ -26,6 +26,8 @@
 		<string>pt</string>
 		<string>pl</string>
 		<string>cs</string>
+		<string>ru</string>
+		<string>be</string>
 	</array>
 	<!-- Живі активності: острівець і банер на замкненому екрані. Без цього
 	     ключа ActivityKit відмовляє на першому ж запиті, і мовчки. -->

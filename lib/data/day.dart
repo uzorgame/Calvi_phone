@@ -306,6 +306,8 @@ const _weekdaysFr = ['DIM', 'LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM'];
 const _weekdaysPt = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
 const _weekdaysPl = ['ND', 'PN', 'WT', 'ŚR', 'CZ', 'PT', 'SO'];
 const _weekdaysCs = ['NE', 'PO', 'ÚT', 'ST', 'ČT', 'PÁ', 'SO'];
+const _weekdaysRu = ['ВС', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
+const _weekdaysBe = ['НД', 'ПН', 'АЎ', 'СР', 'ЧЦ', 'ПТ', 'СБ'];
 
 /* Родовий відмінок: «15 серпня», а не «15 серпень». Місяць тут ніколи не
    стоїть сам, він завжди після числа. */
@@ -453,6 +455,41 @@ const _monthsCs = [
   'prosince',
 ];
 
+/* Російська, як українська і польська, ставить місяць у родовому: «2
+   сентября», а не «2 сентябрь». Крапки після числа, на відміну від
+   німецької та чеської, немає. */
+const _monthsRu = [
+  'января',
+  'февраля',
+  'марта',
+  'апреля',
+  'мая',
+  'июня',
+  'июля',
+  'августа',
+  'сентября',
+  'октября',
+  'ноября',
+  'декабря',
+];
+
+/* Білоруська так само родовим: «2 верасня». Назви місяців у неї власні, а
+   не запозичені, тому списком, а не відрізанням від російських. */
+const _monthsBe = [
+  'студзеня',
+  'лютага',
+  'сакавіка',
+  'красавіка',
+  'мая',
+  'чэрвеня',
+  'ліпеня',
+  'жніўня',
+  'верасня',
+  'кастрычніка',
+  'лістапада',
+  'снежня',
+];
+
 List<String> get _months => switch (dataLang) {
   'uk' => _monthsUk,
   'es' => _monthsEs,
@@ -462,6 +499,8 @@ List<String> get _months => switch (dataLang) {
   'pt' => _monthsPt,
   'pl' => _monthsPl,
   'cs' => _monthsCs,
+  'ru' => _monthsRu,
+  'be' => _monthsBe,
   _ => _monthsEn,
 };
 List<String> get _weekdays => switch (dataLang) {
@@ -473,6 +512,8 @@ List<String> get _weekdays => switch (dataLang) {
   'pt' => _weekdaysPt,
   'pl' => _weekdaysPl,
   'cs' => _weekdaysCs,
+  'ru' => _weekdaysRu,
+  'be' => _weekdaysBe,
   _ => _weekdaysEn,
 };
 
@@ -517,6 +558,8 @@ List<String> weekdaysFromMonday([String? lang]) {
     'pt' => _weekdaysPt,
     'pl' => _weekdaysPl,
     'cs' => _weekdaysCs,
+    'ru' => _weekdaysRu,
+    'be' => _weekdaysBe,
     _ => _weekdaysEn,
   };
   return [...week.skip(1), week.first];
@@ -604,12 +647,48 @@ const _shortCs = [
   'pro',
 ];
 
+/* Російські три літери самі виходять різними: «янв», «июн», «июл». Списком
+   вони стоять лише тому, що «мая» це вже ціле слово, а не відрізок. */
+const _shortRu = [
+  'янв',
+  'фев',
+  'мар',
+  'апр',
+  'мая',
+  'июн',
+  'июл',
+  'авг',
+  'сен',
+  'окт',
+  'ноя',
+  'дек',
+];
+
+/* Білоруські скорочення теж списком: «студзеня» трьома літерами дає «сту»,
+   що не читається, а «жніўня» коротшає до двох. */
+const _shortBe = [
+  'студз',
+  'лют',
+  'сак',
+  'крас',
+  'мая',
+  'чэрв',
+  'ліп',
+  'жн',
+  'вер',
+  'каст',
+  'ліст',
+  'снеж',
+];
+
 String monthShort(int month) => switch (dataLang) {
   'uk' => _shortUk[month - 1],
   'es' => _shortEs[month - 1],
   'it' => _shortIt[month - 1],
   'fr' => _shortFr[month - 1],
   'cs' => _shortCs[month - 1],
+  'ru' => _shortRu[month - 1],
+  'be' => _shortBe[month - 1],
   'de' => _monthsDe[month - 1].substring(0, 3),
   'pt' => _monthsPt[month - 1].substring(0, 3),
   /* Польські три літери самі виходять різними: «sty», «sie», «wrz», «paź».

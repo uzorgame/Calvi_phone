@@ -1,6 +1,7 @@
 import '../data/day.dart' show dataLang;
 import 'app_localizations.dart';
 import 'app_localizations_en.dart';
+import 'app_localizations_be.dart';
 import 'app_localizations_cs.dart';
 import 'app_localizations_de.dart';
 import 'app_localizations_es.dart';
@@ -8,6 +9,7 @@ import 'app_localizations_fr.dart';
 import 'app_localizations_it.dart';
 import 'app_localizations_pl.dart';
 import 'app_localizations_pt.dart';
+import 'app_localizations_ru.dart';
 import 'app_localizations_uk.dart';
 
 /* Саме поле теж видно звідси: ставить його `main`, а живе воно поряд із
@@ -38,5 +40,7 @@ L get dataL => switch (dataLang) {
   'pt' => LPt(),
   'pl' => LPl(),
   'cs' => LCs(),
+  'ru' => LRu(),
+  'be' => LBe(),
   _ => LEn(),
 };
