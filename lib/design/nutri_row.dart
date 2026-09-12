@@ -461,8 +461,12 @@ class _ProSheet extends StatelessWidget {
                 _Mark(icon: f.icon, tint: f.tint, over: false, full: false, plain: false, big: true),
             ],
           ),
-          const SizedBox(height: 18),
-          Text(l.nutriProWhat, style: context.t.bodySmall?.copyWith(height: 1.5)),
+          const SizedBox(height: 14),
+          /* bodyMedium, а не bodySmall: свого bodySmall у темі немає, і Flutter
+             підставляв матеріалівський, з чужим кеглем, чужою розрядкою і
+             чужим кольором. Демка пише це речення другорядним кольором, 15 кеглем
+             і рядком у півтора, і саме це є bodyMedium. */
+          Text(l.nutriProWhat, style: context.t.bodyMedium?.copyWith(height: 1.5)),
 
           /* Друге речення тихіше і з рискою ліворуч: воно не продовження
              першого, а відповідь на питання, яке виникає після нього. */
@@ -474,7 +478,14 @@ class _ProSheet extends StatelessWidget {
             ),
             child: Text(
               l.nutriProKept,
-              style: context.t.labelSmall?.copyWith(fontSize: CalviSize.fsMicro, height: 1.5),
+              /* Звичайна вага, не середня: у демці примітка того самого тону і
+                 кеглю, що й речення над нею, лише дрібніша. Півжирна вона
+                 читалась як заголовок, а не як примітка. */
+              style: context.t.labelSmall?.copyWith(
+                fontSize: CalviSize.fsMicro,
+                fontWeight: FontWeight.w400,
+                height: 1.5,
+              ),
             ),
           ),
         ],
