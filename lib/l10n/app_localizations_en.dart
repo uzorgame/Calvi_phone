@@ -1814,6 +1814,46 @@ class LEn extends L {
   String get nutriUnknown => 'not counted today yet';
 
   @override
+  String get payDish => 'Seafood paella';
+
+  @override
+  String get payHavePromo => 'I have a promo code';
+
+  @override
+  String get payPeas => 'Peas';
+
+  @override
+  String get payPortion => 'One of four portions · ≈350 g';
+
+  @override
+  String get payPromo => 'Promo code';
+
+  @override
+  String get payPromoApply => 'Apply';
+
+  @override
+  String get payPromoBad => 'No such code';
+
+  @override
+  String get payPromoDrop => 'Remove the promo code';
+
+  @override
+  String payPromoOff(int off) {
+    return '−$off% on any plan';
+  }
+
+  @override
+  String get payRice => 'Rice';
+
+  @override
+  String get payShrimp => 'Shrimp';
+
+  @override
+  String payTrial(int n) {
+    return 'Start with $n trial tokens';
+  }
+
+  @override
   String get photoDish => 'Dish';
 
   @override
@@ -2955,51 +2995,6 @@ class LEn extends L {
   @override
   String get todayQuestionClosed =>
       'That question is already closed. Say the weight in words if you need to.';
-
-  @override
-  String get tourCamera => 'Camera';
-
-  @override
-  String get tourCameraHow => 'a plate, a label or a barcode';
-
-  @override
-  String get tourDiary => 'Diary memory';
-
-  @override
-  String get tourDiaryHow => 'say \"borscht\" and it takes your usual portion';
-
-  @override
-  String get tourGuide => 'Guide to the app';
-
-  @override
-  String get tourGuideHow => 'ask where things are and how to do them';
-
-  @override
-  String get tourMemory => 'Lasting memory';
-
-  @override
-  String get tourMemoryHow => '\"no pork\" is enough to say once';
-
-  @override
-  String get tourMore => 'Not only food';
-
-  @override
-  String get tourMoreHow => 'water, workouts, measurements, recipes';
-
-  @override
-  String get tourTitle => 'What Nora can do';
-
-  @override
-  String get tourVoice => 'Voice or text';
-
-  @override
-  String get tourVoiceHow => '\"two eggs and toast\", and it is logged';
-
-  @override
-  String get tourWeek => 'Day and week review';
-
-  @override
-  String get tourWeekHow => 'what worked and what to adjust';
 
   @override
   String get unitCm => 'cm';

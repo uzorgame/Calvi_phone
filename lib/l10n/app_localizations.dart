@@ -3228,6 +3228,78 @@ abstract class L {
   /// **'not counted today yet'**
   String get nutriUnknown;
 
+  /// No description provided for @payDish.
+  ///
+  /// In en, this message translates to:
+  /// **'Seafood paella'**
+  String get payDish;
+
+  /// No description provided for @payHavePromo.
+  ///
+  /// In en, this message translates to:
+  /// **'I have a promo code'**
+  String get payHavePromo;
+
+  /// No description provided for @payPeas.
+  ///
+  /// In en, this message translates to:
+  /// **'Peas'**
+  String get payPeas;
+
+  /// No description provided for @payPortion.
+  ///
+  /// In en, this message translates to:
+  /// **'One of four portions · ≈350 g'**
+  String get payPortion;
+
+  /// No description provided for @payPromo.
+  ///
+  /// In en, this message translates to:
+  /// **'Promo code'**
+  String get payPromo;
+
+  /// No description provided for @payPromoApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get payPromoApply;
+
+  /// No description provided for @payPromoBad.
+  ///
+  /// In en, this message translates to:
+  /// **'No such code'**
+  String get payPromoBad;
+
+  /// No description provided for @payPromoDrop.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove the promo code'**
+  String get payPromoDrop;
+
+  /// No description provided for @payPromoOff.
+  ///
+  /// In en, this message translates to:
+  /// **'−{off}% on any plan'**
+  String payPromoOff(int off);
+
+  /// No description provided for @payRice.
+  ///
+  /// In en, this message translates to:
+  /// **'Rice'**
+  String get payRice;
+
+  /// No description provided for @payShrimp.
+  ///
+  /// In en, this message translates to:
+  /// **'Shrimp'**
+  String get payShrimp;
+
+  /// No description provided for @payTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with {n} trial tokens'**
+  String payTrial(int n);
+
   /// No description provided for @photoDish.
   ///
   /// In en, this message translates to:
@@ -5285,96 +5357,6 @@ abstract class L {
   /// In en, this message translates to:
   /// **'That question is already closed. Say the weight in words if you need to.'**
   String get todayQuestionClosed;
-
-  /// No description provided for @tourCamera.
-  ///
-  /// In en, this message translates to:
-  /// **'Camera'**
-  String get tourCamera;
-
-  /// No description provided for @tourCameraHow.
-  ///
-  /// In en, this message translates to:
-  /// **'a plate, a label or a barcode'**
-  String get tourCameraHow;
-
-  /// No description provided for @tourDiary.
-  ///
-  /// In en, this message translates to:
-  /// **'Diary memory'**
-  String get tourDiary;
-
-  /// No description provided for @tourDiaryHow.
-  ///
-  /// In en, this message translates to:
-  /// **'say \"borscht\" and it takes your usual portion'**
-  String get tourDiaryHow;
-
-  /// No description provided for @tourGuide.
-  ///
-  /// In en, this message translates to:
-  /// **'Guide to the app'**
-  String get tourGuide;
-
-  /// No description provided for @tourGuideHow.
-  ///
-  /// In en, this message translates to:
-  /// **'ask where things are and how to do them'**
-  String get tourGuideHow;
-
-  /// No description provided for @tourMemory.
-  ///
-  /// In en, this message translates to:
-  /// **'Lasting memory'**
-  String get tourMemory;
-
-  /// No description provided for @tourMemoryHow.
-  ///
-  /// In en, this message translates to:
-  /// **'\"no pork\" is enough to say once'**
-  String get tourMemoryHow;
-
-  /// No description provided for @tourMore.
-  ///
-  /// In en, this message translates to:
-  /// **'Not only food'**
-  String get tourMore;
-
-  /// No description provided for @tourMoreHow.
-  ///
-  /// In en, this message translates to:
-  /// **'water, workouts, measurements, recipes'**
-  String get tourMoreHow;
-
-  /// No description provided for @tourTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'What Nora can do'**
-  String get tourTitle;
-
-  /// No description provided for @tourVoice.
-  ///
-  /// In en, this message translates to:
-  /// **'Voice or text'**
-  String get tourVoice;
-
-  /// No description provided for @tourVoiceHow.
-  ///
-  /// In en, this message translates to:
-  /// **'\"two eggs and toast\", and it is logged'**
-  String get tourVoiceHow;
-
-  /// No description provided for @tourWeek.
-  ///
-  /// In en, this message translates to:
-  /// **'Day and week review'**
-  String get tourWeek;
-
-  /// No description provided for @tourWeekHow.
-  ///
-  /// In en, this message translates to:
-  /// **'what worked and what to adjust'**
-  String get tourWeekHow;
 
   /// No description provided for @unitCm.
   ///

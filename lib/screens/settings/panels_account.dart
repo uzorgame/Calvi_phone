@@ -586,7 +586,11 @@ class _PlanPanelState extends State<PlanPanel> {
      підписки гірша за її відсутність. */
   List<(String, String)> _now(L l) {
     if (_pro.isEmpty) return [(l.planPlan, l.planFree), (l.planTokens, l.planTokensFree)];
-    final name = switch (_pro) { 'year' => l.planYearly, 'month' => l.planMonthly, _ => l.planOn };
+    final name = switch (_pro) {
+      'year' => l.planYearly,
+      'month' => l.planMonthly,
+      _ => l.planOn,
+    };
     final s = _state;
     final when = _when;
     return [
@@ -678,7 +682,7 @@ class _PlanPanelState extends State<PlanPanel> {
             Row(
               children: [
                 Expanded(
-                  child: _PlanCard(
+                  child: PlanCard(
                     name: l.planYear,
                     // Чинний тариф позначається спокійно, а не як знижка.
                     // Запланований тариф позначається так само тихо, як чинний.
@@ -697,7 +701,7 @@ class _PlanPanelState extends State<PlanPanel> {
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: _PlanCard(
+                  child: PlanCard(
                     name: l.planMonth,
                     save: _pro == 'month'
                         ? l.planCurrent
@@ -993,7 +997,10 @@ class _DeletePanelState extends State<DeletePanel> {
       /* Причина в тексті: без неї «не вдалось» це порада нічого не робити.
          Найчастіше це мережа, і після її появи можна натиснути ще раз. */
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(L.of(context).deleteFailed('$e')), duration: const Duration(seconds: 8)),
+        SnackBar(
+          content: Text(L.of(context).deleteFailed('$e')),
+          duration: const Duration(seconds: 8),
+        ),
       );
     }
   }
@@ -1173,8 +1180,9 @@ class _Perks extends StatelessWidget {
 ///
 /// Обраний обведений чорнилом, як обрана мова: це вибір серед рівних, а не
 /// кнопка дії, і фарбувати його чорним означало б зробити з нього кнопку.
-class _PlanCard extends StatelessWidget {
-  const _PlanCard({
+class PlanCard extends StatelessWidget {
+  const PlanCard({
+    super.key,
     required this.name,
     required this.price,
     required this.note,
@@ -1183,9 +1191,18 @@ class _PlanCard extends StatelessWidget {
     this.save,
     this.unit,
     this.current = false,
+    this.flash = false,
+    this.tight = false,
   });
 
   final String name;
+
+  /// Ціна щойно змінилась від промокоду: нова на мить зеленіє.
+  final bool flash;
+
+  /// Тісніша картка пейволу: поля 11 на 14 і проміжки по 2, як у демці, де
+  /// кожен піксель під фото рахується.
+  final bool tight;
 
   /* Ціна від магазину. Порожньо означає, що магазин не відповів, і тоді на
      її місці стоїть риска: вигадане число тут виглядало б як справжня ціна. */
@@ -1216,91 +1233,232 @@ class _PlanCard extends StatelessWidget {
         child: AnimatedContainer(
           duration: CalviMotion.fast,
           curve: CalviMotion.ease,
-          padding: EdgeInsets.all(on ? 13 : 14),
+          padding: tight
+              ? const EdgeInsets.symmetric(vertical: 11, horizontal: 14)
+              : const EdgeInsets.all(14),
+          /* Обраний план каже про себе кружком із галочкою в куті і тонкою
+             чорнильною рамкою, а не подвійним обводом. Товста рамка робила з
+             картки кнопку, і поруч із головною кнопкою під нею їх ставало дві. */
           decoration: BoxDecoration(
             color: c.card,
-            border: Border.all(color: on ? c.button : c.cardBorder, width: on ? 2 : 1),
+            border: Border.all(color: on ? c.button : c.cardBorder),
             borderRadius: BorderRadius.circular(CalviSize.rCard),
             boxShadow: context.shadowCard,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          /* Кружок вибору стоїть у правому верхньому куті картки, за 12 від
+             країв, як у демці, і не залежить від рядка назви: у рядку йому
+             діставалась половина вільного місця, і він зупинявся посередині. */
+          child: Stack(
+            clipBehavior: Clip.none,
             children: [
-              /* Назва і чіп знижки в один рядок, і саме тому обидва мусять
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  /* Назва і чіп знижки в один рядок, і саме тому обидва мусять
                  уміти стискатись: на вузькому телефоні з великим системним
                  шрифтом «Рік» і «-17%» разом не влазили в половину ширини, і
                  екран показував смугастий бар замість карток. */
-              Row(
-                children: [
-                  Flexible(
-                    child: Text(
-                      name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.t.bodyLarge?.copyWith(
-                        fontSize: CalviSize.fsCaption,
-                        fontWeight: FontWeight.w500,
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.t.bodyLarge?.copyWith(
+                            fontSize: CalviSize.fsCaption,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      if (save != null) ...[
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1),
+                            /* Чинний тариф позначається тихо: це констатація, а не
+                           вигода, і зелений чіп на ньому читався б як знижка,
+                           якої немає. */
+                            decoration: BoxDecoration(
+                              color: current ? c.fillSecondary : c.success.withValues(alpha: 0.16),
+                              borderRadius: BorderRadius.circular(CalviSize.rPill),
+                            ),
+                            child: Text(
+                              save!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: context.t.labelSmall?.copyWith(
+                                fontSize: 11,
+                                color: current ? c.textSecondary : c.success,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                      // Місце під кружок у куті: назва і чіп не заходять під нього.
+                      const SizedBox(width: 26),
+                    ],
+                  ),
+                  SizedBox(height: tight ? 2 : 4),
+                  /* Ціна великим, одиниця дрібним поруч. Одиниця окремо, а не в
+                 рядку ціни: сам рядок приходить зі стору вже з валютою, і
+                 дописувати до нього щось у перекладі не можна.
+
+                 Нова ціна перекочується, як табло, і на мить зеленіє: на
+                 пейволі промокод міняє її, і око має зловити, що саме
+                 змінилось, без закреслених старих поруч. */
+                  PlanRoll(
+                    child: _Flash(
+                      key: ValueKey('$price|$flash'),
+                      on: flash,
+                      child: Text.rich(
+                        TextSpan(
+                          text: price ?? '···',
+                          children: [
+                            if (unit != null)
+                              TextSpan(
+                                text: unit,
+                                /* 13 кеглем звичайної ваги, як «/міс» у демці. */
+                                style: context.t.labelSmall?.copyWith(
+                                  fontSize: CalviSize.fsMicro,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                          ],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.t.headlineMedium?.copyWith(
+                          fontSize: 21,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                   ),
-                  if (save != null) ...[
-                    const SizedBox(width: 6),
-                    Flexible(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1),
-                        /* Чинний тариф позначається тихо: це констатація, а не
-                           вигода, і зелений чіп на ньому читався б як знижка,
-                           якої немає. */
-                        decoration: BoxDecoration(
-                          color: current
-                              ? c.fillSecondary
-                              : c.success.withValues(alpha: 0.16),
-                          borderRadius: BorderRadius.circular(CalviSize.rPill),
-                        ),
+                  SizedBox(height: tight ? 2 : 4),
+                  if (note != null)
+                    PlanRoll(
+                      child: _Flash(
+                        key: ValueKey('$note|$flash'),
+                        on: flash,
+                        quiet: true,
                         child: Text(
-                          save!,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                          note!,
                           style: context.t.labelSmall?.copyWith(
                             fontSize: 11,
-                            color: current ? c.textSecondary : c.success,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w400,
                           ),
                         ),
                       ),
                     ),
-                  ],
                 ],
               ),
-              const SizedBox(height: 4),
-              /* Ціна великим, одиниця дрібним поруч. Одиниця окремо, а не в
-                 рядку ціни: сам рядок приходить зі стору вже з валютою, і
-                 дописувати до нього щось у перекладі не можна. */
-              Text.rich(
-                TextSpan(
-                  text: price ?? '···',
-                  children: [
-                    if (unit != null)
-                      TextSpan(
-                        text: unit,
-                        style: context.t.labelSmall?.copyWith(fontSize: 12),
-                      ),
-                  ],
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: context.t.headlineMedium?.copyWith(
-                  fontSize: 21,
-                  fontWeight: FontWeight.w700,
-                ),
+              Positioned(
+                top: tight ? 1 : -2,
+                right: -2,
+                child: _Radio(on: on),
               ),
-              const SizedBox(height: 4),
-              if (note != null)
-                Text(note!, style: context.t.labelSmall?.copyWith(fontSize: 11)),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+/* Кружок вибору. Порожній на неактивній картці, залитий чорнилом із галочкою
+   на обраній: той самий знак, що позначає обране всюди в застосунку. */
+class _Radio extends StatelessWidget {
+  const _Radio({required this.on});
+
+  final bool on;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+    return AnimatedContainer(
+      duration: CalviMotion.fast,
+      curve: CalviMotion.ease,
+      width: 18,
+      height: 18,
+      decoration: BoxDecoration(
+        color: on ? c.button : Colors.transparent,
+        shape: BoxShape.circle,
+        border: Border.all(color: on ? c.button : c.hairline, width: 1.5),
+      ),
+      child: AnimatedScale(
+        scale: on ? 1 : 0,
+        duration: CalviMotion.fast,
+        curve: CalviMotion.ease,
+        child: Center(child: CalviIcon('check', size: 10, color: c.buttonText)),
+      ),
+    );
+  }
+}
+
+/// Табло: старий напис іде вгору, новий заходить знизу. 420 мс, як у демці.
+/// Дитина з тим самим ключем стоїть на місці.
+class PlanRoll extends StatelessWidget {
+  const PlanRoll({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  /* Без обрізання: старий напис, що йде вгору, згасає на очах, а не
+     відрубується межею рядка, як і в демці. */
+  Widget build(BuildContext context) => AnimatedSwitcher(
+    duration: const Duration(milliseconds: 420),
+    switchInCurve: CalviMotion.easeRise,
+    switchOutCurve: CalviMotion.easeRise,
+    /* Той, хто йде, їде вгору, а той, хто приходить, заходить знизу, як
+         табло на вокзалі. Один і той самий будівник кличеться для обох, і
+         розрізняє їх ключ: у того, хто приходить, він збігається з дитиною. */
+    transitionBuilder: (child, anim) => FadeTransition(
+      opacity: anim,
+      child: SlideTransition(
+        position: Tween(
+          begin: Offset(0, child.key == this.child.key ? 0.9 : -0.9),
+          end: Offset.zero,
+        ).animate(anim),
+        child: child,
+      ),
+    ),
+    layoutBuilder: (current, previous) => Stack(
+      clipBehavior: Clip.none,
+      alignment: Alignment.centerLeft,
+      children: [...previous, if (current != null) current],
+    ),
+    child: child,
+  );
+}
+
+/* Нова ціна на мить зеленіє і вертається у свій колір: око ловить, що саме
+   змінилось, а на картці лишаються ті самі два числа. Півтори секунди, як у
+   демці. */
+class _Flash extends StatelessWidget {
+  const _Flash({super.key, required this.on, required this.child, this.quiet = false});
+
+  final bool on;
+  final Widget child;
+
+  /// Дрібний рядок вертається в другорядний колір, а не в чорнильний.
+  final bool quiet;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!on) return child;
+    final c = context.c;
+    final rest = quiet ? c.textSecondary : c.text;
+    return TweenAnimationBuilder<Color?>(
+      tween: ColorTween(begin: c.success, end: rest),
+      duration: const Duration(milliseconds: 1600),
+      curve: CalviMotion.ease,
+      builder: (context, color, child) => DefaultTextStyle.merge(
+        style: TextStyle(color: color),
+        child: child!,
+      ),
+      child: child,
     );
   }
 }

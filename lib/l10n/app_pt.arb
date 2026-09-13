@@ -464,6 +464,20 @@
       }
     }
   },
+  "@payPromoOff": {
+    "placeholders": {
+      "off": {
+        "type": "int"
+      }
+    }
+  },
+  "@payTrial": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "@planFrom": {
     "placeholders": {
       "plan": {
@@ -1335,6 +1349,18 @@
   "nutriSugarSource": "A OMS e a EFSA limitam o açúcar adicionado, não o total",
   "nutriSugarWhat": "Todos os açúcares juntos: os adicionados e os da fruta e do leite.",
   "nutriUnknown": "hoje ainda não contado",
+  "payDish": "Paella de marisco",
+  "payHavePromo": "Tenho um código promocional",
+  "payPeas": "Ervilhas",
+  "payPortion": "Uma de quatro porções · ≈350 g",
+  "payPromo": "Código promocional",
+  "payPromoApply": "Aplicar",
+  "payPromoBad": "Esse código não existe",
+  "payPromoDrop": "Remover o código",
+  "payPromoOff": "−{off}% em qualquer plano",
+  "payRice": "Arroz",
+  "payShrimp": "Camarão",
+  "payTrial": "Começar com {n} tokens de teste",
   "photoDish": "Prato",
   "photoNotRecognized": "Não consegui reconhecer o prato nesta foto",
   "planBuy": "Assinar",
@@ -1678,21 +1704,6 @@
   "todayPhotoLabel": "Foto do rótulo",
   "todayPhotoMeal": "Foto",
   "todayQuestionClosed": "Essa pergunta já está fechada. Diga o peso em palavras, se precisar.",
-  "tourCamera": "Câmara",
-  "tourCameraHow": "um prato, um rótulo ou um código de barras",
-  "tourDiary": "Memória do diário",
-  "tourDiaryHow": "diz «borscht» e leva a porção do costume",
-  "tourGuide": "Guia da aplicação",
-  "tourGuideHow": "pergunta onde está o quê e como se faz",
-  "tourMemory": "Memória permanente",
-  "tourMemoryHow": "«não como porco» basta dizer uma vez",
-  "tourMore": "Não só comida",
-  "tourMoreHow": "água, treinos, medidas, receitas",
-  "tourTitle": "O que a Nora sabe fazer",
-  "tourVoice": "Voz ou texto",
-  "tourVoiceHow": "«dois ovos e uma torrada», e fica registrado",
-  "tourWeek": "Análise do dia e da semana",
-  "tourWeekHow": "o que correu bem e o que ajustar",
   "unitCm": "cm",
   "unitCmName": "Centímetros",
   "unitFlozName": "Onças líquidas",

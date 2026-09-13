@@ -464,6 +464,20 @@
       }
     }
   },
+  "@payPromoOff": {
+    "placeholders": {
+      "off": {
+        "type": "int"
+      }
+    }
+  },
+  "@payTrial": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "@planFrom": {
     "placeholders": {
       "plan": {
@@ -1335,6 +1349,18 @@
   "nutriSugarSource": "La OMS y la EFSA limitan el azúcar añadido, no el total",
   "nutriSugarWhat": "Todos los azúcares juntos: los añadidos y los propios de la fruta y la leche.",
   "nutriUnknown": "hoy aún sin contar",
+  "payDish": "Paella de marisco",
+  "payHavePromo": "Tengo un código promocional",
+  "payPeas": "Guisantes",
+  "payPortion": "Una de cuatro porciones · ≈350 g",
+  "payPromo": "Código promocional",
+  "payPromoApply": "Aplicar",
+  "payPromoBad": "No existe ese código",
+  "payPromoDrop": "Quitar el código",
+  "payPromoOff": "−{off}% en cualquier plan",
+  "payRice": "Arroz",
+  "payShrimp": "Gambas",
+  "payTrial": "Empezar con {n} tokens de prueba",
   "photoDish": "Plato",
   "photoNotRecognized": "No he podido reconocer el plato en esta foto",
   "planBuy": "Suscribirme",
@@ -1678,21 +1704,6 @@
   "todayPhotoLabel": "Foto de la etiqueta",
   "todayPhotoMeal": "Foto",
   "todayQuestionClosed": "Esa pregunta ya está cerrada. Di el peso con palabras si hace falta.",
-  "tourCamera": "Cámara",
-  "tourCameraHow": "un plato, una etiqueta o un código de barras",
-  "tourDiary": "Memoria del diario",
-  "tourDiaryHow": "di «borsch» y toma tu porción de siempre",
-  "tourGuide": "Guía de la app",
-  "tourGuideHow": "pregunta dónde está cada cosa y cómo se hace",
-  "tourMemory": "Memoria permanente",
-  "tourMemoryHow": "«no como cerdo» basta decirlo una vez",
-  "tourMore": "No solo comida",
-  "tourMoreHow": "agua, entrenamientos, medidas, recetas",
-  "tourTitle": "Qué sabe hacer Nora",
-  "tourVoice": "Voz o texto",
-  "tourVoiceHow": "«dos huevos y una tostada», y ya está anotado",
-  "tourWeek": "Análisis del día y la semana",
-  "tourWeekHow": "qué salió bien y qué conviene ajustar",
   "unitCm": "cm",
   "unitCmName": "Centímetros",
   "unitFlozName": "Onzas líquidas",

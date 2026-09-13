@@ -94,9 +94,11 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    expect(find.text('Що вміє Нора'), findsOneWidget, reason: 'знайомство останнє');
+    /* Пейвол останній, і з нього дві дороги в щоденник. Тест іде безкоштовною:
+       пробні токени і так у кожного. */
+    expect(find.text('Оформити'), findsOneWidget, reason: 'пейвол останній');
 
-    await tester.tap(find.text('Готово'));
+    await tester.tap(find.text('Почати із пробними 40 токенами'));
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
 

@@ -38,6 +38,20 @@
       }
     }
   },
+  "@payPromoOff": {
+    "placeholders": {
+      "off": {
+        "type": "int"
+      }
+    }
+  },
+  "@payTrial": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "@rcWhole": {
     "placeholders": {
       "kcal": {
@@ -574,6 +588,18 @@
   "nutriSugarSource": "WHO i EFSA ograniczają cukier dodany, a nie całkowity",
   "nutriSugarWhat": "Wszystkie cukry razem: dodane oraz własne cukry owoców i mleka.",
   "nutriUnknown": "dzisiaj jeszcze nie liczone",
+  "payDish": "Paella z owocami morza",
+  "payHavePromo": "Mam kod promocyjny",
+  "payPeas": "Groszek",
+  "payPortion": "Jedna z czterech porcji · ≈350 g",
+  "payPromo": "Kod promocyjny",
+  "payPromoApply": "Zastosuj",
+  "payPromoBad": "Nie ma takiego kodu",
+  "payPromoDrop": "Usuń kod",
+  "payPromoOff": "−{off}% na każdy plan",
+  "payRice": "Ryż",
+  "payShrimp": "Krewetki",
+  "payTrial": "Zacznij z {n} próbnymi tokenami",
   "photoDish": "Danie",
   "photoNotRecognized": "Nie rozpoznałam dania na tym zdjęciu",
   "planBuy": "Wykup",
@@ -917,21 +943,6 @@
   "todayPhotoLabel": "Zdjęcie etykiety",
   "todayPhotoMeal": "Zdjęcie",
   "todayQuestionClosed": "To pytanie jest już zamknięte. Podaj wagę słowami, jeśli trzeba.",
-  "tourCamera": "Aparat",
-  "tourCameraHow": "talerz, etykieta albo kod kreskowy",
-  "tourDiary": "Pamięć dziennika",
-  "tourDiaryHow": "powiesz „barszcz” i weźmie zwykłą porcję",
-  "tourGuide": "Przewodnik po aplikacji",
-  "tourGuideHow": "zapytaj, gdzie co jest i jak to zrobić",
-  "tourMemory": "Stała pamięć",
-  "tourMemoryHow": "„nie jem wieprzowiny” wystarczy raz",
-  "tourMore": "Nie tylko jedzenie",
-  "tourMoreHow": "woda, treningi, pomiary, przepisy",
-  "tourTitle": "Co potrafi Nora",
-  "tourVoice": "Głos albo tekst",
-  "tourVoiceHow": "„dwa jajka i tost” i wpis gotowy",
-  "tourWeek": "Analiza dnia i tygodnia",
-  "tourWeekHow": "co wyszło i co warto poprawić",
   "unitCm": "cm",
   "unitCmName": "Centymetry",
   "unitFlozName": "Uncje płynu",

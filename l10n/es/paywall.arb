@@ -1,0 +1,16 @@
+{
+  "payHavePromo": "Tengo un código promocional",
+  "payPromo": "Código promocional",
+  "payPromoBad": "No existe ese código",
+  "payPromoApply": "Aplicar",
+  "payPromoDrop": "Quitar el código",
+  "payPromoOff": "−{off}% en cualquier plan",
+  "@payPromoOff": { "placeholders": { "off": { "type": "int" } } },
+  "payTrial": "Empezar con {n} tokens de prueba",
+  "@payTrial": { "placeholders": { "n": { "type": "int" } } },
+  "payDish": "Paella de marisco",
+  "payPortion": "Una de cuatro porciones · ≈350 g",
+  "payRice": "Arroz",
+  "payShrimp": "Gambas",
+  "payPeas": "Guisantes"
+}

@@ -1,0 +1,16 @@
+{
+  "payHavePromo": "Ho un codice promo",
+  "payPromo": "Codice promo",
+  "payPromoBad": "Codice inesistente",
+  "payPromoApply": "Applica",
+  "payPromoDrop": "Rimuovi il codice",
+  "payPromoOff": "−{off}% su ogni piano",
+  "@payPromoOff": { "placeholders": { "off": { "type": "int" } } },
+  "payTrial": "Inizia con {n} token di prova",
+  "@payTrial": { "placeholders": { "n": { "type": "int" } } },
+  "payDish": "Paella ai frutti di mare",
+  "payPortion": "Una di quattro porzioni · ≈350 g",
+  "payRice": "Riso",
+  "payShrimp": "Gamberi",
+  "payPeas": "Piselli"
+}

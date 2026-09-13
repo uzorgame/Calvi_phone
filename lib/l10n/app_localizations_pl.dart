@@ -1829,6 +1829,46 @@ class LPl extends L {
   String get nutriUnknown => 'dzisiaj jeszcze nie liczone';
 
   @override
+  String get payDish => 'Paella z owocami morza';
+
+  @override
+  String get payHavePromo => 'Mam kod promocyjny';
+
+  @override
+  String get payPeas => 'Groszek';
+
+  @override
+  String get payPortion => 'Jedna z czterech porcji · ≈350 g';
+
+  @override
+  String get payPromo => 'Kod promocyjny';
+
+  @override
+  String get payPromoApply => 'Zastosuj';
+
+  @override
+  String get payPromoBad => 'Nie ma takiego kodu';
+
+  @override
+  String get payPromoDrop => 'Usuń kod';
+
+  @override
+  String payPromoOff(int off) {
+    return '−$off% na każdy plan';
+  }
+
+  @override
+  String get payRice => 'Ryż';
+
+  @override
+  String get payShrimp => 'Krewetki';
+
+  @override
+  String payTrial(int n) {
+    return 'Zacznij z $n próbnymi tokenami';
+  }
+
+  @override
   String get photoDish => 'Danie';
 
   @override
@@ -2982,51 +3022,6 @@ class LPl extends L {
   @override
   String get todayQuestionClosed =>
       'To pytanie jest już zamknięte. Podaj wagę słowami, jeśli trzeba.';
-
-  @override
-  String get tourCamera => 'Aparat';
-
-  @override
-  String get tourCameraHow => 'talerz, etykieta albo kod kreskowy';
-
-  @override
-  String get tourDiary => 'Pamięć dziennika';
-
-  @override
-  String get tourDiaryHow => 'powiesz „barszcz” i weźmie zwykłą porcję';
-
-  @override
-  String get tourGuide => 'Przewodnik po aplikacji';
-
-  @override
-  String get tourGuideHow => 'zapytaj, gdzie co jest i jak to zrobić';
-
-  @override
-  String get tourMemory => 'Stała pamięć';
-
-  @override
-  String get tourMemoryHow => '„nie jem wieprzowiny” wystarczy raz';
-
-  @override
-  String get tourMore => 'Nie tylko jedzenie';
-
-  @override
-  String get tourMoreHow => 'woda, treningi, pomiary, przepisy';
-
-  @override
-  String get tourTitle => 'Co potrafi Nora';
-
-  @override
-  String get tourVoice => 'Głos albo tekst';
-
-  @override
-  String get tourVoiceHow => '„dwa jajka i tost” i wpis gotowy';
-
-  @override
-  String get tourWeek => 'Analiza dnia i tygodnia';
-
-  @override
-  String get tourWeekHow => 'co wyszło i co warto poprawić';
 
   @override
   String get unitCm => 'cm';

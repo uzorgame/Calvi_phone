@@ -1,5 +1,19 @@
 {
   "@@locale": "be",
+  "@payPromoOff": {
+    "placeholders": {
+      "off": {
+        "type": "int"
+      }
+    }
+  },
+  "@payTrial": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "@todayLabelTalk": {
     "placeholders": {
       "code": {
@@ -526,6 +540,18 @@
   "nutriSugarSource": "СААЗ і EFSA абмяжоўваюць дададзены цукар, а не агульны",
   "nutriSugarWhat": "Усе цукры разам: і дададзеныя, і ўласныя цукры садавіны ды малака.",
   "nutriUnknown": "сёння яшчэ не лічылі",
+  "payDish": "Паэлья з морапрадуктамі",
+  "payHavePromo": "У мяне ёсць промакод",
+  "payPeas": "Гарошак",
+  "payPortion": "Адна з чатырох порцый · ≈350 г",
+  "payPromo": "Промакод",
+  "payPromoApply": "Ужыць",
+  "payPromoBad": "Такога кода няма",
+  "payPromoDrop": "Прыбраць промакод",
+  "payPromoOff": "−{off}% на любы план",
+  "payRice": "Рыс",
+  "payShrimp": "Крэветкі",
+  "payTrial": "Пачаць з {n} пробнымі токенамі",
   "photoDish": "Страва",
   "photoNotRecognized": "Не пазнала страву на гэтым здымку",
   "planBuy": "Аформіць",
@@ -869,21 +895,6 @@
   "todayPhotoLabel": "Фота этыкеткі",
   "todayPhotoMeal": "Фота",
   "todayQuestionClosed": "Гэтае пытанне ўжо закрытае. Скажы вагу словамі, калі трэба.",
-  "tourCamera": "Камера",
-  "tourCameraHow": "талерка, этыкетка або штрыхкод",
-  "tourDiary": "Памяць дзённіка",
-  "tourDiaryHow": "сказаў «баршч», возьме звыклую порцыю",
-  "tourGuide": "Гід па дадатку",
-  "tourGuideHow": "спытай, дзе што ляжыць і як гэта зрабіць",
-  "tourMemory": "Сталая памяць",
-  "tourMemoryHow": "«не ем свініну» дастаткова сказаць раз",
-  "tourMore": "Не толькі ежа",
-  "tourMoreHow": "вада, трэніроўкі, замеры, рэцэпты",
-  "tourTitle": "Што ўмее Нора",
-  "tourVoice": "Голас або тэкст",
-  "tourVoiceHow": "«два яйкі і тост», і запіс гатовы",
-  "tourWeek": "Разбор дня і тыдня",
-  "tourWeekHow": "што выйшла і што варта паправіць",
   "unitCm": "см",
   "unitCmName": "Сантыметры",
   "unitFlozName": "Вадкія унцыі",

@@ -1,0 +1,16 @@
+{
+  "payHavePromo": "У меня есть промокод",
+  "payPromo": "Промокод",
+  "payPromoBad": "Такого кода нет",
+  "payPromoApply": "Применить",
+  "payPromoDrop": "Убрать промокод",
+  "payPromoOff": "−{off}% на любой план",
+  "@payPromoOff": { "placeholders": { "off": { "type": "int" } } },
+  "payTrial": "Начать с {n} пробными токенами",
+  "@payTrial": { "placeholders": { "n": { "type": "int" } } },
+  "payDish": "Паэлья с морепродуктами",
+  "payPortion": "Одна из четырёх порций · ≈350 г",
+  "payRice": "Рис",
+  "payShrimp": "Креветки",
+  "payPeas": "Горошек"
+}

@@ -1,21 +1,4 @@
 {
-  "tourTitle": "Qué sabe hacer Nora",
-
-  "tourVoice": "Voz o texto",
-  "tourVoiceHow": "«dos huevos y una tostada», y ya está anotado",
-  "tourCamera": "Cámara",
-  "tourCameraHow": "un plato, una etiqueta o un código de barras",
-  "tourMore": "No solo comida",
-  "tourMoreHow": "agua, entrenamientos, medidas, recetas",
-  "tourDiary": "Memoria del diario",
-  "tourDiaryHow": "di «borsch» y toma tu porción de siempre",
-  "tourMemory": "Memoria permanente",
-  "tourMemoryHow": "«no como cerdo» basta decirlo una vez",
-  "tourWeek": "Análisis del día y la semana",
-  "tourWeekHow": "qué salió bien y qué conviene ajustar",
-  "tourGuide": "Guía de la app",
-  "tourGuideHow": "pregunta dónde está cada cosa y cómo se hace",
-
   "unitsTitle": "Qué unidades",
   "unitKgName": "Kilogramos",
   "unitLbName": "Libras",

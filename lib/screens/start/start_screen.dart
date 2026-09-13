@@ -14,7 +14,7 @@ import '../../design/shell.dart';
 import '../../design/theme.dart';
 import '../../design/tokens.dart';
 import '../settings/panel_legal.dart';
-import 'nora_tour.dart';
+import 'paywall.dart';
 import 'sign_in.dart';
 import 'welcome.dart';
 import '../../design/wheel.dart';
@@ -504,8 +504,12 @@ class _StartScreenState extends State<StartScreen> {
     6 => _paceStep(),
     7 => _lifeStep(),
     8 => _normStep(),
-    // Остання картка: що вміє Нора. За нею вже щоденник.
-    _ => NoraTour(onDone: _done),
+    /* Остання картка: пейвол. Після норми, а не перед анкетою: рахунок за
+       побачене читається інакше, ніж рахунок наперед. З нього дві дороги в
+       щоденник, платна і з пробними токенами. Картка «Що вміє Нора», що
+       стояла тут, лишилась тільки в демці: тур після сімох питань гортають,
+       не читаючи. */
+    _ => Paywall(onDone: _done, onSignIn: () => _go(0)),
   };
 
   /* Одиниці питаються один раз і більше не питаються: далі вони живуть у

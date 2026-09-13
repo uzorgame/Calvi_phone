@@ -1,0 +1,16 @@
+{
+  "payHavePromo": "Ich habe einen Aktionscode",
+  "payPromo": "Aktionscode",
+  "payPromoBad": "Diesen Code gibt es nicht",
+  "payPromoApply": "Anwenden",
+  "payPromoDrop": "Aktionscode entfernen",
+  "payPromoOff": "−{off}% auf jeden Tarif",
+  "@payPromoOff": { "placeholders": { "off": { "type": "int" } } },
+  "payTrial": "Mit {n} Probe-Tokens starten",
+  "@payTrial": { "placeholders": { "n": { "type": "int" } } },
+  "payDish": "Meeresfrüchte-Paella",
+  "payPortion": "Eine von vier Portionen · ≈350 g",
+  "payRice": "Reis",
+  "payShrimp": "Garnelen",
+  "payPeas": "Erbsen"
+}

@@ -54,6 +54,15 @@ class _Fact {
  * число, якого добирають. Натрій сірий, бо він ні до чого з цього не належить.
  * Теракотовий у ряду не зайнятий нікому навмисно: він приходить тільки тоді,
  * коли стелю перебрано. */
+/// Знак, тон і назва кожного нутрієнта, для місць поза рядом дня: пейвол
+/// малює ними ряд на картці результату. Той самий перелік, що й тут, щоб
+/// шостий нутрієнт колись зʼявився в обох місцях одразу.
+typedef NutriMark = ({String icon, Color tint, String title});
+
+List<NutriMark> nutriMarks(BuildContext context, NutrientGoal goal) => [
+  for (final f in _facts(context, goal)) (icon: f.icon, tint: f.tint, title: f.title),
+];
+
 List<_Fact> _facts(BuildContext context, NutrientGoal goal) {
   final l = L.of(context);
   final c = context.c;

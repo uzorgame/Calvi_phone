@@ -1827,6 +1827,46 @@ class LBe extends L {
   String get nutriUnknown => 'сёння яшчэ не лічылі';
 
   @override
+  String get payDish => 'Паэлья з морапрадуктамі';
+
+  @override
+  String get payHavePromo => 'У мяне ёсць промакод';
+
+  @override
+  String get payPeas => 'Гарошак';
+
+  @override
+  String get payPortion => 'Адна з чатырох порцый · ≈350 г';
+
+  @override
+  String get payPromo => 'Промакод';
+
+  @override
+  String get payPromoApply => 'Ужыць';
+
+  @override
+  String get payPromoBad => 'Такога кода няма';
+
+  @override
+  String get payPromoDrop => 'Прыбраць промакод';
+
+  @override
+  String payPromoOff(int off) {
+    return '−$off% на любы план';
+  }
+
+  @override
+  String get payRice => 'Рыс';
+
+  @override
+  String get payShrimp => 'Крэветкі';
+
+  @override
+  String payTrial(int n) {
+    return 'Пачаць з $n пробнымі токенамі';
+  }
+
+  @override
   String get photoDish => 'Страва';
 
   @override
@@ -2976,51 +3016,6 @@ class LBe extends L {
 
   @override
   String get todayQuestionClosed => 'Гэтае пытанне ўжо закрытае. Скажы вагу словамі, калі трэба.';
-
-  @override
-  String get tourCamera => 'Камера';
-
-  @override
-  String get tourCameraHow => 'талерка, этыкетка або штрыхкод';
-
-  @override
-  String get tourDiary => 'Памяць дзённіка';
-
-  @override
-  String get tourDiaryHow => 'сказаў «баршч», возьме звыклую порцыю';
-
-  @override
-  String get tourGuide => 'Гід па дадатку';
-
-  @override
-  String get tourGuideHow => 'спытай, дзе што ляжыць і як гэта зрабіць';
-
-  @override
-  String get tourMemory => 'Сталая памяць';
-
-  @override
-  String get tourMemoryHow => '«не ем свініну» дастаткова сказаць раз';
-
-  @override
-  String get tourMore => 'Не толькі ежа';
-
-  @override
-  String get tourMoreHow => 'вада, трэніроўкі, замеры, рэцэпты';
-
-  @override
-  String get tourTitle => 'Што ўмее Нора';
-
-  @override
-  String get tourVoice => 'Голас або тэкст';
-
-  @override
-  String get tourVoiceHow => '«два яйкі і тост», і запіс гатовы';
-
-  @override
-  String get tourWeek => 'Разбор дня і тыдня';
-
-  @override
-  String get tourWeekHow => 'што выйшла і што варта паправіць';
 
   @override
   String get unitCm => 'см';

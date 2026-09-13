@@ -1,0 +1,16 @@
+{
+  "payHavePromo": "У мяне ёсць промакод",
+  "payPromo": "Промакод",
+  "payPromoBad": "Такога кода няма",
+  "payPromoApply": "Ужыць",
+  "payPromoDrop": "Прыбраць промакод",
+  "payPromoOff": "−{off}% на любы план",
+  "@payPromoOff": { "placeholders": { "off": { "type": "int" } } },
+  "payTrial": "Пачаць з {n} пробнымі токенамі",
+  "@payTrial": { "placeholders": { "n": { "type": "int" } } },
+  "payDish": "Паэлья з морапрадуктамі",
+  "payPortion": "Адна з чатырох порцый · ≈350 г",
+  "payRice": "Рыс",
+  "payShrimp": "Крэветкі",
+  "payPeas": "Гарошак"
+}

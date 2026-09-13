@@ -1825,6 +1825,46 @@ class LDe extends L {
   String get nutriUnknown => 'heute noch nicht gezählt';
 
   @override
+  String get payDish => 'Meeresfrüchte-Paella';
+
+  @override
+  String get payHavePromo => 'Ich habe einen Aktionscode';
+
+  @override
+  String get payPeas => 'Erbsen';
+
+  @override
+  String get payPortion => 'Eine von vier Portionen · ≈350 g';
+
+  @override
+  String get payPromo => 'Aktionscode';
+
+  @override
+  String get payPromoApply => 'Anwenden';
+
+  @override
+  String get payPromoBad => 'Diesen Code gibt es nicht';
+
+  @override
+  String get payPromoDrop => 'Aktionscode entfernen';
+
+  @override
+  String payPromoOff(int off) {
+    return '−$off% auf jeden Tarif';
+  }
+
+  @override
+  String get payRice => 'Reis';
+
+  @override
+  String get payShrimp => 'Garnelen';
+
+  @override
+  String payTrial(int n) {
+    return 'Mit $n Probe-Tokens starten';
+  }
+
+  @override
   String get photoDish => 'Gericht';
 
   @override
@@ -2973,51 +3013,6 @@ class LDe extends L {
   @override
   String get todayQuestionClosed =>
       'Diese Frage ist schon geschlossen. Sag das Gewicht mit Worten, falls nötig.';
-
-  @override
-  String get tourCamera => 'Kamera';
-
-  @override
-  String get tourCameraHow => 'Teller, Etikett oder Strichcode';
-
-  @override
-  String get tourDiary => 'Gedächtnis des Tagebuchs';
-
-  @override
-  String get tourDiaryHow => 'sag „Borschtsch“ und sie nimmt die übliche Portion';
-
-  @override
-  String get tourGuide => 'Führung durch die App';
-
-  @override
-  String get tourGuideHow => 'frag, wo was liegt und wie es geht';
-
-  @override
-  String get tourMemory => 'Dauerhaftes Gedächtnis';
-
-  @override
-  String get tourMemoryHow => '„kein Schweinefleisch“ reicht einmal';
-
-  @override
-  String get tourMore => 'Nicht nur Essen';
-
-  @override
-  String get tourMoreHow => 'Wasser, Training, Maße, Rezepte';
-
-  @override
-  String get tourTitle => 'Was Nora kann';
-
-  @override
-  String get tourVoice => 'Stimme oder Text';
-
-  @override
-  String get tourVoiceHow => '„zwei Eier und Toast“, und der Eintrag steht';
-
-  @override
-  String get tourWeek => 'Tages- und Wochenanalyse';
-
-  @override
-  String get tourWeekHow => 'was geklappt hat und was anzupassen ist';
 
   @override
   String get unitCm => 'cm';

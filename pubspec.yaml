@@ -129,6 +129,7 @@ flutter:
   # грає сама система розпізнавання. Синтезуються `tools/earcons.mjs`.
   assets:
     - assets/sounds/
+    - assets/img/
 
   # Onest, bundled. google_fonts fetched it over the network at runtime, which
   # on a phone without a connection quietly fell back to Roboto.

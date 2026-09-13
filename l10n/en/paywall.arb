@@ -1,0 +1,16 @@
+{
+  "payHavePromo": "I have a promo code",
+  "payPromo": "Promo code",
+  "payPromoBad": "No such code",
+  "payPromoApply": "Apply",
+  "payPromoDrop": "Remove the promo code",
+  "payPromoOff": "−{off}% on any plan",
+  "@payPromoOff": { "placeholders": { "off": { "type": "int" } } },
+  "payTrial": "Start with {n} trial tokens",
+  "@payTrial": { "placeholders": { "n": { "type": "int" } } },
+  "payDish": "Seafood paella",
+  "payPortion": "One of four portions · ≈350 g",
+  "payRice": "Rice",
+  "payShrimp": "Shrimp",
+  "payPeas": "Peas"
+}

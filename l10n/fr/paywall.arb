@@ -1,0 +1,16 @@
+{
+  "payHavePromo": "J'ai un code promo",
+  "payPromo": "Code promo",
+  "payPromoBad": "Ce code n'existe pas",
+  "payPromoApply": "Appliquer",
+  "payPromoDrop": "Retirer le code",
+  "payPromoOff": "−{off}% sur tous les forfaits",
+  "@payPromoOff": { "placeholders": { "off": { "type": "int" } } },
+  "payTrial": "Commencer avec {n} jetons d'essai",
+  "@payTrial": { "placeholders": { "n": { "type": "int" } } },
+  "payDish": "Paella aux fruits de mer",
+  "payPortion": "Une portion sur quatre · ≈350 g",
+  "payRice": "Riz",
+  "payShrimp": "Crevettes",
+  "payPeas": "Petits pois"
+}

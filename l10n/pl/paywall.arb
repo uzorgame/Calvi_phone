@@ -1,0 +1,16 @@
+{
+  "payHavePromo": "Mam kod promocyjny",
+  "payPromo": "Kod promocyjny",
+  "payPromoBad": "Nie ma takiego kodu",
+  "payPromoApply": "Zastosuj",
+  "payPromoDrop": "Usuń kod",
+  "payPromoOff": "−{off}% na każdy plan",
+  "@payPromoOff": { "placeholders": { "off": { "type": "int" } } },
+  "payTrial": "Zacznij z {n} próbnymi tokenami",
+  "@payTrial": { "placeholders": { "n": { "type": "int" } } },
+  "payDish": "Paella z owocami morza",
+  "payPortion": "Jedna z czterech porcji · ≈350 g",
+  "payRice": "Ryż",
+  "payShrimp": "Krewetki",
+  "payPeas": "Groszek"
+}

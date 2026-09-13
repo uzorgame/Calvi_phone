@@ -1817,6 +1817,46 @@ class LPt extends L {
   String get nutriUnknown => 'hoje ainda não contado';
 
   @override
+  String get payDish => 'Paella de marisco';
+
+  @override
+  String get payHavePromo => 'Tenho um código promocional';
+
+  @override
+  String get payPeas => 'Ervilhas';
+
+  @override
+  String get payPortion => 'Uma de quatro porções · ≈350 g';
+
+  @override
+  String get payPromo => 'Código promocional';
+
+  @override
+  String get payPromoApply => 'Aplicar';
+
+  @override
+  String get payPromoBad => 'Esse código não existe';
+
+  @override
+  String get payPromoDrop => 'Remover o código';
+
+  @override
+  String payPromoOff(int off) {
+    return '−$off% em qualquer plano';
+  }
+
+  @override
+  String get payRice => 'Arroz';
+
+  @override
+  String get payShrimp => 'Camarão';
+
+  @override
+  String payTrial(int n) {
+    return 'Começar com $n tokens de teste';
+  }
+
+  @override
   String get photoDish => 'Prato';
 
   @override
@@ -2960,51 +3000,6 @@ class LPt extends L {
   @override
   String get todayQuestionClosed =>
       'Essa pergunta já está fechada. Diga o peso em palavras, se precisar.';
-
-  @override
-  String get tourCamera => 'Câmara';
-
-  @override
-  String get tourCameraHow => 'um prato, um rótulo ou um código de barras';
-
-  @override
-  String get tourDiary => 'Memória do diário';
-
-  @override
-  String get tourDiaryHow => 'diz «borscht» e leva a porção do costume';
-
-  @override
-  String get tourGuide => 'Guia da aplicação';
-
-  @override
-  String get tourGuideHow => 'pergunta onde está o quê e como se faz';
-
-  @override
-  String get tourMemory => 'Memória permanente';
-
-  @override
-  String get tourMemoryHow => '«não como porco» basta dizer uma vez';
-
-  @override
-  String get tourMore => 'Não só comida';
-
-  @override
-  String get tourMoreHow => 'água, treinos, medidas, receitas';
-
-  @override
-  String get tourTitle => 'O que a Nora sabe fazer';
-
-  @override
-  String get tourVoice => 'Voz ou texto';
-
-  @override
-  String get tourVoiceHow => '«dois ovos e uma torrada», e fica registrado';
-
-  @override
-  String get tourWeek => 'Análise do dia e da semana';
-
-  @override
-  String get tourWeekHow => 'o que correu bem e o que ajustar';
 
   @override
   String get unitCm => 'cm';

@@ -120,6 +120,20 @@
       }
     }
   },
+  "@payPromoOff": {
+    "placeholders": {
+      "off": {
+        "type": "int"
+      }
+    }
+  },
+  "@payTrial": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "@planFrom": {
     "placeholders": {
       "plan": {
@@ -806,6 +820,18 @@
   "nutriSugarSource": "ВООЗ і EFSA обмежують доданий цукор, а не загальний",
   "nutriSugarWhat": "Усі цукри разом: і додані, і власні цукри фруктів та молока.",
   "nutriUnknown": "сьогодні ще не рахували",
+  "payDish": "Паелья з морепродуктами",
+  "payHavePromo": "Маю промокод",
+  "payPeas": "Горошок",
+  "payPortion": "Одна з чотирьох порцій · ≈350 г",
+  "payPromo": "Промокод",
+  "payPromoApply": "Застосувати",
+  "payPromoBad": "Такого коду немає",
+  "payPromoDrop": "Прибрати промокод",
+  "payPromoOff": "−{off}% на будь-який план",
+  "payRice": "Рис",
+  "payShrimp": "Креветки",
+  "payTrial": "Почати із пробними {n} токенами",
   "photoDish": "Страва",
   "photoNotRecognized": "Не впізнала страву на цьому знімку",
   "planBuy": "Оформити",
@@ -1149,21 +1175,6 @@
   "todayPhotoLabel": "Фото етикетки",
   "todayPhotoMeal": "Фото",
   "todayQuestionClosed": "Це питання вже закрите. Скажи вагу словами, якщо треба.",
-  "tourCamera": "Камера",
-  "tourCameraHow": "тарілка, етикетка або штрих-код",
-  "tourDiary": "Памʼять щоденника",
-  "tourDiaryHow": "сказав «борщ», візьме звичну порцію",
-  "tourGuide": "Гід по додатку",
-  "tourGuideHow": "спитай, де що лежить і як це зробити",
-  "tourMemory": "Постійна памʼять",
-  "tourMemoryHow": "«не їм свинини» досить сказати раз",
-  "tourMore": "Не лише їжа",
-  "tourMoreHow": "вода, тренування, заміри, рецепти",
-  "tourTitle": "Що вміє Нора",
-  "tourVoice": "Голос або текст",
-  "tourVoiceHow": "«два яйця і тост», і запис готовий",
-  "tourWeek": "Аналіз дня і тижня",
-  "tourWeekHow": "що вийшло і що варто підправити",
   "unitCm": "см",
   "unitCmName": "Сантиметри",
   "unitFlozName": "Рідкі унції",

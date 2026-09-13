@@ -599,6 +599,20 @@
       }
     }
   },
+  "@payPromoOff": {
+    "placeholders": {
+      "off": {
+        "type": "int"
+      }
+    }
+  },
+  "@payTrial": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "@planFrom": {
     "placeholders": {
       "plan": {
@@ -1495,6 +1509,18 @@
   "nutriSugarSource": "WHO and EFSA limit added sugar, not the total",
   "nutriSugarWhat": "All sugars together: added ones and the sugars of fruit and milk.",
   "nutriUnknown": "not counted today yet",
+  "payDish": "Seafood paella",
+  "payHavePromo": "I have a promo code",
+  "payPeas": "Peas",
+  "payPortion": "One of four portions · ≈350 g",
+  "payPromo": "Promo code",
+  "payPromoApply": "Apply",
+  "payPromoBad": "No such code",
+  "payPromoDrop": "Remove the promo code",
+  "payPromoOff": "−{off}% on any plan",
+  "payRice": "Rice",
+  "payShrimp": "Shrimp",
+  "payTrial": "Start with {n} trial tokens",
   "photoDish": "Dish",
   "photoNotRecognized": "I could not recognise the dish in this shot",
   "planBuy": "Subscribe",
@@ -1838,21 +1864,6 @@
   "todayPhotoLabel": "Label photo",
   "todayPhotoMeal": "Photo",
   "todayQuestionClosed": "That question is already closed. Say the weight in words if you need to.",
-  "tourCamera": "Camera",
-  "tourCameraHow": "a plate, a label or a barcode",
-  "tourDiary": "Diary memory",
-  "tourDiaryHow": "say \"borscht\" and it takes your usual portion",
-  "tourGuide": "Guide to the app",
-  "tourGuideHow": "ask where things are and how to do them",
-  "tourMemory": "Lasting memory",
-  "tourMemoryHow": "\"no pork\" is enough to say once",
-  "tourMore": "Not only food",
-  "tourMoreHow": "water, workouts, measurements, recipes",
-  "tourTitle": "What Nora can do",
-  "tourVoice": "Voice or text",
-  "tourVoiceHow": "\"two eggs and toast\", and it is logged",
-  "tourWeek": "Day and week review",
-  "tourWeekHow": "what worked and what to adjust",
   "unitCm": "cm",
   "unitCmName": "Centimetres",
   "unitFlozName": "Fluid ounces",

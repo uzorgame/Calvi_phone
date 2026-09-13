@@ -1,21 +1,4 @@
 {
-  "tourTitle": "Ce que Nora sait faire",
-
-  "tourVoice": "Voix ou texte",
-  "tourVoiceHow": "« deux œufs et un toast », et c'est noté",
-  "tourCamera": "Appareil photo",
-  "tourCameraHow": "une assiette, une étiquette ou un code-barres",
-  "tourMore": "Pas seulement la nourriture",
-  "tourMoreHow": "eau, séances, mesures, recettes",
-  "tourDiary": "Mémoire du journal",
-  "tourDiaryHow": "dis « bortsch » et elle prend ta portion habituelle",
-  "tourMemory": "Mémoire durable",
-  "tourMemoryHow": "« je ne mange pas de porc » suffit une fois",
-  "tourWeek": "Bilan du jour et de la semaine",
-  "tourWeekHow": "ce qui a marché et ce qu'il faut ajuster",
-  "tourGuide": "Guide de l'app",
-  "tourGuideHow": "demande où se trouve quoi et comment faire",
-
   "unitsTitle": "Quelles unités",
   "unitKgName": "Kilogrammes",
   "unitLbName": "Livres",

@@ -1827,6 +1827,46 @@ class LUk extends L {
   String get nutriUnknown => 'сьогодні ще не рахували';
 
   @override
+  String get payDish => 'Паелья з морепродуктами';
+
+  @override
+  String get payHavePromo => 'Маю промокод';
+
+  @override
+  String get payPeas => 'Горошок';
+
+  @override
+  String get payPortion => 'Одна з чотирьох порцій · ≈350 г';
+
+  @override
+  String get payPromo => 'Промокод';
+
+  @override
+  String get payPromoApply => 'Застосувати';
+
+  @override
+  String get payPromoBad => 'Такого коду немає';
+
+  @override
+  String get payPromoDrop => 'Прибрати промокод';
+
+  @override
+  String payPromoOff(int off) {
+    return '−$off% на будь-який план';
+  }
+
+  @override
+  String get payRice => 'Рис';
+
+  @override
+  String get payShrimp => 'Креветки';
+
+  @override
+  String payTrial(int n) {
+    return 'Почати із пробними $n токенами';
+  }
+
+  @override
   String get photoDish => 'Страва';
 
   @override
@@ -2973,51 +3013,6 @@ class LUk extends L {
 
   @override
   String get todayQuestionClosed => 'Це питання вже закрите. Скажи вагу словами, якщо треба.';
-
-  @override
-  String get tourCamera => 'Камера';
-
-  @override
-  String get tourCameraHow => 'тарілка, етикетка або штрих-код';
-
-  @override
-  String get tourDiary => 'Памʼять щоденника';
-
-  @override
-  String get tourDiaryHow => 'сказав «борщ», візьме звичну порцію';
-
-  @override
-  String get tourGuide => 'Гід по додатку';
-
-  @override
-  String get tourGuideHow => 'спитай, де що лежить і як це зробити';
-
-  @override
-  String get tourMemory => 'Постійна памʼять';
-
-  @override
-  String get tourMemoryHow => '«не їм свинини» досить сказати раз';
-
-  @override
-  String get tourMore => 'Не лише їжа';
-
-  @override
-  String get tourMoreHow => 'вода, тренування, заміри, рецепти';
-
-  @override
-  String get tourTitle => 'Що вміє Нора';
-
-  @override
-  String get tourVoice => 'Голос або текст';
-
-  @override
-  String get tourVoiceHow => '«два яйця і тост», і запис готовий';
-
-  @override
-  String get tourWeek => 'Аналіз дня і тижня';
-
-  @override
-  String get tourWeekHow => 'що вийшло і що варто підправити';
 
   @override
   String get unitCm => 'см';

@@ -464,6 +464,20 @@
       }
     }
   },
+  "@payPromoOff": {
+    "placeholders": {
+      "off": {
+        "type": "int"
+      }
+    }
+  },
+  "@payTrial": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "@planFrom": {
     "placeholders": {
       "plan": {
@@ -1335,6 +1349,18 @@
   "nutriSugarSource": "LʼOMS et lʼEFSA limitent le sucre ajouté, pas le total",
   "nutriSugarWhat": "Tous les sucres ensemble : les sucres ajoutés et ceux des fruits et du lait.",
   "nutriUnknown": "pas encore compté aujourdʼhui",
+  "payDish": "Paella aux fruits de mer",
+  "payHavePromo": "J'ai un code promo",
+  "payPeas": "Petits pois",
+  "payPortion": "Une portion sur quatre · ≈350 g",
+  "payPromo": "Code promo",
+  "payPromoApply": "Appliquer",
+  "payPromoBad": "Ce code n'existe pas",
+  "payPromoDrop": "Retirer le code",
+  "payPromoOff": "−{off}% sur tous les forfaits",
+  "payRice": "Riz",
+  "payShrimp": "Crevettes",
+  "payTrial": "Commencer avec {n} jetons d'essai",
   "photoDish": "Plat",
   "photoNotRecognized": "Je n'ai pas réussi à reconnaître le plat sur cette photo",
   "planBuy": "S'abonner",
@@ -1678,21 +1704,6 @@
   "todayPhotoLabel": "Photo de l'étiquette",
   "todayPhotoMeal": "Photo",
   "todayQuestionClosed": "Cette question est déjà close. Dis le poids avec des mots si besoin.",
-  "tourCamera": "Appareil photo",
-  "tourCameraHow": "une assiette, une étiquette ou un code-barres",
-  "tourDiary": "Mémoire du journal",
-  "tourDiaryHow": "dis « bortsch » et elle prend ta portion habituelle",
-  "tourGuide": "Guide de l'app",
-  "tourGuideHow": "demande où se trouve quoi et comment faire",
-  "tourMemory": "Mémoire durable",
-  "tourMemoryHow": "« je ne mange pas de porc » suffit une fois",
-  "tourMore": "Pas seulement la nourriture",
-  "tourMoreHow": "eau, séances, mesures, recettes",
-  "tourTitle": "Ce que Nora sait faire",
-  "tourVoice": "Voix ou texte",
-  "tourVoiceHow": "« deux œufs et un toast », et c'est noté",
-  "tourWeek": "Bilan du jour et de la semaine",
-  "tourWeekHow": "ce qui a marché et ce qu'il faut ajuster",
   "unitCm": "cm",
   "unitCmName": "Centimètres",
   "unitFlozName": "Onces liquides",

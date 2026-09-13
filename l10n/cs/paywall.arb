@@ -1,0 +1,16 @@
+{
+  "payHavePromo": "Mám promo kód",
+  "payPromo": "Promo kód",
+  "payPromoBad": "Takový kód neexistuje",
+  "payPromoApply": "Použít",
+  "payPromoDrop": "Odebrat kód",
+  "payPromoOff": "−{off}% na každý tarif",
+  "@payPromoOff": { "placeholders": { "off": { "type": "int" } } },
+  "payTrial": "Začít s {n} zkušebními tokeny",
+  "@payTrial": { "placeholders": { "n": { "type": "int" } } },
+  "payDish": "Paella s mořskými plody",
+  "payPortion": "Jedna ze čtyř porcí · ≈350 g",
+  "payRice": "Rýže",
+  "payShrimp": "Krevety",
+  "payPeas": "Hrášek"
+}

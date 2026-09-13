@@ -1,5 +1,19 @@
 {
   "@@locale": "ru",
+  "@payPromoOff": {
+    "placeholders": {
+      "off": {
+        "type": "int"
+      }
+    }
+  },
+  "@payTrial": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "@todayLabelTalk": {
     "placeholders": {
       "code": {
@@ -526,6 +540,18 @@
   "nutriSugarSource": "ВОЗ и EFSA ограничивают добавленный сахар, а не общий",
   "nutriSugarWhat": "Все сахара вместе: и добавленные, и собственные сахара фруктов и молока.",
   "nutriUnknown": "сегодня ещё не считали",
+  "payDish": "Паэлья с морепродуктами",
+  "payHavePromo": "У меня есть промокод",
+  "payPeas": "Горошек",
+  "payPortion": "Одна из четырёх порций · ≈350 г",
+  "payPromo": "Промокод",
+  "payPromoApply": "Применить",
+  "payPromoBad": "Такого кода нет",
+  "payPromoDrop": "Убрать промокод",
+  "payPromoOff": "−{off}% на любой план",
+  "payRice": "Рис",
+  "payShrimp": "Креветки",
+  "payTrial": "Начать с {n} пробными токенами",
   "photoDish": "Блюдо",
   "photoNotRecognized": "Не узнала блюдо на этом снимке",
   "planBuy": "Оформить",
@@ -869,21 +895,6 @@
   "todayPhotoLabel": "Фото этикетки",
   "todayPhotoMeal": "Фото",
   "todayQuestionClosed": "Этот вопрос уже закрыт. Скажи вес словами, если нужно.",
-  "tourCamera": "Камера",
-  "tourCameraHow": "тарелка, этикетка или штрихкод",
-  "tourDiary": "Память дневника",
-  "tourDiaryHow": "сказал «борщ», возьмёт привычную порцию",
-  "tourGuide": "Гид по приложению",
-  "tourGuideHow": "спроси, где что лежит и как это сделать",
-  "tourMemory": "Постоянная память",
-  "tourMemoryHow": "«не ем свинину» достаточно сказать раз",
-  "tourMore": "Не только еда",
-  "tourMoreHow": "вода, тренировки, замеры, рецепты",
-  "tourTitle": "Что умеет Нора",
-  "tourVoice": "Голос или текст",
-  "tourVoiceHow": "«два яйца и тост», и запись готова",
-  "tourWeek": "Разбор дня и недели",
-  "tourWeekHow": "что вышло и что стоит поправить",
   "unitCm": "см",
   "unitCmName": "Сантиметры",
   "unitFlozName": "Жидкие унции",

@@ -1,21 +1,4 @@
 {
-  "tourTitle": "O que a Nora sabe fazer",
-
-  "tourVoice": "Voz ou texto",
-  "tourVoiceHow": "«dois ovos e uma torrada», e fica registrado",
-  "tourCamera": "Câmara",
-  "tourCameraHow": "um prato, um rótulo ou um código de barras",
-  "tourMore": "Não só comida",
-  "tourMoreHow": "água, treinos, medidas, receitas",
-  "tourDiary": "Memória do diário",
-  "tourDiaryHow": "diz «borscht» e leva a porção do costume",
-  "tourMemory": "Memória permanente",
-  "tourMemoryHow": "«não como porco» basta dizer uma vez",
-  "tourWeek": "Análise do dia e da semana",
-  "tourWeekHow": "o que correu bem e o que ajustar",
-  "tourGuide": "Guia da aplicação",
-  "tourGuideHow": "pergunta onde está o quê e como se faz",
-
   "unitsTitle": "Que unidades",
   "unitKgName": "Quilogramas",
   "unitLbName": "Libras",

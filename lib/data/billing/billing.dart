@@ -62,6 +62,12 @@ class StorePlan {
   final Package? package;
 }
 
+/// Тарифи демки, коли магазину немає: ті самі числа, що на localhost:5300.
+const demoPlans = [
+  StorePlan(kind: 'month', productId: 'demo_month', display: r'$8.99', amount: 8.99),
+  StorePlan(kind: 'year', productId: 'demo_year', display: r'$39.99', amount: 39.99),
+];
+
 /// Чим скінчилась покупка. Скасування це не помилка, і плутати їх не можна:
 /// людина, яка передумала, не має бачити «щось пішло не так».
 enum BuyResult { done, canceled, failed }
@@ -145,26 +151,55 @@ class Billing {
    * Десятковий знак береться з того ж рядка: остання кома чи крапка, після
    * якої рівно дві цифри. Якщо такої немає, валюта без копійок, і число
    * округлюється до цілого. */
-  static String perMonthOf(String display, double yearAmount) {
+  static String perMonthOf(String display, double yearAmount) =>
+      withAmount(display, yearAmount / 12);
+
+  /* Той самий рядок магазину з іншим числом.
+   *
+   * Валюта, її місце і десятковий знак лишаються магазинними: у рядку вже
+   * стоїть і символ, і місцевий формат, і вигадати їх удруге означало б
+   * показати «$3.33» тому, хто платить у злотих. Міняється лише число: на
+   * місячну частку річної або на ціну зі знижкою. */
+  static String withAmount(String display, double amount) {
     // Між тисячами магазин ставить звичайний або нерозривний пробіл (U+00A0,
     // вузький U+202F), тому в клас символів входять усі три.
     final number = RegExp(r'\d[\d\s\u00A0\u202F.,]*\d|\d').firstMatch(display);
     if (number == null) return display;
 
     final dec = RegExp(r'([.,])\d{2}$').firstMatch(number.group(0)!);
-    final per = yearAmount / 12;
     final text = dec == null
-        ? per.round().toString()
-        : per.toStringAsFixed(2).replaceFirst('.', dec.group(1)!);
+        ? amount.round().toString()
+        : amount.toStringAsFixed(2).replaceFirst('.', dec.group(1)!);
     return display.replaceRange(number.start, number.end, text);
   }
+
+  /// Ціна зі знижкою у відсотках, округлена до цента, як округлив би магазин.
+  static double withOff(double amount, int off) => (amount * (1 - off / 100) * 100).round() / 100;
+
+  /* Промокод: скільки відсотків він знімає, або нічого, якщо такого немає.
+   *
+   * Код перевіряє той, хто його видав, а не застосунок: у застосунку немає
+   * жодного коду, і поки перевірку ніхто не підвісив, не проходить жоден.
+   * Показати знижку, яку потім ніхто не стягне, означало б обіцяти чуже.
+   * Демо-режим і тести підвішують сюди свою перевірку, а справжня прийде
+   * з сервера або з магазину, коли коди зʼявляться. */
+  static Future<int?> Function(String code) promo = (_) async => null;
 
   /* Тарифи з магазину: місячний і річний.
    *
    * Порожньо означає «магазин не відповів або товарів ще немає». Екран у такому
    * разі показує сторінку без цін, а не вигадані числа. */
   static Future<List<StorePlan>> plans() async {
-    if (!configured || !_ready) {
+    /* Магазину тут немає взагалі: веб, тести, демо. Тоді тарифи ті самі, що
+       в демці, і саме тому: пейвол і сторінка підписки мають виглядати один
+       в один з демкою там, де їх дивляться без телефона. На телефоні магазин
+       підключений завжди, і цей шлях там не вмикається: там ціна або від
+       магазину, або ніяка. */
+    if (!configured) {
+      trouble = BillingTrouble.none;
+      return demoPlans;
+    }
+    if (!_ready) {
       trouble = BillingTrouble.quiet;
       debugPrint('billing: не готовий (configured=$configured, ready=$_ready)');
       return const [];
@@ -228,6 +263,10 @@ class Billing {
    * доступ у нас дає сервер, коли отримає вебхук. Магазин повернув керування
    * без винятку, отже покупка відбулась. Далі не наша справа. */
   static Future<BuyResult> buy(StorePlan plan) async {
+    /* Без магазину покупка умовна, як у демці: вікна нема, а дорога далі є.
+       Доступ і тут дає лише сервер, тому щоденник після цього лишається
+       безкоштовним, доки сервер не скаже інакше. */
+    if (!configured) return BuyResult.done;
     final pack = plan.package;
     if (!_ready || pack == null) return BuyResult.failed;
     try {

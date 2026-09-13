@@ -1,5 +1,19 @@
 {
   "@@locale": "cs",
+  "@payPromoOff": {
+    "placeholders": {
+      "off": {
+        "type": "int"
+      }
+    }
+  },
+  "@payTrial": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "@todayLabelTalk": {
     "placeholders": {
       "code": {
@@ -526,6 +540,18 @@
   "nutriSugarSource": "WHO a EFSA omezují přidaný cukr, ne celkový",
   "nutriSugarWhat": "Všechny cukry dohromady: přidané i ty z ovoce a mléka.",
   "nutriUnknown": "dnes zatím nepočítáno",
+  "payDish": "Paella s mořskými plody",
+  "payHavePromo": "Mám promo kód",
+  "payPeas": "Hrášek",
+  "payPortion": "Jedna ze čtyř porcí · ≈350 g",
+  "payPromo": "Promo kód",
+  "payPromoApply": "Použít",
+  "payPromoBad": "Takový kód neexistuje",
+  "payPromoDrop": "Odebrat kód",
+  "payPromoOff": "−{off}% na každý tarif",
+  "payRice": "Rýže",
+  "payShrimp": "Krevety",
+  "payTrial": "Začít s {n} zkušebními tokeny",
   "photoDish": "Jídlo",
   "photoNotRecognized": "Na tomhle snímku jsem jídlo nerozpoznala",
   "planBuy": "Předplatit",
@@ -869,21 +895,6 @@
   "todayPhotoLabel": "Fotka etikety",
   "todayPhotoMeal": "Foto",
   "todayQuestionClosed": "Ta otázka je už uzavřená. Když je potřeba, řekni váhu slovy.",
-  "tourCamera": "Fotoaparát",
-  "tourCameraHow": "talíř, etiketa nebo čárový kód",
-  "tourDiary": "Paměť deníku",
-  "tourDiaryHow": "řekni „boršč“ a vezme tvou obvyklou porci",
-  "tourGuide": "Průvodce aplikací",
-  "tourGuideHow": "zeptej se, kde co je a jak to udělat",
-  "tourMemory": "Trvalá paměť",
-  "tourMemoryHow": "„vepřové nejím“ stačí říct jednou",
-  "tourMore": "Nejen jídlo",
-  "tourMoreHow": "voda, tréninky, míry, recepty",
-  "tourTitle": "Co Nora umí",
-  "tourVoice": "Hlasem nebo textem",
-  "tourVoiceHow": "„dvě vejce a toast“, a je to zapsané",
-  "tourWeek": "Rozbor dne a týdne",
-  "tourWeekHow": "co vyšlo a co doladit",
   "unitCm": "cm",
   "unitCmName": "Centimetry",
   "unitFlozName": "Tekuté unce",

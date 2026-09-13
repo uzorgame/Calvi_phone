@@ -201,9 +201,7 @@ class _CalviAppState extends State<CalviApp> with WidgetsBindingObserver {
     final goal = dailyKcal(_s);
     final eaten = _stats.netOn(todayDate);
     unawaited(
-      _live.put(
-        LiveFacts(left: goal - eaten, goal: goal, eaten: eaten, last: _stats.lastKcal),
-      ),
+      _live.put(LiveFacts(left: goal - eaten, goal: goal, eaten: eaten, last: _stats.lastKcal)),
     );
   }
 
@@ -1053,9 +1051,8 @@ class _CalviAppState extends State<CalviApp> with WidgetsBindingObserver {
                 onMeds: () => Navigator.of(context).push(slideRoute(const MedsRoute())),
                 /* Кнопка на картці «токени скінчились» веде одразу на панель
                    тарифів, тим самим шляхом, що й пункт меню. */
-                onPlan: () => Navigator.of(context).push(
-                  slideRoute(const SettingsScreen(panel: 'plan')),
-                ),
+                onPlan: () =>
+                    Navigator.of(context).push(slideRoute(const SettingsScreen(panel: 'plan'))),
               ),
             });
           },
@@ -1078,6 +1075,9 @@ Widget _start(Widget home) {
   if (!_devScreens) return home;
   final want = Uri.base.queryParameters['screen'];
   if (want == null) return home;
+  /* Демо-режим живе за тими самими правилами, що localhost:5300: промокод
+     «1» знімає пʼяту частину. У самому застосунку цього коду немає. */
+  Billing.promo = (code) async => code.trim() == '1' ? 20 : null;
   return Builder(
     builder: (context) {
       final scope = AppScope.of(context);

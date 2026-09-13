@@ -1830,6 +1830,46 @@ class LRu extends L {
   String get nutriUnknown => 'сегодня ещё не считали';
 
   @override
+  String get payDish => 'Паэлья с морепродуктами';
+
+  @override
+  String get payHavePromo => 'У меня есть промокод';
+
+  @override
+  String get payPeas => 'Горошек';
+
+  @override
+  String get payPortion => 'Одна из четырёх порций · ≈350 г';
+
+  @override
+  String get payPromo => 'Промокод';
+
+  @override
+  String get payPromoApply => 'Применить';
+
+  @override
+  String get payPromoBad => 'Такого кода нет';
+
+  @override
+  String get payPromoDrop => 'Убрать промокод';
+
+  @override
+  String payPromoOff(int off) {
+    return '−$off% на любой план';
+  }
+
+  @override
+  String get payRice => 'Рис';
+
+  @override
+  String get payShrimp => 'Креветки';
+
+  @override
+  String payTrial(int n) {
+    return 'Начать с $n пробными токенами';
+  }
+
+  @override
   String get photoDish => 'Блюдо';
 
   @override
@@ -2977,51 +3017,6 @@ class LRu extends L {
 
   @override
   String get todayQuestionClosed => 'Этот вопрос уже закрыт. Скажи вес словами, если нужно.';
-
-  @override
-  String get tourCamera => 'Камера';
-
-  @override
-  String get tourCameraHow => 'тарелка, этикетка или штрихкод';
-
-  @override
-  String get tourDiary => 'Память дневника';
-
-  @override
-  String get tourDiaryHow => 'сказал «борщ», возьмёт привычную порцию';
-
-  @override
-  String get tourGuide => 'Гид по приложению';
-
-  @override
-  String get tourGuideHow => 'спроси, где что лежит и как это сделать';
-
-  @override
-  String get tourMemory => 'Постоянная память';
-
-  @override
-  String get tourMemoryHow => '«не ем свинину» достаточно сказать раз';
-
-  @override
-  String get tourMore => 'Не только еда';
-
-  @override
-  String get tourMoreHow => 'вода, тренировки, замеры, рецепты';
-
-  @override
-  String get tourTitle => 'Что умеет Нора';
-
-  @override
-  String get tourVoice => 'Голос или текст';
-
-  @override
-  String get tourVoiceHow => '«два яйца и тост», и запись готова';
-
-  @override
-  String get tourWeek => 'Разбор дня и недели';
-
-  @override
-  String get tourWeekHow => 'что вышло и что стоит поправить';
 
   @override
   String get unitCm => 'см';

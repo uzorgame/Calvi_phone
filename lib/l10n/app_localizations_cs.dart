@@ -1806,6 +1806,46 @@ class LCs extends L {
   String get nutriUnknown => 'dnes zatím nepočítáno';
 
   @override
+  String get payDish => 'Paella s mořskými plody';
+
+  @override
+  String get payHavePromo => 'Mám promo kód';
+
+  @override
+  String get payPeas => 'Hrášek';
+
+  @override
+  String get payPortion => 'Jedna ze čtyř porcí · ≈350 g';
+
+  @override
+  String get payPromo => 'Promo kód';
+
+  @override
+  String get payPromoApply => 'Použít';
+
+  @override
+  String get payPromoBad => 'Takový kód neexistuje';
+
+  @override
+  String get payPromoDrop => 'Odebrat kód';
+
+  @override
+  String payPromoOff(int off) {
+    return '−$off% na každý tarif';
+  }
+
+  @override
+  String get payRice => 'Rýže';
+
+  @override
+  String get payShrimp => 'Krevety';
+
+  @override
+  String payTrial(int n) {
+    return 'Začít s $n zkušebními tokeny';
+  }
+
+  @override
   String get photoDish => 'Jídlo';
 
   @override
@@ -2946,51 +2986,6 @@ class LCs extends L {
 
   @override
   String get todayQuestionClosed => 'Ta otázka je už uzavřená. Když je potřeba, řekni váhu slovy.';
-
-  @override
-  String get tourCamera => 'Fotoaparát';
-
-  @override
-  String get tourCameraHow => 'talíř, etiketa nebo čárový kód';
-
-  @override
-  String get tourDiary => 'Paměť deníku';
-
-  @override
-  String get tourDiaryHow => 'řekni „boršč“ a vezme tvou obvyklou porci';
-
-  @override
-  String get tourGuide => 'Průvodce aplikací';
-
-  @override
-  String get tourGuideHow => 'zeptej se, kde co je a jak to udělat';
-
-  @override
-  String get tourMemory => 'Trvalá paměť';
-
-  @override
-  String get tourMemoryHow => '„vepřové nejím“ stačí říct jednou';
-
-  @override
-  String get tourMore => 'Nejen jídlo';
-
-  @override
-  String get tourMoreHow => 'voda, tréninky, míry, recepty';
-
-  @override
-  String get tourTitle => 'Co Nora umí';
-
-  @override
-  String get tourVoice => 'Hlasem nebo textem';
-
-  @override
-  String get tourVoiceHow => '„dvě vejce a toast“, a je to zapsané';
-
-  @override
-  String get tourWeek => 'Rozbor dne a týdne';
-
-  @override
-  String get tourWeekHow => 'co vyšlo a co doladit';
 
   @override
   String get unitCm => 'cm';
