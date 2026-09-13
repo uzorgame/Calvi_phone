@@ -10,8 +10,8 @@ import 'package:calvi/screens/start/start_screen.dart';
  *
  * Він не має прокручуватись, і саме це тут перевіряється розміром: на
  * найменшому телефоні і на звичайному екран мусить скластись без переповнень,
- * фото забирає решту, а кнопки стоять на місці. Промокод у тесті той самий,
- * що в демці: «1» знімає п'яту частину, будь-який інший струшує поле. */
+ * фото забирає решту, а кнопки стоять на місці. Код для перевірки тест видає
+ * собі сам: у застосунку кодів немає, і чужий код струшує поле. */
 void main() {
   Future<void> open(WidgetTester tester, Size size) async {
     tester.view.physicalSize = size;
@@ -40,9 +40,9 @@ void main() {
     });
   }
 
-  testWidgets('промокод «1» стає міткою, чужий код лишає поле', (tester) async {
-    // Перевірку коду підвішує тест, як демо-режим: у застосунку кодів немає.
-    Billing.promo = (code) async => code == '1' ? 20 : null;
+  testWidgets('відомий код стає міткою, чужий код лишає поле', (tester) async {
+    // Перевірку коду підвішує сам тест: у застосунку жодного коду немає.
+    Billing.promo = (code) async => code == 'TESTCODE' ? 20 : null;
     addTearDown(() => Billing.promo = (_) async => null);
     await open(tester, const Size(390, 844));
 
@@ -53,7 +53,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(TextField), findsOneWidget, reason: 'чужий код не проходить');
 
-    await tester.enterText(find.byType(TextField), '1');
+    await tester.enterText(find.byType(TextField), 'testcode');
     await tester.tap(find.bySemanticsLabel('Застосувати'));
     await tester.pumpAndSettle();
     expect(find.text('−20% на будь-який план'), findsOneWidget);
