@@ -1075,9 +1075,6 @@ Widget _start(Widget home) {
   if (!_devScreens) return home;
   final want = Uri.base.queryParameters['screen'];
   if (want == null) return home;
-  /* Демо-режим живе за тими самими правилами, що localhost:5300: промокод
-     «1» знімає пʼяту частину. У самому застосунку цього коду немає. */
-  Billing.promo = (code) async => code.trim() == '1' ? 20 : null;
   return Builder(
     builder: (context) {
       final scope = AppScope.of(context);
